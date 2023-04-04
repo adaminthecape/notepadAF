@@ -71,6 +71,23 @@
     <template #content>
       <DisplayStory :storyId="story.id" />
     </template>
+    <template #actions>
+      <q-btn
+          label="View"
+          color="primary"
+          dense
+          flat
+          class="q-mr-xs"
+          @click.stop.prevent="$openLink(story.url)"
+      />
+      <q-btn
+          label="Git C/O"
+          color="negative"
+          dense
+          flat
+          @click.stop.prevent="$emit('checkoutBoth', story.id)"
+      />
+    </template>
   </SimpleModal>
 </template>
 

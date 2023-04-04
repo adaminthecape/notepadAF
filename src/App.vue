@@ -121,10 +121,8 @@
         }
         else
         {
-          const ignoreAllLogTypes = localStorage
-              .getItem('ignoreAllLogTypes');
-          const logTypesToIgnore = JSON.parse(localStorage
-              .getItem('logTypesToIgnore'));
+          const ignoreAllLogTypes = JSON.parse(localStorage.getItem('ignoreAllLogTypes'));
+          const logTypesToIgnore = JSON.parse(localStorage.getItem('logTypesToIgnore'));
 
           if(
               !ignoreAllLogTypes &&

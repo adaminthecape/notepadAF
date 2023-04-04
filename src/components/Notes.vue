@@ -484,6 +484,8 @@ export default {
       );
 
       this.$store.dispatch('notes/update', { note });
+
+      this.$notify(`Created alert for ${note.title}`);
     },
     deleteNote(noteData)
     {
@@ -500,12 +502,16 @@ export default {
     saveNote(noteData)
     {
       this.$log('saveNote', noteData.id);
-      this.$notify('saving note...');
       this.updateNoteInDb(noteData, false);
       this.$notify('note saved!');
     },
     attachStory(noteId, storyId)
     {
+      if(!storyId || !noteId)
+      {
+        return;
+      }
+
       this.$log('attachStory', `${noteId} :: ${storyId}`);
       const note = this.getNote(noteId);
 
@@ -516,7 +522,6 @@ export default {
           note.stories = [];
         }
 
-        console.info('stories:', note.stories);
         note.stories = note.stories.map((storyId) => storyId.toString());
 
         if(!note.stories.includes(storyId))
