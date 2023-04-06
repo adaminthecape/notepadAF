@@ -13,6 +13,7 @@
       >
         <q-tab name="notes" label="Notes" />
         <q-tab name="activity" label="My Activity" />
+        <q-tab name="tickets" label="My Tickets" />
         <q-tab name="settings" label="Settings" />
         <q-space />
 
@@ -35,6 +36,13 @@
           @updatedActivity="setActivityCache"
       />
     </div>
+    <div v-if="currentTab === 'tickets'">
+      <MyTickets
+          class="q-pa-md"
+          :cachedActivity="activityCache"
+          @updatedActivity="setActivityCache"
+      />
+    </div>
     <div v-if="currentTab === 'settings'">
       <Settings class="q-pa-md" />
     </div>
@@ -52,6 +60,7 @@
 <script>
   import Notes from './components/Notes';
   import MyActivity from './components/MyActivity';
+  import MyTickets from './components/MyTickets';
   import Settings from './components/Settings';
   import LogEntries from './components/LogEntries';
 
@@ -61,7 +70,8 @@
       Notes,
       Settings,
       LogEntries,
-      MyActivity
+      MyActivity,
+      MyTickets
     },
     data()
     {

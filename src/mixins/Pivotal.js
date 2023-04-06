@@ -10,7 +10,7 @@ export function getPivotalProjectId()
     return localStorage.getItem('pivotalProjectId');
 }
 
-export async function getPivotalEndpoint(endpoint, params)
+export async function getPivotalEndpoint(endpoint, params, query)
 {
     const projectId = getPivotalProjectId();
     const baseUri = 'https://www.pivotaltracker.com/services/v5/';
@@ -21,6 +21,9 @@ export async function getPivotalEndpoint(endpoint, params)
     }
     else
     {
+        endpoint = endpoint
+            .replace('{projectId}', projectId);
+
         endpoint = `${baseUri}${endpoint}`;
     }
 
@@ -31,6 +34,11 @@ export async function getPivotalEndpoint(endpoint, params)
     try
     {
         console.info('getPivotalEndpoint:', { endpoint, headers, params });
+
+        if(query)
+        {
+
+        }
 
         const { data } = await axios.get(endpoint, { headers, params });
 
@@ -62,6 +70,9 @@ export async function getPivotal(storyId, endpoint)
     }
     else
     {
+        endpoint = endpoint
+            .replace('{projectId}', projectId);
+
         endpoint = `${baseUri}${endpoint}`;
     }
 
