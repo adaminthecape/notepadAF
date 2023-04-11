@@ -11,7 +11,7 @@
               :color="label.name.includes('(') ? 'primary' : 'secondary'"
               class="q-ma-none q-mr-xs"
               style="color: #ddd"
-              size="sm"
+              :size="dense ? 'sm' : 'md'"
           />
         </div>
       </div>
@@ -20,11 +20,12 @@
       <div v-if="story" class="col" @click="open">
         <div class="items-center q-my-sm">
           <q-btn
+              v-if="clearable"
               icon="close"
               color="negative"
-              dense
+              :dense="dense"
               flat
-              size="sm"
+              :size="dense ? 'sm' : 'md'"
               class="q-mr-xs"
               @click.stop.prevent="removeStory"
           />
@@ -46,14 +47,14 @@
               :color="label.name.includes('(') ? 'primary' : 'secondary'"
               class="q-ma-none q-mr-xs"
               style="color: #ddd"
-              size="sm"
+              :size="dense ? 'sm' : 'md'"
           />
         </div>
         <div class="q-mt-sm">
           <q-btn
               label="View"
               color="primary"
-              dense
+              :dense="dense"
               flat
               class="q-mr-xs"
               @click.stop.prevent="$openLink(story.url)"
@@ -61,9 +62,16 @@
           <q-btn
               label="Git C/O"
               color="negative"
-              dense
+              :dense="dense"
               flat
               @click.stop.prevent="$emit('checkoutBoth', story.id)"
+          />
+          <q-btn
+              :label="story.id"
+              color="secondary"
+              :dense="dense"
+              flat
+              @click.stop.prevent="copy(story.id)"
           />
         </div>
       </div>
@@ -75,7 +83,7 @@
       <q-btn
           label="View"
           color="primary"
-          dense
+          :dense="dense"
           flat
           class="q-mr-xs"
           @click.stop.prevent="$openLink(story.url)"
@@ -83,7 +91,7 @@
       <q-btn
           label="Git C/O"
           color="negative"
-          dense
+          :dense="dense"
           flat
           @click.stop.prevent="$emit('checkoutBoth', story.id)"
       />
@@ -94,6 +102,7 @@
 <script>
   import DisplayStory from './DisplayStory';
   import SimpleModal from './SimpleModal';
+  import { copyToClipboard } from 'quasar';
 
   export default {
     components: {
@@ -112,6 +121,14 @@
       storyId: {
         type: [String, Number],
         required: true
+      },
+      dense: {
+        type: Boolean,
+        default: false
+      },
+      clearable: {
+        type: Boolean,
+        default: false
       }
     },
     inject: ['$openLink'],
@@ -121,7 +138,15 @@
         return this.$store.getters['pivotal/get'](this.storyId);
       }
     },
+    async mounted()
+    {
+      await this.$store.dispatch('pivotal/load', { id: this.storyId });
+    },
     methods: {
+      async copy(text)
+      {
+        await copyToClipboard(text);
+      },
       removeStory()
       {
         if(!this.noteId)

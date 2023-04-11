@@ -51,6 +51,8 @@
                   <StoryCard
                       :storyId="story.id"
                       :noteId="selectedNote.id"
+                      clearable
+                      dense
                       @checkoutBoth="checkoutBoth($event)"
                   />
                 </q-item>
@@ -111,8 +113,14 @@
                 dark
                 @filter="filterFn"
             >
-              <template #option="{ opt }">
-                <q-item clickable class="q-pa-sm full-width">
+              <template #option="{ opt, itemProps, itemEvents }">
+                <q-item
+                    v-bind="itemProps"
+                    v-on="itemEvents"
+                    class="q-pa-sm full-width"
+                    clickable
+                    dense
+                >
                   <div class="row items-center">
                     <div class="col">
                       <div class="row items-center">
@@ -126,21 +134,13 @@
                           {{ opt.label }}
                         </div>
                         <q-space />
-                        <div>
-                          <q-badge
-                              :label="getNote(opt.value).created"
-                              dense
-                          />
-                          <q-badge
-                              v-if="getNote(opt.value).tasks"
-                              :label="`${getNote(opt.value).tasks.length} tasks`"
-                              color="primary"
-                              class="text-bold"
-                          />
-                        </div>
                       </div>
-                      <div>
-                        {{ opt.value }}
+                      <div v-if="getNote(opt.value).tasks">
+                        <q-badge
+                            :label="`${getNote(opt.value).tasks.length} tasks`"
+                            color="primary"
+                            class="text-bold"
+                        />
                       </div>
                     </div>
                   </div>

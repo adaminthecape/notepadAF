@@ -11,86 +11,6 @@
           label="Options"
           class="q-mr-sm"
       >
-        <q-card>
-          <q-item>
-            <q-item-section caption>
-              View as
-            </q-item-section>
-            <q-item-section side>
-              <q-btn-toggle
-                  v-model="calendarView"
-                  dark
-                  :options="[
-              { label: 'Calendar', value: true },
-              { label: 'List', value: false }
-            ]"
-              />
-            </q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section caption>
-              From date
-            </q-item-section>
-            <q-item-section side>
-              <div class="row items-center">
-                <q-select
-                    v-model="calendarEndDay"
-                    :options="days"
-                    class="q-mr-xs"
-                    filled
-                />
-                <q-select
-                    v-model="calendarEndMonth"
-                    :options="months"
-                    class="q-mr-xs"
-                    filled
-                />
-                <q-select
-                    v-model="calendarEndYear"
-                    :options="years"
-                    filled
-                />
-              </div>
-            </q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section caption>
-              To date
-            </q-item-section>
-            <q-item-section side>
-              <div class="row items-center">
-                <q-select
-                    v-model="calendarStartDay"
-                    :options="days"
-                    class="q-mr-xs"
-                    filled
-                />
-                <q-select
-                    v-model="calendarStartMonth"
-                    :options="months"
-                    class="q-mr-xs"
-                    filled
-                />
-                <q-select
-                    v-model="calendarStartYear"
-                    :options="years"
-                    filled
-                />
-              </div>
-            </q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section caption>
-            </q-item-section>
-            <q-item-section side>
-              <q-btn
-                  label="Search"
-                  color="primary"
-                  @click="getActivity"
-              />
-            </q-item-section>
-          </q-item>
-        </q-card>
       </q-btn-dropdown>
       <q-btn-dropdown
           v-model="isGitStatusDropdownOpen"
@@ -142,6 +62,79 @@
     <template #page-content>
       <q-scroll-area style="height: calc(100vh - 120px)">
         <div>
+          <q-expansion-item
+              label="Options"
+              class="q-mb-md bordered"
+              defaultOpened
+          >
+            <q-item
+                v-for="param in queryParamNames"
+                :key="`param-${param}`"
+                clickable
+            >
+              <q-item-section caption>
+                <div class="row">
+                  <h5>
+                    {{ param }}
+                  </h5>
+                </div>
+              </q-item-section>
+              <q-item-section>
+                <q-select
+                    v-if="queryParamOptions[param]"
+                    v-model="queryParams[param]"
+                    :options="queryParamOptions[param]"
+                    class="q-pa-sm"
+                    stack-label
+                    clearable
+                    filled
+                    :multiple="queryParamMultiples[param] || false"
+                />
+                <q-input
+                    v-else
+                    v-model="queryParams[param]"
+                    class="q-pa-sm"
+                    bottom-slots
+                    stack-label
+                    clearable
+                    filled
+                    :mask="queryParamMasks[param] || undefined"
+                />
+              </q-item-section>
+            </q-item>
+<!--            <q-input-->
+<!--                v-model="queryParamToAdd"-->
+<!--                class="q-pa-sm"-->
+<!--                label="Custom parameter"-->
+<!--                bottom-slots-->
+<!--                stack-label-->
+<!--                clearable-->
+<!--                filled-->
+<!--            >-->
+<!--              <template #append>-->
+<!--                <q-btn-->
+<!--                    icon="add"-->
+<!--                    @click="addQueryParam"-->
+<!--                />-->
+<!--              </template>-->
+<!--            </q-input>-->
+            <div class="row">
+              <q-space />
+              <q-btn
+                  icon="save"
+                  label="Save options and reload"
+                  class="q-ma-sm"
+                  @click="getActivity"
+              />
+            </div>
+          </q-expansion-item>
+          <q-badge
+              color="primary"
+              style="font-size: 1.2em; user-select: none"
+              class="q-pa-md q-mb-md full-width"
+          >
+            {{ resultTotals.hits }} stories, {{ resultTotals.points }} points
+          </q-badge>
           <div
               v-if="isLoadingActivity"
               class="full-width"
@@ -157,7 +150,6 @@
               :key="story.id"
               class="bordered q-mb-xs"
           >
-<!--            <PivotalAction :action="action" />-->
             <q-item clickable class="q-pa-sm">
               <StoryCard
                   :storyId="story.id"
@@ -198,31 +190,7 @@ export default {
   },
   data()
   {
-    const today = new Date();
-
-    today.setDate(today.getDate() + 1);
-
-    const aWeekAgo = new Date(new Date().setDate(today.getDate() - 7));
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-    console.log(today.toISOString(), aWeekAgo.toISOString());
-
     return {
-      days: [...Array(31).keys()],
-      months,
-      monthOptions: months.map((month, m) => ({
-        label: month,
-        value: this.padLeft(m, '0', 2)
-      })),
-      years: [2023, 2022, 2021],
-      calendarView: true,
-      calendarLength: 14,
-      calendarStartDay: today.getDate(),
-      calendarStartMonth: months[today.getMonth()],
-      calendarStartYear: today.getFullYear(),
-      calendarEndDay: aWeekAgo.getDate(),
-      calendarEndMonth: months[aWeekAgo.getMonth()],
-      calendarEndYear: aWeekAgo.getFullYear(),
       isLoadingActivity: false,
       isGitStatusDropdownOpen: false,
       results: this.cachedTickets || [],
@@ -233,35 +201,56 @@ export default {
         'core-api',
         'localhost'
       ],
-      params: {
-        limit: 50,
-        offset: null,
-        occurred_after: null,
-        occurred_before: null
+      params: {},
+      queryParamMultiples: {
+        epic: true
       },
+      queryParamMasks: {
+        created: '##/##/20##'
+      },
+      queryParamOptions: {
+        epic: [
+            'dev (spec)',
+            'dev (ready)',
+            'dev (active)',
+            'dev (pr + docs)',
+            'qa (ready)',
+            'qa (pass)',
+            'qa (active)',
+            'dev (merge)',
+            'cst (live actions)'
+        ],
+        has: [
+            'attachment'
+        ],
+        state: [
+            'unstarted',
+            'started'
+        ]
+      },
+      queryParamNegations: {},
       queryParams: {
         // this should be filled from endpoint queryParams
-        owner: 'af',
-        epic: 'dev (pr + docs)'
-      }
+        owner: 'AF',
+        requester: null,
+        epic: ['dev (active)', 'dev (pr + docs)']
+      },
+      queryParamToAdd: null,
+      resultTotals: {}
     };
   },
   computed: {
+    resultTotalsKeys()
+    {
+      return Object.keys(this.resultTotals);
+    },
+    queryParamNames()
+    {
+      return Object.keys(this.queryParams);
+    },
     storyResults()
     {
-      if(this.results && this.results.stories && this.results.stories.stories)
-      {
-        return this.results.stories.stories;
-      }
-
-      return [];
-    },
-    calendarDaysToShow()
-    {
-      const end = this.calendarStartDate;
-      const len = this.calendarLength;
-
-      return this.daysTo(end, len);
+      return this.results || [];
     },
     actionsToShow()
     {
@@ -310,97 +299,6 @@ export default {
     actionsForTemplate()
     {
       return Object.values(this.actionsToShow || {});
-    },
-    actionsByHourData()
-    {
-      return this.actionsForTemplate.reduce((agg, action) =>
-      {
-        if(!(action.date && action.time)) return;
-
-        const [year, month, day] = action.date.split('-');
-        let [hour] = action.time.split(':');
-
-        hour = Math.min(20, Math.max(7, hour));
-
-        // if(this.isWeekend(year, month, day))
-        // {
-        //   return;
-        // }
-
-        if(!agg.actions[year]) agg.actions[year] = {};
-        if(!agg.actions[year][month]) agg.actions[year][month] = {};
-        if(!agg.actions[year][month][day]) agg.actions[year][month][day] = {};
-        if(!agg.actions[year][month][day][hour]) agg.actions[year][month][day][hour] = [];
-
-        agg.actions[year][month][day][hour].push(action);
-
-        if(!agg.counts[`${year}-${month}-${day}`])
-        {
-          agg.counts[`${year}-${month}-${day}`] = 1;
-        }
-        else
-        {
-          agg.counts[`${year}-${month}-${day}`] += 1;
-        }
-
-        if(!agg.counts[`${year}-${month}-${day}#${hour}`])
-        {
-          agg.counts[`${year}-${month}-${day}#${hour}`] = 1;
-        }
-        else
-        {
-          agg.counts[`${year}-${month}-${day}#${hour}`] += 1;
-        }
-
-        return agg;
-      }, {
-        actions: {},
-        counts: {}
-      });
-    },
-    actionsByHourCounts()
-    {
-      return this.actionsByHourData.counts;
-    },
-    actionsByHour()
-    {
-      return this.actionsByHourData.actions;
-    },
-    lastMonthInActionsByHour()
-    {
-      const keys = Object.keys(this.actionsByHour[this.currentYear]);
-
-      return keys[keys.length - 1];
-    },
-    lastDayInActionsByHour()
-    {
-      const keys = Object.keys(this.actionsByHour[this.currentYear][this.currentMonth]);
-
-      return keys[keys.length - 1];
-    },
-    currentYear()
-    {
-      return new Date().getFullYear().toString();
-    },
-    currentMonth()
-    {
-      return this.padLeft((new Date().getMonth() + 1).toString(), '0', 2);
-    },
-    currentDay()
-    {
-      return this.padLeft((new Date().getDate()).toString(), '0', 2);
-    },
-    tomorrow()
-    {
-      return this.padLeft((new Date().getDate() + 1).toString(), '0', 2);
-    },
-    calendarEndDate()
-    {
-      return new Date(`${this.calendarEndDay} ${this.calendarEndMonth} ${this.calendarEndYear}`);
-    },
-    calendarStartDate()
-    {
-      return new Date(`${this.calendarStartDay} ${this.calendarStartMonth} ${this.calendarStartYear}`);
     }
   },
   async mounted()
@@ -413,12 +311,18 @@ export default {
     }
   },
   methods: {
-    isWeekend(year, month, day)
+    addQueryParam()
     {
-      const dt = `${year}/${month}/${day}`;
-      const dayNum = new Date(dt).getDay();
+      const param = this.queryParamToAdd;
 
-      return dayNum === 6 || dayNum === 0;
+      if(!param || this.queryParamNames.includes(param))
+      {
+        return;
+      }
+
+      this.queryParams[param] = null;
+
+      this.queryParamToAdd = null;
     },
     padLeft(str, padChar, totalLength)
     {
@@ -430,48 +334,6 @@ export default {
       }
 
       return str;
-    },
-    daysFrom(startDate, len)
-    {
-      const days = [];
-
-      [...Array(len).keys()].forEach((key) =>
-      {
-        let add = key + startDate;
-
-        if(add > 31)
-        {
-          add = add - 31;
-        }
-
-        days.push(add);
-      });
-
-      return days;
-    },
-    daysTo(startDate, len)
-    {
-      console.log(len, startDate.toISOString());
-      const dt = new Date(startDate.getTime());
-      const res = [];
-
-      let i = 0;
-
-      while(i < len)
-      {
-        const newDate = new Date(dt.setDate(dt.getDate() - 1));
-
-        res.push({
-          day: this.padLeft(newDate.getDate(), '0', 2),
-          month: this.padLeft(newDate.getMonth() + 1, '0', 2),
-          year: newDate.getFullYear(),
-          text: newDate.toDateString()
-        });
-
-        i += 1;
-      }
-
-      return res;
     },
     async getActivity()
     {
@@ -498,7 +360,15 @@ export default {
 
       this.isLoadingActivity = false;
 
-      this.results = res || [];
+      if(res && res.stories && res.stories.stories)
+      {
+        this.results = res.stories.stories;
+        this.resultTotals = {
+          hits: res.stories.total_hits,
+          points: res.stories.total_points,
+          completedPoints: res.stories.total_points_completed
+        };
+      }
 
       try
       {

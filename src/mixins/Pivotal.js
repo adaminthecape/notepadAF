@@ -41,7 +41,18 @@ export async function getPivotalEndpoint(endpoint, params, queryParams)
 
             Object.entries(queryParams).forEach(([label, value]) =>
             {
-                queryString = `${queryString} ${htmlEncode(label)}:"${htmlEncode(value)}"`;
+                let result = '';
+
+                if(Array.isArray(value))
+                {
+                    result = `(${value.map((v) => (`${htmlEncode(label)}:"${htmlEncode(v)}"`)).join(' OR ')})`;
+                }
+                else
+                {
+                    result = `${htmlEncode(label)}:"${htmlEncode(value)}"`;
+                }
+
+                queryString = `${queryString} ${result}`;
             });
 
             endpoint = `${endpoint}?query=${queryString}`;
