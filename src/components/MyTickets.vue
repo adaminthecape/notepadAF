@@ -536,7 +536,7 @@ export default {
         });
       }
 
-      const res = await this.getPivotalEndpoint(uri, {}, queryParams);
+      const res = await this.getPivotalEndpoint(uri, queryParams);
 
       this.isLoadingActivity = false;
 

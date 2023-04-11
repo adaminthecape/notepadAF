@@ -19,53 +19,64 @@
         </template>
       </q-input>
     </q-item>
-    <q-item
-        v-for="task in tasks"
-        :key="`task-${task.id}`"
+    <draggable
+        v-model="tasks"
+        handle=".handle"
+        @end="updateOrder"
     >
-      <q-input
-          :value="task.message"
-          :style="task.done ? 'background: #00FF002A;' : ''"
-          placeholder="Add a task"
-          class="full-width"
-          readonly
-          filled
-          dense
+      <q-item
+          v-for="task in tasks"
+          :key="`task-${task.id}`"
       >
-        <template #append>
-          <q-btn
-              v-if="task.done"
-              icon="task_alt"
-              color="positive"
-              flat
-              dense
-              @click="addTask({ ...task, done: false })"
-          />
-          <q-btn
-              v-else
-              icon="done"
-              color="neutral"
-              flat
-              dense
-              @click="addTask({ ...task, done: true })"
-          />
-          <q-btn
-              icon="close"
-              color="negative"
-              flat
-              dense
-              @click="removeTask(task)"
-          />
-        </template>
-      </q-input>
-    </q-item>
+        <q-input
+            :value="task.message"
+            :style="task.done ? 'background: #00FF002A;' : ''"
+            placeholder="Add a task"
+            class="full-width"
+            readonly
+            filled
+            dense
+        >
+          <template #append>
+            <q-btn
+                v-if="task.done"
+                icon="task_alt"
+                color="positive"
+                flat
+                dense
+                @click="addTask({ ...task, done: false })"
+            />
+            <q-btn
+                v-else
+                icon="done"
+                color="neutral"
+                flat
+                dense
+                @click="addTask({ ...task, done: true })"
+            />
+            <q-btn
+                icon="close"
+                color="negative"
+                flat
+                dense
+                @click="removeTask(task)"
+            />
+            <div class="handle">
+              <q-icon name="menu" />
+            </div>
+          </template>
+        </q-input>
+      </q-item>
+    </draggable>
   </q-card>
 </template>
 
 <script>
   import { v4 as uuidv4 } from 'uuid';
+  import draggable from 'vuedraggable';
 
   export default {
+    components: { draggable },
     props: {
       noteId: {
         type: String,
@@ -75,20 +86,30 @@
     data()
     {
       return {
-        message: null
+        message: null,
+        tasks: []
       };
     },
     computed: {
       note()
       {
         return this.$store.getters['notes/getNote'](this.noteId);
-      },
-      tasks()
-      {
-        return this.note.tasks || [];
       }
     },
+    mounted()
+    {
+      this.tasks = this.note.tasks || [];
+    },
     methods: {
+      async updateOrder()
+      {
+        await this.$store.dispatch('notes/update', { note: {
+          ...this.note,
+            tasks: this.tasks || []
+        } });
+
+        this.tasks = this.note.tasks || [];
+      },
       removeTask(task)
       {
         if(!task.id)
@@ -164,3 +185,12 @@
     }
   };
 </script>
+
+<style>
+.handle {
+  align-items: center;
+  cursor: grab;
+  display: flex;
+  margin-right: 8px;
+}
+</style>

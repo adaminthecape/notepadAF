@@ -1,4 +1,5 @@
 import axios from 'axios';
+import qs from 'qs';
 
 export function getPivotalToken()
 {
@@ -40,7 +41,13 @@ export async function getPivotalEndpoint(endpoint, params, query)
 
         }
 
-        const { data } = await axios.get(endpoint, { headers, params });
+        const { data } = await axios.get(endpoint, {
+            headers,
+            params,
+            paramsSerializer: params => {
+                return qs.stringify(params);
+            }
+        });
 
         console.info('getPivotalEndpoint: result:', data);
 
