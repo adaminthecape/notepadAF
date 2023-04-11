@@ -225,6 +225,11 @@
     border-radius: 6px;
   }
 
+  * {
+    font-family: 'Verdana';
+    letter-spacing: 0.4px;
+  }
+
   body, body *, .styleScroll, .styleScroll * {
     /* firefox support - limited customizability compared to chrome */
     scrollbar-color: #a0a0a5  #f4f4f4;
@@ -273,5 +278,18 @@
       width: 7px;
     }
 
+  }
+
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.5s;
+    opacity: 1;
+    max-height: revert;
+  }
+
+  .fade-enter,
+  .fade-leave-to {
+    opacity: 0;
+    max-height: 0;
   }
 </style>

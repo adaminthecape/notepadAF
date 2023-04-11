@@ -56,7 +56,7 @@
       <q-btn
           icon="refresh"
           dense
-          @click="getActivity"
+          @click="getTickets"
       />
     </template>
     <template #page-content>
@@ -124,17 +124,20 @@
                   icon="save"
                   label="Save options and reload"
                   class="q-ma-sm"
-                  @click="getActivity"
+                  @click="getTickets"
               />
             </div>
           </q-expansion-item>
-          <q-badge
-              color="primary"
-              style="font-size: 1.2em; user-select: none"
-              class="q-pa-md q-mb-md full-width"
-          >
-            {{ resultTotals.hits }} stories, {{ resultTotals.points }} points
-          </q-badge>
+          <transition name="fade" appear>
+            <q-badge
+                v-if="resultTotals && resultTotals.hits"
+                color="primary"
+                style="font-size: 1.2em; user-select: none"
+                class="q-pa-md q-mb-md full-width"
+            >
+              {{ resultTotals.hits }} stories, {{ resultTotals.points }} points
+            </q-badge>
+          </transition>
           <div
               v-if="isLoadingActivity"
               class="full-width"
@@ -307,7 +310,7 @@ export default {
 
     if(!this.cachedTickets)
     {
-      await this.getActivity();
+      await this.getTickets();
     }
   },
   methods: {
@@ -335,7 +338,7 @@ export default {
 
       return str;
     },
-    async getActivity()
+    async getTickets()
     {
       this.$log('getTickets');
       this.isLoadingActivity = true;
@@ -355,6 +358,8 @@ export default {
           }
         });
       }
+
+      this.resultTotals = {};
 
       const res = await this.getPivotalEndpoint(uri, {}, queryParams);
 

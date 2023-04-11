@@ -477,10 +477,7 @@ export default {
   {
     this.$log('mounted', 'MyActivity');
 
-    if(!this.cachedActivity)
-    {
-      await this.getActivity();
-    }
+    await this.getActivity();
   },
   methods: {
     isWeekend(year, month, day)
