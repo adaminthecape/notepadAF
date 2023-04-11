@@ -152,71 +152,17 @@
             />
           </div>
           <div
-              v-else-if="calendarView"
-              v-for="day in calendarDaysToShow"
-              :key="`day-${day.year}-${day.month}-${day.day}`"
-              class="q-mb-xs"
-              :style="`max-width: ${$q.screen.width} !important; border-bottom: 1px solid #aaa`"
-          >
-            <q-expansion-item :value="false" dense>
-              <template #header>
-                <div class="row items-center full-width">
-                  <h5 class="q-my-sm">
-                    {{ day.text }}
-                  </h5>
-                  <q-chip
-                      v-if="actionsByHourCounts[`${day.year}-${day.month}-${day.day}`]"
-                      color="warning"
-                  >
-                    {{ actionsByHourCounts[`${day.year}-${day.month}-${day.day}`] }}
-                  </q-chip>
-                </div>
-              </template>
-              <template>
-                <div
-                    v-for="hourNum in [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]"
-                    :key="`hourNum-${hourNum}`"
-                    class="q-mb-xs"
-                >
-                  <q-expansion-item :value="true" dense>
-                    <template #header>
-                      <div class="row full-width items-center">
-                        <div>
-                          {{ hourNum }}:00
-                        </div>
-                        <q-chip
-                            v-if="actionsByHourCounts[`${day.year}-${day.month}-${day.day}#${hourNum}`]"
-                            color="warning"
-                        >
-                          {{ actionsByHourCounts[`${day.year}-${day.month}-${day.day}#${hourNum}`] }}
-                        </q-chip>
-                      </div>
-                    </template>
-                    <template>
-                      <div
-                          v-if="actionsByHourCounts[`${day.year}-${day.month}-${day.day}#${hourNum}`]"
-                      >
-                        <div
-                            v-for="action in actionsByHour[`${day.year}`][`${day.month}`][`${day.day}`][`${hourNum}`]"
-                            :key="action.guid"
-                            class="bordered q-mb-xs"
-                        >
-                          <PivotalAction :action="action" />
-                        </div>
-                      </div>
-                    </template>
-                  </q-expansion-item>
-                </div>
-              </template>
-            </q-expansion-item>
-          </div>
-          <div
               v-else
-              v-for="action in actionsForTemplate"
-              :key="action.guid"
+              v-for="story in storyResults"
+              :key="story.id"
               class="bordered q-mb-xs"
           >
-            <PivotalAction :action="action" />
+<!--            <PivotalAction :action="action" />-->
+            <q-item clickable class="q-pa-sm">
+              <StoryCard
+                  :storyId="story.id"
+              />
+            </q-item>
           </div>
         </div>
       </q-scroll-area>
@@ -233,12 +179,14 @@ import DisplayStory from './DisplayStory';
 import SimpleLayout from './SimpleLayout';
 import PivotalAction from './PivotalAction';
 import escape from 'lodash/escape';
+import StoryCard from "components/StoryCard";
 
 export default {
   components: {
+    StoryCard,
     // DisplayStory,
-    SimpleLayout,
-    PivotalAction
+    // PivotalAction,
+    SimpleLayout
   },
   mixins: [Pivotal, GitMixin, DbMixin],
   props: {
@@ -298,6 +246,15 @@ export default {
     };
   },
   computed: {
+    storyResults()
+    {
+      if(this.results && this.results.stories && this.results.stories.stories)
+      {
+        return this.results.stories.stories;
+      }
+
+      return [];
+    },
     calendarDaysToShow()
     {
       const end = this.calendarStartDate;
@@ -536,7 +493,7 @@ export default {
         });
       }
 
-      const res = await this.getPivotalEndpoint(uri, queryParams);
+      const res = await this.getPivotalEndpoint(uri, {}, queryParams);
 
       this.isLoadingActivity = false;
 

@@ -81,9 +81,12 @@ const actions = {
 
         console.log('updateNote: existing', existing, allNotes);
 
+        const now = Date.now();
         const newNote = {
             ...existing,
-            ...note
+            ...note,
+            updated: now,
+            created: note.created || now
         };
 
         if(!newNote || !newNote.id)

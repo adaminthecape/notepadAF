@@ -110,7 +110,43 @@
                 useInput
                 dark
                 @filter="filterFn"
-            />
+            >
+              <template #option="{ opt }">
+                <q-item clickable class="q-pa-sm full-width">
+                  <div class="row items-center">
+                    <div class="col">
+                      <div class="row items-center">
+                        <q-icon
+                            v-if="getNote(opt.value).isStarred"
+                            name="star"
+                            class="q-ma-xs"
+                            color="warning"
+                        />
+                        <div>
+                          {{ opt.label }}
+                        </div>
+                        <q-space />
+                        <div>
+                          <q-badge
+                              :label="getNote(opt.value).created"
+                              dense
+                          />
+                          <q-badge
+                              v-if="getNote(opt.value).tasks"
+                              :label="`${getNote(opt.value).tasks.length} tasks`"
+                              color="primary"
+                              class="text-bold"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        {{ opt.value }}
+                      </div>
+                    </div>
+                  </div>
+                </q-item>
+              </template>
+            </q-select>
             <q-space />
             <!-- note controls -->
             <div class="row items-center">

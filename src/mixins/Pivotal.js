@@ -11,7 +11,7 @@ export function getPivotalProjectId()
     return localStorage.getItem('pivotalProjectId');
 }
 
-export async function getPivotalEndpoint(endpoint, params, query)
+export async function getPivotalEndpoint(endpoint, params, queryParams)
 {
     const projectId = getPivotalProjectId();
     const baseUri = 'https://www.pivotaltracker.com/services/v5/';
@@ -34,19 +34,24 @@ export async function getPivotalEndpoint(endpoint, params, query)
 
     try
     {
-        console.info('getPivotalEndpoint:', { endpoint, headers, params });
-
-        if(query)
+        if(queryParams)
         {
+            // const queryString = qs.stringify(queryParams);
+            let queryString = '';
 
+            Object.entries(queryParams).forEach(([label, value]) =>
+            {
+                queryString = `${queryString} ${htmlEncode(label)}:"${htmlEncode(value)}"`;
+            });
+
+            endpoint = `${endpoint}?query=${queryString}`;
         }
+
+        console.info('getPivotalEndpoint:', { endpoint, headers, params, queryParams });
 
         const { data } = await axios.get(endpoint, {
             headers,
-            params,
-            paramsSerializer: params => {
-                return qs.stringify(params);
-            }
+            params
         });
 
         console.info('getPivotalEndpoint: result:', data);
@@ -59,6 +64,25 @@ export async function getPivotalEndpoint(endpoint, params, query)
 
         return null;
     }
+}
+
+export function htmlEncode(str) {
+    // let i = str.length,
+    //     aRet = [];
+    //
+    // while (i--) {
+    //     const iC = str[i].charCodeAt();
+    //     if (iC < 65 || iC > 127 || (iC>90 && iC<97)) {
+    //         // aRet[i] = '&#'+iC+';';
+    //         aRet[i] = '%'+iC;
+    //     } else {
+    //         aRet[i] = str[i];
+    //     }
+    // }
+    // return aRet.join('');
+
+    return encodeURI(str)
+        .replace('+', '%2B');
 }
 
 export async function getPivotal(storyId, endpoint)
