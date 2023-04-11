@@ -130,6 +130,8 @@
         console.log({ tasks });
 
         this.$store.dispatch('notes/update', { note: { ...this.note, tasks } });
+
+        this.tasks = this.note.tasks || [];
       },
       addTask(task)
       {
@@ -178,6 +180,8 @@
         }
 
         this.$store.dispatch('notes/update', { note: { ...this.note, tasks } });
+
+        this.tasks = this.note.tasks || [];
 
         this.message = null;
         this.$refs.newTaskInput.focus();
