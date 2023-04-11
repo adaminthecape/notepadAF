@@ -100,6 +100,15 @@
     {
       this.tasks = this.note.tasks || [];
     },
+    watch: {
+      noteId()
+      {
+        setTimeout(() =>
+        {
+          this.tasks = this.note.tasks || [];
+        }, 100);
+      }
+    },
     methods: {
       async updateOrder()
       {
