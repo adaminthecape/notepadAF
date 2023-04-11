@@ -1,23 +1,10 @@
 <template>
   <SimpleModal fullWidth>
-    <template #title>
-      <div class="col">
-        <h5 class="q-mb-sm">{{ story.name }}</h5>
-        <div>
-          <q-chip
-              v-for="label in story.labels"
-              :label="label.name"
-              :key="label.name"
-              :color="label.name.includes('(') ? 'primary' : 'secondary'"
-              class="q-ma-none q-mr-xs"
-              style="color: #ddd"
-              :size="dense ? 'sm' : 'md'"
-          />
-        </div>
-      </div>
-    </template>
     <template #activator="{ open }">
-      <div v-if="story" class="col" @click="open">
+      <div v-if="!story" class="row justify-center">
+        <q-spinner size="lg" color="primary" class="q-ma-md" />
+      </div>
+      <div v-else class="col" @click="open">
         <div class="items-center q-my-sm">
           <q-btn
               v-if="clearable"
@@ -72,6 +59,22 @@
               :dense="dense"
               flat
               @click.stop.prevent="copy(story.id)"
+          />
+        </div>
+      </div>
+    </template>
+    <template #title>
+      <div class="col">
+        <h5 class="q-mb-sm">{{ story.name }}</h5>
+        <div>
+          <q-chip
+              v-for="label in story.labels"
+              :label="label.name"
+              :key="label.name"
+              :color="label.name.includes('(') ? 'primary' : 'secondary'"
+              class="q-ma-none q-mr-xs"
+              style="color: #ddd"
+              :size="dense ? 'sm' : 'md'"
           />
         </div>
       </div>
