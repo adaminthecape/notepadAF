@@ -182,6 +182,7 @@ import escape from 'lodash/escape';
 import StoryCard from "components/StoryCard";
 
 export default {
+  name: 'MyTickets',
   components: {
     StoryCard,
     // DisplayStory,
@@ -190,7 +191,7 @@ export default {
   },
   mixins: [Pivotal, GitMixin, DbMixin],
   props: {
-    cachedActivity: {
+    cachedTickets: {
       type: Array,
       default: null
     }
@@ -224,7 +225,7 @@ export default {
       calendarEndYear: aWeekAgo.getFullYear(),
       isLoadingActivity: false,
       isGitStatusDropdownOpen: false,
-      results: this.cachedActivity || [],
+      results: this.cachedTickets || [],
       projectId: localStorage.getItem('pivotalProjectId'),
       modulesToFetch: [
         'aluminate-vue',
@@ -406,7 +407,7 @@ export default {
   {
     this.$log('mounted', 'MyActivity');
 
-    if(!this.cachedActivity)
+    if(!this.cachedTickets)
     {
       await this.getActivity();
     }
@@ -499,7 +500,14 @@ export default {
 
       this.results = res || [];
 
-      this.$emit('updatedActivity', res);
+      try
+      {
+        this.$emit('updatedTickets', res.stories.stories);
+      }
+      catch(e)
+      {
+        //
+      }
 
       return res;
     }

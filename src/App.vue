@@ -39,8 +39,8 @@
     <div v-if="currentTab === 'tickets'">
       <MyTickets
           class="q-pa-md"
-          :cachedActivity="activityCache"
-          @updatedActivity="setActivityCache"
+          :cachedTickets="ticketCache"
+          @updatedTickets="setActivityCache"
       />
     </div>
     <div v-if="currentTab === 'settings'">
@@ -81,7 +81,8 @@
         currentTab: 'notes',
         logEntries: [],
         isLogDrawerOpen: false,
-        activityCache: null
+        activityCache: null,
+        ticketCache: null
       };
     },
     provide()
@@ -111,6 +112,10 @@
       setActivityCache(data)
       {
         this.activityCache = data;
+      },
+      setTicketCache(data)
+      {
+        this.ticketCache = data;
       },
       debug(...args)
       {
