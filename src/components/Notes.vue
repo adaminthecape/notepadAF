@@ -302,6 +302,8 @@ export default {
 
       this.selectedNote = this.notesList
           .find((note) => note.id === newVal.value);
+
+      localStorage.setItem('selectedNoteId', newVal.value);
     },
     'selectedNote.stories'(newVal)
     {
@@ -322,7 +324,7 @@ export default {
     setTimeout(() =>
     {
       this.setSelectedNoteById();
-    }, 500);
+    }, 100);
   },
   methods: {
     reRender()
@@ -429,7 +431,7 @@ export default {
 
       if(!id)
       {
-        id = this.notesList[0].id;
+        id = localStorage.getItem('selectedNoteId') || this.notesList[0].id;
       }
 
       if(!this.notesList || !id) return;

@@ -14,15 +14,15 @@
         <q-tab name="notes" label="Notes" />
         <q-tab name="activity" label="My Activity" />
         <q-tab name="tickets" label="My Tickets" />
+        <q-tab name="wiki" label="Wiki" />
         <q-tab name="settings" label="Settings" />
-        <q-space />
-
-        <q-btn
-            label="Log"
-            dense
-            flat
-            @click="isLogDrawerOpen = true"
-        />
+<!--        <q-space />-->
+<!--        <q-btn-->
+<!--            label="Log"-->
+<!--            dense-->
+<!--            flat-->
+<!--            @click="isLogDrawerOpen = true"-->
+<!--        />-->
       </q-tabs>
     </div>
 
@@ -43,17 +43,20 @@
           @updatedTickets="setActivityCache"
       />
     </div>
+    <div v-if="currentTab === 'wiki'">
+      <Wiki class="q-pa-md" />
+    </div>
     <div v-if="currentTab === 'settings'">
       <Settings class="q-pa-md" />
     </div>
 
-    <div v-if="isLogDrawerOpen" style="position: fixed; top: 0; right: 0; width: 400px; background: #66666680">
-      <LogEntries
-          class="q-pa-md"
-          :logEntries="logEntries"
-          @close="isLogDrawerOpen = false"
-      />
-    </div>
+<!--    <div v-if="isLogDrawerOpen" style="position: fixed; top: 0; right: 0; width: 400px; background: #66666680">-->
+<!--      <LogEntries-->
+<!--          class="q-pa-md"-->
+<!--          :logEntries="logEntries"-->
+<!--          @close="isLogDrawerOpen = false"-->
+<!--      />-->
+<!--    </div>-->
   </div>
 </template>
 
@@ -63,23 +66,25 @@
   import MyTickets from './components/MyTickets';
   import Settings from './components/Settings';
   import LogEntries from './components/LogEntries';
+  import Wiki from './components/Wiki';
 
   export default {
     name: 'App',
     components: {
       Notes,
       Settings,
-      LogEntries,
+      Wiki,
+      // LogEntries,
       MyActivity,
       MyTickets
     },
     data()
     {
-      const storedLogTypes = localStorage.getItem('logTypesToIgnore');
+      // const storedLogTypes = localStorage.getItem('logTypesToIgnore');
 
       return {
         currentTab: 'notes',
-        logEntries: [],
+        // logEntries: [],
         isLogDrawerOpen: false,
         activityCache: null,
         ticketCache: null
