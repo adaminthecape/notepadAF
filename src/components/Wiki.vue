@@ -95,6 +95,12 @@
         </q-input>
         -->
         <q-btn
+            :icon="!isShowingHistory ? 'history' : 'menu'"
+            class="q-mr-sm"
+            dense
+            @click="isShowingHistory = !isShowingHistory"
+        />
+        <q-btn
             v-if="chosenPage && chosenPage.value"
             icon="arrow_right_alt"
             class="q-mr-sm"
@@ -108,7 +114,36 @@
             dense
             @click="openActiveArticle('edit')"
         />
+        <div
+            v-if="isShowingHistory"
+            class="row items-center q-my-xs q-ml-xs"
+        >
+          <q-input
+              value="History"
+              style="flex-grow: 1"
+              disable
+              filled
+              dense
+          />
+          <q-select
+              v-model="branchToGetHistoryFor"
+              :options="['vue', 'api', 'core', 'framework']"
+              class="q-ml-sm"
+              outlined
+              dense
+              @input="getHistory"
+          />
+          <q-select
+              v-model="historyLimit"
+              :options="[10, 20, 50, 100, 150, 200, 500, 1000]"
+              class="q-ml-sm"
+              outlined
+              dense
+              @input="getHistory"
+          />
+        </div>
         <q-select
+            v-else
             v-model="chosenPage"
             :options="availablePagesFiltered"
             label="Existing pages"
@@ -163,15 +198,69 @@
       </div>
       <SimpleLayout :header="false" style="max-height: 70vh">
         <template #body>
-<!--          <q-markdown-->
-<!--              ref="editor"-->
-<!--              class="q-pa-sm"-->
-<!--              :src="originalContent"-->
-<!--              style="max-width: 64em"-->
-<!--          />-->
-<!--          <vue-showdown-->
-<!--              :markdown="originalContent"-->
-<!--          />-->
+          <div
+              v-if="!isShowingHistory"
+          >
+            <q-markdown
+                ref="editor"
+                class="q-pa-sm"
+                :src="originalContent"
+                style="max-width: 64em"
+            />
+            <!--          <vue-showdown-->
+            <!--              :markdown="originalContent"-->
+            <!--          />-->
+          </div>
+          <div v-else class="q-pa-sm">
+            <div v-if="!history || !history.length">
+              No history to show
+            </div>
+            <div v-else>
+              <div
+                  v-for="(historyItem, h) in history"
+                  :key="`historyItem-${h}`"
+              >
+                <q-card class="q-mb-xs">
+                  <q-item>
+                    <q-item-section>
+                      <q-input
+                        label="Commit"
+                        :value="historyItem.commit"
+                        class="q-mb-xs"
+                        disable
+                        filled
+                        dense
+                      />
+                      <q-input
+                        label="Author"
+                        :value="historyItem.author"
+                        class="q-mb-xs"
+                        disable
+                        filled
+                        dense
+                      />
+                      <q-input
+                        label="Date"
+                        :value="historyItem.date"
+                        class="q-mb-xs"
+                        disable
+                        filled
+                        dense
+                      />
+                      <q-input
+                        label="Message"
+                        :value="historyItem.message"
+                        class="q-mb-xs"
+                        disable
+                        filled
+                        dense
+                      />
+                    </q-item-section>
+                  </q-item>
+                </q-card>
+              </div>
+            </div>
+          </div>
         </template>
       </SimpleLayout>
     </div>
@@ -183,24 +272,29 @@ import axios from 'axios';
 import { copyToClipboard } from 'quasar';
 import debounce from 'lodash/debounce';
 import GitlabMixin from '../mixins/gitlab';
+import GitMixin from '../mixins/git';
 import SimpleLayout from './SimpleLayout';
-// import { QMarkdown } from '@quasar/quasar-ui-qmarkdown';
+import { QMarkdown } from '@quasar/quasar-ui-qmarkdown';
 // import VueShowdown from 'vue-showdown';
 
 export default {
   name: 'WikiEditor',
   components: {
-    // QMarkdown,
+    QMarkdown,
     // VueShowdown,
     SimpleLayout
   },
-  mixins: [GitlabMixin],
+  mixins: [GitlabMixin, GitMixin],
   inject: ['$openLink'],
   data()
   {
     const token = this.getGitlabToken();
 
     return {
+      isShowingHistory: true,
+      history: [],
+      branchToGetHistoryFor: 'vue',
+      historyLimit: 100,
       vmarkOpts: {
         source: false,
         show: false,
@@ -312,6 +406,79 @@ export default {
     this.loadAllModulePages();
   },
   methods: {
+    getHistory()
+    {
+      const getBranchCode = (module) =>
+      {
+        switch(module)
+        {
+          case 'vue':
+            return 'aluminate-vue.wiki';
+          case 'api':
+            return 'aluminate-api.wiki';
+          case 'core':
+            return 'core-api.wiki';
+          case 'framework':
+            return 'framework.wiki';
+          default:
+            return null;
+        }
+      };
+
+      const branch = getBranchCode(this.branchToGetHistoryFor);
+
+      if(!branch)
+      {
+        return;
+      }
+
+      this.runCmd(
+          `cd C:/devRepos/${branch} && git log`,
+          (data) =>
+          {
+            if(typeof data === 'string')
+            {
+              const dataItems = data
+                  .split('\n\ncommit')
+                  .slice(0, this.historyLimit)
+                  .map((item) =>
+                  {
+                    return item.split('\n').reduce((agg, i, index) =>
+                    {
+                      if(!i)
+                      {
+                        return agg;
+                      }
+                      else if(i.startsWith('Author: '))
+                      {
+                        agg.author = i.replace('Author: ', '');
+                      }
+                      else if(i.startsWith('Date:   '))
+                      {
+                        agg.date = i.replace('Date:   ', '');
+                      }
+                      else if(i.startsWith('commit ') || index === 0)
+                      {
+                        agg.commit = i.replace('commit', '').slice(1);
+                      }
+                      else if(i.startsWith('    '))
+                      {
+                        agg.message = i.slice(4);
+                      }
+
+                      return agg;
+                    }, {});
+                  });
+
+              this.history = dataItems;
+            }
+          },
+          (err) =>
+          {
+            console.error(err);
+          }
+      );
+    },
     // getTextSelection()
     // {
     //   return window.getSelection?.().toString() || document.selection?.createRange().text || '';
