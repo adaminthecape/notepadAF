@@ -43,7 +43,7 @@
       <MyTickets
           class="q-pa-md"
           :cachedTickets="ticketCache"
-          @updatedTickets="setActivityCache"
+          @updatedTickets="setTicketCache"
       />
     </div>
     <div v-if="currentTab === 'wiki'">
