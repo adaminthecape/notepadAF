@@ -205,6 +205,12 @@ export default {
     SimpleLayout
   },
   mixins: [DbMixin, Pivotal, GitMixin],
+  props: {
+    desiredNoteId: {
+      type: String,
+      default: null
+    }
+  },
   data()
   {
     return {
@@ -323,7 +329,7 @@ export default {
 
     setTimeout(() =>
     {
-      this.setSelectedNoteById();
+      this.setSelectedNoteById(this.desiredNoteId);
     }, 100);
   },
   methods: {
@@ -424,6 +430,7 @@ export default {
     },
     setSelectedNoteById(id)
     {
+      console.info('setSelectedNoteById:', id);
       if(!this.notesList || !this.notesList[0])
       {
         return;
@@ -441,6 +448,7 @@ export default {
 
       if(this.notesList[index])
       {
+        console.info('setSelectedNoteById: setting');
         this.selectedNote = this.notesList[index];
         this.selectedNoteId = {
           label: this.notesList[index].title,

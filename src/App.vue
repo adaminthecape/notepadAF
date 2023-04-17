@@ -27,7 +27,9 @@
     </div>
 
     <div v-if="currentTab === 'notes'">
-      <Notes />
+      <Notes
+          :desiredNoteId="desiredNoteId"
+      />
     </div>
     <div v-if="currentTab === 'activity'">
       <MyActivity
@@ -87,7 +89,8 @@
         // logEntries: [],
         isLogDrawerOpen: false,
         activityCache: null,
-        ticketCache: null
+        ticketCache: null,
+        desiredNoteId: null
       };
     },
     provide()
@@ -96,7 +99,8 @@
         $log: this.audit,
         $notify: this.notify,
         $debug: this.debug,
-        $openLink: this.openInBrowser
+        $openLink: this.openInBrowser,
+        $openNote: this.openNote
       };
     },
     computed: {
@@ -108,6 +112,12 @@
     //   }
     // },
     methods: {
+      openNote(noteId)
+      {
+        console.info('openNote', noteId);
+        this.desiredNoteId = noteId;
+        this.currentTab = 'notes';
+      },
       openInBrowser(link)
       {
         const { shell } = require('electron');

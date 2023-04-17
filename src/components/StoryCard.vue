@@ -1,5 +1,8 @@
 <template>
-  <SimpleModal fullWidth>
+  <SimpleModal
+      v-if="story"
+      fullWidth
+  >
     <template #activator="{ open }">
       <div v-if="!story" class="row justify-center">
         <q-spinner size="lg" color="primary" class="q-ma-md" />
@@ -60,6 +63,31 @@
               flat
               @click.stop.prevent="copy(story.id)"
           />
+          <SimpleModal
+            v-if="relatedNotes.length"
+            style="display: inline"
+          >
+            <template #activator="{ open }">
+              <q-btn
+                  :label="`${relatedNotes.length} notes`"
+                  color="primary"
+                  :dense="dense"
+                  flat
+                  @click.stop.prevent="open"
+              />
+            </template>
+            <template #content>
+              <div
+                  v-for="noteId in relatedNotes"
+                  :key="`noteCard-${noteId}`"
+              >
+                <NoteCard
+                    :noteId="noteId"
+                    @clicked.stop.prevent="$openNote(noteId)"
+                />
+              </div>
+            </template>
+          </SimpleModal>
         </div>
       </div>
     </template>
@@ -104,12 +132,14 @@
 
 <script>
   import DisplayStory from './DisplayStory';
+  import NoteCard from './NoteCard';
   import SimpleModal from './SimpleModal';
   import { copyToClipboard } from 'quasar';
 
   export default {
     components: {
       DisplayStory,
+      NoteCard,
       SimpleModal
     },
     props: {
@@ -134,11 +164,27 @@
         default: false
       }
     },
-    inject: ['$openLink'],
+    inject: ['$openLink', '$openNote'],
     computed: {
       story()
       {
         return this.$store.getters['pivotal/get'](this.storyId);
+      },
+      relatedNotes()
+      {
+        const notes = this.$store.getters['notes/all'];
+
+        if(!notes || !notes.length)
+        {
+          return [];
+        }
+
+        return notes.filter((note) =>
+        {
+          return note && note.stories && note.stories.length && note.stories.some(
+              (storyId) => parseInt(storyId, 10) === parseInt(this.storyId, 10)
+          );
+        }).map((note) => note.id);
       }
     },
     async mounted()
