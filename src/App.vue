@@ -29,6 +29,7 @@
     <div v-if="currentTab === 'notes'">
       <Notes
           :desiredNoteId="desiredNoteId"
+          :key="notesRenderIndex"
       />
     </div>
     <div v-if="currentTab === 'activity'">
@@ -90,7 +91,8 @@
         isLogDrawerOpen: false,
         activityCache: null,
         ticketCache: null,
-        desiredNoteId: null
+        desiredNoteId: null,
+        notesRenderIndex: 0
       };
     },
     provide()
@@ -117,6 +119,7 @@
         console.info('openNote', noteId);
         this.desiredNoteId = noteId;
         this.currentTab = 'notes';
+        this.notesRenderIndex += 1;
       },
       openInBrowser(link)
       {
