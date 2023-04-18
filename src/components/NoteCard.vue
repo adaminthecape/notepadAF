@@ -21,17 +21,33 @@
           <q-space />
         </div>
         <div class="row items-center">
-          <q-badge
-              v-if="note.tasks"
-              :label="`${note.tasks.length} tasks`"
-              color="primary"
-              class="text-bold"
-          />
+          <div v-if="taskMeta">
+            <q-chip
+                dense
+                :color="chipColor"
+                :dark="dark"
+            >
+              <q-icon name="task_alt" class="q-mr-xs" />
+              <span class="text-bold" :class="{ 'text-green-9': !dark, 'text-green': dark }">{{ taskMeta.done }}</span>
+              <span> / </span>
+              <span class="text-bold">{{ taskMeta.total }}</span>
+            </q-chip>
+          </div>
           <q-space />
-          <q-chip v-if="created && !updated" dense>
-            C: {{ created }}
+          <q-chip
+              v-if="created && !updated"
+              dense
+              :color="chipColor"
+              :dark="dark"
+          >
+            Created {{ created }}
           </q-chip>
-          <q-chip v-if="updated" dense>
+          <q-chip
+              v-if="updated"
+              dense
+              :color="chipColor"
+              :dark="dark"
+          >
             Updated {{ updated }}
           </q-chip>
         </div>
@@ -54,6 +70,10 @@
       clickOverride: {
         type: Function,
         default: undefined
+      },
+      dark: {
+        type: Boolean,
+        default: false
       }
     },
     inject: ['$openNote'],
@@ -63,6 +83,10 @@
       };
     },
     computed: {
+      chipColor()
+      {
+        return this.dark ? 'grey-9' : 'grey-3';
+      },
       note()
       {
         return this.$store.getters['notes/getNote'](this.noteId);
@@ -78,6 +102,29 @@
         return this.note.updated ?
             moment(this.note.updated).fromNow() :
             null;
+      },
+      taskMeta()
+      {
+        if(!this.note || !this.note.tasks || !this.note.tasks.length)
+        {
+          return null;
+        }
+
+        return this.note.tasks.reduce((agg, task) =>
+        {
+          agg.total += 1;
+
+          if(task.done)
+          {
+            agg.done += 1;
+          }
+
+          return agg;
+        }, {
+          total: 0,
+          done: 0,
+          todo: 0
+        });
       }
     },
     methods: {

@@ -1,4 +1,5 @@
 import { app, BrowserWindow, nativeTheme } from 'electron';
+import fs from "fs";
 
 try {
   if (process.platform === 'win32' && nativeTheme.shouldUseDarkColors === true) {
@@ -23,6 +24,7 @@ function createWindow () {
     const path = require("path");
     const fs = require("fs");
     const initPath = path.join(app.getAppPath(), "init.json");
+    console.warn({ initPath, appPath: app.getAppPath() });
     let data;
 
     try
@@ -56,10 +58,18 @@ function createWindow () {
         'close',
         () =>
         {
-            fs.writeFileSync(
-                initPath,
-                JSON.stringify({ bounds: mainWindow.getBounds() })
-            );
+            try
+            {
+                fs.writeFileSync(
+                    initPath,
+                    JSON.stringify({ bounds: mainWindow.getBounds() })
+                );
+            }
+            catch(e)
+            {
+                console.warn('FS ERROR:');
+                console.warn(e);
+            }
         }
     );
 

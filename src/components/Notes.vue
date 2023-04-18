@@ -122,6 +122,7 @@
                 >
                   <NoteCard
                       :noteId="opt.value"
+                      dark
                   />
                 </q-card>
               </template>

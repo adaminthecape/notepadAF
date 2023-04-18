@@ -77,15 +77,17 @@
               />
             </template>
             <template #content>
-              <div
+              <q-card
                   v-for="noteId in relatedNotes"
                   :key="`noteCard-${noteId}`"
+                  bordered
+                  class="q-pa-none q-ma-none"
               >
                 <NoteCard
                     :noteId="noteId"
                     @selectedNote="$openNote(noteId)"
                 />
-              </div>
+              </q-card>
             </template>
           </SimpleModal>
         </div>
