@@ -193,6 +193,10 @@ export default {
   },
   data()
   {
+    const savedQueryParams = localStorage.getItem('ticketQueryParams') ?
+        JSON.parse(localStorage.getItem('ticketQueryParams')) :
+        null;
+
     return {
       isLoadingActivity: false,
       isGitStatusDropdownOpen: false,
@@ -234,9 +238,12 @@ export default {
       queryParamNegations: {},
       queryParams: {
         // this should be filled from endpoint queryParams
+        text: '',
         owner: 'AF',
-        requester: null,
-        epic: ['dev (active)', 'dev (pr + docs)']
+        // requester: null,
+        epic: ['dev (active)', 'dev (pr + docs)'],
+        includedone: true,
+        // ...(savedQueryParams && { ...savedQueryParams })
       },
       queryParamToAdd: null,
       resultTotals: {}
@@ -314,6 +321,10 @@ export default {
     }
   },
   methods: {
+    saveParams(params)
+    {
+      localStorage.setItem('ticketQueryParams', JSON.stringify(params));
+    },
     addQueryParam()
     {
       const param = this.queryParamToAdd;

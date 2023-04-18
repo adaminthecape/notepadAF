@@ -34,7 +34,10 @@ export const pivotalData = {
                 path: 'projects/{projectId}/search',
                 queryParams: {
                     owner: 'string',
-                    epic: 'string'
+                    epic: 'string',
+                    requester: 'string',
+                    includedone: 'boolean',
+                    text: 'string'
                 }
             }
         },

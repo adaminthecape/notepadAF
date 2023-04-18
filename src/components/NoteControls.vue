@@ -8,7 +8,8 @@
       <div class="row items-center">
         <slot name="before" />
         <q-btn
-            label="Stories"
+            icon="task"
+            :label="!dense ? 'Stories' : undefined"
             class="q-mr-xs"
             dense
             flat
@@ -46,7 +47,7 @@
           </q-card>
         </q-dialog>
         <q-btn
-            aria-label="Add new alert"
+            :label="!dense ? 'Alert' : undefined"
             icon="add_alert"
             class="q-mr-xs"
             dense
@@ -101,8 +102,8 @@
         />
         <q-btn
             v-if="note.isStarred"
+            :label="!dense ? 'Un-Star' : undefined"
             icon="star"
-            color="orange"
             class="q-mr-xs"
             dense
             flat
@@ -110,6 +111,7 @@
         />
         <q-btn
             v-else
+            :label="!dense ? 'Star' : undefined"
             icon="star_border"
             class="q-mr-xs"
             dense
@@ -117,6 +119,7 @@
             @click="toggleStarred"
         />
         <q-btn
+            :label="!dense ? 'Save' : undefined"
             icon="save"
             class="q-mr-xs"
             dense
@@ -124,6 +127,7 @@
             @click="saveNote(note)"
         />
         <q-btn
+            :label="!dense ? 'Delete' : undefined"
             icon="delete"
             dense
             flat
@@ -132,14 +136,18 @@
         <q-dialog v-model="isConfirmingDeletion">
           <q-card>
             <q-card-section>
-              Are you sure?
-              <q-btn
-                  icon="delete"
-                  color="negative"
-                  dense
-                  flat
-                  @click="deleteNote(note); isConfirmingDeletion = false"
-              />
+              <div>Are you sure you want to delete this note?</div>
+              <div class="row q-mt-md">
+                <q-space />
+                <q-btn
+                    :label="!dense ? 'Delete' : undefined"
+                    icon="delete"
+                    color="negative"
+                    dense
+                    flat
+                    @click="deleteNote(note); isConfirmingDeletion = false"
+                />
+              </div>
             </q-card-section>
           </q-card>
         </q-dialog>
@@ -161,6 +169,10 @@ export default {
     addStyle: {
       type: String,
       default: undefined
+    },
+    dense: {
+      type: Boolean,
+      default: false
     }
   },
   data()

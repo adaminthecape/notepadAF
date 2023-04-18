@@ -18,7 +18,7 @@ export async function getPivotalEndpoint(endpoint, params, queryParams)
 
     if(!endpoint)
     {
-        endpoint = `${baseUri}/projects/${projectId}/stories/${storyId}`;
+        endpoint = `${baseUri}/projects/${projectId}/stories`;
     }
     else
     {
@@ -43,7 +43,11 @@ export async function getPivotalEndpoint(endpoint, params, queryParams)
             {
                 let result = '';
 
-                if(Array.isArray(value))
+                if(label === 'text')
+                {
+                    // ignore until the end
+                }
+                else if(Array.isArray(value))
                 {
                     result = `(${value.map((v) => (`${htmlEncode(label)}:"${htmlEncode(v)}"`)).join(' OR ')})`;
                 }
@@ -55,6 +59,10 @@ export async function getPivotalEndpoint(endpoint, params, queryParams)
                 queryString = `${queryString} ${result}`;
             });
 
+            queryString = `${queryParams.text || ''} ${queryString}`;
+
+            console.info('query string:', queryString);
+
             endpoint = `${endpoint}?query=${queryString}`;
         }
 
@@ -64,8 +72,6 @@ export async function getPivotalEndpoint(endpoint, params, queryParams)
             headers,
             params
         });
-
-        console.info('getPivotalEndpoint: result:', data);
 
         return data;
     }
@@ -125,11 +131,11 @@ export async function getPivotal(storyId, endpoint)
 
     try
     {
-        console.info('getPivotal:', { endpoint, headers });
+        // console.info('getPivotal:', { endpoint, headers });
 
         const { data } = await axios.get(endpoint, { headers });
 
-        console.info('getPivotal: result:', data);
+        // console.info('getPivotal: result:', data);
 
         return data;
     }

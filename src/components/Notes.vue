@@ -128,29 +128,29 @@
               </template>
             </q-select>
             <q-space />
-            <!-- note controls -->
-            <div class="row items-center">
-              <NoteControls
-                  v-if="selectedNote"
-                  :noteId="selectedNote.id"
-                  class="bordered q-pa-none q-ml-sm"
-                  @createAlert="createAlert"
-                  @deleteNote="deleteNote"
-                  @saveNote="saveNote"
-                  @attachStory="attachStory"
-                  @togglePivotal="toggleDrawerRight"
-              />
-              <q-btn
-                  icon="refresh"
-                  class="q-ml-sm"
-                  dense
-                  flat
-                  @click="reRender"
-              />
-            </div>
           </div>
         </template>
         <template #page-content>
+          <!-- note controls -->
+          <div class="row items-center q-mb-md">
+            <NoteControls
+                v-if="selectedNote"
+                :noteId="selectedNote.id"
+                class="bordered q-pa-none"
+                @createAlert="createAlert"
+                @deleteNote="deleteNote"
+                @saveNote="saveNote"
+                @attachStory="attachStory"
+                @togglePivotal="toggleDrawerRight"
+            />
+            <q-btn
+                icon="refresh"
+                class="q-ml-sm"
+                dense
+                flat
+                @click="reRender"
+            />
+          </div>
           <DisplayNote
               v-if="selectedNote"
               ref="noteDisplay"
