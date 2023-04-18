@@ -1,4 +1,4 @@
-import { app, BrowserWindow, nativeTheme } from 'electron'
+import { app, BrowserWindow, nativeTheme } from 'electron';
 
 try {
   if (process.platform === 'win32' && nativeTheme.shouldUseDarkColors === true) {
@@ -16,30 +16,58 @@ if (process.env.PROD) {
 
 let mainWindow
 
+/**
+ * Initial window options
+ */
 function createWindow () {
-  /**
-   * Initial window options
-   */
-  mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 600,
-    useContentSize: true,
-    webPreferences: {
-      // Change from /quasar.conf.js > electron > nodeIntegration;
-      // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
-      nodeIntegration: process.env.QUASAR_NODE_INTEGRATION,
-      nodeIntegrationInWorker: process.env.QUASAR_NODE_INTEGRATION,
+    const path = require("path");
+    const fs = require("fs");
+    const initPath = path.join(app.getAppPath(), "init.json");
+    let data;
 
-      // More info: /quasar-cli/developing-electron-apps/electron-preload-script
-      // preload: path.resolve(__dirname, 'electron-preload.js')
+    try
+    {
+        data = JSON.parse(fs.readFileSync(initPath, 'utf8'));
     }
-  })
+    catch(e)
+    {
+        //
+    }
 
-  mainWindow.loadURL(process.env.APP_URL)
+    const width = data && data.bounds && data.bounds.width ? data.bounds.width : 600;
+    const height = data && data.bounds && data.bounds.height ? data.bounds.height : 800;
 
-  mainWindow.on('closed', () => {
-    mainWindow = null
-  })
+    mainWindow = new BrowserWindow({
+        width,
+        height,
+        useContentSize: true,
+        webPreferences: {
+          // Change from /quasar.conf.js > electron > nodeIntegration;
+          // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
+          nodeIntegration: process.env.QUASAR_NODE_INTEGRATION,
+          nodeIntegrationInWorker: process.env.QUASAR_NODE_INTEGRATION,
+
+          // More info: /quasar-cli/developing-electron-apps/electron-preload-script
+          // preload: path.resolve(__dirname, 'electron-preload.js')
+        }
+    });
+
+    mainWindow.on(
+        'close',
+        () =>
+        {
+            fs.writeFileSync(
+                initPath,
+                JSON.stringify({ bounds: mainWindow.getBounds() })
+            );
+        }
+    );
+
+    mainWindow.loadURL(process.env.APP_URL);
+
+    mainWindow.on('closed', () => {
+        mainWindow = null
+    });
 }
 
 app.on('ready', createWindow)

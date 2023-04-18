@@ -114,37 +114,16 @@
                 @filter="filterFn"
             >
               <template #option="{ opt, itemProps, itemEvents }">
-                <q-item
+                <q-card
                     v-bind="itemProps"
                     v-on="itemEvents"
-                    class="q-pa-sm full-width"
-                    clickable
-                    dense
+                    class="q-pa-none q-ma-none"
+                    square
                 >
-                  <div class="row items-center">
-                    <div class="col">
-                      <div class="row items-center">
-                        <q-icon
-                            v-if="getNote(opt.value).isStarred"
-                            name="star"
-                            class="q-ma-xs"
-                            color="warning"
-                        />
-                        <div>
-                          {{ opt.label }}
-                        </div>
-                        <q-space />
-                      </div>
-                      <div v-if="getNote(opt.value).tasks">
-                        <q-badge
-                            :label="`${getNote(opt.value).tasks.length} tasks`"
-                            color="primary"
-                            class="text-bold"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </q-item>
+                  <NoteCard
+                      :noteId="opt.value"
+                  />
+                </q-card>
               </template>
             </q-select>
             <q-space />
@@ -194,10 +173,12 @@ import Pivotal from '../mixins/Pivotal';
 import DbMixin from '../mixins/jsondb';
 import GitMixin from '../mixins/git';
 import { v4 as uuidv4 } from 'uuid';
+import NoteCard from "components/NoteCard";
 
 export default {
   name: 'Notes',
   components: {
+    NoteCard,
     NoteControls,
     DisplayNote,
     StoryCard,

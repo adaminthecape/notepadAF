@@ -83,7 +83,7 @@
               >
                 <NoteCard
                     :noteId="noteId"
-                    @clicked.stop.prevent="$openNote(noteId)"
+                    @selectedNote="$openNote(noteId)"
                 />
               </div>
             </template>
