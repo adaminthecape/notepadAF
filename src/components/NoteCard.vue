@@ -1,5 +1,6 @@
 <template>
   <q-item
+      v-if="note && note.id"
       style="min-width: 400px"
       class="q-pa-sm full-width"
       clickable
@@ -7,7 +8,16 @@
       @click="$emit('selectedNote', note.id)"
   >
     <div class="row items-center full-width">
-      <div class="col">
+      <div>
+        <q-icon name="description" size="md" class="q-mr-sm" />
+      </div>
+      <div class="col full-width">
+        <div class="row items-center">
+          <div>
+            {{ note.title }}
+          </div>
+          <q-space />
+        </div>
         <div class="row items-center">
           <q-icon
               v-if="note.isStarred"
@@ -15,12 +25,6 @@
               class="q-ma-xs"
               color="warning"
           />
-          <div>
-            {{ note.title }}
-          </div>
-          <q-space />
-        </div>
-        <div class="row items-center">
           <div v-if="taskMeta">
             <q-chip
                 dense
@@ -52,15 +56,35 @@
           </q-chip>
         </div>
       </div>
+      <div v-if="showControls">
+        <q-btn
+            icon="menu"
+            dense
+            class="q-ml-sm"
+            @click.stop.prevent="isShowingControls = !isShowingControls"
+        />
+      </div>
+      <q-dialog v-model="isShowingControls">
+        <q-card class="q-pa-md">
+          <h5 class="q-pa-sm q-ma-none">
+            <span class="text-bold text-grey-9">{{ note.title }}</span>
+          </h5>
+          <q-item class="q-ma-sm">
+            <NoteControls :noteId="note.id" />
+          </q-item>
+        </q-card>
+      </q-dialog>
     </div>
   </q-item>
 </template>
 
 <script>
   import * as moment from 'moment';
+  import NoteControls from './NoteControls';
 
   export default {
     components: {
+      NoteControls
     },
     props: {
       noteId: {
@@ -74,12 +98,17 @@
       dark: {
         type: Boolean,
         default: false
+      },
+      showControls: {
+        type: Boolean,
+        default: true
       }
     },
     inject: ['$openNote'],
     data()
     {
       return {
+        isShowingControls: false
       };
     },
     computed: {
