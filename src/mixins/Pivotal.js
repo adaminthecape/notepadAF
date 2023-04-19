@@ -47,6 +47,10 @@ export async function getPivotalEndpoint(endpoint, params, queryParams)
                 {
                     // ignore until the end
                 }
+                else if(typeof value === 'boolean' || value === 'true' || value === 'false')
+                {
+                    result = `${htmlEncode(label)}:${value}`;
+                }
                 else if(Array.isArray(value))
                 {
                     result = `(${value.map((v) => (`${htmlEncode(label)}:"${htmlEncode(v)}"`)).join(' OR ')})`;
