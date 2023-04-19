@@ -228,7 +228,7 @@ export default {
         logGitAudit(type, data)
         {
             this.$log('logGitAudit', type);
-            this.writeToDb(
+            this.writeToDbSync(
                 'git_audits',
                 [{
                     time: new Date().getTime(),

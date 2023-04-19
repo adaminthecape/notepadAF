@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import deepmerge from "deepmerge";
-import { writeToDb, readFromDb, saveAll } from '../../mixins/jsondb';
+import cloneDeep from "lodash/cloneDeep";
+import { readFromDbSync, saveAll } from '../../mixins/jsondb';
 
 const state = {
     notes: []
@@ -96,6 +97,8 @@ const actions = {
 
         console.log('updateNote: newNote', newNote);
         commit('ADD_NOTE', newNote);
+
+        commit('SAVE_NOTES');
     },
     deleteNote({ commit }, { id })
     {
@@ -119,6 +122,8 @@ const actions = {
                 isStarred: !note.isStarred
             });
         }
+
+        commit('SAVE_NOTES');
     },
     attachStory({ getters, commit }, { noteId, storyId })
     {
@@ -126,7 +131,9 @@ const actions = {
 
         if(note)
         {
-            const stories = (note.stories || []).push(storyId);
+            const stories = cloneDeep(note.stories || []);
+
+            stories.push(storyId);
 
             commit('ADD_NOTE', { ...note, stories });
         }
@@ -139,7 +146,7 @@ const actions = {
         console.log('removeStory:', { note });
         if(note)
         {
-            const stories = note.stories || [];
+            const stories = cloneDeep(note.stories || []);
             const storyIndex = stories.findIndex((s) => s === storyId.toString());
 
             console.log({
@@ -164,26 +171,25 @@ const actions = {
     },
     loadAll({ commit, dispatch })
     {
-        readFromDb('notesdb.json', (data) =>
+        const data = readFromDbSync('notesdb.json', true);
+
+        let parsed = JSON.parse(data) || {};
+
+        if(typeof parsed === 'string')
         {
-            let parsed = JSON.parse(data) || {};
+            parsed = JSON.parse(parsed);
+        }
 
-            if(typeof parsed === 'string')
-            {
-                parsed = JSON.parse(parsed);
-            }
+        if(!parsed.notes)
+        {
+            parsed.notes = [];
+        }
 
-            if(!parsed.notes)
-            {
-                parsed.notes = [];
-            }
-
-            console.log('loadNotes', parsed);
-            parsed.notes.forEach((note) =>
-            {
-                commit('ADD_NOTE', note);
-            });
-        }, true);
+        console.log('loadNotes', parsed);
+        parsed.notes.forEach((note) =>
+        {
+            commit('ADD_NOTE', note);
+        });
     },
     saveAll({ commit })
     {

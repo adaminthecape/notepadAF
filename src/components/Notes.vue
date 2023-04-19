@@ -51,8 +51,10 @@
                   <StoryCard
                       :storyId="story.id"
                       :noteId="selectedNote.id"
+                      :key="`story-card-${story.id}-${storyCardRenderIndex}`"
                       clearable
                       dense
+                      @removed="storyCardRenderIndex += 1"
                       @checkoutBoth="checkoutBoth($event)"
                   />
                 </q-item>
@@ -197,6 +199,7 @@ export default {
   {
     return {
       controlsRenderIndex: 0,
+      storyCardRenderIndex: 0,
       reRendering: false,
       isCreateModalOpen: false,
       isNoteListDrawerOpen: true,

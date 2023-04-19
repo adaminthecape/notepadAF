@@ -209,6 +209,8 @@
           noteId: this.noteId,
           storyId: this.story.id
         });
+
+        this.$emit('removed');
       }
     }
   };

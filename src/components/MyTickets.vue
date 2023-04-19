@@ -80,8 +80,16 @@
                 </div>
               </q-item-section>
               <q-item-section>
+                <q-checkbox
+                    v-if="['includedone'].includes(param)"
+                    v-model="queryParams[param]"
+                    class="q-pa-sm"
+                    stack-label
+                    clearable
+                    filled
+                />
                 <q-select
-                    v-if="queryParamOptions[param]"
+                    v-else-if="queryParamOptions[param]"
                     v-model="queryParams[param]"
                     :options="queryParamOptions[param]"
                     class="q-pa-sm"
@@ -129,14 +137,50 @@
             </div>
           </q-expansion-item>
           <transition name="fade" appear>
-            <q-badge
-                v-if="resultTotals && resultTotals.hits"
-                color="primary"
-                style="font-size: 1.2em; user-select: none"
-                class="q-pa-md q-mb-md full-width"
-            >
-              {{ resultTotals.hits }} stories, {{ resultTotals.points }} points
-            </q-badge>
+            <div v-if="resultTotals" :key="resultsRenderIndex">
+              <q-badge
+                  v-if="resultTotals.hits > 0"
+                  color="primary"
+                  style="font-size: 1.2em; user-select: none"
+                  class="q-pa-md q-mb-md full-width"
+              >
+                <div class="row items-center full-width">
+                  <div>
+                    {{ resultTotals.hits }} stories, {{ resultTotals.points }} points
+                  </div>
+                  <q-space />
+                  <div>
+                    <q-select
+                        v-model="sortType"
+                        :options="sortTypes"
+                        label="Sort by:"
+                        :loading="sortingResults"
+                        clearable
+                        emitValue
+                        outlined
+                        dense
+                        dark
+                    >
+                      <template #default>
+                        Sort...
+                      </template>
+                    </q-select>
+                  </div>
+                </div>
+              </q-badge>
+              <q-badge
+                  v-else
+                  color="primary"
+                  style="font-size: 1.2em; user-select: none"
+                  class="q-pa-md q-mb-md full-width"
+              >
+                <div class="row items-center full-width">
+                  <div>
+                    No results found.
+                  </div>
+                </div>
+              </q-badge>
+            </div>
           </transition>
           <div
               v-if="isLoadingActivity"
@@ -243,10 +287,14 @@ export default {
         // requester: null,
         epic: ['dev (active)', 'dev (pr + docs)'],
         includedone: true,
-        // ...(savedQueryParams && { ...savedQueryParams })
+        ...(savedQueryParams && { ...savedQueryParams })
       },
       queryParamToAdd: null,
-      resultTotals: {}
+      resultTotals: {},
+      resultsRenderIndex: 0,
+      sortType: null,
+      sortTypes: ['notes', 'epic'],
+      sortingResults: false
     };
   },
   computed: {
@@ -309,6 +357,10 @@ export default {
     actionsForTemplate()
     {
       return Object.values(this.actionsToShow || {});
+    },
+    allNotes()
+    {
+      return this.$store.getters['notes/all'] || [];
     }
   },
   async mounted()
@@ -320,7 +372,52 @@ export default {
       await this.getTickets();
     }
   },
+  watch: {
+    sortType()
+    {
+      this.sortResults();
+    }
+  },
   methods: {
+    getRelatedNotes(storyId)
+    {
+      if(!this.allNotes || !this.allNotes.length)
+      {
+        return [];
+      }
+
+      console.info('getRelatedNotes', storyId);
+
+      return this.allNotes.filter((note) =>
+      {
+        return note && note.stories && note.stories.length && note.stories.some(
+            (storyId2) => parseInt(storyId2, 10) === parseInt(storyId, 10)
+        );
+      }).map((note) => note.id);
+    },
+    sortResults()
+    {
+      if(!this.results || !this.results.length)
+      {
+        return;
+      }
+
+      this.sortingResults = true;
+
+      let results = [...this.results];
+
+      if(this.sortType === 'notes')
+      {
+        results = results.sort((a, b) =>
+        {
+          return this.getRelatedNotes(b.id).length - this.getRelatedNotes(a.id).length;
+        });
+      }
+
+      this.$set(this, 'results', results);
+
+      this.sortingResults = false;
+    },
     saveParams(params)
     {
       localStorage.setItem('ticketQueryParams', JSON.stringify(params));
@@ -368,6 +465,8 @@ export default {
             queryParams[paramName] = this.queryParams[paramName];
           }
         });
+
+        this.saveParams(queryParams);
       }
 
       this.resultTotals = {};
@@ -385,6 +484,12 @@ export default {
           completedPoints: res.stories.total_points_completed
         };
       }
+      else
+      {
+        this.$notify('Results are in an unexpected format!');
+      }
+
+      this.resultsRenderIndex += 1;
 
       try
       {
