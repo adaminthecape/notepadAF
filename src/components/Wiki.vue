@@ -533,8 +533,6 @@ export default {
         keyword = keyword.slice(0, -1);
       }
 
-      console.info({ keyword });
-
       this.potentialSelectionPages = this.availablePages.reduce((agg, page) =>
       {
         if(page.value.replace('-', ' ').toLowerCase().includes(keyword))
@@ -772,8 +770,6 @@ export default {
 
       try
       {
-        console.info({ uri });
-
         // const { data } = await axios.get(uri, { headers: {
         //     'PRIVATE-TOKEN': this.token
         //   } });
@@ -847,8 +843,6 @@ export default {
               }
             });
 
-        console.info({ uri });
-
         return data;
       }
       catch(e)
@@ -886,8 +880,6 @@ export default {
 
       const link = this.generateLink(slug, module);
       const matches = this.originalContent.match(new RegExp(this.genericPattern(name), trim ? 'g' : 'i'));
-
-      console.info({ link, matches, name, slug, module });
 
       if(!matches)
       {

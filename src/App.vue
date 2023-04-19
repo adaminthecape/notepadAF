@@ -68,8 +68,9 @@
   import MyActivity from './components/MyActivity';
   import MyTickets from './components/MyTickets';
   import Settings from './components/Settings';
-  import LogEntries from './components/LogEntries';
+  // import LogEntries from './components/LogEntries';
   import Wiki from './components/Wiki';
+  import { timeSince } from "src/utils";
 
   export default {
     name: 'App',
@@ -102,7 +103,8 @@
         $notify: this.notify,
         $debug: this.debug,
         $openLink: this.openInBrowser,
-        $openNote: this.openNote
+        $openNote: this.openNote,
+        $timeSince: timeSince
       };
     },
     computed: {
@@ -116,7 +118,6 @@
     methods: {
       openNote(noteId)
       {
-        console.info('openNote', noteId);
         this.desiredNoteId = noteId;
         this.currentTab = 'notes';
         this.notesRenderIndex += 1;

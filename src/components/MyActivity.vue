@@ -289,8 +289,6 @@ export default {
     const aWeekAgo = new Date(new Date().setDate(today.getDate() - 7));
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-    console.log(today.toISOString(), aWeekAgo.toISOString());
-
     return {
       days: [...Array(31).keys()],
       months,
@@ -518,7 +516,6 @@ export default {
     },
     daysTo(startDate, len)
     {
-      console.log(len, startDate.toISOString());
       const dt = new Date(startDate.getTime());
       const res = [];
 
@@ -584,7 +581,6 @@ export default {
 
       this.calendarLength = Math.floor(Math.abs(after.getTime() - before.getTime()) / (1000 * 3600 * 24));
 
-      console.log('set length to:', this.calendarLength);
       params.limit = 500;
 
       const res = await this.getPivotalEndpoint(uri, params);

@@ -129,14 +129,10 @@
         const tasks = [...this.note.tasks];
         const existingIndex = tasks.findIndex((t) => t.id === task.id);
 
-        console.log({ existingIndex });
-
         if(existingIndex > -1)
         {
           tasks.splice(existingIndex, 1);
         }
-
-        console.log({ tasks });
 
         this.$store.dispatch('notes/update', { note: { ...this.note, tasks } });
 

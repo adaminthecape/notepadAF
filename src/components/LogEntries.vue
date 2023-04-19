@@ -119,8 +119,6 @@ export default {
   methods: {
     updateLogTypes()
     {
-      console.log({ logTypesToIgnore: this.logTypesToIgnore });
-
       this.$log('updateLogTypes');
       const types = [...this.logTypesToIgnore];
 

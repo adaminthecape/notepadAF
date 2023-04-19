@@ -62,14 +62,6 @@ export function readFromDir(
     });
 };
 
-export function writeToFile(dir, filename, extension, dataToWrite, thenFn)
-{
-    $log('writeToFile', JSON.stringify({ dir, filename, extension, dataToWrite: dataToWrite.slice(0, 50) }));
-    const path = `${dir}/${filename}.${extension}`;
-
-    fsWrite(path, dataToWrite, thenFn);
-}
-
 export function readFileWithoutError(dir, filename, extension, thenFn)
 {
     // implementation:
@@ -89,55 +81,6 @@ export function readFileWithoutError(dir, filename, extension, thenFn)
         {
             if(typeof thenFn === 'function')
             {
-                thenFn(data);
-            }
-        }
-    );
-}
-
-export function readFromDb(path, thenFn, createFile = false)
-{
-    $log('readFromDb');
-    const fs = require('fs');
-
-    $log('readFromDb', `fs :: ${!!fs}`);
-    fs.readFile(
-        path,
-        { encoding: 'utf8' },
-        (err, data) =>
-        {
-            if(err)
-            {
-                $log('readFromDb', `error :: ${err} (${createFile})`);
-                console.warn('file read ERROR:', err);
-
-                if(!createFile)
-                {
-                    return;
-                }
-
-                fsWrite(path, {}, (err, data) =>
-                {
-                    $log('readFromDb', JSON.stringify({ err, data }));
-
-                    if(typeof thenFn === 'function')
-                    {
-                        $log('readFromDb', 'created file');
-                        thenFn(data);
-                    }
-
-                    return;
-                });
-            }
-            else if(!data)
-            {
-                $log('readFromDb', `no data :: ${data}`);
-                console.warn('file EMPTY:', data, path);
-            }
-
-            if(typeof thenFn === 'function')
-            {
-                $log('readFromDb', `success :: ${data}`);
                 thenFn(data);
             }
         }
@@ -196,27 +139,6 @@ export function mergeData(source, key, newData, deep = false)
     }
 }
 
-export function fsWrite(path, data, thenFn)
-{
-    $log('fsWrite', `${path} :: ${data}`);
-    fs.writeFile(path, JSON.stringify(data), (err) =>
-    {
-        if(err)
-        {
-            $log('fsWrite', `ERROR :: ${err}`);
-            console.warn('file read ERROR:', err);
-
-            return;
-        }
-
-        if(typeof thenFn === 'function')
-        {
-            $log('fsWrite', `success :: ${path} - ${typeof data}`);
-            thenFn(data);
-        }
-    });
-}
-
 export function fsWriteSync(path, data)
 {
     $log('fsWriteSync', `${path} :: ${data}`);
@@ -232,7 +154,7 @@ export function fsWriteSync(path, data)
     }
 }
 
-export function _updateNoteInDb(allNotes, noteData, deleteNote = false, thenFn)
+export function _updateNoteInDb(noteData, deleteNote = false)
 {
     $log('updateNoteInDb', noteData.id);
 
@@ -244,6 +166,10 @@ export function _updateNoteInDb(allNotes, noteData, deleteNote = false, thenFn)
     }
 
     noteData.updated = now;
+
+    const allNotes = JSON.parse(
+        readFromDbSync('notesdb.json')
+    );
 
     const existing = allNotes
         .find((item) => item.id && item.id === noteData.id);
@@ -269,71 +195,17 @@ export function _updateNoteInDb(allNotes, noteData, deleteNote = false, thenFn)
         }
     }
 
-    saveAll(allNotes, thenFn);
+    saveAll(allNotes);
 }
 
 export function saveAll(allNotes)
 {
     writeToDbSync('notes', allNotes, { createTable: true, dbFile: 'notesdb.json' });
-
-    console.info('updated all notes');
 }
 
 export function deleteNote(note)
 {
     _updateNoteInDb(note, true);
-}
-
-export function writeToDb(table, data, thenFn, opts = { shouldMerge: false, createTable: true, dbFile: 'notesdb.json' })
-{
-    $log('writeToDb', JSON.stringify({ table, data, opts }));
-
-    if(!data)
-    {
-        console.warn('Invalid data!');
-
-        return;
-    }
-
-    readFromDb(opts.dbFile, (existingDbData) =>
-    {
-        if(!opts)
-        {
-            opts = {};
-        }
-
-        if(!existingDbData)
-        {
-            existingDbData = '{}';
-        }
-
-        const db = JSON.parse(existingDbData);
-
-        if(!db[table])
-        {
-            if(!opts.createTable)
-            {
-                $log('writeToDb', 'invalid table!');
-                console.warn('Not a valid table!');
-
-                return;
-            }
-
-            db[table] = data;
-        }
-
-        if(typeof db[table] !== typeof data)
-        {
-            $log('writeToDb', `data type mismatch! ${typeof db[table]} : ${typeof data}`);
-            console.warn('Data type mismatch!', typeof db[table], typeof data);
-
-            return;
-        }
-
-        const mergedFileData = mergeData(db, table, data, opts.shouldMerge);
-
-        fsWrite(opts.dbFile, mergedFileData, thenFn);
-    });
 }
 
 export function writeToDbSync(
@@ -349,9 +221,6 @@ export function writeToDbSync(
     };
 
     opts = opts ? { ...baseOpts, ...opts } : baseOpts;
-
-    debugTitle = 'writeToDbSync';
-    $debug('start');
 
     let existingDbData = readFromDbSync(opts.dbFile, opts.createTable || false);
 
@@ -393,14 +262,10 @@ export default {
     inject: ['$log', '$notify'],
     methods: {
         readFromDir,
-        writeToFile,
         readFileWithoutError,
-        readFromDb,
         readFromDbSync,
         mergeData,
-        fsWrite,
         fsWriteSync,
-        writeToDb,
         writeToDbSync,
         saveAll,
         deleteNote

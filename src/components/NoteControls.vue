@@ -47,59 +47,103 @@
           </q-card>
         </q-dialog>
         <q-btn
-            :label="!dense ? 'Alert' : undefined"
-            icon="add_alert"
+            :label="!dense ? 'Alerts' : undefined"
+            :icon="note.alerts && note.alerts.length ? 'notifications_active' : 'notifications'"
             class="q-mr-xs"
             dense
             flat
-            @click="isCreatingAlert = true"
+            @click="isShowingAlerts = true"
         />
-        <q-dialog v-model="isCreatingAlert" fullWidth>
+        <q-dialog v-model="isShowingAlerts" fullWidth>
           <q-card>
             <q-card-section>
               <h5 class="justify-center">
-                Create alert for {{ note.title }}
+                Alerts for {{ note.title }}
               </h5>
-              <div class="row items-center">
-                <q-date
-                    v-model="createAlertDate"
-                    type="text"
-                    label="Date"
-                />
-                <q-time
-                    v-model="createAlertTime"
-                    type="text"
-                    label="Time"
-                    class="q-mx-sm"
-                />
-              </div>
-              <div class="row q-mt-md">
-                <q-input
-                    v-model="createAlertMessage"
-                    placeholder="Alert message..."
-                    class="full-width"
-                    filled
-                />
-              </div>
-              <div class="row q-mt-md">
-                <q-space />
+              <div class="col">
+                <div
+                    v-if="note.alerts && note.alerts.length"
+                    class="col"
+                >
+                  <div
+                      v-for="(alert, a) in note.alerts"
+                      :key="`alert-${note.id}-${a}`"
+                  >
+                    <q-item clickable>
+                      <q-item-section>
+                        <div class="row items-center">
+                          <q-icon
+                              name="timer"
+                              size="sm"
+                              class="q-mr-sm"
+                          />
+                          <div class="col">
+                            <div>{{ alert.message }}</div>
+                            <div class="text-grey-9">
+                              {{ alert.date }} at {{ alert.time }}
+                            </div>
+                            <div class="text-grey-9">
+                              Created {{ $timeSince(alert.created) }}
+                            </div>
+                          </div>
+                        </div>
+                      </q-item-section>
+                    </q-item>
+                  </div>
+                </div>
+                <div v-else>
+                  No alerts for this note.
+                </div>
                 <q-btn
-                    label="Save"
-                    color="secondary"
-                    @click="createAlert"
+                    :label="!dense ? 'Add new' : undefined"
+                    icon="add_alert"
+                    class="q-mt-md"
+                    dense
+                    flat
+                    @click="isCreatingAlert = true"
                 />
+                <q-dialog v-model="isCreatingAlert" fullWidth>
+                  <q-card>
+                    <q-card-section>
+                      <h5 class="justify-center">
+                        Create alert for {{ note.title }}
+                      </h5>
+                      <div class="row items-center">
+                        <q-date
+                            v-model="createAlertDate"
+                            type="text"
+                            label="Date"
+                        />
+                        <q-time
+                            v-model="createAlertTime"
+                            type="text"
+                            label="Time"
+                            class="q-mx-sm"
+                        />
+                      </div>
+                      <div class="row q-mt-md">
+                        <q-input
+                            v-model="createAlertMessage"
+                            placeholder="Alert message..."
+                            class="full-width"
+                            filled
+                        />
+                      </div>
+                      <div class="row q-mt-md">
+                        <q-space />
+                        <q-btn
+                            label="Save"
+                            color="secondary"
+                            @click="createAlert"
+                        />
+                      </div>
+                    </q-card-section>
+                  </q-card>
+                </q-dialog>
               </div>
             </q-card-section>
           </q-card>
         </q-dialog>
-        <q-btn
-            v-if="note.alerts && note.alerts.length"
-            icon="notifications_active"
-            class="q-mr-xs"
-            dense
-            flat
-            disable
-        />
         <q-btn
             v-if="note.isStarred"
             :label="!dense ? 'Un-Star' : undefined"
@@ -183,6 +227,7 @@ export default {
 
     return {
       renderIndex: 0,
+      isShowingAlerts: false,
       isCreatingAlert: false,
       isConfirmingDeletion: false,
       isAttachingStory: false,
@@ -192,7 +237,7 @@ export default {
       createAlertMessage: ''
     };
   },
-  inject: ['$updateNote'],
+  inject: ['$timeSince'],
   computed: {
     note()
     {
@@ -222,21 +267,11 @@ export default {
         message: this.createAlertMessage
       });
 
-      console.info({
-        id: this.noteId,
-        created: new Date().getTime(),
-        time: this.createAlertTime,
-        date: this.createAlertDate,
-        unix: new Date(`${this.createAlertDate} ${this.createAlertTime}`).getTime(),
-        text: this.createAlertMessage
-      });
-
       this.isCreatingAlert = false;
     },
     toggleStarred()
     {
       this.$store.dispatch('notes/starNote', this.noteId);
-      this.$store.dispatch('notes/saveAll');
     }
   }
 };

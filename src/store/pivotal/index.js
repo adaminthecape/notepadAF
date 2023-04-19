@@ -1,6 +1,4 @@
 import Vue from 'vue';
-import deepmerge from "deepmerge";
-import { writeToDb, readFromDb, saveAll } from '../../mixins/jsondb';
 import { getPivotal } from '../../mixins/Pivotal';
 
 const state = {
@@ -62,37 +60,9 @@ const actions = {
         if(force || !existing)
         {
             const story = await getPivotal(id);
-            console.log('story loaded!', id);
             commit('ADD_STORY', story);
         }
     }
-    // loadAll({ commit, dispatch })
-    // {
-    //     readFromDb('notesdb.json', (data) =>
-    //     {
-    //         let parsed = JSON.parse(data) || {};
-    //
-    //         if(typeof parsed === 'string')
-    //         {
-    //             parsed = JSON.parse(parsed);
-    //         }
-    //
-    //         if(!parsed.notes)
-    //         {
-    //             parsed.notes = [];
-    //         }
-    //
-    //         console.log('loadNotes', parsed);
-    //         parsed.notes.forEach((note) =>
-    //         {
-    //             commit('ADD_NOTE', note);
-    //         });
-    //     }, true);
-    // },
-    // saveAll({ commit })
-    // {
-    //     commit('SAVE_NOTES');
-    // }
 };
 
 const getters = {

@@ -1,16 +1,5 @@
 <template>
   <div>
-    <div
-        v-if="imminentAlerts.length"
-        class="q-mb-sm"
-    >
-      <q-chip
-          v-for="(alert, a) in imminentAlerts"
-          :key="`alert-${a}`"
-      >
-        {{ alert.date }} at {{ alert.time }}
-      </q-chip>
-    </div>
     <div v-if="!editable">
       {{ noteContent }}
     </div>
@@ -89,15 +78,6 @@ export default {
         this.isContentUpdated = true;
         this.updatedContent = data;
       }
-    },
-    imminentAlerts()
-    {
-      if(!this.note || !this.note.alerts || !this.note.alerts.length)
-      {
-        return [];
-      }
-
-      return this.note.alerts.filter((alert) => true);
     }
   },
   watch: {

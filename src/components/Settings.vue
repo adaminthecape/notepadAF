@@ -119,6 +119,7 @@ import Pivotal from '../mixins/Pivotal';
 import DbMixin from '../mixins/jsondb';
 import GitMixin from '../mixins/git';
 import SimpleLayout from './SimpleLayout';
+import { getFromLocalStorage, saveToLocalStorage } from "src/utils";
 // import PivotalAction from './PivotalAction';
 
 export default {
@@ -134,15 +135,15 @@ export default {
     return {
       cache: {
         tokens: {
-          gitlab: localStorage.getItem('gitlabToken'),
-          pivotal: localStorage.getItem('pivotalToken')
+          gitlab: getFromLocalStorage('gitlabToken'),
+          pivotal: getFromLocalStorage('pivotalToken')
         },
-        pivotalProjectId: localStorage.getItem('pivotalProjectId')
+        pivotalProjectId: getFromLocalStorage('pivotalProjectId')
       },
-      pivotalProjectId: localStorage.getItem('pivotalProjectId'),
+      pivotalProjectId: getFromLocalStorage('pivotalProjectId'),
       tokens: {
-        gitlab: localStorage.getItem('gitlabToken'),
-        pivotal: localStorage.getItem('pivotalToken')
+        gitlab: getFromLocalStorage('gitlabToken'),
+        pivotal: getFromLocalStorage('pivotalToken')
       }
     };
   },
@@ -154,23 +155,20 @@ export default {
   methods: {
     setToken(service)
     {
-      localStorage.setItem(`${service}Token`, this.tokens[service]);
+      saveToLocalStorage(`${service}Token`, this.tokens[service]);
     },
     revertToken(service)
     {
-      localStorage.setItem(`${service}Token`, this.cache.tokens[service]);
+      saveToLocalStorage(`${service}Token`, this.cache.tokens[service]);
     },
     setSetting(setting)
     {
-      console.log('setSetting', setting);
-      localStorage.setItem(setting, this[setting]);
+      saveToLocalStorage(setting, this[setting]);
       this.cache[setting] = this[setting];
-      this.$log('setting', `set setting "${setting}" to ${this[setting]}`);
-      console.log(`set setting "${setting}" to ${this[setting]}`);
     },
     revertSetting(setting)
     {
-      localStorage.setItem(setting, this.cache[setting]);
+      saveToLocalStorage(setting, this.cache[setting]);
     }
   }
 };

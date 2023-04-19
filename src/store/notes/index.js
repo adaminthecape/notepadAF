@@ -60,10 +60,7 @@ const mutations = {
     },
     SAVE_NOTES(state)
     {
-        saveAll(state.notes, () =>
-        {
-            console.log('SAVE_NOTES: done');
-        });
+        saveAll(state.notes);
     }
 };
 

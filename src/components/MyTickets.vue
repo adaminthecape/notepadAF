@@ -386,8 +386,6 @@ export default {
         return [];
       }
 
-      console.info('getRelatedNotes', storyId);
-
       return this.allNotes.filter((note) =>
       {
         return note && note.stories && note.stories.length && note.stories.some(

@@ -97,14 +97,10 @@ export async function getGitlabEndpoint(endpoint, params, queryParams, extra)
             endpoint = `${endpoint}?query=${queryString}`;
         }
 
-        console.info('getGitlabEndpoint:', { endpoint, headers, params, queryParams });
-
         const { data } = await axios.get(endpoint, {
             headers,
             params
         });
-
-        console.info('getGitlabEndpoint: result:', data);
 
         return data;
     }

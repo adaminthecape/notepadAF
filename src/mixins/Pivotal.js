@@ -65,12 +65,8 @@ export async function getPivotalEndpoint(endpoint, params, queryParams)
 
             queryString = `${queryParams.text || ''} ${queryString}`;
 
-            console.info('query string:', queryString);
-
             endpoint = `${endpoint}?query=${queryString}`;
         }
-
-        console.info('getPivotalEndpoint:', { endpoint, headers, params, queryParams });
 
         const { data } = await axios.get(endpoint, {
             headers,

@@ -336,78 +336,12 @@ export default {
     {
       this.$log(`loadNotes`);
       this.$store.dispatch('notes/loadAll');
-      // // get the notes from the JSON repository
-      // this.readFromDb('notesdb.json', (data) =>
-      // {
-      //   let parsed = JSON.parse(data) || {};
-      //
-      //   if(typeof parsed === 'string')
-      //   {
-      //     parsed = JSON.parse(parsed);
-      //   }
-      //
-      //   if(!parsed.notes)
-      //   {
-      //     parsed.notes = [];
-      //   }
-      //
-      //   this.$set(this, 'notesList', parsed.notes);
-      // }, true);
     },
     updateNoteInDb(noteData, deleteNote = false)
     {
       this.$log('updateNoteInDb', noteData.id);
 
       this.$store.dispatch('notes/update', { note: noteData });
-
-      // Working, but legacy - now doing this via the store
-      // this.loadNotes();
-      //
-      // let allNotes = [...this.notesList];
-      //
-      // const now = Date.now();
-      //
-      // if(!noteData.created)
-      // {
-      //   noteData.created = now;
-      // }
-      //
-      // noteData.updated = now;
-      //
-      // const existing = allNotes
-      //     .find((item) => item.id && item.id === noteData.id);
-      //
-      // // find the existing item with this id if possible
-      // const existingIndex = allNotes
-      //     .findIndex((item) => item.id && item.id === noteData.id);
-      //
-      // if(existingIndex > -1)
-      // {
-      //   const toUpdate = {
-      //     ...existing,
-      //     ...(this.noteBeingEdited || noteData)
-      //   };
-      //
-      //   if(deleteNote)
-      //   {
-      //     allNotes.splice(existingIndex, 1);
-      //   }
-      //   else
-      //   {
-      //     allNotes.splice(existingIndex, 1, toUpdate);
-      //   }
-      // }
-      //
-      // this.writeToDb(
-      //     'notes',
-      //     allNotes,
-      //     (data) =>
-      //     {
-      //       console.info('updated note:', noteData.id);
-      //
-      //       this.loadNotes();
-      //     }
-      // );
     },
     getNote(id)
     {
@@ -415,7 +349,6 @@ export default {
     },
     setSelectedNoteById(id)
     {
-      console.info('setSelectedNoteById:', id);
       if(!this.notesList || !this.notesList[0])
       {
         return;
@@ -433,7 +366,6 @@ export default {
 
       if(this.notesList[index])
       {
-        console.info('setSelectedNoteById: setting');
         this.selectedNote = this.notesList[index];
         this.selectedNoteId = {
           label: this.notesList[index].title,
