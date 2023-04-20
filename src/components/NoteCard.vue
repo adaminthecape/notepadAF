@@ -1,3 +1,4 @@
+<script src="../../../notepadAF2/src/boot/pinia.ts"></script>
 <template>
   <q-item
       v-if="note && note.id"

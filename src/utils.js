@@ -7,6 +7,16 @@ export function openInBrowser(link)
     shell.openExternal(link);
 }
 
+export function getAppBasePath()
+{
+    const pathParts = require('electron').remote.app.getAppPath().split('\\');
+
+    return pathParts
+        .slice(0, pathParts.length - 2)
+        .join('\\');
+        // .replace('.quasar\\electron', '');
+}
+
 export function getNotesDbPath(filename)
 {
     return localStorage.getItem('notesDbFullPath');
@@ -14,14 +24,14 @@ export function getNotesDbPath(filename)
 
 export function setNotesDbPath(filename)
 {
-    setLocalStorageFilePath(undefined, 'notesdb', '.json');
+    setLocalStorageFilePath(undefined, 'notesdb', 'json');
 }
 
 export function setLocalStorageFilePath(dir, filename, extension)
 {
     if(!dir)
     {
-        dir = app.getAppPath();
+        dir = getAppBasePath();
     }
 
     if(!extension)

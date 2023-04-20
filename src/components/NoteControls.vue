@@ -13,37 +13,51 @@
             class="q-mr-xs"
             dense
             flat
-            @click="$emit('togglePivotal')"
+            @click="isAttachingStory = !isAttachingStory"
         />
         <q-dialog v-model="isAttachingStory">
           <q-card>
-            <q-card-section>
-              <q-input
-                  v-if="isAttachingStory"
-                  v-model="storyIdToAttach"
-                  placeholder="Story ID"
-                  class="q-mr-xs"
-                  outlined
-                  dense
+            <!-- attach story -->
+            <q-item class="q-mb-xs q-pa-sm">
+              <q-item-section class="full-width">
+                <q-input
+                    v-model="storyIdToAttach"
+                    placeholder="Story ID"
+                    class="q-mr-sm"
+                    outlined
+                    dense
+                >
+                  <template #append>
+                    <q-btn
+                        aria-label="Attach story"
+                        label="Attach"
+                        dense
+                        flat
+                        @click="attachStory(note.id, storyIdToAttach)"
+                    />
+                  </template>
+                </q-input>
+              </q-item-section>
+            </q-item>
+
+            <!-- story card list -->
+            <div v-if="note && note.stories" class="q-pa-xs">
+              <q-item
+                  v-for="(story, s) in attachedStories"
+                  :key="`story-container-${story.id}-${s}`"
+                  class="q-mb-xs"
+                  clickable
               >
-                <template #append>
-                  <q-btn
-                      aria-label="Attach story"
-                      label="Attach"
-                      dense
-                      flat
-                      @click="attachStory(noteId, storyIdToAttach)"
-                  />
-                  <q-btn
-                      icon="cancel"
-                      dense
-                      round
-                      flat
-                      @click="isAttachingStory = false"
-                  />
-                </template>
-              </q-input>
-            </q-card-section>
+                <StoryCard
+                    :storyId="story.id"
+                    :noteId="note.id"
+                    :key="`story-card-${story.id}`"
+                    clearable
+                    dense
+                    @checkoutBoth="checkoutBoth($event)"
+                />
+              </q-item>
+            </div>
           </q-card>
         </q-dialog>
         <q-btn
@@ -203,8 +217,14 @@
 </template>
 
 <script>
+import { checkoutBoth } from '../mixins/git';
+import StoryCard from './StoryCard';
+
 export default {
   name: 'NoteControls',
+  components: {
+    StoryCard
+  },
   props: {
     noteId: {
       type: [String, Number],
@@ -242,11 +262,60 @@ export default {
     note()
     {
       return this.$store.getters['notes/getNote'](this.noteId);
+    },
+    attachedStories()
+    {
+      if(!this.note)
+      {
+        return [];
+      }
+
+      const stories = this.$store.getters['pivotal/all'] || [];
+      const storiesForNote = (this.note.stories || [])
+          .map((id) => parseInt(id, 10));
+
+      if(!stories.length || !storiesForNote.length)
+      {
+        return [];
+      }
+
+      return stories.filter((s) => storiesForNote.includes(s.id));
     }
   },
   watch: {
   },
   methods: {
+    attachStory(noteId, storyId)
+    {
+      if(!storyId || !noteId)
+      {
+        return;
+      }
+
+      this.$log('attachStory', `${noteId} :: ${storyId}`);
+      const note = this.getNote(noteId);
+
+      if(note)
+      {
+        if(!Array.isArray(note.stories))
+        {
+          note.stories = [];
+        }
+
+        note.stories = note.stories.map((storyId) => storyId.toString());
+
+        if(!note.stories.includes(storyId))
+        {
+          note.stories.push(storyId);
+        }
+
+        this.updateNoteInDb(note);
+
+        this.$notify(`Attached PT: ${storyId}`);
+      }
+
+      this.storyIdToAttach = null;
+    },
     deleteNote()
     {
       this.$store.dispatch('notes/deleteNote', { id: this.note.id });

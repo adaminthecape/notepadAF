@@ -1,6 +1,8 @@
 import deepmerge from "deepmerge";
 import fs from "fs";
+import path from "path";
 import App from '../App';
+import {getAppBasePath} from "src/utils";
 
 export function $log(...args)
 {
@@ -124,14 +126,10 @@ export function mergeData(source, key, newData, deep = false)
 {
     if(deep)
     {
-        $log('mergeData', 'deepmerging...');
-
         return deepmerge(source, { [key]: newData });
     }
     else
     {
-        $log('mergeData', 'merging...');
-
         return {
             ...source,
             [key]: newData
@@ -217,7 +215,8 @@ export function writeToDbSync(
     const baseOpts = {
         shouldMerge: false,
         createTable: true,
-        dbFile: 'notesdb.json'
+        dbFile: 'notesdb.json',
+        baseDir: getAppBasePath()
     };
 
     opts = opts ? { ...baseOpts, ...opts } : baseOpts;
@@ -254,7 +253,9 @@ export function writeToDbSync(
 
     const mergedFileData = mergeData(db, table, data, opts.shouldMerge);
 
-    fsWriteSync(opts.dbFile, mergedFileData);
+    const pathWithDir = path.join(opts.baseDir || '', opts.dbFile);
+
+    fsWriteSync(pathWithDir, mergedFileData);
 }
 
 export default {

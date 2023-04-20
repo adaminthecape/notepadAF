@@ -1,6 +1,18 @@
 import deepmerge from "deepmerge";
 import { exec } from "child_process";
 
+export function checkoutBoth(branchId)
+{
+    this.$log('checkoutBoth', branchId);
+    if(typeof branchId === 'number')
+    {
+        branchId = `PT_${branchId}`;
+    }
+
+    this.changeGitBranch('aluminate-vue', branchId);
+    this.changeGitBranch('aluminate-api', branchId, () => this.getGitStatusForAllModules());
+}
+
 export function runCmd(
     command,
     onData,
@@ -168,17 +180,7 @@ export default {
                 }, 500);
             }
         },
-        checkoutBoth(branchId)
-        {
-            this.$log('checkoutBoth', branchId);
-            if(typeof branchId === 'number')
-            {
-                branchId = `PT_${branchId}`;
-            }
-
-            this.changeGitBranch('aluminate-vue', branchId);
-            this.changeGitBranch('aluminate-api', branchId, () => this.getGitStatusForAllModules());
-        },
+        checkoutBoth,
         changeGitBranch(module, to, thenFn)
         {
             this.$log('checkoutBoth', `${module} :: ${to}`);

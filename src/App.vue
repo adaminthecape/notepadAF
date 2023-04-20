@@ -70,7 +70,7 @@
   import Settings from './components/Settings';
   // import LogEntries from './components/LogEntries';
   import Wiki from './components/Wiki';
-  import { timeSince } from "src/utils";
+  import { openInBrowser, timeSince } from "src/utils";
 
   export default {
     name: 'App',
@@ -102,7 +102,7 @@
         $log: this.audit,
         $notify: this.notify,
         $debug: this.debug,
-        $openLink: this.openInBrowser,
+        $openLink: openInBrowser,
         $openNote: this.openNote,
         $timeSince: timeSince
       };
@@ -121,12 +121,6 @@
         this.desiredNoteId = noteId;
         this.currentTab = 'notes';
         this.notesRenderIndex += 1;
-      },
-      openInBrowser(link)
-      {
-        const { shell } = require('electron');
-
-        shell.openExternal(link);
       },
       setActivityCache(data)
       {

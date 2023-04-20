@@ -17,49 +17,6 @@
               :width="400"
               :breakpoint="100"
           >
-            <!-- attach story -->
-            <q-card class="q-mb-xs">
-              <q-card-section>
-                <q-input
-                    v-model="storyIdToAttach"
-                    placeholder="Story ID"
-                    class="q-mr-sm"
-                    outlined
-                    dense
-                >
-                  <template #append>
-                    <q-btn
-                        aria-label="Attach story"
-                        label="Attach"
-                        dense
-                        flat
-                        @click="attachStory(selectedNote.id, storyIdToAttach)"
-                    />
-                  </template>
-                </q-input>
-              </q-card-section>
-            </q-card>
-
-            <!-- story card list -->
-            <div v-if="selectedNote && selectedNote.stories" class="q-pa-xs">
-              <q-card
-                  v-for="(story, s) in attachedStories"
-                  :key="`story-container-${story.id}-${s}`"
-                  class="q-mb-xs"
-              >
-                <q-item clickable>
-                  <StoryCard
-                      :storyId="story.id"
-                      :noteId="selectedNote.id"
-                      :key="`story-card-${story.id}-${storyCardRenderIndex}`"
-                      clearable
-                      dense
-                      @removed="storyCardRenderIndex += 1"
-                      @checkoutBoth="checkoutBoth($event)"
-                  />
-                </q-item>
-              </q-card>
-            </div>
           </q-drawer>
         </template>
         <template #header-left>
@@ -142,7 +99,6 @@
                 @createAlert="createAlert"
                 @deleteNote="deleteNote"
                 @saveNote="saveNote"
-                @attachStory="attachStory"
                 @togglePivotal="toggleDrawerRight"
             />
             <q-btn
@@ -171,7 +127,6 @@ import NoteControls from './NoteControls';
 import DisplayNote from './DisplayNote';
 import SimpleLayout from './SimpleLayout';
 import SimpleModal from './SimpleModal';
-import StoryCard from './StoryCard';
 import Pivotal from '../mixins/Pivotal';
 import DbMixin from '../mixins/jsondb';
 import GitMixin from '../mixins/git';
@@ -184,7 +139,6 @@ export default {
     NoteCard,
     NoteControls,
     DisplayNote,
-    StoryCard,
     SimpleModal,
     SimpleLayout
   },
@@ -231,33 +185,6 @@ export default {
     {
       return this.$store.getters['notes/all'];
     },
-    attachedStories()
-    {
-      if(!this.selectedNote)
-      {
-        return [];
-      }
-
-      const stories = this.$store.getters['pivotal/all'] || [];
-      const storiesForNote = (this.selectedNote.stories || [])
-          .map((id) => parseInt(id, 10));
-
-      if(!stories.length || !storiesForNote.length)
-      {
-        return [];
-      }
-
-      return stories.filter((s) => storiesForNote.includes(s.id));
-    },
-    noteNames()
-    {
-      if(!this.notesList || !this.notesList.length)
-      {
-        return [];
-      }
-
-      return this.notesList.map((note) => note.title);
-    },
     noteOptions()
     {
       if(!this.notesList || !this.notesList.length)
@@ -269,18 +196,6 @@ export default {
         label: note.title,
         value: note.id
       }));
-    },
-    noteBeingEdited()
-    {
-      if(this.$refs && this.$refs.noteDisplay && this.$refs.noteDisplay.noteContent)
-      {
-        return {
-          ...this.$refs.noteDisplay.note,
-          content: this.$refs.noteDisplay.noteContent
-        };
-      }
-
-      return null;
     }
   },
   watch: {
@@ -467,37 +382,6 @@ export default {
       this.$log('saveNote', noteData.id);
       this.updateNoteInDb(noteData, false);
       this.$notify('note saved!');
-    },
-    attachStory(noteId, storyId)
-    {
-      if(!storyId || !noteId)
-      {
-        return;
-      }
-
-      this.$log('attachStory', `${noteId} :: ${storyId}`);
-      const note = this.getNote(noteId);
-
-      if(note)
-      {
-        if(!Array.isArray(note.stories))
-        {
-          note.stories = [];
-        }
-
-        note.stories = note.stories.map((storyId) => storyId.toString());
-
-        if(!note.stories.includes(storyId))
-        {
-          note.stories.push(storyId);
-        }
-
-        this.updateNoteInDb(note);
-
-        this.$notify(`Attached PT: ${storyId}`);
-      }
-
-      this.storyIdToAttach = null;
     },
     filterFn(val, update)
     {
