@@ -110,6 +110,40 @@
           </q-item-section>
         </q-item>
       </q-card>
+      <q-card class="q-mb-sm">
+        <q-item>
+          <q-item-section>
+            <h5>Git base directory</h5>
+          </q-item-section>
+          <q-item-section>
+            <q-input
+                v-model="gitModuleBasePath"
+                type="text"
+                filled
+                placeholder="Git base directory"
+            >
+              <template #append>
+                <div v-if="cache.gitModuleBasePath !== gitModuleBasePath">
+                  <q-btn
+                      icon="check"
+                      round
+                      dense
+                      color="secondary"
+                      @click="setSetting('gitModuleBasePath')"
+                  />
+                  <q-btn
+                      icon="cancel"
+                      round
+                      dense
+                      color="negative"
+                      @click="revertSetting('gitModuleBasePath')"
+                  />
+                </div>
+              </template>
+            </q-input>
+          </q-item-section>
+        </q-item>
+      </q-card>
     </template>
   </SimpleLayout>
 </template>
@@ -132,19 +166,18 @@ export default {
   inject: ['$log'],
   data()
   {
-    return {
-      cache: {
-        tokens: {
-          gitlab: getFromLocalStorage('gitlabToken'),
-          pivotal: getFromLocalStorage('pivotalToken')
-        },
-        pivotalProjectId: getFromLocalStorage('pivotalProjectId')
-      },
-      pivotalProjectId: getFromLocalStorage('pivotalProjectId'),
+    const cache = {
       tokens: {
         gitlab: getFromLocalStorage('gitlabToken'),
         pivotal: getFromLocalStorage('pivotalToken')
-      }
+      },
+      pivotalProjectId: getFromLocalStorage('pivotalProjectId'),
+      gitModuleBasePath: getFromLocalStorage('gitModuleBasePath')
+    };
+
+    return {
+      cache,
+      ...cache
     };
   },
   computed: {
@@ -169,6 +202,7 @@ export default {
     revertSetting(setting)
     {
       saveToLocalStorage(setting, this.cache[setting]);
+      this[setting] = this.cache[setting];
     }
   }
 };

@@ -1,4 +1,3 @@
-<script src="../../../notepadAF2/src/boot/pinia.ts"></script>
 <template>
   <q-item
       v-if="note && note.id"
@@ -71,7 +70,7 @@
             <span class="text-bold text-grey-9">{{ note.title }}</span>
           </h5>
           <q-item class="q-ma-sm">
-            <NoteControls :noteId="note.id" />
+            <NoteControlsInCard :noteId="note.id" />
           </q-item>
         </q-card>
       </q-dialog>
@@ -80,12 +79,11 @@
 </template>
 
 <script>
-  import * as moment from 'moment';
-  import NoteControls from './NoteControls';
+  import { timeSince } from '../utils.js';
 
   export default {
     components: {
-      NoteControls
+      NoteControlsInCard: import('./NoteControls')
     },
     props: {
       noteId: {
@@ -124,13 +122,13 @@
       created()
       {
         return this.note.created ?
-            moment(this.note.created).fromNow() :
+            timeSince(this.note.created) :
             null;
       },
       updated()
       {
         return this.note.updated ?
-            moment(this.note.updated).fromNow() :
+            timeSince(this.note.updated) :
             null;
       },
       taskMeta()

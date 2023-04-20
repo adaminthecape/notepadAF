@@ -73,10 +73,17 @@
                 clickable
             >
               <q-item-section caption>
-                <div class="row">
+                <div class="row items-center">
                   <h5>
                     {{ param }}
                   </h5>
+                  <q-checkbox
+                      v-if="queryParamMultiples[param]"
+                      v-model="areAllSelected[param]"
+                      label="All"
+                      class="q-pa-sm"
+                      @input="toggleSelectAll(param)"
+                  />
                 </div>
               </q-item-section>
               <q-item-section>
@@ -84,9 +91,6 @@
                     v-if="['includedone'].includes(param)"
                     v-model="queryParams[param]"
                     class="q-pa-sm"
-                    stack-label
-                    clearable
-                    filled
                 />
                 <q-select
                     v-else-if="queryParamOptions[param]"
@@ -265,11 +269,15 @@ export default {
             'dev (ready)',
             'dev (active)',
             'dev (pr + docs)',
+            'dev (pr complete)',
             'qa (ready)',
-            'qa (pass)',
             'qa (active)',
+            'qa (fail)',
+            'dev (rehab)',
+            'dev (qa pass)',
             'dev (merge)',
-            'cst (live actions)'
+            'cst (live actions)',
+            'priorities (internal)'
         ],
         has: [
             'attachment'
@@ -279,6 +287,7 @@ export default {
             'started'
         ]
       },
+      areAllSelected: {},
       queryParamNegations: {},
       queryParams: {
         // this should be filled from endpoint queryParams
@@ -499,6 +508,22 @@ export default {
       }
 
       return res;
+    },
+    toggleSelectAll(param)
+    {
+      if(this.queryParamOptions[param])
+      {
+        this.areAllSelected[param] = !this.areAllSelected[param];
+
+        if(this.areAllSelected[param])
+        {
+          this.queryParams[param] = [...this.queryParamOptions[param]];
+        }
+        else
+        {
+          this.queryParams[param] = null;
+        }
+      }
     }
   }
 };

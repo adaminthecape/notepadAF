@@ -285,6 +285,7 @@ export default {
   watch: {
   },
   methods: {
+    checkoutBoth,
     attachStory(noteId, storyId)
     {
       if(!storyId || !noteId)
