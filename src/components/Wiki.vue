@@ -275,6 +275,7 @@ import GitlabMixin from '../mixins/gitlab';
 import GitMixin from '../mixins/git';
 import SimpleLayout from './SimpleLayout';
 import { QMarkdown } from '@quasar/quasar-ui-qmarkdown';
+import { echo, getFromLocalStorage } from "src/utils";
 // import VueShowdown from 'vue-showdown';
 
 export default {
@@ -432,13 +433,18 @@ export default {
         return;
       }
 
+      const command = `cd ${this.moduleBasePath}${branch} && git pull && git log`;
+      const statusCommand = `cd ${this.moduleBasePath}${branch} && git status`;
+
+      console.warn(command);
+
       this.runCmd(
-          `cd C:/devRepos/${branch} && git log`,
+          command,
           (data) =>
           {
             if(typeof data === 'string')
             {
-              const dataItems = data
+              this.history = data
                   .split('\n\ncommit')
                   .slice(0, this.historyLimit)
                   .map((item) =>
@@ -469,12 +475,16 @@ export default {
                       return agg;
                     }, {});
                   });
-
-              this.history = dataItems;
             }
           },
           (err) =>
           {
+            this.runCmd(statusCommand, (data) =>
+            {
+              console.warn('STATUS:', statusCommand);
+              console.log(data);
+            });
+
             console.error(err);
           }
       );

@@ -77,13 +77,40 @@
                   <h5>
                     {{ param }}
                   </h5>
-                  <q-checkbox
-                      v-if="queryParamMultiples[param]"
-                      v-model="areAllSelected[param]"
-                      label="All"
-                      class="q-pa-sm"
-                      @input="toggleSelectAll(param)"
-                  />
+                  <q-space />
+                  <div v-if="queryParamMultiples[param]">
+                    <q-btn
+                        v-if="areAllSelected[param]"
+                        label="None"
+                        class="q-pa-sm"
+                        dense
+                        flat
+                        @click="toggleSelectAll(param)"
+                    />
+                    <div v-else class="row items-center">
+                      <q-btn
+                          label="All"
+                          class="q-pa-sm"
+                          dense
+                          flat
+                          @click="toggleSelectAll(param)"
+                      />
+                      <q-btn
+                          label="Dev"
+                          class="q-pa-sm"
+                          dense
+                          flat
+                          @click="toggleSelectAll(param, 'dev')"
+                      />
+                      <q-btn
+                          label="QA"
+                          class="q-pa-sm"
+                          dense
+                          flat
+                          @click="toggleSelectAll(param, 'qa')"
+                      />
+                    </div>
+                  </div>
                 </div>
               </q-item-section>
               <q-item-section>
@@ -509,7 +536,7 @@ export default {
 
       return res;
     },
-    toggleSelectAll(param)
+    toggleSelectAll(param, containing)
     {
       if(this.queryParamOptions[param])
       {
@@ -517,7 +544,16 @@ export default {
 
         if(this.areAllSelected[param])
         {
-          this.queryParams[param] = [...this.queryParamOptions[param]];
+          if(containing)
+          {
+            this.queryParams[param] = [
+                ...this.queryParamOptions[param]
+                    .filter((opt) => opt.includes(containing))
+            ];}
+          else
+          {
+            this.queryParams[param] = [...this.queryParamOptions[param]];
+          }
         }
         else
         {

@@ -1,5 +1,5 @@
-import deepmerge from "deepmerge";
 import { exec } from "child_process";
+import { getFromLocalStorage } from "src/utils";
 
 export function checkoutBoth(branchId)
 {
@@ -19,6 +19,8 @@ export function runCmd(
     onError
 )
 {
+    console.info();
+
     if(!(typeof command === 'string' && command.length))
     {
         console.warn('command wrong!', command, args);
@@ -54,16 +56,14 @@ export function runCmd(
             return stderr;
         }
 
+        console.log(`result of "${command}":`, '\n', stdout.slice(0, 100));
+
         if(typeof onData === 'function')
         {
-            console.log(`result of "${command}":`, '\n', stdout);
-
             onData(stdout);
         }
         else
         {
-            console.log(`result of "${command}":`, '\n', stdout);
-
             return stdout;
         }
     });
@@ -78,7 +78,7 @@ export default {
             isLoadingGitStatus: false,
             gitRenderKey: 0,
             gitStatus: {},
-            moduleBasePath: 'C:/devRepos/'
+            moduleBasePath: getFromLocalStorage('gitModuleBasePath')
         };
     },
     inject: ['$log', '$notify'],
