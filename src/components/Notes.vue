@@ -16,6 +16,7 @@
               unelevated
               :width="400"
               :breakpoint="100"
+              :dark="dark"
           >
           </q-drawer>
         </template>
@@ -69,7 +70,7 @@
                 filled
                 dense
                 useInput
-                dark
+                :dark="dark"
                 @filter="filterFn"
             >
               <template #option="{ opt, itemProps, itemEvents }">
@@ -78,10 +79,11 @@
                     v-on="itemEvents"
                     class="q-pa-none q-ma-none"
                     square
+                    :dark="dark"
                 >
                   <NoteCard
                       :noteId="opt.value"
-                      dark
+                      :dark="dark"
                   />
                 </q-card>
               </template>
@@ -96,6 +98,7 @@
                 v-if="selectedNote"
                 :noteId="selectedNote.id"
                 class="bordered q-pa-none"
+                :dark="dark"
                 @createAlert="createAlert"
                 @deleteNote="deleteNote"
                 @saveNote="saveNote"
@@ -106,6 +109,7 @@
                 class="q-ml-sm"
                 dense
                 flat
+                :dark="dark"
                 @click="reRender"
             />
           </div>
@@ -115,6 +119,7 @@
               :noteId="selectedNote.id"
               class="full-width"
               editable
+              :dark="dark"
           />
         </template>
       </SimpleLayout>
@@ -147,6 +152,10 @@ export default {
     desiredNoteId: {
       type: String,
       default: null
+    },
+    dark: {
+      type: Boolean,
+      default: true
     }
   },
   data()

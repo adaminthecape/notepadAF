@@ -79,15 +79,7 @@
                   </h5>
                   <q-space />
                   <div v-if="queryParamMultiples[param]">
-                    <q-btn
-                        v-if="areAllSelected[param]"
-                        label="None"
-                        class="q-pa-sm"
-                        dense
-                        flat
-                        @click="toggleSelectAll(param)"
-                    />
-                    <div v-else class="row items-center">
+                    <div class="row items-center">
                       <q-btn
                           label="All"
                           class="q-pa-sm"
@@ -125,20 +117,38 @@
                     :options="queryParamOptions[param]"
                     class="q-pa-sm"
                     stack-label
-                    clearable
                     filled
                     :multiple="queryParamMultiples[param] || false"
-                />
+                >
+                  <template #append>
+                    <q-btn
+                        v-if="queryParams[param]"
+                        icon="clear"
+                        dense
+                        flat
+                        @click.stop.prevent="queryParams[param] = null"
+                    />
+                  </template>
+                </q-select>
                 <q-input
                     v-else
                     v-model="queryParams[param]"
                     class="q-pa-sm"
                     bottom-slots
                     stack-label
-                    clearable
                     filled
                     :mask="queryParamMasks[param] || undefined"
-                />
+                >
+                  <template #append>
+                    <q-btn
+                        v-if="queryParams[param]"
+                        icon="clear"
+                        dense
+                        flat
+                        @click.stop.prevent="queryParams[param] = null"
+                    />
+                  </template>
+                </q-input>
               </q-item-section>
             </q-item>
 <!--            <q-input-->
@@ -540,24 +550,16 @@ export default {
     {
       if(this.queryParamOptions[param])
       {
-        this.areAllSelected[param] = !this.areAllSelected[param];
-
-        if(this.areAllSelected[param])
+        if(containing)
         {
-          if(containing)
-          {
-            this.queryParams[param] = [
-                ...this.queryParamOptions[param]
-                    .filter((opt) => opt.includes(containing))
-            ];}
-          else
-          {
-            this.queryParams[param] = [...this.queryParamOptions[param]];
-          }
+          this.queryParams[param] = [
+            ...this.queryParamOptions[param]
+                .filter((opt) => opt.includes(containing))
+          ];
         }
         else
         {
-          this.queryParams[param] = null;
+          this.queryParams[param] = [...this.queryParamOptions[param]];
         }
       }
     }

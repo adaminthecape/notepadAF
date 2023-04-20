@@ -10,6 +10,7 @@
           narrowIndicator
           activeBgColor="blue-2"
           dense
+          dark
       >
         <q-tab name="notes" label="Notes" />
         <q-tab name="activity" label="My Activity" />

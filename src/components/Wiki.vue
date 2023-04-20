@@ -212,15 +212,21 @@
             <!--          />-->
           </div>
           <div v-else class="q-pa-sm">
-            <div v-if="!history || !history.length">
-              No history to show
+            <div v-if="historyStatus" class="row items-center q-pa-sm bordered">
+              <q-spinner size="md" />
+              <div class="q-ml-sm">
+                {{ historyStatus }} ...
+              </div>
+            </div>
+            <div v-else-if="!history || !history.length">
+              No history to show.
             </div>
             <div v-else>
               <div
                   v-for="(historyItem, h) in history"
                   :key="`historyItem-${h}`"
               >
-                <q-card class="q-mb-xs">
+                <q-card class="q-mb-xs" dark>
                   <q-item>
                     <q-item-section>
                       <q-input
@@ -230,6 +236,7 @@
                         disable
                         filled
                         dense
+                        dark
                       />
                       <q-input
                         label="Author"
@@ -238,6 +245,7 @@
                         disable
                         filled
                         dense
+                        dark
                       />
                       <q-input
                         label="Date"
@@ -246,6 +254,7 @@
                         disable
                         filled
                         dense
+                        dark
                       />
                       <q-input
                         label="Message"
@@ -254,7 +263,46 @@
                         disable
                         filled
                         dense
+                        dark
                       />
+                      <div v-if="historyItem.changes" class="row items-center text-bold">
+                        <q-chip
+                            v-if="historyItem.changes.filesChanged"
+                            class="q-mb-xs"
+                            color="secondary"
+                            disable
+                            filled
+                            dense
+                            dark
+                        >
+                          <q-icon name="task" />
+                          {{ historyItem.changes.filesChanged }}
+                        </q-chip>
+                        <q-chip
+                            v-if="historyItem.changes.insertions"
+                            class="q-mb-xs"
+                            color="positive"
+                            disable
+                            filled
+                            dense
+                            dark
+                        >
+                          +
+                          {{ historyItem.changes.insertions }}
+                        </q-chip>
+                        <q-chip
+                            v-if="historyItem.changes.deletions"
+                            class="q-mb-xs"
+                            color="negative"
+                            disable
+                            filled
+                            dense
+                            dark
+                        >
+                          -
+                          {{ historyItem.changes.deletions }}
+                        </q-chip>
+                      </div>
                     </q-item-section>
                   </q-item>
                 </q-card>
@@ -336,7 +384,9 @@ export default {
       // whether to edit as WYSIWYG or as markdown
       wysiwygMode: false,
       potentialSelectionPages: [],
-      markdownTemplates: []
+      markdownTemplates: [],
+      historyStatus: null,
+      lastGitUpdate: {}
     };
   },
   computed: {
@@ -407,8 +457,73 @@ export default {
     this.loadAllModulePages();
   },
   methods: {
+    updateStatusLog(data)
+    {
+      if(typeof data !== 'string')
+      {
+        return null;
+      }
+
+      return data
+          .split('\n\ncommit')
+          .slice(0, this.historyLimit)
+          .map((item) =>
+          {
+            return item.split('\n').reduce((agg, i, index) =>
+            {
+              if(!i)
+              {
+                return agg;
+              }
+              else if(i.startsWith('Author: '))
+              {
+                agg.author = i.replace('Author: ', '');
+              }
+              else if(i.startsWith('Date:   '))
+              {
+                agg.date = i.replace('Date:   ', '');
+              }
+              else if(i.startsWith('commit ') || index === 0)
+              {
+                agg.commit = i.replace('commit', '').slice(1);
+              }
+              else if(i.startsWith('    '))
+              {
+                agg.message = i.slice(4);
+              }
+              else if(i.includes('file changed'))
+              {
+                let [filesChanged, insertions, deletions] = i.split(',');
+
+                const getNum = (n) =>
+                {
+                  if(n)
+                  {
+                    return parseInt(n.split(' ').find((y) => parseInt(y, 10).toString() === y), 10);
+                  }
+
+                  return n;
+                }
+
+                filesChanged = getNum(filesChanged);
+                insertions = getNum(insertions);
+                deletions = getNum(deletions);
+
+                agg.changes = { filesChanged, insertions, deletions };
+              }
+              else
+              {
+                agg.other = `${agg.other || ''}\n${i}`;
+              }
+
+              return agg;
+            }, {});
+          });
+    },
     getHistory()
     {
+      this.$set(this, 'historyStatus', 'Loading latest updates');
+
       const getBranchCode = (module) =>
       {
         switch(module)
@@ -433,61 +548,76 @@ export default {
         return;
       }
 
-      const command = `cd ${this.moduleBasePath}${branch} && git pull && git log`;
-      const statusCommand = `cd ${this.moduleBasePath}${branch} && git status`;
+      const dirCommand = `cd ${this.moduleBasePath}${branch}`;
+      const initialCommand = `${dirCommand} && git pull`;
+      const command = `${dirCommand} && git log --stat`;
+      const statusCommand = `${dirCommand} && git status`;
 
       console.warn(command);
 
-      this.runCmd(
-          command,
-          (data) =>
-          {
-            if(typeof data === 'string')
-            {
-              this.history = data
-                  .split('\n\ncommit')
-                  .slice(0, this.historyLimit)
-                  .map((item) =>
-                  {
-                    return item.split('\n').reduce((agg, i, index) =>
-                    {
-                      if(!i)
-                      {
-                        return agg;
-                      }
-                      else if(i.startsWith('Author: '))
-                      {
-                        agg.author = i.replace('Author: ', '');
-                      }
-                      else if(i.startsWith('Date:   '))
-                      {
-                        agg.date = i.replace('Date:   ', '');
-                      }
-                      else if(i.startsWith('commit ') || index === 0)
-                      {
-                        agg.commit = i.replace('commit', '').slice(1);
-                      }
-                      else if(i.startsWith('    '))
-                      {
-                        agg.message = i.slice(4);
-                      }
+      const checkStatus = () =>
+      {
+        this.runCmd(statusCommand, (data) =>
+        {
+          console.warn('STATUS:', statusCommand);
+          console.log(data);
+        });
+      }
 
-                      return agg;
-                    }, {});
-                  });
+      const doThing = (initialData) =>
+      {
+        this.$set(this, 'historyStatus', 'Fetching logs');
+
+        this.runCmd(
+            command,
+            (data) =>
+            {
+              this.$set(this, 'historyStatus', 'Updating logs');
+
+              this.history = this.updateStatusLog(data);
+
+              setTimeout(() =>
+              {
+                this.historyStatus = null;
+              }, 250)
+            },
+            (err) =>
+            {
+              this.$set(this, 'historyStatus', 'Failed to fetch logs');
+
+              console.error(err);
+              checkStatus();
             }
-          },
-          (err) =>
-          {
-            this.runCmd(statusCommand, (data) =>
-            {
-              console.warn('STATUS:', statusCommand);
-              console.log(data);
-            });
+        );
+      }
 
-            console.error(err);
-          }
-      );
+      const timeSinceUpdate = this.lastGitUpdate[this.branchToGetHistoryFor] ?
+          this.lastGitUpdate[this.branchToGetHistoryFor] - Date.now() :
+          null;
+
+      if(timeSinceUpdate && timeSinceUpdate < 60000)
+      {
+        this.runCmd(
+            initialCommand,
+            (initialData) =>
+            {
+              doThing(initialData);
+
+              this.lastGitUpdate[this.branchToGetHistoryFor] = Date.now();
+            },
+            (err) =>
+            {
+              this.$set(this, 'historyStatus', 'Failed to load updates');
+
+              console.error(err);
+              checkStatus();
+            }
+        )
+      }
+      else
+      {
+        doThing();
+      }
     },
     // getTextSelection()
     // {

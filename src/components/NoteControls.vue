@@ -257,7 +257,7 @@ export default {
       createAlertMessage: ''
     };
   },
-  inject: ['$timeSince'],
+  inject: ['$timeSince', '$notify'],
   computed: {
     note()
     {
@@ -293,8 +293,7 @@ export default {
         return;
       }
 
-      this.$log('attachStory', `${noteId} :: ${storyId}`);
-      const note = this.getNote(noteId);
+      const note = this.$store.getters['notes/getNote'](noteId);
 
       if(note)
       {
@@ -303,14 +302,27 @@ export default {
           note.stories = [];
         }
 
-        note.stories = note.stories.map((storyId) => storyId.toString());
+        storyId = parseInt(storyId.replace(/ /g, ''));
+
+        note.stories = note.stories.map((storyId) =>
+        {
+          if(typeof storyId === 'string')
+          {
+            return parseInt(storyId.replace(/ /g, ''), 10)
+          }
+
+          return storyId;
+        });
+
+        console.log('stories', note.stories);
+        console.log('storyId', storyId);
 
         if(!note.stories.includes(storyId))
         {
           note.stories.push(storyId);
         }
 
-        this.updateNoteInDb(note);
+        this.$store.dispatch('notes/update', { note });
 
         this.$notify(`Attached PT: ${storyId}`);
       }
