@@ -219,17 +219,15 @@
 <script>
 import { checkoutBoth } from '../mixins/git';
 import StoryCard from './StoryCard';
+import NoteControlsMixin from '../mixins/NoteControlsMixin.js';
 
 export default {
   name: 'NoteControls',
   components: {
     StoryCard
   },
+  mixins: [NoteControlsMixin],
   props: {
-    noteId: {
-      type: [String, Number],
-      required: true
-    },
     addStyle: {
       type: String,
       default: undefined
@@ -259,10 +257,6 @@ export default {
   },
   inject: ['$timeSince', '$notify'],
   computed: {
-    note()
-    {
-      return this.$store.getters['notes/getNote'](this.noteId);
-    },
     attachedStories()
     {
       if(!this.note)
