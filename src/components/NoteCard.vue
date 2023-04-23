@@ -56,47 +56,53 @@
           </q-chip>
         </div>
       </div>
-      <div v-if="showControls">
-        <q-btn
-            icon="menu"
-            dense
-            class="q-ml-sm"
-            @click.stop.prevent="isShowingControls = !isShowingControls"
-        />
-      </div>
-      <q-dialog v-model="isShowingControls">
-        <q-card class="q-pa-md">
-          <h5 class="q-pa-sm q-ma-none">
-            <span class="text-bold text-grey-9">{{ note.title }}</span>
-          </h5>
-          <q-item class="q-ma-sm">
-            <NoteControlsInCard :noteId="note.id" />
-          </q-item>
-        </q-card>
-      </q-dialog>
+<!--      <div v-if="showControls">-->
+<!--        <q-btn-->
+<!--            icon="menu"-->
+<!--            dense-->
+<!--            class="q-ml-sm"-->
+<!--            @click.stop.prevent="isShowingControls = !isShowingControls"-->
+<!--        />-->
+<!--      </div>-->
+<!--      <q-dialog v-model="isShowingControls">-->
+<!--        <q-card class="q-pa-md">-->
+<!--          <q-item class="q-ma-sm">-->
+<!--            <NoteMiniDisplay :noteId="noteId" />-->
+<!--          </q-item>-->
+<!--        </q-card>-->
+<!--      </q-dialog>-->
+      <Modal v-if="showControls" fullWidth>
+        <template #activator="{ open }">
+          <q-btn
+              icon="menu"
+              dense
+              class="q-ml-sm"
+              @click.stop.prevent="open"
+          />
+        </template>
+        <template #content>
+          <NoteMiniDisplay :noteId="noteId" />
+        </template>
+      </Modal>
     </div>
   </q-item>
 </template>
 
 <script>
-  import { timeSince } from '../utils.js';
+  import NoteMiniDisplay from './NoteMiniDisplay';
+  import NoteControlsMixin from '../mixins/NoteControlsMixin.js';
+  import Modal from "components/SimpleModal";
 
   export default {
     components: {
-      NoteControlsInCard: import('./NoteControls')
+      Modal,
+      NoteMiniDisplay
     },
+    mixins: [NoteControlsMixin],
     props: {
-      noteId: {
-        type: String,
-        required: true
-      },
       clickOverride: {
         type: Function,
         default: undefined
-      },
-      dark: {
-        type: Boolean,
-        default: false
       },
       showControls: {
         type: Boolean,
@@ -114,22 +120,6 @@
       chipColor()
       {
         return this.dark ? 'grey-9' : 'grey-3';
-      },
-      note()
-      {
-        return this.$store.getters['notes/getNote'](this.noteId);
-      },
-      created()
-      {
-        return this.note.created ?
-            timeSince(this.note.created) :
-            null;
-      },
-      updated()
-      {
-        return this.note.updated ?
-            timeSince(this.note.updated) :
-            null;
       },
       taskMeta()
       {
