@@ -16,6 +16,7 @@
         <q-tab name="activity" label="My Activity" />
         <q-tab name="tickets" label="My Tickets" />
         <q-tab name="wiki" label="Wiki" />
+        <q-tab name="git_history" label="Git log" />
         <q-tab name="settings" label="Settings" />
 <!--        <q-space />-->
 <!--        <q-btn-->
@@ -50,6 +51,9 @@
     <div v-if="currentTab === 'wiki'">
       <Wiki class="q-pa-md" />
     </div>
+    <div v-if="currentTab === 'git_history'">
+      <GitHistoryLog class="q-pa-md" />
+    </div>
     <div v-if="currentTab === 'settings'">
       <Settings class="q-pa-md" />
     </div>
@@ -69,6 +73,7 @@
   import MyActivity from './components/MyActivity';
   import MyTickets from './components/MyTickets';
   import Settings from './components/Settings';
+  import GitHistoryLog from './components/GitHistoryLog';
   // import LogEntries from './components/LogEntries';
   import Wiki from './components/Wiki';
   import { openInBrowser, timeSince } from "src/utils";
@@ -81,7 +86,8 @@
       Wiki,
       // LogEntries,
       MyActivity,
-      MyTickets
+      MyTickets,
+      GitHistoryLog
     },
     data()
     {
