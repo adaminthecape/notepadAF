@@ -144,21 +144,48 @@
           </q-item-section>
         </q-item>
       </q-card>
+      <q-card class="q-mb-sm">
+        <q-item>
+          <q-item-section>
+            <h5>Backups</h5>
+          </q-item-section>
+          <q-item-section>
+            <SimpleModal fullWidth>
+              <template #title>
+                <h5>Backups</h5>
+              </template>
+              <template #activator="{ open }">
+                <q-btn
+                    label="Open backup handler"
+                    @click="open"
+                />
+              </template>
+              <template #content>
+                <BackupHandler />
+              </template>
+            </SimpleModal>
+          </q-item-section>
+        </q-item>
+      </q-card>
     </template>
   </SimpleLayout>
 </template>
 
 <script>
-import Pivotal from '../mixins/Pivotal';
-import DbMixin from '../mixins/jsondb';
-import GitMixin from '../mixins/git';
-import SimpleLayout from './SimpleLayout';
+import Pivotal from '../mixins/Pivotal.js';
+import DbMixin from '../mixins/jsondb.js';
+import GitMixin from '../mixins/git.js';
+import SimpleLayout from './SimpleLayout.vue';
+import SimpleModal from './SimpleModal.vue';
 import { getFromLocalStorage, saveToLocalStorage } from "src/utils";
+import BackupHandler from "./BackupHandler.vue";
 // import PivotalAction from './PivotalAction';
 
 export default {
   name: 'Settings',
   components: {
+    BackupHandler,
+    SimpleModal,
     SimpleLayout
   },
   mixins: [Pivotal, GitMixin, DbMixin],
