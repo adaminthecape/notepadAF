@@ -22,7 +22,7 @@
           <q-select
               v-model="historyLimit"
               label="Limit"
-              :options="[10, 20, 50, 100, 150, 200, 500, 1000]"
+              :options="[10, 20, 50, 100, 150, 200, 500, 1000, 2000, 5000]"
               class="q-mb-sm"
               outlined
               dense
@@ -46,22 +46,33 @@
         <div v-else-if="!history || !history.length" class="row items-center q-pa-sm bordered">
           No history to show.
         </div>
-        <q-space />
-        <q-btn
-            label="Go"
-            @click="getHistory"
-        />
-        <q-btn
-            label="Stats"
-            class="q-ml-sm"
-            :loading="isLoadingStatistics"
-            @click="runStatsReport"
-        />
-        <q-btn
-            :label="isShowingResults ? 'Hide results' : 'Show results'"
-            class="q-ml-sm"
-            @click="isShowingResults = !isShowingResults"
-        />
+        <q-separator class="q-my-md" />
+        <div class="row items-center">
+          <q-select
+              v-model="statisticsSortType"
+              :options="statisticsSortTypeOptions"
+              label="Sort type"
+              outlined
+              dense
+          />
+          <q-space />
+          <q-btn
+              label="Go"
+              @click="getHistory"
+          />
+          <q-btn
+              label="Stats"
+              class="q-ml-sm"
+              :loading="isLoadingStatistics"
+              @click="runStatsReport"
+          />
+          <q-btn
+              :label="isShowingResults ? 'Hide results' : 'Show results'"
+              class="q-ml-sm"
+              @click="isShowingResults = !isShowingResults"
+          />
+        </div>
+        <q-separator class="q-my-md" />
       </div>
       <div v-if="gitStatusLatest">
         <pre>{{ gitStatusLatest }}</pre>
@@ -70,11 +81,6 @@
     </template>
     <template #page-content>
       <div v-if="!isShowingResults && historyStatisticsArray.length">
-        <q-select
-            v-model="statisticsSortType"
-            :options="statisticsSortTypeOptions"
-            label="Sort type"
-        />
         <div
             v-for="(stat, a) in historyStatisticsArray"
             :key="`statItem-${a}`"
@@ -108,7 +114,7 @@
                     <span>{{ stat.insertionDeletionDiff }} diff</span>
                   </span>
                   <br />
-                  <div class="row items-center">
+                  <div>
                     <q-icon name="history" />&nbsp;
                     <span>{{ new Date(stat.earliestDate).toDateString() }} - {{ new Date(stat.latestDate).toDateString() }}</span>
                   </div>
