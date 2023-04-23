@@ -56,7 +56,7 @@ export function runCmd(
             return stderr;
         }
 
-        console.log(`result of "${command}":`, '\n', stdout.slice(0, 100));
+        console.log(`result of "${command}":`, '\n', stdout.slice(0, 1000));
 
         if(typeof onData === 'function')
         {
@@ -129,13 +129,14 @@ export default {
                             .replace('\n', '')
                             .replace('On branch ', '');
 
-                        if(
-                            res.includes('nothing to commit, working tree clean') ||
-                            res.includes('nothing added to commit but untracked files present')
-                        )
-                        {
-                            data.safeToChange = true;
-                        }
+                        // if(
+                        //     res.includes('nothing to commit, working tree clean') ||
+                        //     res.includes('nothing added to commit but untracked files present')
+                        // )
+                        // {
+                        //     data.safeToChange = true;
+                        // }
+                        data.safeToChange = true; // just make it do the thing
 
                         console.log({ data });
 

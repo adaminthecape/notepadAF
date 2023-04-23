@@ -143,6 +143,24 @@ export function fsWriteSync(path, data)
 
     try
     {
+        try
+        {
+            const pathParts = path.split('\\');
+            const dirPath = `${
+                pathParts.slice(0, pathParts.length - 1).join('\\')
+            }\\`;
+
+            console.log({ dirPath });
+
+            fs.mkdirSync(dirPath, { recursive: true } );
+        }
+        catch(e)
+        {
+            console.log('Cannot create folder ', e);
+
+            return;
+        }
+
         fs.writeFileSync(path, JSON.stringify(data));
     }
     catch(e)

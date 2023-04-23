@@ -22,18 +22,15 @@
 import { debounce } from 'quasar';
 import Pivotal from '../mixins/Pivotal';
 import TaskList from './TaskList';
+import NoteControlsMixin from '../mixins/NoteControlsMixin.js';
 
 export default {
   name: 'DisplayNote',
   components: {
     TaskList
   },
-  mixins: [Pivotal],
+  mixins: [Pivotal, NoteControlsMixin],
   props: {
-    noteId: {
-      type: String,
-      required: true
-    },
     editable: {
       type: Boolean,
       default: false
@@ -49,14 +46,6 @@ export default {
   },
   inject: ['$updateNote'],
   computed: {
-    note()
-    {
-      return this.$store.getters['notes/getNote'](this.noteId);
-    },
-    stories()
-    {
-      return this.note ? this.note.stories : null;
-    },
     attachedStories()
     {
       return this.stories && this.stories.map((storyId) => (
