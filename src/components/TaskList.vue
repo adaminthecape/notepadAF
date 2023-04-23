@@ -72,40 +72,33 @@
 </template>
 
 <script>
-  import { v4 as uuidv4 } from 'uuid';
   import draggable from 'vuedraggable';
+  import NoteControlsMixin from '../mixins/NoteControlsMixin.js';
 
   export default {
     components: { draggable },
+    mixins: [NoteControlsMixin],
     props: {
-      noteId: {
-        type: String,
-        required: true
-      }
     },
     data()
     {
       return {
         message: null,
-        tasks: []
+        tasksCopy: []
       };
     },
     computed: {
-      note()
-      {
-        return this.$store.getters['notes/getNote'](this.noteId);
-      }
     },
     mounted()
     {
-      this.tasks = this.note.tasks || [];
+      this.tasksCopy = this.note.tasks || [];
     },
     watch: {
       noteId()
       {
         setTimeout(() =>
         {
-          this.tasks = this.note.tasks || [];
+          this.tasksCopy = this.note.tasks || [];
         }, 100);
       }
     },
@@ -114,82 +107,10 @@
       {
         await this.$store.dispatch('notes/update', { note: {
           ...this.note,
-            tasks: this.tasks || []
+            tasks: this.tasksCopy || []
         } });
 
-        this.tasks = this.note.tasks || [];
-      },
-      removeTask(task)
-      {
-        if(!task.id)
-        {
-          return;
-        }
-
-        const tasks = [...this.note.tasks];
-        const existingIndex = tasks.findIndex((t) => t.id === task.id);
-
-        if(existingIndex > -1)
-        {
-          tasks.splice(existingIndex, 1);
-        }
-
-        this.$store.dispatch('notes/update', { note: { ...this.note, tasks } });
-
-        this.tasks = this.note.tasks || [];
-      },
-      addTask(task)
-      {
-        if(!this.noteId || !this.note)
-        {
-          return;
-        }
-
-        if(!task && this.message)
-        {
-          task = {
-            message: this.message
-          };
-        }
-
-        const tasks = this.note.tasks || [];
-        const now = Date.now();
-        let existingIndex = -1;
-
-        if(!task.id)
-        {
-          task.id = uuidv4();
-        }
-        else
-        {
-          existingIndex = tasks.findIndex((t) => t.id === task.id);
-        }
-
-        if(!task.created)
-        {
-          task.created = now;
-        }
-
-        if(!task.updated)
-        {
-          task.updated = now;
-        }
-
-        if(existingIndex > -1)
-        {
-          tasks.splice(existingIndex, 1, task);
-        }
-        else
-        {
-          tasks.push(task);
-        }
-
-        this.$store.dispatch('notes/update', { note: { ...this.note, tasks } });
-
-        this.tasks = this.note.tasks || [];
-
-        this.message = null;
-        this.$refs.newTaskInput.focus();
+        this.tasksCopy = this.note.tasks || [];
       }
     }
   };

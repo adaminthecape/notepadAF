@@ -139,6 +139,7 @@
   import { copyToClipboard } from 'quasar';
 
   export default {
+    name: 'StoryCard',
     components: {
       DisplayStory,
       NoteCard,

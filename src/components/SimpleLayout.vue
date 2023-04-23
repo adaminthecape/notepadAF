@@ -41,6 +41,7 @@
 
     <q-page-container v-if="page">
       <q-page class="q-pa-md" :style="pageStyle">
+        <slot name="page-header" />
         <q-scroll-area :style="`height: calc(100vh - ${pageOffset}px)`">
           <slot name="page-content" />
         </q-scroll-area>
