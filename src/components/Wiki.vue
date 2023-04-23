@@ -222,91 +222,7 @@
               No history to show.
             </div>
             <div v-else>
-              <div
-                  v-for="(historyItem, h) in history"
-                  :key="`historyItem-${h}`"
-              >
-                <q-card class="q-mb-xs" dark>
-                  <q-item>
-                    <q-item-section>
-                      <q-input
-                        label="Commit"
-                        :value="historyItem.commit"
-                        class="q-mb-xs"
-                        disable
-                        filled
-                        dense
-                        dark
-                      />
-                      <q-input
-                        label="Author"
-                        :value="historyItem.author"
-                        class="q-mb-xs"
-                        disable
-                        filled
-                        dense
-                        dark
-                      />
-                      <q-input
-                        label="Date"
-                        :value="historyItem.date"
-                        class="q-mb-xs"
-                        disable
-                        filled
-                        dense
-                        dark
-                      />
-                      <q-input
-                        label="Message"
-                        :value="historyItem.message"
-                        class="q-mb-xs"
-                        disable
-                        filled
-                        dense
-                        dark
-                      />
-                      <div v-if="historyItem.changes" class="row items-center text-bold">
-                        <q-chip
-                            v-if="historyItem.changes.filesChanged"
-                            class="q-mb-xs"
-                            color="secondary"
-                            disable
-                            filled
-                            dense
-                            dark
-                        >
-                          <q-icon name="task" />
-                          {{ historyItem.changes.filesChanged }}
-                        </q-chip>
-                        <q-chip
-                            v-if="historyItem.changes.insertions"
-                            class="q-mb-xs"
-                            color="positive"
-                            disable
-                            filled
-                            dense
-                            dark
-                        >
-                          +
-                          {{ historyItem.changes.insertions }}
-                        </q-chip>
-                        <q-chip
-                            v-if="historyItem.changes.deletions"
-                            class="q-mb-xs"
-                            color="negative"
-                            disable
-                            filled
-                            dense
-                            dark
-                        >
-                          -
-                          {{ historyItem.changes.deletions }}
-                        </q-chip>
-                      </div>
-                    </q-item-section>
-                  </q-item>
-                </q-card>
-              </div>
+              <GitHistoryLog />
             </div>
           </div>
         </template>
@@ -322,8 +238,8 @@ import debounce from 'lodash/debounce';
 import GitlabMixin from '../mixins/gitlab';
 import GitMixin from '../mixins/git';
 import SimpleLayout from './SimpleLayout';
+import GitHistoryLog from './GitHistoryLog';
 import { QMarkdown } from '@quasar/quasar-ui-qmarkdown';
-import { echo, getFromLocalStorage } from "src/utils";
 // import VueShowdown from 'vue-showdown';
 
 export default {
@@ -331,7 +247,8 @@ export default {
   components: {
     QMarkdown,
     // VueShowdown,
-    SimpleLayout
+    SimpleLayout,
+    GitHistoryLog
   },
   mixins: [GitlabMixin, GitMixin],
   inject: ['$openLink'],
