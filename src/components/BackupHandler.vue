@@ -124,9 +124,13 @@ export default {
   computed: {
     recentBackupsOptions()
     {
-      return (this.recentBackups || []).map((backup) => ({
-        label: path.join(backup.dir, `${backup.file}.${backup.ext}`),
-        value: backup
+      return (this.recentBackups || []).filter((x) => x).map((backup) => ({
+        label: typeof backup === 'string' ?
+          this.stringToDirFileExt(backup) :
+          this.dirFileExtToString(backup),
+        value: typeof backup === 'string' ?
+            this.stringToDirFileExt(backup) :
+            backup
       }));
     },
     currentSource()
@@ -164,6 +168,19 @@ export default {
           this.currentSource,
           { dir, file, ext }
       );
+    },
+    dirFileExtToString(dirFileExt)
+    {
+      return path.join(dirFileExt.dir, `${dirFileExt.file}.${dirFileExt.ext}`);
+    },
+    stringToDirFileExt(str)
+    {
+      const parts = str.split('\\');
+
+      const [file, ext] = parts.pop().split('.');
+      const dir = parts.join('\\');
+
+      return { dir, file, ext };
     },
     loadChosenBackup()
     {
