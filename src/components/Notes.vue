@@ -9,17 +9,17 @@
         :key="controlsRenderIndex"
     >
       <SimpleLayout header>
-        <template #body>
-          <q-drawer
-              v-model="isDrawerRightOpen"
-              side="right"
-              unelevated
-              :width="400"
-              :breakpoint="100"
-              :dark="dark"
-          >
-          </q-drawer>
-        </template>
+<!--        <template #body>-->
+<!--          <q-drawer-->
+<!--              v-model="isDrawerRightOpen"-->
+<!--              side="right"-->
+<!--              unelevated-->
+<!--              :width="400"-->
+<!--              :breakpoint="100"-->
+<!--              :dark="dark"-->
+<!--          >-->
+<!--          </q-drawer>-->
+<!--        </template>-->
         <template #header-left>
           <!-- add new note -->
           <SimpleModal>
@@ -93,7 +93,34 @@
         </template>
         <template #page-content>
           <!-- note controls -->
-          <div class="row items-center q-mb-md">
+          <div
+              v-if="notesLoaded && !notesList || !notesList.length"
+              class="col bordered q-pa-sm"
+          >
+            <h5 class="justify-center full-width q-mt-sm q-mb-md">
+              No notes found!
+            </h5>
+            <div>
+              <SimpleModal fullWidth>
+                <template #title>
+                  <h5>Backups</h5>
+                </template>
+                <template #activator="{ open }">
+                  <q-btn
+                      label="Restore from backup"
+                      @click="open"
+                  />
+                </template>
+                <template #content>
+                  <BackupHandler @imported="loadNotes" />
+                </template>
+              </SimpleModal>
+            </div>
+          </div>
+          <div
+              v-else
+              class="row items-center q-mb-md"
+          >
             <NoteControls
                 v-if="selectedNote"
                 :noteId="selectedNote.id"
@@ -137,6 +164,7 @@ import DbMixin from '../mixins/jsondb';
 import GitMixin from '../mixins/git';
 import { v4 as uuidv4 } from 'uuid';
 import NoteCard from "components/NoteCard";
+import BackupHandler from "components/BackupHandler";
 
 export default {
   name: 'Notes',
@@ -145,7 +173,8 @@ export default {
     NoteControls,
     DisplayNote,
     SimpleModal,
-    SimpleLayout
+    SimpleLayout,
+    BackupHandler
   },
   mixins: [DbMixin, Pivotal, GitMixin],
   props: {
@@ -178,7 +207,8 @@ export default {
       isDrawerRightOpen: false,
       isDrawerLeftOpen: false,
       storyIdToAttach: null,
-      storyBeingViewed: null
+      storyBeingViewed: null,
+      notesLoaded: false
     };
   },
   provide()
@@ -256,10 +286,11 @@ export default {
     {
       this.isDrawerRightOpen = !this.isDrawerRightOpen;
     },
-    loadNotes()
+    async loadNotes()
     {
       this.$log(`loadNotes`);
-      this.$store.dispatch('notes/loadAll');
+      await this.$store.dispatch('notes/loadAll');
+      this.notesLoaded = true;
     },
     updateNoteInDb(noteData, deleteNote = false)
     {

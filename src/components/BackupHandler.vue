@@ -226,6 +226,8 @@ export default {
           this.currentSource,
           this.chosenBackup.value
       );
+
+      this.$emit('imported');
     },
     suggestBackupPath()
     {
