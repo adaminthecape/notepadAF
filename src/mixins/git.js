@@ -184,7 +184,7 @@ export default {
         checkoutBoth,
         changeGitBranch(module, to, thenFn)
         {
-            this.$log('checkoutBoth', `${module} :: ${to}`);
+            this.$log('changeGitBranch', `${module} :: ${to}`);
             console.log('changeGitBranch:', module, to);
             if(!to || !this.checkModule(module))
             {

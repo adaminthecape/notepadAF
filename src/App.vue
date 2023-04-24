@@ -241,8 +241,8 @@
 
 <style>
   .bordered {
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
   }
 
   * {

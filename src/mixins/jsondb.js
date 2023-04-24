@@ -216,7 +216,28 @@ export function _updateNoteInDb(noteData, deleteNote = false)
 
 export function saveAll(allNotes)
 {
-    writeToDbSync('notes', allNotes, { createTable: true, dbFile: 'notesdb.json' });
+    if(typeof allNotes === 'string')
+    {
+        try
+        {
+            allNotes = JSON.parse(allNotes);
+        }
+        catch(e)
+        {
+            //
+        }
+    }
+
+    console.info('all:', allNotes);
+
+    writeToDbSync(
+        'notes',
+        allNotes,
+        {
+            createTable: true,
+            dbFile: 'notesdb.json'
+        }
+    );
 }
 
 export function deleteNote(note)
@@ -246,7 +267,47 @@ export function writeToDbSync(
         existingDbData = '{}';
     }
 
-    const db = JSON.parse(existingDbData);
+    let db = JSON.parse(existingDbData);
+
+    if(typeof db === 'string')
+    {
+        try
+        {
+            db = JSON.parse(existingDbData);
+        }
+        catch(e)
+        {
+            console.warn(e);
+        }
+    }
+
+    console.info(1, 'db type:', typeof db);
+
+    if(typeof db === 'string')
+    {
+        try
+        {
+            db = JSON.parse(existingDbData);
+        }
+        catch(e)
+        {
+            console.warn(e);
+        }
+    }
+
+    console.info(2, 'db type:', typeof db);
+
+    if(typeof data === 'string')
+    {
+        try
+        {
+            data = JSON.parse(data);
+        }
+        catch(e)
+        {
+            console.warn(e);
+        }
+    }
 
     if(!db[table])
     {

@@ -10,6 +10,25 @@
       <div class="row items-center">
         <div class="col q-my-xs">
           <q-input
+              v-model="branchToCheckoutTo"
+              placeholder="Checkout to ..."
+              class="q-mb-sm"
+              outlined
+              dense
+          >
+            <template #append>
+              <q-btn
+                  v-if="branchToCheckoutTo"
+                  label="Checkout"
+                  dense
+                  @click.stop.prevent="checkoutToBranch(branchToCheckoutTo)"
+              />
+            </template>
+          </q-input>
+          <div v-if="checkoutSuccessMessage" class="q-ma-sm" :class="{ 'text-red': checkoutFailed }">
+            <pre class="bordered q-pa-sm">{{ checkoutSuccessMessage }}</pre>
+          </div>
+          <q-input
               v-model="branchToGetHistoryFor"
               label="Directory"
               placeholder="C:/..."
@@ -60,14 +79,14 @@
               label="Go"
               @click="getHistory"
           />
+<!--          <q-btn-->
+<!--              label="Stats"-->
+<!--              class="q-ml-sm"-->
+<!--              :loading="isLoadingStatistics"-->
+<!--              @click="runStatsReport"-->
+<!--          />-->
           <q-btn
-              label="Stats"
-              class="q-ml-sm"
-              :loading="isLoadingStatistics"
-              @click="runStatsReport"
-          />
-          <q-btn
-              :label="isShowingResults ? 'Hide results' : 'Show results'"
+              :label="isShowingResults ? 'Show Stats' : 'Show Results'"
               class="q-ml-sm"
               @click="isShowingResults = !isShowingResults"
           />
@@ -248,7 +267,10 @@ export default {
         { label: 'Lines added', value: 'insertions' },
         { label: 'Lines removed', value: 'deletions' },
         { label: 'Lines added - removed', value: 'insertionDeletionDiff' }
-      ]
+      ],
+      branchToCheckoutTo: null,
+      checkoutSuccessMessage: null,
+      checkoutFailed: false
     };
   },
   computed: {
@@ -281,6 +303,34 @@ export default {
     }
   },
   methods: {
+    checkoutToBranch(branchToCheckoutTo)
+    {
+      this.checkoutFailed = false;
+
+      if(!branchToCheckoutTo)
+      {
+        return;
+      }
+
+      const command = `cd ${this.branchToGetHistoryFor} && git checkout ${branchToCheckoutTo}`;
+
+      this.runCmd(
+          command,
+          (data) =>
+          {
+            this.checkoutSuccessMessage = `Checked out to ${branchToCheckoutTo} at ${new Date().toTimeString()}`;
+
+            this.branchToCheckoutTo = null;
+          },
+          (err) =>
+          {
+            this.checkoutSuccessMessage = `${new Date().toTimeString()}:\n${err}\nCommand: ${command}`;
+
+            this.checkoutFailed = true;
+            this.branchToCheckoutTo = null;
+          }
+      );
+    },
     updateStatusLog(data)
     {
       if(typeof data !== 'string')

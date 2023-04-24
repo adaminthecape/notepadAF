@@ -7,20 +7,32 @@
         </h5>
       </q-item>
       <q-item>
-        <div class="full-width q-mb-xs">
+        <div class="col full-width q-mb-xs">
           <q-select
               v-model="chosenBackup"
               :options="recentBackupsOptions"
               filled
-          >
-            <template #append>
-              <q-btn
-                  v-if="chosenBackup"
-                  label="Load"
-                  @click.stop.prevent="loadChosenBackup"
-              />
-            </template>
-          </q-select>
+              new-value-mode="add"
+          />
+          <q-input
+              v-model="chosenBackupAlt"
+              placeholder="Enter custom path ..."
+              filled
+              class="q-mt-sm"
+          />
+          <div class="row items-center q-mt-sm">
+            <q-btn
+                v-if="chosenBackup || chosenBackupAlt"
+                label="Load"
+                @click.stop.prevent="loadChosenBackup"
+            />
+            <q-space />
+            <div>Or&nbsp;</div>
+            <q-btn
+                label="Choose file"
+                @click.stop.prevent="openFileHandler"
+            />
+          </div>
         </div>
       </q-item>
       <div v-if="parsedBackupData">
@@ -70,6 +82,11 @@
                   label="Save"
                   @click.stop.prevent="saveNewBackup"
               />
+              <q-btn
+                  v-else
+                  label="Suggest"
+                  @click.stop.prevent="suggestBackupPath"
+              />
             </template>
           </q-input>
         </div>
@@ -84,7 +101,8 @@ import {
   getFromLocalStorage,
   readFromExternalBackup,
   restoreFromExternalBackup,
-  saveToExternalBackup
+  saveToExternalBackup,
+  saveToLocalStorageArray
 } from "src/utils";
 import * as path from 'path';
 
@@ -98,6 +116,7 @@ export default {
     return {
       recentBackups: getFromLocalStorage('external_backups'),
       chosenBackup: null,
+      chosenBackupAlt: null,
       newBackupPath: null,
       parsedBackupData: null
     };
@@ -120,6 +139,20 @@ export default {
     }
   },
   methods: {
+    openFileHandler()
+    {
+      const { dialog } = require('electron').remote;
+
+      dialog.showOpenDialog({
+        properties: ['openFile'/*, 'multiSelections'*/]
+      }).then(function (files)
+      {
+        if(typeof files !== 'undefined')
+        {
+          console.log('files picked:', files);
+        }
+      });
+    },
     saveNewBackup()
     {
       const ext = this.newBackupPath.split('.').pop();
@@ -134,9 +167,21 @@ export default {
     },
     loadChosenBackup()
     {
-      if(!this.chosenBackup.value)
+      if((!this.chosenBackup || !this.chosenBackup.value) && !this.chosenBackupAlt)
       {
         return;
+      }
+
+      if(this.chosenBackupAlt)
+      {
+        this.chosenBackupAlt = this.chosenBackupAlt.replace(/\//g, '\\');
+
+        const parts = this.chosenBackupAlt.split('\\');
+
+        const [file, ext] = parts.pop().split('.');
+        const dir = parts.join('\\');
+
+        this.chosenBackup = { value: { dir, file, ext }, label: this.chosenBackupAlt };
       }
 
       const backupData = readFromExternalBackup(
@@ -147,14 +192,26 @@ export default {
 
       if(backupData)
       {
-        try
+        if(typeof backupData !== 'object')
         {
-          this.parsedBackupData = JSON.parse(backupData);
+          this.parsedBackupData = backupData;
         }
-        catch(e)
+        else
         {
-          console.warn(e);
+          try
+          {
+            this.parsedBackupData = JSON.stringify(backupData);
+          }
+          catch(e)
+          {
+            console.warn(e);
+          }
         }
+
+        saveToLocalStorageArray(
+            'external_backups',
+            `${this.chosenBackup.value.dir}\\${this.chosenBackup.value.file}.${this.chosenBackup.value.ext}`
+        );
       }
     },
     reallyLoadChosenBackup()
@@ -169,6 +226,15 @@ export default {
           this.currentSource,
           this.chosenBackup.value
       );
+    },
+    suggestBackupPath()
+    {
+      const year = new Date().getFullYear();
+      const month = new Date().getMonth();
+      const day = new Date().getDate();
+      const [hour, minute] = new Date().toTimeString().split(':');
+
+      this.newBackupPath = `C:\\notepadAF_backups\\${year}-${month}-${day} ${hour}-${minute}.json`;
     }
   }
 };

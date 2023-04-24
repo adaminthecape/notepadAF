@@ -91,19 +91,11 @@ export function saveToLocalStorageArray(
     data
 )
 {
-    const existingData = getFromLocalStorage(name) || '[]';
-    let newData;
+    const existingData = getFromLocalStorage(name) || [];
 
-    try
-    {
-        newData = JSON.parse(existingData);
-    }
-    catch(e)
-    {
-        newData = [];
-    }
+    console.log({ existingData });
 
-    if(!newData.some((item) =>
+    if(!existingData.some((item) =>
     {
         let itemComp;
 
@@ -121,10 +113,14 @@ export function saveToLocalStorageArray(
         return item === itemComp;
     }))
     {
-        newData.push(data);
+        console.log({ data });
+
+        existingData.push(data);
     }
 
-    saveToLocalStorage(name, JSON.stringify(newData));
+    console.log({ existingData });
+
+    saveToLocalStorage(name, JSON.stringify(existingData));
 }
 
 export function saveToExternalBackup(
@@ -144,7 +140,7 @@ export function saveToExternalBackup(
 
     console.warn('sourcePath:', sourcePath, targetPath);
 
-    const fileData = readFromDbSync(sourcePath, false);
+    let fileData = readFromDbSync(sourcePath, false);
 
     if(!fileData)
     {
@@ -152,6 +148,32 @@ export function saveToExternalBackup(
 
         throw new Error('No data found to back up!');
     }
+
+    if(typeof fileData === 'string')
+    {
+        try
+        {
+            fileData = JSON.parse(fileData);
+        }
+        catch(e)
+        {
+            //
+        }
+    }
+
+    if(typeof fileData === 'string')
+    {
+        try
+        {
+            fileData = JSON.parse(fileData);
+        }
+        catch(e)
+        {
+            //
+        }
+    }
+
+    console.info({ fileData });
 
     fsWriteSync(targetPath, fileData);
 
@@ -182,7 +204,35 @@ export function restoreFromExternalBackup(
         throw new Error('No data found to restore from!');
     }
 
-    fsWriteSync(targetPath, JSON.parse(fileData));
+    let dataToSave = JSON.parse(fileData);
+
+    if(typeof dataToSave === 'string')
+    {
+        try
+        {
+            dataToSave = JSON.parse(dataToSave);
+        }
+        catch(e)
+        {
+            //
+        }
+    }
+
+    if(typeof dataToSave === 'string')
+    {
+        try
+        {
+            dataToSave = JSON.parse(dataToSave);
+        }
+        catch(e)
+        {
+            //
+        }
+    }
+
+    console.info({ dataToSave });
+
+    fsWriteSync(targetPath, dataToSave);
 }
 
 export function readFromExternalBackup(
