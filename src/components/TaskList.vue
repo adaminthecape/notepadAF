@@ -44,15 +44,19 @@
                 color="positive"
                 flat
                 dense
-                @click="addTask({ ...task, done: false })"
-            />
+                @click="addTask({ ...task, done: 0 })"
+            >
+              <q-tooltip>
+                Finished {{ new Date(task.done).toDateString() }} at {{ new Date(task.done).toLocaleTimeString() }}
+              </q-tooltip>
+            </q-btn>
             <q-btn
-                v-else
+                v-if="!task.done"
                 icon="done"
                 color="neutral"
                 flat
                 dense
-                @click="addTask({ ...task, done: true })"
+                @click="addTask({ ...task, done: Date.now() })"
             />
             <q-btn
                 icon="close"

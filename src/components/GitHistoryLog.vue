@@ -70,11 +70,44 @@
           <q-select
               v-model="statisticsSortType"
               :options="statisticsSortTypeOptions"
-              label="Sort type"
+              label="Sort by"
               outlined
               dense
+              style="min-width: 10em"
+          />
+          <q-select
+              v-model="statisticsFilterType"
+              :options="statisticsFilterTypeOptions"
+              class="q-ml-sm"
+              outlined
+              dense
+              style="min-width: 10em"
+          >
+            <template #append>
+              <q-btn
+                  v-if="statisticsFilterType"
+                  icon="close"
+                  size="sm"
+                  dense
+                  flat
+                  @click="statisticsFilterType = null"
+              />
+            </template>
+          </q-select>
+          <q-select
+              v-if="statisticsFilterType"
+              v-model="statisticsFilterType.value.term"
+              :label="statisticsFilterType.label"
+              :options="statisticsFilterType.options"
+              class="q-ml-sm"
+              outlined
+              dense
+              style="min-width: 10em"
           />
           <q-space />
+          <div class="q-mr-md text-primary">
+            {{ historyArray.length }} results.
+          </div>
           <q-btn
               label="Go"
               @click="getHistory"
@@ -99,7 +132,7 @@
       <q-separator class="q-my-sm" />
     </template>
     <template #page-content>
-      <div v-if="!isShowingResults && historyStatisticsArray.length">
+      <div v-if="!isShowingResults">
         <div
             v-for="(stat, a) in historyStatisticsArray"
             :key="`statItem-${a}`"
@@ -145,7 +178,7 @@
       </div>
       <div v-else>
         <div
-          v-for="(historyItem, h) in history"
+          v-for="(historyItem, h) in historyArray"
           :key="`historyItem-${h}`"
         >
         <q-card class="q-mb-xs" dark>
@@ -153,7 +186,7 @@
             <q-item-section>
               <q-input
                   label="Commit"
-                  :value="historyItem.commit"
+                  :value="historyItem.hash"
                   class="q-mb-xs"
                   disable
                   filled
@@ -225,6 +258,48 @@
                   {{ historyItem.changes.deletions }}
                 </q-chip>
               </div>
+              <div v-if="historyItem.diffs" class="row items-center text-bold">
+                <div
+                    v-for="(diff, d) in historyItem.diffs"
+                    :key="`diff-${d}`"
+                >
+                  <q-chip
+                      v-if="diff.insertions"
+                      class="q-mb-xs"
+                      color="positive"
+                      disable
+                      filled
+                      dense
+                      dark
+                  >
+                    +
+                    {{ diff.insertions }}
+                  </q-chip>
+                  <q-chip
+                      v-if="diff.deletions"
+                      class="q-mb-xs"
+                      color="negative"
+                      disable
+                      filled
+                      dense
+                      dark
+                  >
+                    -
+                    {{ diff.deletions }}
+                  </q-chip>
+                  <q-chip
+                      class="q-mb-xs"
+                      color="grey-9"
+                      disable
+                      filled
+                      dense
+                      dark
+                  >
+                    &nbsp;<q-icon name="task" />
+                    &nbsp;{{ diff.filename }}&nbsp;
+                  </q-chip>
+                </div>
+              </div>
             </q-item-section>
           </q-item>
         </q-card>
@@ -252,7 +327,7 @@ export default {
     return {
       history: [],
       branchToGetHistoryFor: getFromLocalStorage('git_history_branch'),
-      historyLimit: 100,
+      historyLimit: 10,
       historyStatus: null,
       historyFailure: null,
       lastGitUpdate: {},
@@ -261,12 +336,16 @@ export default {
       isShowingResults: true,
       gitStatusLatest: null,
       statisticsSortType: null,
+      statisticsFilterType: null,
       statisticsSortTypeOptions: [
         { label: 'Files changed', value: 'filesChanged' },
         { label: 'Files changed (unique)', value: 'uniqueFiles' },
         { label: 'Lines added', value: 'insertions' },
         { label: 'Lines removed', value: 'deletions' },
         { label: 'Lines added - removed', value: 'insertionDeletionDiff' }
+      ],
+      statisticsFilterTypeOptions: [
+        { label: 'Author', value: { key: 'author', term: null } }
       ],
       branchToCheckoutTo: null,
       checkoutSuccessMessage: null,
@@ -291,6 +370,7 @@ export default {
         return agg;
       }, []);
 
+      // sorting
       if(this.statisticsSortType)
       {
         stats = stats.sort((a, b) =>
@@ -299,7 +379,54 @@ export default {
         });
       }
 
+      // filtering
+      if(this.statisticsFilterType)
+      {
+        stats = stats.filter((stat) =>
+        {
+          return stat[this.statisticsFilterType.value.key] === this.statisticsFilterType.value.term;
+        });
+      }
+
       return stats;
+    },
+    historyArray()
+    {
+      if(!this.history || !this.history.length)
+      {
+        return [];
+      }
+
+      if(this.statisticsFilterType && this.statisticsFilterType.value.term)
+      {
+        return this.history.filter((stat) =>
+        {
+          return stat[this.statisticsFilterType.value.key] === this.statisticsFilterType.value.term;
+        });
+      }
+
+      return this.history;
+    }
+  },
+  watch: {
+    statisticsFilterType(newVal)
+    {
+      if(newVal && (!newVal.options || !newVal.options.length))
+      {
+        console.log('history:', this.history);
+
+        this.statisticsFilterType.options = this.history.reduce((agg, s) =>
+        {
+          console.log(s, s[this.statisticsFilterType.value.key]);
+
+          if(!agg.includes(s[this.statisticsFilterType.value.key]))
+          {
+            agg.push(s[this.statisticsFilterType.value.key]);
+          }
+
+          return agg;
+        }, []);
+      }
     }
   },
   methods: {
@@ -338,76 +465,112 @@ export default {
         return null;
       }
 
-      return data
-          .split('\n\ncommit')
-          .slice(0, this.historyLimit)
-          .map((item) =>
+      const res = data
+          .split('|$END$|')
+          .map((line) =>
           {
-            return item.split('\n').reduce((agg, i, index) =>
+            let [diff, vars] = line.split('|$VARS$|');
+
+            const diffs = [];
+
+            if(diff && diff.indexOf('\t') > -1)
             {
-              if(!i)
-              {
-                return agg;
-              }
-              else if(i.startsWith('Author: '))
-              {
-                agg.author = i.replace('Author: ', '');
-              }
-              else if(i.startsWith('Date:   '))
-              {
-                agg.date = i.replace('Date:   ', '');
-              }
-              else if(i.startsWith('commit ') || index === 0)
-              {
-                agg.commit = i.replace('commit', '').slice(1);
-              }
-              else if(i.startsWith('    '))
-              {
-                agg.message = i.slice(4);
-              }
-              else if(i.includes('file changed') || i.includes('files changed'))
-              {
-                let [filesChanged, insertions, deletions] = i.split(',');
+              diff = diff.replace(/\n/g, '');
 
-                const getNum = (n) =>
+              const [insertions, deletions, filename] = diff.split('\t');
+
+              diffs.push({ insertions, deletions, filename });
+            }
+
+            vars = (vars || '').split('|')
+                .reduce((agg, item) =>
                 {
-                  if(n)
+                  const [k, v] = item.split(':');
+
+                  if(k && v)
                   {
-                    return parseInt(n.split(' ').find((y) => parseInt(y, 10).toString() === y), 10);
+                    agg[k] = v;
                   }
 
-                  return n;
-                }
+                  return agg;
+                }, {});
 
-                filesChanged = getNum(filesChanged);
-                insertions = getNum(insertions);
-                deletions = getNum(deletions);
-
-                agg.changes = { filesChanged, insertions, deletions };
-              }
-              else
-              {
-                agg.other = `${agg.other || ''}\n${i}`;
-
-                if(i.indexOf(' src/') === 0 || i.indexOf(' | ') > -1)
-                {
-                  if(!agg.filenames)
-                  {
-                    agg.filenames = [];
-                  }
-
-                  const [filenameToAdd] = i.slice(1).split(' ');
-
-                  if(!agg.filenames.includes(filenameToAdd))
-                  {
-                    agg.filenames.push(filenameToAdd);
-                  }
-                }
-              }
-
-              return agg;
-            }, {});
+            return { diffs, ...vars };
           });
+
+      console.info('commits:', res);
+
+      return res;
+      // return data
+      //     .split('\n\ncommit')
+      //     .slice(0, this.historyLimit)
+      //     .map((item) =>
+      //     {
+      //       return item.split('\n').reduce((agg, i, index) =>
+      //       {
+      //         if(!i)
+      //         {
+      //           return agg;
+      //         }
+      //         else if(i.startsWith('Author: '))
+      //         {
+      //           agg.author = i.replace('Author: ', '');
+      //         }
+      //         else if(i.startsWith('Date:   '))
+      //         {
+      //           agg.date = i.replace('Date:   ', '');
+      //         }
+      //         else if(i.startsWith('commit ') || index === 0)
+      //         {
+      //           agg.commit = i.replace('commit', '').slice(1);
+      //         }
+      //         else if(i.startsWith('    '))
+      //         {
+      //           agg.message = i.slice(4);
+      //         }
+      //         else if(i.includes('file changed') || i.includes('files changed'))
+      //         {
+      //           let [filesChanged, insertions, deletions] = i.split(',');
+      //
+      //           const getNum = (n) =>
+      //           {
+      //             if(n)
+      //             {
+      //               return parseInt(n.split(' ').find((y) => parseInt(y, 10).toString() === y), 10);
+      //             }
+      //
+      //             return n;
+      //           }
+      //
+      //           filesChanged = getNum(filesChanged);
+      //           insertions = getNum(insertions);
+      //           deletions = getNum(deletions);
+      //
+      //           agg.changes = { filesChanged, insertions, deletions };
+      //         }
+      //         else
+      //         {
+      //           agg.other = `${agg.other || ''}\n${i}`;
+      //
+      //           if(i.indexOf(' src/') === 0 || i.indexOf(' | ') > -1)
+      //           {
+      //             if(!agg.filenames)
+      //             {
+      //               agg.filenames = [];
+      //             }
+      //
+      //             const [filenameToAdd] = i.slice(1).split(' ');
+      //
+      //             if(!agg.filenames.includes(filenameToAdd))
+      //             {
+      //               agg.filenames.push(filenameToAdd);
+      //             }
+      //           }
+      //         }
+      //
+      //         return agg;
+      //       }, {});
+      //     });
     },
     getHistory()
     {
@@ -453,7 +616,8 @@ export default {
 
       const dirCommand = `cd ${branch}`;
       const initialCommand = `${dirCommand} && git pull`;
-      const command = `${dirCommand} && git log -${this.historyLimit} --stat`;
+      const format = '|$VARS$|hash:%h|cn:%cn|author:%an|date:%ah|message:%s|$END$|';
+      const command = `${dirCommand} && git log -${this.historyLimit} --pretty=format:"${format}" --numstat`;
       const statusCommand = `${dirCommand} && git status`;
 
       console.warn(command);
@@ -542,6 +706,7 @@ export default {
     },
     runStatsReport()
     {
+      console.log('run stats');
       if(!this.history || !this.history.length)
       {
         return;

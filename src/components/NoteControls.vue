@@ -158,13 +158,12 @@
             </q-card-section>
           </q-card>
         </q-dialog>
-        <q-btn
+        <ButtonWrapper
             v-if="note.isStarred"
-            :label="!dense ? 'Un-Star' : undefined"
+            :label="!dense ? 'UnStar' : undefined"
             icon="star"
             class="q-mr-xs"
-            dense
-            flat
+            :qProps="{ dense: true, flat: true }"
             @click="toggleStarred"
         />
         <q-btn
@@ -219,12 +218,14 @@
 <script>
 import { checkoutBoth } from '../mixins/git';
 import StoryCard from './StoryCard';
+import ButtonWrapper from './ButtonWrapper';
 import NoteControlsMixin from '../mixins/NoteControlsMixin.js';
 
 export default {
   name: 'NoteControls',
   components: {
-    StoryCard
+    StoryCard,
+    ButtonWrapper
   },
   mixins: [NoteControlsMixin],
   props: {

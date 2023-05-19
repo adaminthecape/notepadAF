@@ -54,6 +54,9 @@
             </div>
             <div class="full-width q-mb-xs row items-center">
               <q-space />
+              <div v-if="importStatus" class="q-mr-md">
+                {{ importStatus }}
+              </div>
               <q-btn
                   label="Import"
                   @click="reallyLoadChosenBackup"
@@ -118,19 +121,16 @@ export default {
       chosenBackup: null,
       chosenBackupAlt: null,
       newBackupPath: null,
-      parsedBackupData: null
+      parsedBackupData: null,
+      importStatus: null
     };
   },
   computed: {
     recentBackupsOptions()
     {
       return (this.recentBackups || []).filter((x) => x).map((backup) => ({
-        label: typeof backup === 'string' ?
-          this.stringToDirFileExt(backup) :
-          this.dirFileExtToString(backup),
-        value: typeof backup === 'string' ?
-            this.stringToDirFileExt(backup) :
-            backup
+        label: typeof backup === 'string' ? backup : this.dirFileExtToString(backup),
+        value: typeof backup === 'string' ? this.stringToDirFileExt(backup) : backup
       }));
     },
     currentSource()
@@ -159,14 +159,9 @@ export default {
     },
     saveNewBackup()
     {
-      const ext = this.newBackupPath.split('.').pop();
-      const dirParts = this.newBackupPath.split('\\');
-      const dir = dirParts.slice(0, dirParts.length - 1).join('\\');
-      const [file] = dirParts.pop().split('.');
-
       saveToExternalBackup(
           this.currentSource,
-          { dir, file, ext }
+          this.stringToDirFileExt(this.newBackupPath)
       );
     },
     dirFileExtToString(dirFileExt)
@@ -176,7 +171,6 @@ export default {
     stringToDirFileExt(str)
     {
       const parts = str.split('\\');
-
       const [file, ext] = parts.pop().split('.');
       const dir = parts.join('\\');
 
@@ -184,6 +178,8 @@ export default {
     },
     loadChosenBackup()
     {
+      this.importStatus = null;
+
       if((!this.chosenBackup || !this.chosenBackup.value) && !this.chosenBackupAlt)
       {
         return;
@@ -227,14 +223,18 @@ export default {
 
         saveToLocalStorageArray(
             'external_backups',
-            `${this.chosenBackup.value.dir}\\${this.chosenBackup.value.file}.${this.chosenBackup.value.ext}`
+            this.dirFileExtToString(this.chosenBackup.value)
         );
       }
     },
     reallyLoadChosenBackup()
     {
+      this.importStatus = 'Starting import ...';
+
       if(!this.parsedBackupData || !this.currentSource)
       {
+        this.importStatus = 'Nothing to import.';
+
         return;
       }
 
@@ -245,15 +245,19 @@ export default {
       );
 
       this.$emit('imported');
+      this.importStatus = `Successfully imported ${this.dirFileExtToString(this.chosenBackup.value)}`;
     },
     suggestBackupPath()
     {
-      const year = new Date().getFullYear();
-      const month = new Date().getMonth();
-      const day = new Date().getDate();
-      const [hour, minute] = new Date().toTimeString().split(':');
+      const date = new Date();
 
-      this.newBackupPath = `C:\\notepadAF_backups\\${year}-${month}-${day} ${hour}-${minute}.json`;
+      this.newBackupPath = `${
+        getAppBasePath().split(':')[0]
+      }:\\notepadAF_backups\\notes backup ${
+        date.toDateString()
+      } ${
+        date.toLocaleTimeString().replace(/:/g, '-')
+      }.json`;
     }
   }
 };

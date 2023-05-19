@@ -309,9 +309,9 @@ export default {
             'dev (pr complete)',
             'qa (ready)',
             'qa (active)',
-            'qa (fail)',
             'dev (rehab)',
             'dev (qa pass)',
+            'dev (qa fail)',
             'dev (merge)',
             'cst (live actions)',
             'priorities (internal)'
