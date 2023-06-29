@@ -11,12 +11,58 @@
         @click.ctrl="editTask"
     >
       <q-item-section>
-        <div>
+        <div class="row items-center" style="margin-bottom: -10px">
+          <!-- VIEW ALERTS: -->
+          <div v-if="alerts.length">
+            <q-btn
+                v-for="(alert, a) in alerts"
+                :key="`alert-${a}-${activeAlertsRenderKey}`"
+                size="sm"
+                class="text-bold"
+                :class="{ 'q-ml-xs': !!a }"
+                unelevated
+                outline
+                dense
+                :color="(alert.unix < (Date.now() - 600000)) ? 'negative' : 'primary'"
+            >
+              <div class="row items-center">
+                <q-icon name="notification_important" />
+                <span>{{ timeSince(new Date(alert.unix)) }}</span>
+                <q-icon
+                    name="close"
+                    size="xs"
+                    dense
+                    flat
+                    @dblclick.stop.prevent="removeAlert(alert)"
+                />
+              </div>
+              <q-tooltip>Due {{ alert.date }} at {{ alert.time }}</q-tooltip>
+            </q-btn>
+          </div>
+          <!-- MENU: -->
+          <q-space />
+          <div class="row items-center">
+            <q-space />
+            <TaskOptions
+                :task="task"
+                size="md"
+                style="margin-right: -14px"
+                @editTask="editTask"
+                @updateTask="updateTask"
+                @removeTask="removeTask"
+                @toggleArchived="toggleArchived"
+                @createAlert="addAlertToTask"
+            />
+          </div>
+        </div>
+        <div class="row items-center">
+          <!-- MESSAGE: -->
           <div
               v-if="!isEditing"
               style="white-space: pre-line;"
               class="q-mt-sm"
           >{{ task.message }}</div>
+          <!-- MESSAGE INPUT: -->
           <q-input
               v-else
               ref="messageInput"
@@ -30,40 +76,35 @@
               @input="updateTask(task)"
           >
             <template #append>
-              <q-btn
-                  icon="save_as"
-                  :color="isEditing ? 'positive' : 'neutral'"
-                  size="sm"
-                  class="q-ml-xs"
-                  flat
-                  dense
-                  @click="updateTaskAndStopEditing"
-              />
-              <q-btn
-                  icon="list"
-                  :color="task.messageType === 'textarea' ? 'positive' : 'neutral'"
-                  size="sm"
-                  class="q-ml-xs"
-                  flat
-                  dense
-                  @click="toggleTextarea"
-              />
+              <div
+                  :style="task.messageType === 'textarea' ?
+                    'display: flex; flex-direction: column; margin-top: 40px' :
+                    ''"
+              >
+                <q-btn
+                    icon="save_as"
+                    :color="isEditing ? 'positive' : 'neutral'"
+                    size="sm"
+                    class="q-ml-xs"
+                    flat
+                    dense
+                    @click="updateTaskAndStopEditing"
+                />
+                <q-btn
+                    icon="list"
+                    :color="task.messageType === 'textarea' ? 'positive' : 'neutral'"
+                    size="sm"
+                    class="q-ml-xs"
+                    :outline="task.messageType === 'textarea'"
+                    :flat="task.messageType !== 'textarea'"
+                    dense
+                    @click="toggleTextarea"
+                >
+                  <q-tooltip>{{ task.messageType !== 'textarea' ? 'Convert to textarea' : 'Convert to input' }}</q-tooltip>
+                </q-btn>
+              </div>
             </template>
           </q-input>
-          <div class="row items-center">
-            <q-space />
-            <!-- MENU: -->
-            <TaskOptions
-                :task="task"
-                size="md"
-                style="margin-right: -14px"
-                @editTask="editTask"
-                @updateTask="updateTask"
-                @removeTask="removeTask"
-                @toggleArchived="toggleArchived"
-                @createAlert="addAlertToTask"
-            />
-          </div>
         </div>
         <div class="row items-center" style="margin: 0 -12px;">
           <!-- ADD TAGS: -->
@@ -105,7 +146,10 @@
                   style="margin-left: -4px"
                   @click.stop.prevent="removeTag(tag)"
               />
-              <span @click="$emit('filterByTag', tag)">{{ tag }}</span>
+              <span
+                  style="margin-top: -4px;"
+                  @click="$emit('filterByTag', tag)"
+              >{{ tag }}</span>
             </div>
           </q-chip>
           <q-space />
@@ -117,33 +161,6 @@
               <q-icon name="schedule" size="xs" class="q-mx-xs" />
               <span>{{ new Date(task.done).toLocaleTimeString().slice(0, -3) }}</span>
             </q-chip>
-          </div>
-          <!-- VIEW ALERTS: -->
-          <div v-if="alerts.length">
-            <q-btn
-                v-for="(alert, a) in alerts"
-                :key="`alert-${a}-${activeAlertsRenderKey}`"
-                size="sm"
-                class="text-bold"
-                :class="{ 'q-ml-xs': !!a }"
-                unelevated
-                outline
-                dense
-                :color="(alert.unix < (Date.now() - 600000)) ? 'negative' : 'primary'"
-            >
-              <div class="row items-center">
-                <q-icon name="notification_important" />
-                <span>{{ timeSince(new Date(alert.unix)) }}</span>
-                <q-icon
-                    name="close"
-                    size="xs"
-                    dense
-                    flat
-                    @dblclick.stop.prevent="removeAlert(alert)"
-                />
-              </div>
-              <q-tooltip>Due {{ alert.date }} at {{ alert.time }}</q-tooltip>
-            </q-btn>
           </div>
           <!-- VIEW STORIES: -->
           <div v-if="stories && stories.length">
