@@ -332,7 +332,7 @@ export default {
         owner: 'AF',
         // requester: null,
         epic: ['dev (active)', 'dev (pr + docs)'],
-        includedone: true,
+        includedone: false,
         ...(savedQueryParams && { ...savedQueryParams })
       },
       queryParamToAdd: null,

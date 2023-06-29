@@ -36,8 +36,8 @@ function createWindow () {
         //
     }
 
-    const width = data && data.bounds && data.bounds.width ? data.bounds.width : 600;
-    const height = data && data.bounds && data.bounds.height ? data.bounds.height : 800;
+    const width = data && data.bounds && data.bounds.width ? data.bounds.width : 640;
+    const height = data && data.bounds && data.bounds.height ? data.bounds.height : 1040;
 
     mainWindow = new BrowserWindow({
         width,

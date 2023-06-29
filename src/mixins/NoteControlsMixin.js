@@ -118,7 +118,7 @@ export default {
             this.tasks = this.note.tasks || [];
 
             this.message = null;
-            this.$refs.newTaskInput.focus();
+            if(this.$refs.newTaskInput) this.$refs.newTaskInput.focus();
         }
     }
 };

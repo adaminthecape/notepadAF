@@ -1,11 +1,31 @@
 import { shell } from 'electron';
 import * as path from 'path';
 import * as moment from 'moment';
-import {fsWriteSync, readFromDbSync, writeToDbSync} from "src/mixins/jsondb";
+import { fsWriteSync, readFromDbSync } from 'src/mixins/jsondb';
 
 export function openInBrowser(link)
 {
     shell.openExternal(link);
+}
+
+export function flashTaskbarIcon()
+{
+    const window = require ("electron").remote.getCurrentWindow();
+
+    const disable = () => window.flashFrame(false);
+
+    window.once('focus', disable);
+    window.flashFrame(true);
+
+    return disable;
+}
+
+export function clearAllFlashes()
+{
+    const window = require ("electron").remote.getCurrentWindow();
+
+    window.flashFrame(false);
+    window.focus();
 }
 
 export function getAppBasePath()
@@ -57,27 +77,37 @@ export function saveToLocalStorage(name, data)
     }
 }
 
-export function getFromLocalStorage(name)
+/**
+ * Get an item from local storage. Returns the string if it cannot be parsed, unless forceObject is true.
+ * @param name - local storage key to fetch
+ * @param forceObject - `true` to return undefined when parsing as object fails
+ * @returns {string|any}
+ */
+export function getFromLocalStorage(name, forceObject = false)
 {
     const data = localStorage.getItem(name);
-    let parsedData;
 
-    try
+    if(forceObject)
     {
-        parsedData = JSON.parse(data);
-    }
-    catch(e)
-    {
-        //
-    }
-
-    if(parsedData && typeof parsedData === 'object')
-    {
-        return JSON.parse(data);
+        try
+        {
+            return JSON.parse(data);
+        }
+        catch(e)
+        {
+            return undefined;
+        }
     }
     else
     {
-        return data;
+        try
+        {
+            return JSON.parse(data);
+        }
+        catch(e)
+        {
+            return data;
+        }
     }
 }
 
@@ -86,10 +116,7 @@ export function timeSince(time)
     return moment(time).fromNow();
 }
 
-export function saveToLocalStorageArray(
-    name,
-    data
-)
+export function saveToLocalStorageArray(name, data)
 {
     const existingData = getFromLocalStorage(name) || [];
 

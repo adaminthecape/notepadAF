@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { getPivotal } from '../../mixins/Pivotal';
+import { getPivotalStory } from '../../mixins/Pivotal';
 
 const state = {
     stories: []
@@ -59,7 +59,7 @@ const actions = {
 
         if(force || !existing)
         {
-            const story = await getPivotal(id);
+            const story = await getPivotalStory(id);
             commit('ADD_STORY', story);
         }
     }

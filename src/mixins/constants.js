@@ -58,7 +58,7 @@ export const logTypes = [
     'checkoutBoth',
     'readFromDb',
     'writeToDb',
-    'getPivotal',
+    'getPivotalStory',
     'getPivotalEndpoint',
     'readFromDir',
     'loadNotes',

@@ -12,23 +12,21 @@
           dense
           dark
       >
-        <q-tab name="notes" label="Notes" />
-        <q-tab name="activity" label="My Activity" />
-        <q-tab name="tickets" label="My Tickets" />
-        <q-tab name="wiki" label="Wiki" />
-        <q-tab name="git_history" label="Git log" />
-        <q-tab name="events" label="Events" />
-        <q-tab name="settings" label="Settings" />
-<!--        <q-space />-->
-<!--        <q-btn-->
-<!--            label="Log"-->
-<!--            dense-->
-<!--            flat-->
-<!--            @click="isLogDrawerOpen = true"-->
-<!--        />-->
+        <q-tab
+            v-for="tab in activeAppTabs"
+            :key="`tab-${tab.name}`"
+            :name="tab.name"
+            :label="tab.label"
+        />
       </q-tabs>
     </div>
 
+    <div v-if="currentTab === 'tasks'">
+      <TasksActivity
+          :desiredNoteId="desiredTaskId"
+          :key="tasksRenderIndex"
+      />
+    </div>
     <div v-if="currentTab === 'notes'">
       <Notes
           :desiredNoteId="desiredNoteId"
@@ -55,9 +53,6 @@
     <div v-if="currentTab === 'git_history'">
       <GitHistoryLog class="q-pa-md" />
     </div>
-    <div v-if="currentTab === 'events'">
-      <EventSpecification class="q-pa-md" />
-    </div>
     <div v-if="currentTab === 'settings'">
       <Settings class="q-pa-md" />
     </div>
@@ -74,10 +69,10 @@
 
 <script>
   import Notes from './components/Notes';
+  import TasksActivity from './components/TasksActivity';
   import MyActivity from './components/MyActivity';
   import MyTickets from './components/MyTickets';
   import Settings from './components/Settings';
-  import EventSpecification from './components/EventSpecification';
   import GitHistoryLog from './components/GitHistoryLog';
   // import LogEntries from './components/LogEntries';
   import Wiki from './components/Wiki';
@@ -92,21 +87,74 @@
       // LogEntries,
       MyActivity,
       MyTickets,
-      EventSpecification,
-      GitHistoryLog
+      GitHistoryLog,
+      TasksActivity
     },
     data()
     {
-      // const storedLogTypes = localStorage.getItem('logTypesToIgnore');
+      let appTabs = null;
+
+      try
+      {
+        appTabs = JSON.parse(localStorage.getItem('appTabs'));
+      }
+      catch(e)
+      {
+        console.warn(e);
+      }
 
       return {
-        currentTab: 'notes',
+        currentTab: 'tasks',
         // logEntries: [],
         isLogDrawerOpen: false,
         activityCache: null,
         ticketCache: null,
         desiredNoteId: null,
-        notesRenderIndex: 0
+        notesRenderIndex: 0,
+        desiredTaskId: null,
+        tasksRenderIndex: 0,
+        appTabs: appTabs || [
+          {
+            name: 'tasks',
+            label: 'Tasks',
+            active: true
+          },
+          {
+            name: 'notes',
+            label: 'Notes',
+            active: true
+          },
+          {
+            name: 'activity',
+            label: 'Activity',
+            active: true
+          },
+          {
+            name: 'tickets',
+            label: 'Tickets',
+            active: true
+          },
+          {
+            name: 'wiki',
+            label: 'Wiki',
+            active: true
+          },
+          {
+            name: 'git_history',
+            label: 'Git Log',
+            active: true
+          },
+          {
+            name: 'events',
+            label: 'Events',
+            active: true
+          },
+          {
+            name: 'settings',
+            label: 'Settings',
+            active: true
+          }
+        ]
       };
     },
     provide()
@@ -117,10 +165,33 @@
         $debug: this.debug,
         $openLink: openInBrowser,
         $openNote: this.openNote,
+        $openTask: this.openTask,
         $timeSince: timeSince
       };
     },
     computed: {
+      activeAppTabs()
+      {
+        return this.appTabs.filter((t) => t.active);
+      }
+    },
+    mounted()
+    {
+      let appTabs = null;
+
+      try
+      {
+        appTabs = JSON.parse(localStorage.getItem('appTabs'));
+      }
+      catch(e)
+      {
+        console.warn(e);
+      }
+
+      if(!Object.keys(appTabs || {}).length)
+      {
+        localStorage.setItem('appTabs', JSON.stringify(this.appTabs));
+      }
     },
     // watch: {
     //   currentTab(newVal, oldVal)
@@ -129,11 +200,21 @@
     //   }
     // },
     methods: {
+      shouldShowTab(tab)
+      {
+        const storedTabs = localStorage.getItem('appTabs');
+      },
       openNote(noteId)
       {
         this.desiredNoteId = noteId;
         this.currentTab = 'notes';
         this.notesRenderIndex += 1;
+      },
+      openTask(taskId)
+      {
+        this.desiredTaskId = taskId;
+        this.currentTab = 'tasks';
+        this.tasksRenderIndex += 1;
       },
       setActivityCache(data)
       {

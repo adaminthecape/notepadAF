@@ -83,7 +83,8 @@ export async function getPivotalEndpoint(endpoint, params, queryParams)
     }
 }
 
-export function htmlEncode(str) {
+export function htmlEncode(str)
+{
     // let i = str.length,
     //     aRet = [];
     //
@@ -102,7 +103,7 @@ export function htmlEncode(str) {
         .replace('+', '%2B');
 }
 
-export async function getPivotal(storyId, endpoint)
+export async function getPivotalStory(storyId, endpoint)
 {
     const projectId = getPivotalProjectId();
     const baseUri = 'https://www.pivotaltracker.com/services/v5/';
@@ -131,11 +132,11 @@ export async function getPivotal(storyId, endpoint)
 
     try
     {
-        // console.info('getPivotal:', { endpoint, headers });
+        // console.info('getPivotalStory:', { endpoint, headers });
 
         const { data } = await axios.get(endpoint, { headers });
 
-        // console.info('getPivotal: result:', data);
+        // console.info('getPivotalStory: result:', data);
 
         return data;
     }
@@ -159,6 +160,6 @@ export default {
     methods: {
         getPivotalToken,
         getPivotalEndpoint,
-        getPivotal
+        getPivotalStory
     }
 };

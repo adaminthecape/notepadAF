@@ -167,6 +167,45 @@
           </q-item-section>
         </q-item>
       </q-card>
+      <q-card v-if="appTabs">
+        <q-item>
+          <q-item-section>
+            <h5>Tabs</h5>
+          </q-item-section>
+          <q-item-section>
+            <SimpleModal>
+              <template #title>
+                <h5>Tabs</h5>
+              </template>
+              <template #activator="{ open }">
+                <q-btn
+                    label="Adjust tabs"
+                    @click="open"
+                />
+              </template>
+              <template #content>
+                <q-item
+                    v-for="tab in appTabs"
+                    :key="tab.name"
+                >
+                  <q-checkbox
+                      v-model="tab.active"
+                      :label="tab.label"
+                      :disable="tab.name === 'settings'"
+                  />
+                </q-item>
+                <q-item>
+                  <q-space />
+                  <q-btn
+                      label="Save"
+                      @click="saveAppTabs"
+                  />
+                </q-item>
+              </template>
+            </SimpleModal>
+          </q-item-section>
+        </q-item>
+      </q-card>
     </template>
   </SimpleLayout>
 </template>
@@ -202,9 +241,21 @@ export default {
       gitModuleBasePath: getFromLocalStorage('gitModuleBasePath')
     };
 
+    let appTabs;
+
+    try
+    {
+      appTabs = JSON.parse(localStorage.getItem('appTabs'));
+    }
+    catch(e)
+    {
+      console.warn(e);
+    }
+
     return {
       cache,
-      ...cache
+      ...cache,
+      appTabs
     };
   },
   computed: {
@@ -213,6 +264,15 @@ export default {
   {
   },
   methods: {
+    saveAppTabs()
+    {
+      if(Object.keys(this.appTabs || {}).length)
+      {
+        console.info('saving tabs:', this.appTabs);
+
+        localStorage.setItem('appTabs', JSON.stringify(this.appTabs));
+      }
+    },
     setToken(service)
     {
       saveToLocalStorage(`${service}Token`, this.tokens[service]);

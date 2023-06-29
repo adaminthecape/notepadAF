@@ -1,13 +1,14 @@
 <template>
+  <div v-if="!story" class="row items-center justify-center" style="width: 90vw">
+    <q-spinner size="md" color="primary" class="q-ma-md" />
+    <span>Loading {{ storyId }} ...</span>
+  </div>
   <SimpleModal
-      v-if="story"
+      v-else
       fullWidth
   >
     <template #activator="{ open }">
-      <div v-if="!story" class="row justify-center">
-        <q-spinner size="lg" color="primary" class="q-ma-md" />
-      </div>
-      <div v-else class="col" @click="open">
+      <div class="col" @click="open">
         <div class="items-center q-my-sm">
           <q-btn
               v-if="clearable"
@@ -171,7 +172,7 @@
     computed: {
       story()
       {
-        return this.$store.getters['pivotal/get'](this.storyId);
+        return this.$store.getters['pivotal/get'](parseInt(this.storyId, 10));
       },
       relatedNotes()
       {
@@ -192,7 +193,7 @@
     },
     async mounted()
     {
-      await this.$store.dispatch('pivotal/load', { id: this.storyId });
+      await this.$store.dispatch('pivotal/load', { id: parseInt(this.storyId, 10) });
     },
     methods: {
       async copy(text)
