@@ -1,31 +1,21 @@
 <template>
   <div class="row items-center">
-<!--<q-btn-->
-<!--    icon="edit"-->
-<!--    :color="isEditing ? 'positive' : 'neutral'"-->
-<!--    :size="size"-->
-<!--    flat-->
-<!--    dense-->
-<!--    @dblclick="editTask"-->
-<!--/>-->
     <q-btn
         icon="edit"
         :color="isEditing ? 'positive' : 'neutral'"
-        size="sm"
-        class="q-mr-xs"
-        style="margin-left: -10px"
-        flat
+        :size="size"
         dense
-        @click="editTask"
+        flat
+        @click="$emit('editTask')"
     />
     <q-btn
         v-if="task.done"
         icon="task_alt"
         color="positive"
         :size="size"
-        flat
         dense
-        @click="updateTask({ ...task, done: 0 })"
+        flat
+        @click="$emit('updateTask', { ...task, done: 0 })"
     >
       <q-tooltip>
         Finished {{ timeSince(task.done) }}
@@ -38,7 +28,7 @@
         :size="size"
         flat
         dense
-        @click="updateTask({ ...task, done: Date.now() })"
+        @click="$emit('updateTask', { ...task, done: Date.now() })"
     />
     <q-btn
         v-if="task.active"
@@ -47,10 +37,7 @@
         :size="size"
         flat
         dense
-        @click="updateTask({
-              ...task,
-              active: 0
-            })"
+        @click="$emit('updateTask', { ...task, active: 0 })"
     >
       <q-tooltip>
         Started {{ timeSince(task.active) }}
@@ -63,19 +50,16 @@
         :size="size"
         flat
         dense
-        @click="updateTask({
-             ...task,
-             active: Date.now()
-            })"
+        @click="$emit('updateTask', { ...task, active: Date.now() })"
     >
       <q-tooltip>Start</q-tooltip>
     </q-btn>
     <TaskMenu
         :task="task"
         :size="size"
-        @removeTask="removeTask"
-        @toggleArchived="toggleArchived"
-        @createAlert="createAlert"
+        @removeTask="$emit('removeTask')"
+        @toggleArchived="$emit('toggleArchived')"
+        @createAlert="$emit('createAlert', $event)"
     />
   </div>
 </template>
@@ -110,27 +94,7 @@ export default {
   },
   computed: {},
   methods: {
-    timeSince,
-    updateTask(task)
-    {
-      this.$emit('updateTask', task);
-    },
-    editTask()
-    {
-      this.$emit('editTask');
-    },
-    removeTask()
-    {
-      this.$emit('removeTask');
-    },
-    toggleArchived()
-    {
-      this.$emit('toggleArchived');
-    },
-    createAlert(e)
-    {
-      this.$emit('createAlert', e);
-    }
+    timeSince
   }
 }
 </script>

@@ -3,11 +3,14 @@
     <q-btn-dropdown
         v-for="story in stories"
         :key="story.id"
-        :label="story.id"
         size="sm"
         unelevated
+        outline
         dense
     >
+      <template #label>
+        <span style="margin-right: -10px">{{ story.id }}</span>
+      </template>
       <q-item clickable style="min-width: 90%;">
         <q-item-section>
           <StoryCard

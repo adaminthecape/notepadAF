@@ -1,7 +1,7 @@
 <template>
   <q-card
       class="flex q-mb-sm"
-      style="flex-direction: column; background-color: lightgrey"
+      style="flex-direction: column; background-color: #70809020"
       flat
       bordered
   >
@@ -12,17 +12,6 @@
     >
       <q-item-section>
         <div>
-          <!-- EDIT: -->
-<!--          <q-btn-->
-<!--              icon="edit"-->
-<!--              :color="isEditing ? 'positive' : 'neutral'"-->
-<!--              size="sm"-->
-<!--              class="q-mr-xs"-->
-<!--              style="margin-left: -10px"-->
-<!--              flat-->
-<!--              dense-->
-<!--              @click="editTask"-->
-<!--          />-->
           <div
               v-if="!isEditing"
               style="white-space: pre-line;"
@@ -32,7 +21,7 @@
               v-else
               ref="messageInput"
               v-model="task.message"
-              :type="task.messageType || undefined"
+              :type="task.messageType"
               placeholder="Edit task"
               class="full-width q-mb-xs"
               dense
@@ -49,6 +38,15 @@
                   flat
                   dense
                   @click="updateTaskAndStopEditing"
+              />
+              <q-btn
+                  icon="list"
+                  :color="task.messageType === 'textarea' ? 'positive' : 'neutral'"
+                  size="sm"
+                  class="q-ml-xs"
+                  flat
+                  dense
+                  @click="toggleTextarea"
               />
             </template>
           </q-input>
@@ -93,12 +91,11 @@
           <q-chip
               v-for="(tag, tagIndex) in task.tags"
               :key="`tag-${tagIndex}`"
-              dark
+              square
               dense
+              dark
           >
-            <div
-                class="row items-center"
-            >
+            <div class="row items-center">
               <q-btn
                   icon="close"
                   dense
@@ -112,38 +109,6 @@
             </div>
           </q-chip>
           <q-space />
-          <!-- VIEW STORIES: -->
-          <div v-if="stories && stories.length">
-            <TaskStoryDropdown
-                :stories="stories"
-            />
-          </div>
-          <!-- VIEW ALERTS: -->
-          <div v-if="alerts.length">
-            <q-btn
-                v-for="(alert, a) in alerts"
-                :key="`alert-${a}-${activeAlertsRenderKey}`"
-                size="sm"
-                class="q-ml-xs"
-                unelevated
-                dense
-                :color="(alert.unix < (Date.now() - 600000)) ? 'negative' : 'primary'"
-            >
-              <div class="row items-center">
-                <q-icon name="notification_important" />
-                <span>{{ timeSince(new Date(alert.unix)) }}</span>
-                <q-btn
-                    icon="close"
-                    size="xs"
-                    round
-                    dense
-                    flat
-                    @dblclick.stop.prevent="removeAlert(alert)"
-                />
-              </div>
-              <q-tooltip>Due {{ alert.date }} at {{ alert.time }}</q-tooltip>
-            </q-btn>
-          </div>
           <!-- VIEW DONE: -->
           <div v-if="task.done" class="row items-center">
             <q-chip class="row items-center" style="background: #00FF0020">
@@ -153,46 +118,40 @@
               <span>{{ new Date(task.done).toLocaleTimeString().slice(0, -3) }}</span>
             </q-chip>
           </div>
+          <!-- VIEW ALERTS: -->
+          <div v-if="alerts.length">
+            <q-btn
+                v-for="(alert, a) in alerts"
+                :key="`alert-${a}-${activeAlertsRenderKey}`"
+                size="sm"
+                class="text-bold"
+                :class="{ 'q-ml-xs': !!a }"
+                unelevated
+                outline
+                dense
+                :color="(alert.unix < (Date.now() - 600000)) ? 'negative' : 'primary'"
+            >
+              <div class="row items-center">
+                <q-icon name="notification_important" />
+                <span>{{ timeSince(new Date(alert.unix)) }}</span>
+                <q-icon
+                    name="close"
+                    size="xs"
+                    dense
+                    flat
+                    @dblclick.stop.prevent="removeAlert(alert)"
+                />
+              </div>
+              <q-tooltip>Due {{ alert.date }} at {{ alert.time }}</q-tooltip>
+            </q-btn>
+          </div>
+          <!-- VIEW STORIES: -->
+          <div v-if="stories && stories.length">
+            <TaskStoryDropdown :stories="stories" />
+          </div>
         </div>
       </q-item-section>
     </q-item>
-    <!-- VIEW/EDIT TASK MESSAGE: -->
-<!--    <q-input-->
-<!--        v-else-->
-<!--        ref="messageInput"-->
-<!--        v-model="task.message"-->
-<!--        :type="task.messageType || undefined"-->
-<!--        placeholder="Edit task"-->
-<!--        class="full-width q-mb-xs"-->
-<!--        dense-->
-<!--        debounce="2500"-->
-<!--        @keydown.alt.down.stop.prevent="toggleTextarea"-->
-<!--        @input="updateTask(task)"-->
-<!--    >-->
-<!--      <template #prepend>-->
-<!--        <q-btn-->
-<!--            icon="save_as"-->
-<!--            :color="isEditing ? 'positive' : 'neutral'"-->
-<!--            size="sm"-->
-<!--            class="q-ml-xs"-->
-<!--            flat-->
-<!--            dense-->
-<!--            @click="updateTaskAndStopEditing"-->
-<!--        />-->
-<!--      </template>-->
-<!--      <template #append>-->
-<!--        <TaskOptions-->
-<!--            :task="task"-->
-<!--            size="md"-->
-<!--            @editTask="editTask"-->
-<!--            @updateTask="updateTask"-->
-<!--            @removeTask="removeTask"-->
-<!--            @toggleArchived="toggleArchived"-->
-<!--            @createAlert="addAlertToTask"-->
-<!--        />-->
-<!--      </template>-->
-<!--    </q-input>-->
-<!--    <q-separator class="q-my-xs" />-->
   </q-card>
 </template>
 
@@ -479,10 +438,9 @@ export default {
         messageType = undefined;
       }
 
-      this.updateTask({
-        ...this.task,
-        messageType
-      });
+      this.task.messageType = messageType;
+
+      this.updateTask({ ...this.task, messageType });
     },
     toggleArchived()
     {
