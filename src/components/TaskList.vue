@@ -38,25 +38,9 @@
             dense
         >
           <template #append>
-            <q-btn
-                v-if="task.done"
-                icon="task_alt"
-                color="positive"
-                flat
-                dense
-                @click="addTask({ ...task, done: 0 })"
-            >
-              <q-tooltip>
-                Finished {{ new Date(task.done).toDateString() }} at {{ new Date(task.done).toLocaleTimeString() }}
-              </q-tooltip>
-            </q-btn>
-            <q-btn
-                v-if="!task.done"
-                icon="done"
-                color="neutral"
-                flat
-                dense
-                @click="addTask({ ...task, done: Date.now() })"
+            <TaskDoneButton
+                :done="task.done"
+                @toggle="addTask({ ...task, done: $event })"
             />
             <q-btn
                 icon="close"
@@ -78,9 +62,10 @@
 <script>
   import draggable from 'vuedraggable';
   import NoteControlsMixin from '../mixins/NoteControlsMixin.js';
+  import TaskDoneButton from "components/TaskDoneButton";
 
   export default {
-    components: { draggable },
+    components: { TaskDoneButton, draggable },
     mixins: [NoteControlsMixin],
     props: {
     },

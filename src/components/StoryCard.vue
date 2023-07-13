@@ -21,7 +21,7 @@
               @click.stop.prevent="removeStory"
           />
           <q-badge
-              :label="story.estimate"
+              :label="story.estimate === 0 ? 0 : story.estimate || '?'"
               class="q-mr-xs"
           />
           <q-icon
@@ -63,6 +63,17 @@
               :dense="dense"
               flat
               @click.stop.prevent="copy(story.id)"
+          />
+          <q-btn
+              label="Open tasks"
+              color="primary"
+              :dense="dense"
+              flat
+              @click.stop.prevent="openTasksForStory"
+          />
+          <AddTask
+              :initialTaskData="{ stories: [story.id] }"
+              dense
           />
           <SimpleModal
             v-if="relatedNotes.length"
@@ -138,10 +149,13 @@
   import NoteCard from './NoteCard';
   import SimpleModal from './SimpleModal';
   import { copyToClipboard } from 'quasar';
+  import AddTask from "components/AddTask";
+  import { saveToLocalStorage } from "src/utils";
 
   export default {
     name: 'StoryCard',
     components: {
+      AddTask,
       DisplayStory,
       NoteCard,
       SimpleModal
@@ -161,14 +175,14 @@
       },
       dense: {
         type: Boolean,
-        default: false
+        default: true
       },
       clearable: {
         type: Boolean,
         default: false
       }
     },
-    inject: ['$openLink', '$openNote'],
+    inject: ['$openLink', '$openNote', '$addOrUpdateTask', '$openTab'],
     computed: {
       story()
       {
@@ -213,6 +227,11 @@
         });
 
         this.$emit('removed');
+      },
+      openTasksForStory()
+      {
+        saveToLocalStorage('taskFilters', { keyword: `${this.storyId}` });
+        this.$openTab('tasks');
       }
     }
   };

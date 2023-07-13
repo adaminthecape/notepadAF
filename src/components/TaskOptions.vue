@@ -1,59 +1,33 @@
 <template>
   <div class="row items-center">
-    <q-btn
-        icon="edit"
-        :color="isEditing ? 'positive' : 'neutral'"
+    <TaskEditButton
+        :editing="isEditing"
         :size="size"
-        dense
         flat
-        @click="$emit('editTask')"
+        dense
+        @toggle="$emit('editTask')"
     />
-    <q-btn
-        v-if="task.done"
-        icon="task_alt"
-        color="positive"
-        :size="size"
-        dense
-        flat
-        @click="$emit('updateTask', { ...task, done: 0 })"
-    >
-      <q-tooltip>
-        Finished {{ timeSince(task.done) }}
-      </q-tooltip>
-    </q-btn>
-    <q-btn
-        v-if="!task.done"
-        icon="done"
-        color="neutral"
+    <TaskDoneButton
+        :done="task.done"
         :size="size"
         flat
         dense
-        @click="$emit('updateTask', { ...task, done: Date.now() })"
+        @toggle="$emit('updateTask', { ...task, done: $event })"
     />
-    <q-btn
-        v-if="task.active"
-        icon="pending_actions"
-        color="orange"
+    <TaskActiveButton
+        :active="task.active"
         :size="size"
         flat
         dense
-        @click="$emit('updateTask', { ...task, active: 0 })"
-    >
-      <q-tooltip>
-        Started {{ timeSince(task.active) }}
-      </q-tooltip>
-    </q-btn>
-    <q-btn
-        v-if="!task.active"
-        icon="play_arrow"
-        color="neutral"
+        @toggle="$emit('updateTask', { ...task, active: $event })"
+    />
+    <TaskArchiveButton
+        :archived="task.archived"
         :size="size"
         flat
         dense
-        @click="$emit('updateTask', { ...task, active: Date.now() })"
-    >
-      <q-tooltip>Start</q-tooltip>
-    </q-btn>
+        @toggle="$emit('updateTask', { ...task, archived: $event })"
+    />
     <TaskMenu
         :task="task"
         :size="size"
@@ -66,10 +40,17 @@
 
 <script>
 import TaskMenu from './TaskMenu';
-import { timeSince } from "src/utils";
+import TaskActiveButton from "components/TaskActiveButton";
+import TaskDoneButton from "components/TaskDoneButton";
+import TaskEditButton from "components/TaskEditButton";
+import TaskArchiveButton from "components/TaskArchiveButton";
 
 export default {
   components: {
+    TaskArchiveButton,
+    TaskEditButton,
+    TaskDoneButton,
+    TaskActiveButton,
     TaskMenu
   },
   props: {
@@ -91,10 +72,6 @@ export default {
     return {
       isRemovingTask: false
     };
-  },
-  computed: {},
-  methods: {
-    timeSince
   }
 }
 </script>

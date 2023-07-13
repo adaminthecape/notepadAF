@@ -61,9 +61,10 @@
               placeholder="Filter by keyword"
               class="q-mr-xs"
               style="flex-grow: 1; max-width: 40%"
+              debounce="250"
+              clearable
               filled
               dense
-              debounce="250"
               @input="filterTasks"
           />
           <TaskTagSelector
@@ -71,8 +72,8 @@
               label="Filter by tags"
               style="flex-grow: 1; max-width: 60%"
               multiple
-              @input="filters.tags = $event; filterTasks()"
-              @cancel="filters.tags = []; filterTasks()"
+              @input="setTagFilter"
+              @cancel="setTagFilter([])"
           />
         </div>
         <q-btn-group class="row items-center q-mb-xs" flat>
@@ -89,7 +90,10 @@
       </div>
       <q-separator class="q-mb-sm" />
       <!-- TASK LIST: -->
-      <div style="height: calc(100vh - 260px); overflow-y: scroll">
+      <div
+          :key="`taskListRenderIndex-${taskListRenderIndex}`"
+          style="height: calc(100vh - 260px); overflow-y: scroll"
+      >
         <div
             v-for="task in filteredTasksList"
             :key="task.id"
@@ -118,8 +122,7 @@ import TaskTagSelector from './TaskTagSelector';
 import TaskSortDropdown from './TaskSortDropdown';
 import DbMixin from '../mixins/jsondb';
 import { v4 as uuidv4 } from 'uuid';
-import uniq from 'lodash/uniq';
-import { getFromLocalStorage } from 'src/utils';
+import { getFromLocalStorage, saveToLocalStorage } from "src/utils";
 
 export default {
   name: 'Tasks',
@@ -148,6 +151,7 @@ export default {
       },
       tasksLoaded: false,
       taskRenderIndex: {},
+      taskListRenderIndex: 0,
       sortType: null,
       inverseSort: false
     };
@@ -159,6 +163,7 @@ export default {
       $getTask: this.getTask
     };
   },
+  inject: ['$addOrUpdateTask'],
   computed: {
     areFiltersActive()
     {
@@ -183,6 +188,10 @@ export default {
 
       return this.$store.getters['notes/getNote']('tasks').tasks;
     },
+    numTasks()
+    {
+      return this.tasksList.length;
+    },
     taskOptions()
     {
       if(!this.tasksList || !this.tasksList.length)
@@ -202,15 +211,24 @@ export default {
         return [];
       }
 
-      return uniq(this.tasksList.reduce((agg, task) =>
+      return this.tasksList.reduce((agg, task) =>
       {
-        if(!task.tags)
+        const tags = [...task.tags || []]
+            .filter((tag) => !agg.includes(tag));
+
+        if(tags.length)
         {
-          return agg;
+          return agg.concat(tags);
         }
 
-        return agg.concat(task.tags);
-      }, []));
+        return agg;
+      }, []);
+    }
+  },
+  watch: {
+    numTasks()
+    {
+      this.taskListRenderIndex += 1;
     }
   },
   mounted()
@@ -271,11 +289,11 @@ export default {
     {
       const filters = this.filters;
 
-      localStorage.setItem('taskFilters', JSON.stringify({
+      saveToLocalStorage('taskFilters', {
         ...filters,
         sortType: this.sortType,
         inverseSort: this.inverseSort
-      }));
+      });
 
       this.filteredTasksList = this.tasksList.filter((task) => (
           (
@@ -424,70 +442,10 @@ export default {
       this.sortTasks();
     },
     /****** Updating tasks */
-    /**
-     * Update task via db interface. Do NOT use any other fn to dispatch task updates,
-     * unless it goes through this.
-     * @param {Object} taskData
-     * @param {boolean} deleteTask
-     */
     updateTaskInDb(taskData, deleteTask = false)
     {
-      if(!taskData)
-      {
-        console.warn('bad task!', taskData);
-
-        return;
-      }
-
-      if(!Array.isArray(this.tasksList))
-      {
-        console.warn('no tasks to update!', this.tasksList);
-
-        return;
-      }
-
-      taskData.updated = Date.now();
-
-      let foundTaskIndex = -1;
-
-      const tasks = this.tasksList.map((task, t) =>
-      {
-        if(task)
-        {
-          if(task.id === taskData.id)
-          {
-            foundTaskIndex = t;
-
-            if(deleteTask)
-            {
-              // blank it
-              return null;
-            }
-
-            return {
-              ...task,
-              ...taskData
-            };
-          }
-        }
-
-        return task;
-      }).filter((t) => t);
-
-      if(!deleteTask)
-      {
-        if(foundTaskIndex === -1)
-        {
-          tasks.push(taskData);
-        }
-      }
-
-      this.$store.dispatch('notes/update', {
-        note: {
-          id: 'tasks',
-          tasks
-        }
-      }).then(() =>
+      console.info({ taskData });
+      this.$addOrUpdateTask(taskData, deleteTask).then(() =>
       {
         setTimeout(() =>
         {
@@ -627,6 +585,11 @@ export default {
       });
 
       return task;
+    },
+    setTagFilter(e)
+    {
+      this.filters.tags = e;
+      this.filterTasks();
     }
   }
 };

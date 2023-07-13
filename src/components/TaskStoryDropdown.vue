@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="stories && stories.length">
     <q-btn-dropdown
         v-for="story in stories"
         :key="story.id"

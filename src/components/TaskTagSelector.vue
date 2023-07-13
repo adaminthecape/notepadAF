@@ -10,8 +10,10 @@
       useInput
       :hideSelected="!multiple"
       fillInput
+      :dark="dark"
       inputDebounce="0"
       newValueMode="add-unique"
+      style="width: 12em"
       @filter="filterFn"
       @keydown.tab="emitInput(value, true)"
       @input="emitInput(value, false)"
@@ -50,6 +52,10 @@ export default {
       default: 'new tag...'
     },
     multiple: {
+      type: Boolean,
+      default: false
+    },
+    dark: {
       type: Boolean,
       default: false
     }

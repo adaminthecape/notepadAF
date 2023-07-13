@@ -76,7 +76,8 @@
   import GitHistoryLog from './components/GitHistoryLog';
   // import LogEntries from './components/LogEntries';
   import Wiki from './components/Wiki';
-  import { openInBrowser, timeSince } from "src/utils";
+  import { getFromLocalStorage, openInBrowser, saveToLocalStorage, timeSince } from "src/utils";
+  import { v4 as uuidv4 } from 'uuid';
 
   export default {
     name: 'App',
@@ -165,14 +166,25 @@
         $debug: this.debug,
         $openLink: openInBrowser,
         $openNote: this.openNote,
-        $openTask: this.openTask,
-        $timeSince: timeSince
+        $openTab: this.openTab,
+        $addOrUpdateTask: this.addOrUpdateTask
       };
     },
     computed: {
       activeAppTabs()
       {
         return this.appTabs.filter((t) => t.active);
+      },
+      tasksList()
+      {
+        const note = this.$store.getters['notes/getNote']('tasks');
+
+        if(note)
+        {
+          return note.tasks.map((t) => ({ ...t, id: t.id || uuidv4() }));
+        }
+
+        return null;
       }
     },
     mounted()
@@ -181,7 +193,7 @@
 
       try
       {
-        appTabs = JSON.parse(localStorage.getItem('appTabs'));
+        appTabs = JSON.parse(getFromLocalStorage('appTabs'));
       }
       catch(e)
       {
@@ -190,7 +202,7 @@
 
       if(!Object.keys(appTabs || {}).length)
       {
-        localStorage.setItem('appTabs', JSON.stringify(this.appTabs));
+        saveToLocalStorage('appTabs', this.appTabs);
       }
     },
     // watch: {
@@ -200,6 +212,77 @@
     //   }
     // },
     methods: {
+      /**
+       * Update task via db interface. Do NOT use any other fn to dispatch task updates,
+       * unless it goes through this.
+       * @param {Object} taskData
+       * @param {boolean} deleteTask
+       */
+      async addOrUpdateTask(taskData, deleteTask = false)
+      {
+        console.info('addOrUpdateTask:', taskData);
+        if(!taskData)
+        {
+          console.warn('bad task!', taskData);
+
+          return;
+        }
+
+        if(!taskData.id)
+        {
+          taskData.id = uuidv4();
+        }
+
+        if(!Array.isArray(this.tasksList))
+        {
+          console.warn('no tasks to update!', this.tasksList);
+
+          return;
+        }
+
+        taskData.updated = Date.now();
+
+        let foundTaskIndex = -1;
+
+        const tasks = this.tasksList.map((task, t) =>
+        {
+          if(task)
+          {
+            if(task.id === taskData.id)
+            {
+              foundTaskIndex = t;
+
+              if(deleteTask)
+              {
+                // blank it
+                return null;
+              }
+
+              return {
+                ...task,
+                ...taskData
+              };
+            }
+          }
+
+          return task;
+        }).filter((t) => t);
+
+        if(!deleteTask)
+        {
+          if(foundTaskIndex === -1)
+          {
+            tasks.push(taskData);
+          }
+        }
+
+        await this.$store.dispatch('notes/update', {
+          note: {
+            id: 'tasks',
+            tasks
+          }
+        });
+      },
       shouldShowTab(tab)
       {
         const storedTabs = localStorage.getItem('appTabs');
@@ -210,11 +293,9 @@
         this.currentTab = 'notes';
         this.notesRenderIndex += 1;
       },
-      openTask(taskId)
+      openTab(tab)
       {
-        this.desiredTaskId = taskId;
-        this.currentTab = 'tasks';
-        this.tasksRenderIndex += 1;
+        this.currentTab = tab;
       },
       setActivityCache(data)
       {

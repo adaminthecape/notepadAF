@@ -97,7 +97,7 @@
                               {{ alert.date }} at {{ alert.time }}
                             </div>
                             <div class="text-grey-9">
-                              Created {{ $timeSince(alert.created) }}
+                              Created {{ timeSince(alert.created) }}
                             </div>
                           </div>
                         </div>
@@ -216,6 +216,7 @@
 </template>
 
 <script>
+import { timeSince } from '../utils';
 import { checkoutBoth } from '../mixins/git';
 import StoryCard from './StoryCard';
 import ButtonWrapper from './ButtonWrapper';
@@ -256,7 +257,7 @@ export default {
       createAlertMessage: ''
     };
   },
-  inject: ['$timeSince', '$notify'],
+  inject: ['$notify'],
   computed: {
     attachedStories()
     {
@@ -280,6 +281,7 @@ export default {
   watch: {
   },
   methods: {
+    timeSince,
     checkoutBoth,
     attachStory(noteId, storyId)
     {

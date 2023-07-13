@@ -13,7 +13,7 @@
       <q-item-section>
         <div class="row items-center" style="margin-bottom: -10px">
           <!-- VIEW ALERTS: -->
-          <div v-if="alerts.length">
+          <div v-if="alerts.length" style="margin-left: -10px">
             <q-btn
                 v-for="(alert, a) in alerts"
                 :key="`alert-${a}-${activeAlertsRenderKey}`"
@@ -39,14 +39,32 @@
               <q-tooltip>Due {{ alert.date }} at {{ alert.time }}</q-tooltip>
             </q-btn>
           </div>
+          <q-space />
+          <!-- VIEW DONE: -->
+          <div v-if="task.done" class="row items-center">
+            <q-chip
+                class="row items-center"
+                style="background: #00FF0020"
+                square
+                dense
+            >
+              <q-icon name="task_alt" size="xs" class="q-mr-xs" />
+              <span>{{ new Date(task.done).toDateString() }}</span>
+              <q-icon name="schedule" size="xs" class="q-mx-xs" />
+              <span>{{ new Date(task.done).toLocaleTimeString().slice(0, -3) }}</span>
+            </q-chip>
+          </div>
           <!-- MENU: -->
           <q-space />
-          <div class="row items-center">
+          <div
+              class="row items-center"
+              style="margin-right: -14px; margin-left: -14px"
+          >
             <q-space />
             <TaskOptions
                 :task="task"
+                :isEditing="isEditing"
                 size="md"
-                style="margin-right: -14px"
                 @editTask="editTask"
                 @updateTask="updateTask"
                 @removeTask="removeTask"
@@ -71,9 +89,7 @@
               placeholder="Edit task"
               class="full-width q-mb-xs"
               dense
-              debounce="2500"
               @keydown.alt.down.stop.prevent="toggleTextarea"
-              @input="updateTask(task)"
           >
             <template #append>
               <div
@@ -121,9 +137,13 @@
           <q-chip
               v-show="addingTag"
               style="overflow-y: hidden"
+              square
+              dense
+              dark
           >
             <TaskTagSelector
                 ref="newTagSelector"
+                dark
                 @cancel="addingTag = false"
                 @input="addTag"
             />
@@ -135,34 +155,18 @@
               square
               dense
               dark
+              style="margin-right: -2px"
+              removable
+              @remove="removeTag(tag)"
           >
             <div class="row items-center">
-              <q-btn
-                  icon="close"
-                  dense
-                  round
-                  flat
-                  size="xs"
-                  style="margin-left: -4px"
-                  @click.stop.prevent="removeTag(tag)"
-              />
               <span
-                  style="margin-top: -4px;"
+                  style="margin-top: -2px;"
                   @click="$emit('filterByTag', tag)"
               >{{ tag }}</span>
             </div>
           </q-chip>
           <q-space />
-          <!-- VIEW DONE: -->
-          <div v-if="task.done" class="row items-center">
-            <q-chip class="row items-center" style="background: #00FF0020">
-              <q-icon name="task_alt" size="xs" class="q-mr-xs" />
-              <span>{{ new Date(task.done).toDateString() }}</span>
-              <q-icon name="schedule" size="xs" class="q-mx-xs" />
-              <span>{{ new Date(task.done).toLocaleTimeString().slice(0, -3) }}</span>
-            </q-chip>
-          </div>
-          <!-- VIEW STORIES: -->
           <div v-if="stories && stories.length">
             <TaskStoryDropdown :stories="stories" />
           </div>
@@ -260,9 +264,13 @@ export default {
         this.isEditing = !this.isEditing;
       }
 
-      if(this.isEditing)
+      if(this.isEditing) // if now editing, focus the input
       {
         this.focusOnNextTick('messageInput');
+      }
+      else // otherwise, save the task
+      {
+        this.updateTask(this.task);
       }
     },
     focusOnNextTick(refName, depth = 0)
