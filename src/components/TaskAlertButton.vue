@@ -3,9 +3,6 @@
     <q-btn
         v-bind="allQProps"
         icon="add_alert"
-        size="sm"
-        dense
-        flat
         @click="isCreatingAlert = !isCreatingAlert"
     >
       <q-tooltip>Add alert</q-tooltip>

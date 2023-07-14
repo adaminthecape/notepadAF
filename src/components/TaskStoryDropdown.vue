@@ -1,19 +1,19 @@
 <template>
   <div v-if="stories && stories.length">
     <q-btn-dropdown
-        v-for="story in stories"
-        :key="story.id"
         size="sm"
         unelevated
         outline
         dense
     >
       <template #label>
-        <span style="margin-right: -10px">{{ story.id }}</span>
+        <span style="margin-right: -10px">{{ storyIds }}</span>
       </template>
       <q-item clickable style="min-width: 90%;">
         <q-item-section>
           <StoryCard
+              v-for="story in stories"
+              :key="story.id"
               :storyId="story.id"
           />
         </q-item-section>
@@ -35,14 +35,11 @@ export default {
       required: true
     }
   },
-  data()
-  {
-    return {
-    };
-  },
   computed: {
-  },
-  methods: {
+    storyIds()
+    {
+      return this.stories.map((s) => s.id).join(', ');
+    }
   }
 };
 </script>

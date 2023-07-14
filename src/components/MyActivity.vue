@@ -262,14 +262,11 @@ import Pivotal from '../mixins/Pivotal';
 import DbMixin from '../mixins/jsondb';
 import GitMixin from '../mixins/git';
 import { pivotalData } from '../mixins/constants';
-import DisplayStory from './DisplayStory';
 import SimpleLayout from './SimpleLayout';
 import PivotalAction from './PivotalAction';
-import escape from 'lodash/escape';
 
 export default {
   components: {
-    // DisplayStory,
     SimpleLayout,
     PivotalAction
   },

@@ -1,12 +1,16 @@
 <template>
   <div style="display: inline">
-    <q-btn
-        label="Add Task"
-        color="secondary"
-        :dense="dense"
-        flat
-        @click.stop.prevent="isAddingTask = !isAddingTask"
-    />
+    <slot name="activator" v-bind="{ open: open }">
+      <q-btn
+          icon="add_task"
+          color="primary"
+          :dense="dense"
+          flat
+          @click.stop.prevent="open"
+      >
+        <q-tooltip>Add a task</q-tooltip>
+      </q-btn>
+    </slot>
     <q-dialog v-model="isAddingTask">
       <q-card class="q-pa-md full-width">
         <q-item-section>
@@ -109,6 +113,10 @@
     },
     inject: ['$addOrUpdateTask'],
     methods: {
+      open()
+      {
+        this.isAddingTask = !this.isAddingTask;
+      },
       toggleTextarea()
       {
         this.newTask.messageType = (this.newTask.messageType === 'textarea') ? undefined : 'textarea';

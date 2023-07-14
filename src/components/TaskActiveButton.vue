@@ -3,6 +3,7 @@
       v-bind="allQProps"
       :color="active ? 'orange' : undefined"
       :icon="active ? 'assignment_ind' : 'content_paste_go'"
+      :key="renderIndex"
       @click="toggle"
   >
     <q-tooltip>
@@ -32,7 +33,13 @@
         default: () => ({})
       }
     },
-    inject: ['$addOrUpdateTask', '$refreshTask'],
+    data()
+    {
+      return {
+        renderIndex: 0
+      };
+    },
+    inject: ['$addOrUpdateTask'],
     mounted()
     {
       if(this.mode === 'save' && !this.task)
@@ -51,7 +58,7 @@
             return;
           }
 
-          const task = { ...this.task };
+          const task = structuredClone(this.task);
 
           if(!task.activity)
           {
@@ -60,7 +67,7 @@
 
           task.active = this.active ? 0 : Date.now();
 
-          if(task.active) // task is now active; start a new log
+          if(!this.active) // task is now active; start a new log
           {
             task.activity.push({ start: Date.now(), end: 0 });
           }
@@ -72,7 +79,7 @@
 
             if(!lastLog) // create first log
             {
-              task.activity.push({ start: Date.now(), end: 0 });
+              task.activity.push({ start: this.active, end: Date.now() });
             }
             else
             {
@@ -80,11 +87,8 @@
             }
           }
 
-          this.$addOrUpdateTask(task)
-              .then(() =>
-              {
-                this.$refreshTask(task);
-              });
+          this.$addOrUpdateTask(task);
+          this.$emit('refreshTask', task);
 
           return;
         }

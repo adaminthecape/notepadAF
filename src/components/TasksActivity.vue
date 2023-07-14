@@ -19,6 +19,7 @@
         </q-btn>
         <TaskSortDropdown
             :sortType="sortType"
+            :inverseSort="inverseSort"
             @setSortType="setSort"
         />
         <q-btn
@@ -133,7 +134,7 @@ import TaskTagSelector from './TaskTagSelector';
 import TaskSortDropdown from './TaskSortDropdown';
 import DbMixin from '../mixins/jsondb';
 import { v4 as uuidv4 } from 'uuid';
-import { getFromLocalStorage, saveToLocalStorage } from "src/utils";
+import { filterTaskList, getFromLocalStorage, saveToLocalStorage } from "src/utils";
 
 export default {
   name: 'Tasks',
@@ -296,31 +297,13 @@ export default {
     /** Actual filtering logic. Sorts after filtering. Saves filters to localStorage. */
     filterTasks()
     {
-      const filters = this.filters;
-
       saveToLocalStorage('taskFilters', {
-        ...filters,
+        ...this.filters,
         sortType: this.sortType,
         inverseSort: this.inverseSort
       });
 
-      this.filteredTasksList = this.tasksList.filter((task) => (
-          (
-              !filters.tags || !filters.tags.length ? true :
-                  !task.tags ? false : task.tags.some((t) => filters.tags.includes(t))
-          ) &&
-          (
-              !filters.keyword ? true :
-                  `${
-                      task.message.toLowerCase()
-                  } ${
-                      (task.tags || []).join('').toLowerCase()
-                  }`.indexOf(filters.keyword.toLowerCase()) > -1
-          ) &&
-          this.checkFilterBool('done', task) &&
-          this.checkFilterBool('archived', task) &&
-          this.checkFilterBool('active', task)
-      ));
+      this.filteredTasksList = filterTaskList(this.tasksList, this.filters);
 
       this.sortTasks();
     },
@@ -381,12 +364,6 @@ export default {
       }
 
       this.filterTasks();
-    },
-    checkFilterBool(prop, task)
-    {
-      return typeof this.filters[prop] === 'boolean' ?
-          this.filters[prop] ? task[prop] : !task[prop] :
-          true;
     },
     /****** Sorting tasks */
     sortTasks()
@@ -505,6 +482,7 @@ export default {
     },
     refreshTask(task)
     {
+      console.info('refresh:', task, task.active);
       this.taskRenderIndex[task.id] = `render-${task.id}-${Date.now()}`;
     },
     refreshAll()

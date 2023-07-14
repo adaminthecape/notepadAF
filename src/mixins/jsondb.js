@@ -228,8 +228,6 @@ export function saveAll(allNotes)
         }
     }
 
-    console.info('all:', allNotes);
-
     writeToDbSync(
         'notes',
         allNotes,

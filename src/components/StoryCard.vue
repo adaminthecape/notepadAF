@@ -55,26 +55,17 @@
               color="negative"
               :dense="dense"
               flat
-              @click.stop.prevent="$emit('checkoutBoth', story.id)"
+              @click.stop.prevent="copyToClipboard(`git checkout PT_${story.id}`)"
           />
           <q-btn
               :label="story.id"
               color="secondary"
               :dense="dense"
               flat
-              @click.stop.prevent="copy(story.id)"
-          />
-          <q-btn
-              label="Open tasks"
-              color="primary"
-              :dense="dense"
-              flat
-              @click.stop.prevent="openTasksForStory"
-          />
-          <AddTask
-              :initialTaskData="{ stories: [story.id] }"
-              dense
-          />
+              @click.stop.prevent="copyToClipboard(story.id)"
+          >
+            <q-tooltip>Copy story ID</q-tooltip>
+          </q-btn>
           <SimpleModal
             v-if="relatedNotes.length"
             style="display: inline"
@@ -102,6 +93,23 @@
               </q-card>
             </template>
           </SimpleModal>
+          <q-btn-group>
+            <q-btn
+                v-if="allowAddTasks"
+                label="Tasks"
+                color="primary"
+                :dense="dense"
+                flat
+                @click.stop.prevent="openTasksForStory"
+            >
+              <q-tooltip>View tasks for {{ storyId }}</q-tooltip>
+            </q-btn>
+            <AddTask
+                v-if="allowAddTasks"
+                :initialTaskData="{ stories: [story.id] }"
+                dense
+            />
+          </q-btn-group>
         </div>
       </div>
     </template>
@@ -148,9 +156,8 @@
   import DisplayStory from './DisplayStory';
   import NoteCard from './NoteCard';
   import SimpleModal from './SimpleModal';
-  import { copyToClipboard } from 'quasar';
   import AddTask from "components/AddTask";
-  import { saveToLocalStorage } from "src/utils";
+  import { getFromLocalStorage, saveToLocalStorage, copyToClipboard } from "src/utils";
 
   export default {
     name: 'StoryCard',
@@ -178,6 +185,10 @@
         default: true
       },
       clearable: {
+        type: Boolean,
+        default: false
+      },
+      allowAddTasks: {
         type: Boolean,
         default: false
       }
@@ -210,10 +221,7 @@
       await this.$store.dispatch('pivotal/load', { id: parseInt(this.storyId, 10) });
     },
     methods: {
-      async copy(text)
-      {
-        await copyToClipboard(text);
-      },
+      copyToClipboard,
       removeStory()
       {
         if(!this.noteId)
@@ -230,7 +238,8 @@
       },
       openTasksForStory()
       {
-        saveToLocalStorage('taskFilters', { keyword: `${this.storyId}` });
+        const existingFilters = getFromLocalStorage('taskFilters', true);
+        saveToLocalStorage('taskFilters', { ...existingFilters, keyword: `${this.storyId}` });
         this.$openTab('tasks');
       }
     }

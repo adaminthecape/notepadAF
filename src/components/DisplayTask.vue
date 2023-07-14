@@ -12,8 +12,26 @@
     >
       <q-item-section>
         <div class="row items-center" style="margin-bottom: -10px">
+          <!-- VIEW DONE: -->
+          <div
+              v-if="task.done"
+              style="margin-left: -14px"
+              class="row items-center"
+          >
+            <q-chip
+                class="row items-center"
+                style="background: #00FF0020"
+                square
+                dense
+            >
+              <q-icon name="task_alt" size="xs" class="q-mr-xs" />
+              <span>{{ new Date(task.done).toDateString() }}</span>
+              <q-icon name="schedule" size="xs" class="q-mx-xs" />
+              <span>{{ new Date(task.done).toLocaleTimeString().slice(0, -3) }}</span>
+            </q-chip>
+          </div>
           <!-- VIEW ALERTS: -->
-          <div v-if="alerts.length" style="margin-left: -10px">
+          <div v-else-if="alerts.length" style="margin-left: -10px">
             <q-btn
                 v-for="(alert, a) in alerts"
                 :key="`alert-${a}-${activeAlertsRenderKey}`"
@@ -39,21 +57,6 @@
               <q-tooltip>Due {{ alert.date }} at {{ alert.time }}</q-tooltip>
             </q-btn>
           </div>
-          <q-space />
-          <!-- VIEW DONE: -->
-          <div v-if="task.done" class="row items-center">
-            <q-chip
-                class="row items-center"
-                style="background: #00FF0020"
-                square
-                dense
-            >
-              <q-icon name="task_alt" size="xs" class="q-mr-xs" />
-              <span>{{ new Date(task.done).toDateString() }}</span>
-              <q-icon name="schedule" size="xs" class="q-mx-xs" />
-              <span>{{ new Date(task.done).toLocaleTimeString().slice(0, -3) }}</span>
-            </q-chip>
-          </div>
           <!-- MENU: -->
           <q-space />
           <div
@@ -64,6 +67,8 @@
                 :task="task"
                 :isEditing="isEditing"
                 size="md"
+                dense
+                flat
                 @editTask="editTask"
                 @updateTask="updateTask"
                 @taskRemoved="$emit('refreshTask', $event)"
@@ -142,6 +147,7 @@
             <TaskTagSelector
                 ref="newTagSelector"
                 dark
+                new-value-mode
                 @cancel="addingTag = false"
                 @input="addTag"
             />
@@ -425,8 +431,6 @@ export default {
     toggleAddingTag()
     {
       this.addingTag = !this.addingTag;
-
-      this.focusOnNextTick('newTagSelector');
     },
     addTag(tag)
     {

@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import deepmerge from "deepmerge";
-import cloneDeep from "lodash/cloneDeep";
 import { readFromDbSync, saveAll } from '../../mixins/jsondb';
 
 const state = {
@@ -77,8 +76,6 @@ const actions = {
         const existing = allNotes
             .find((n) => n.id === note.id) || {};
 
-        console.log('updateNote: existing', existing, allNotes);
-
         const now = Date.now();
         const newNote = {
             ...existing,
@@ -92,7 +89,6 @@ const actions = {
             return;
         }
 
-        console.log('updateNote: newNote', newNote);
         commit('ADD_NOTE', newNote);
 
         commit('SAVE_NOTES');
@@ -128,7 +124,7 @@ const actions = {
 
         if(note)
         {
-            const stories = cloneDeep(note.stories || []);
+            const stories = structuredClone(note.stories || []);
 
             stories.push(storyId);
 
@@ -143,7 +139,7 @@ const actions = {
         console.log('removeStory:', { note });
         if(note)
         {
-            const stories = cloneDeep(note.stories || []);
+            const stories = structuredClone(note.stories || []);
             const storyIndex = stories.findIndex((s) => s === storyId.toString());
 
             console.log({

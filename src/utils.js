@@ -250,3 +250,51 @@ export function readFromExternalBackup(
 
     return readFromDbSync(sourcePath, false);
 }
+
+export function copyToClipboard(value)
+{
+    if(Array.isArray(value))
+    {
+        navigator.clipboard.writeText(value.join(', '));
+    }
+    else if(value && typeof value === 'object')
+    {
+        navigator.clipboard.writeText(JSON.stringify(value));
+    }
+    else
+    {
+        navigator.clipboard.writeText(value);
+    }
+}
+
+export function checkFilterBool(prop, task, filters)
+{
+    return typeof filters[prop] === 'boolean' ?
+        filters[prop] ? task[prop] : !task[prop] :
+        true;
+}
+
+export function filterTaskList(tasks, filters)
+{
+    return tasks.filter((task) => (
+        (
+            !filters.id ? true :
+                task.id === filters.id
+        ) &&
+        (
+            !filters.tags || !filters.tags.length ? true :
+                !task.tags ? false : task.tags.some((t) => filters.tags.includes(t))
+        ) &&
+        (
+            !filters.keyword ? true :
+                `${
+                    task.message.toLowerCase()
+                } ${
+                    (task.tags || []).join('').toLowerCase()
+                }`.indexOf(filters.keyword.toLowerCase()) > -1
+        ) &&
+        checkFilterBool('done', task, filters) &&
+        checkFilterBool('archived', task, filters) &&
+        checkFilterBool('active', task, filters)
+    ));
+}

@@ -12,21 +12,25 @@
       fillInput
       :dark="dark"
       inputDebounce="0"
-      newValueMode="add-unique"
+      :newValueMode="newValueMode ? 'add-unique' : undefined"
       style="width: 12em"
       @filter="filterFn"
       @keydown.tab="emitInput(value, true)"
       @input="emitInput(value, false)"
   >
     <template v-slot:no-option>
-      <q-item>
+      <q-item :clickable="newValueMode">
         <q-item-section class="text-grey">
-          No results
+          <div v-if="!newValueMode">No results</div>
+          <div v-else class="text-amber">
+            Press Enter to add
+          </div>
         </q-item-section>
       </q-item>
     </template>
     <template #append>
       <q-btn
+          v-if="!newValueMode"
           icon="content_copy"
           round
           dense
@@ -49,8 +53,6 @@
 </template>
 
 <script>
-import uniq from 'lodash/uniq';
-
 export default {
   props: {
     inputValue: {
@@ -66,6 +68,10 @@ export default {
       default: false
     },
     dark: {
+      type: Boolean,
+      default: false
+    },
+    newValueMode: {
       type: Boolean,
       default: false
     }
@@ -96,15 +102,18 @@ export default {
         return [];
       }
 
-      return uniq(this.tasksList.reduce((agg, task) =>
+      return this.tasksList.reduce((agg, task) =>
       {
-        if(!task.tags)
+        const tags = [...task.tags || []]
+            .filter((tag) => !agg.includes(tag));
+
+        if(tags.length)
         {
-          return agg;
+          return agg.concat(tags);
         }
 
-        return agg.concat(task.tags);
-      }, []));
+        return agg;
+      }, []);
     }
   },
   watch: {
