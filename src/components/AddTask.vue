@@ -69,7 +69,7 @@
                 icon="save"
                 color="primary"
                 dense
-                @click="addTaskForStory"
+                @click="addNewTask"
             />
           </div>
         </q-item-section>
@@ -99,7 +99,7 @@
         newTask: {
           done: 0,
           active: 0,
-          archived: false,
+          archived: 0,
           message: '',
           stories: [],
           ...(this.initialTaskData || {})
@@ -115,7 +115,7 @@
 
         this.newTaskRenderIndex += 1;
       },
-      addTaskForStory()
+      addNewTask()
       {
         const tags = Array.isArray(this.newTask.tags) ? this.newTask.tags : [];
 

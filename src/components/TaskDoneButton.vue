@@ -2,7 +2,7 @@
   <q-btn
       v-bind="allQProps"
       :color="done ? 'green-7' : undefined"
-      :icon="done ? 'done' : 'task_alt'"
+      :icon="done ? 'check_circle' : 'check_circle_outline'"
       @click="toggle"
   >
     <q-tooltip>

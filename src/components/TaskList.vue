@@ -40,13 +40,15 @@
           <template #append>
             <TaskDoneButton
                 :done="task.done"
+                dense
+                flat
                 @toggle="addTask({ ...task, done: $event })"
             />
             <q-btn
                 icon="close"
                 color="negative"
-                flat
                 dense
+                flat
                 @click="removeTask(task)"
             />
             <div class="handle">

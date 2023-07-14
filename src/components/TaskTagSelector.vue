@@ -27,6 +27,16 @@
     </template>
     <template #append>
       <q-btn
+          icon="content_copy"
+          round
+          dense
+          flat
+          size="xs"
+          @click.stop.prevent="copyTags"
+      >
+        <q-tooltip>Copy</q-tooltip>
+      </q-btn>
+      <q-btn
           icon="close"
           round
           dense
@@ -104,7 +114,11 @@ export default {
     }
   },
   methods: {
-    filterFn(val, update, abort)
+    copyTags()
+    {
+      navigator.clipboard.writeText(this.value.join(', '));
+    },
+    filterFn(val, update/*, abort*/)
     {
       update(() => {
         if (val === '')

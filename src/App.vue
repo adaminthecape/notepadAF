@@ -76,7 +76,7 @@
   import GitHistoryLog from './components/GitHistoryLog';
   // import LogEntries from './components/LogEntries';
   import Wiki from './components/Wiki';
-  import { getFromLocalStorage, openInBrowser, saveToLocalStorage, timeSince } from "src/utils";
+  import { getFromLocalStorage, openInBrowser, saveToLocalStorage } from "src/utils";
   import { v4 as uuidv4 } from 'uuid';
 
   export default {
@@ -193,7 +193,7 @@
 
       try
       {
-        appTabs = JSON.parse(getFromLocalStorage('appTabs'));
+        appTabs = getFromLocalStorage('appTabs', true);
       }
       catch(e)
       {

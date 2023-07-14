@@ -60,16 +60,14 @@
               class="row items-center"
               style="margin-right: -14px; margin-left: -14px"
           >
-            <q-space />
             <TaskOptions
                 :task="task"
                 :isEditing="isEditing"
                 size="md"
                 @editTask="editTask"
                 @updateTask="updateTask"
-                @removeTask="removeTask"
+                @taskRemoved="$emit('refreshTask', $event)"
                 @toggleArchived="toggleArchived"
-                @createAlert="addAlertToTask"
             />
           </div>
         </div>
@@ -212,7 +210,7 @@ export default {
       alarmTickTimeout: null,
       activeAlertsRenderKey: 10000,
       isEditing: false,
-      isEditingLocked: false
+      isCreatingAlert: false
     };
   },
   inject: ['$openLink'],
@@ -324,10 +322,6 @@ export default {
     updateTask(task)
     {
       this.$emit('updateTask', task);
-    },
-    removeTask()
-    {
-      this.$emit('removeTask', this.taskId);
     },
     updateTaskAndStopEditing()
     {

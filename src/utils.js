@@ -38,33 +38,6 @@ export function getAppBasePath()
         // .replace('.quasar\\electron', '');
 }
 
-export function getNotesDbPath(filename)
-{
-    return localStorage.getItem('notesDbFullPath');
-}
-
-export function setNotesDbPath(filename)
-{
-    setLocalStorageFilePath(undefined, 'notesdb', 'json');
-}
-
-export function setLocalStorageFilePath(dir, filename, extension)
-{
-    if(!dir)
-    {
-        dir = getAppBasePath();
-    }
-
-    if(!extension)
-    {
-        extension = '.json'
-    }
-
-    const fullPath = path.join(dir, `${filename}.${extension}`);
-
-    saveToLocalStorage(`${filename}FilePath`, fullPath);
-}
-
 export function saveToLocalStorage(name, data)
 {
     if(data && typeof data === 'object')

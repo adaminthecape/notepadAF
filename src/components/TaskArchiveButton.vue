@@ -20,7 +20,7 @@ export default {
   mixins: [QPropsMixin],
   props: {
     archived: {
-      type: Number,
+      type: [Boolean, Number],
       default: 0
     }
   },

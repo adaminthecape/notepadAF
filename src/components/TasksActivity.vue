@@ -62,18 +62,29 @@
               class="q-mr-xs"
               style="flex-grow: 1; max-width: 40%"
               debounce="250"
-              clearable
               filled
               dense
               @input="filterTasks"
-          />
+          >
+            <template #append>
+              <q-btn
+                  v-if="filters.keyword"
+                  icon="close"
+                  round
+                  dense
+                  flat
+                  size="xs"
+                  @click.stop.prevent="setFilter(filterTypes.keyword, undefined)"
+              />
+            </template>
+          </q-input>
           <TaskTagSelector
               :inputValue="filters.tags || []"
               label="Filter by tags"
               style="flex-grow: 1; max-width: 60%"
               multiple
-              @input="setTagFilter"
-              @cancel="setTagFilter([])"
+              @input="setFilter(filterTypes.tags, $event)"
+              @cancel="setFilter(filterTypes.tags, [])"
           />
         </div>
         <q-btn-group class="row items-center q-mb-xs" flat>
@@ -91,8 +102,8 @@
       <q-separator class="q-mb-sm" />
       <!-- TASK LIST: -->
       <div
-          :key="`taskListRenderIndex-${taskListRenderIndex}`"
           style="height: calc(100vh - 260px); overflow-y: scroll"
+          :key="`taskList-${taskListRenderIndex}`"
       >
         <div
             v-for="task in filteredTasksList"
@@ -106,7 +117,7 @@
               editable
               :dark="dark"
               @updateTask="updateTask"
-              @removeTask="removeTask"
+              @refreshTask="refreshTask"
               @filterByTag="addTagToFilters"
           />
         </div>
@@ -142,6 +153,13 @@ export default {
   data()
   {
     return {
+      filterTypes: {
+        keyword: 'keyword',
+        tags: 'tags',
+        active: 'active',
+        archived: 'archived',
+        done: 'done'
+      },
       filters: {},
       applyFilters: true,
       filteredTasksList: [],
@@ -160,7 +178,8 @@ export default {
   {
     return {
       $updateTask: this.updateTaskInDb,
-      $getTask: this.getTask
+      $getTask: this.getTask,
+      $refreshTask: this.refreshTask
     };
   },
   inject: ['$addOrUpdateTask'],
@@ -187,10 +206,6 @@ export default {
       }
 
       return this.$store.getters['notes/getNote']('tasks').tasks;
-    },
-    numTasks()
-    {
-      return this.tasksList.length;
     },
     taskOptions()
     {
@@ -225,18 +240,12 @@ export default {
       }, []);
     }
   },
-  watch: {
-    numTasks()
-    {
-      this.taskListRenderIndex += 1;
-    }
-  },
   mounted()
   {
     this.loadTasks();
     this.filteredTasksList = this.tasksList;
 
-    const storedFilters = getFromLocalStorage('taskFilters');
+    const storedFilters = getFromLocalStorage('taskFilters', true);
 
     if(storedFilters)
     {
@@ -449,7 +458,7 @@ export default {
       {
         setTimeout(() =>
         {
-          this.taskRenderIndex[taskData.id] = `render-${taskData.id}-${Date.now()}`;
+          this.refreshTask(taskData);
           this.filterTasks();
         }, 100);
       });
@@ -493,6 +502,14 @@ export default {
     removeTask(id)
     {
       this.updateTaskInDb({ id }, true);
+    },
+    refreshTask(task)
+    {
+      this.taskRenderIndex[task.id] = `render-${task.id}-${Date.now()}`;
+    },
+    refreshAll()
+    {
+      this.taskListRenderIndex += 1;
     },
     /** updateTaskInDb with new alert added */
     createAlert(alert)
@@ -586,9 +603,9 @@ export default {
 
       return task;
     },
-    setTagFilter(e)
+    setFilter(type, value)
     {
-      this.filters.tags = e;
+      this.filters[type] = value;
       this.filterTasks();
     }
   }

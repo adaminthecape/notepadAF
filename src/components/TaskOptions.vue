@@ -1,5 +1,11 @@
 <template>
   <div class="row items-center">
+    <TaskAlertButton
+        :task="task"
+        :size="size"
+        flat
+        dense
+    />
     <TaskEditButton
         :editing="isEditing"
         :size="size"
@@ -17,6 +23,8 @@
     <TaskActiveButton
         :active="task.active"
         :size="size"
+        :task="task"
+        mode="save"
         flat
         dense
         @toggle="$emit('updateTask', { ...task, active: $event })"
@@ -28,30 +36,32 @@
         dense
         @toggle="$emit('updateTask', { ...task, archived: $event })"
     />
-    <TaskMenu
+    <TaskDeleteButton
         :task="task"
         :size="size"
-        @removeTask="$emit('removeTask')"
-        @toggleArchived="$emit('toggleArchived')"
-        @createAlert="$emit('createAlert', $event)"
+        flat
+        dense
+        @removed="$emit('taskRemoved', $event)"
     />
   </div>
 </template>
 
 <script>
-import TaskMenu from './TaskMenu';
 import TaskActiveButton from "components/TaskActiveButton";
 import TaskDoneButton from "components/TaskDoneButton";
 import TaskEditButton from "components/TaskEditButton";
 import TaskArchiveButton from "components/TaskArchiveButton";
+import TaskDeleteButton from "components/TaskDeleteButton";
+import TaskAlertButton from "components/TaskAlertButton";
 
 export default {
   components: {
+    TaskAlertButton,
+    TaskDeleteButton,
     TaskArchiveButton,
     TaskEditButton,
     TaskDoneButton,
-    TaskActiveButton,
-    TaskMenu
+    TaskActiveButton
   },
   props: {
     task: {
@@ -66,12 +76,6 @@ export default {
       type: Boolean,
       default: false
     }
-  },
-  data()
-  {
-    return {
-      isRemovingTask: false
-    };
   }
 }
 </script>
