@@ -102,11 +102,13 @@
 import {
   getAppBasePath,
   getFromLocalStorage,
+  saveToLocalStorageArray
+} from "src/utils.js";
+import {
   readFromExternalBackup,
   restoreFromExternalBackup,
-  saveToExternalBackup,
-  saveToLocalStorageArray
-} from "src/utils";
+  saveToExternalBackup
+} from "src/backups.js";
 import * as path from 'path';
 
 export default {

@@ -16,7 +16,7 @@
       </q-card>
     </q-dialog>
     <TaskAlertButton
-        :task="task"
+        :taskId="task.id"
         :size="size"
         :dense="dense"
         :flat="flat"
@@ -42,7 +42,7 @@
         mode="save"
         :dense="dense"
         :flat="flat"
-        @toggle="$updateTask({ ...task, active: $event })"
+        @toggle="updateTask({ ...task, active: $event })"
         @refreshTask="queueTaskRefresh(task.id)"
     />
     <TaskArchiveButton
@@ -50,10 +50,10 @@
         :size="size"
         :dense="dense"
         :flat="flat"
-        @toggle="$updateTask({ ...task, archived: $event })"
+        @toggle="updateTask({ ...task, archived: $event })"
     />
     <TaskDeleteButton
-        :task="task"
+        :taskId="taskId"
         :size="size"
         :dense="dense"
         :flat="flat"
@@ -71,7 +71,7 @@ import TaskDeleteButton from "components/TaskDeleteButton";
 import TaskAlertButton from "components/TaskAlertButton";
 import TaskActivityLog from "components/TaskActivityLog";
 import QPropsMixin from "src/mixins/QPropsMixin";
-import { getTaskByIdFromStore, queueTaskRefresh } from "src/utils";
+import SingleTaskMixin from "src/mixins/SingleTaskMixin";
 
 export default {
   components: {
@@ -83,42 +83,27 @@ export default {
     TaskDoneButton,
     TaskActiveButton
   },
-  mixins: [QPropsMixin],
+  mixins: [QPropsMixin, SingleTaskMixin],
   props: {
-    taskId: {
-      type: String,
-      required: true
-    },
-    size: {
-      type: String,
-      default: 'sm'
-    },
     isEditing: {
       type: Boolean,
       default: false
     }
   },
-  inject: ['$updateTask'],
   data()
   {
     return {
       isViewingActivity: false
     };
   },
-  computed: {
-    task()
-    {
-      return getTaskByIdFromStore(this.$store, this.taskId);
-    }
-  },
   methods: {
-    queueTaskRefresh,
-    toggleDone(e)
+    toggleDone(newVal)
     {
-      this.$updateTask({
+      this.updateTask({
         ...this.task,
-        done: e,
-        alerts: e ? [] : this.task.alerts
+        done: newVal,
+        // clear alerts on marking done
+        alerts: newVal ? [] : this.task.alerts
       });
     }
   }

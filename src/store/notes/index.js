@@ -1,5 +1,4 @@
 import Vue from 'vue';
-import deepmerge from "deepmerge";
 import { readFromDbSync, saveAll } from '../../mixins/jsondb';
 
 const state = {
@@ -29,34 +28,6 @@ const mutations = {
 
         Vue.set(state, 'notes', allNotes);
     },
-    DELETE_NOTE(state, noteId)
-    {
-        if(!noteId)
-        {
-            return;
-        }
-
-        const allNotes = state.notes;
-
-        const existingIndex = allNotes.findIndex((n) => n.id === noteId);
-
-        if(existingIndex > -1)
-        {
-            allNotes.splice(existingIndex, 1);
-
-            Vue.set(state, 'notes', allNotes);
-        }
-    },
-    UPDATE_NOTE(state, { fileId, changes })
-    {
-        state.files.forEach((file, i) =>
-        {
-            if(file.id === fileId)
-            {
-                state.files[i].data = deepmerge(state.files[i].data, changes);
-            }
-        });
-    },
     SAVE_NOTES(state)
     {
         saveAll(state.notes);
@@ -73,8 +44,7 @@ const actions = {
         }
 
         const allNotes = getters.all(state);
-        const existing = allNotes
-            .find((n) => n.id === note.id) || {};
+        const existing = allNotes.find((n) => n.id === note.id) || {};
 
         const now = Date.now();
         const newNote = {
@@ -91,79 +61,12 @@ const actions = {
 
         commit('ADD_NOTE', newNote);
 
+        // OUTPUT DATA: save via API
         commit('SAVE_NOTES');
     },
-    deleteNote({ commit }, { id })
+    loadAll({ commit })
     {
-        console.log('deleteNote', { id });
-        if(!id)
-        {
-            return;
-        }
-
-        commit('DELETE_NOTE', id);
-        commit('SAVE_NOTES');
-    },
-    starNote({ getters, commit }, noteId)
-    {
-        const note = getters.getNote(noteId);
-
-        if(note)
-        {
-            commit('ADD_NOTE', {
-                ...note,
-                isStarred: !note.isStarred
-            });
-        }
-
-        commit('SAVE_NOTES');
-    },
-    attachStory({ getters, commit }, { noteId, storyId })
-    {
-        const note = getters.getNote(noteId);
-
-        if(note)
-        {
-            const stories = structuredClone(note.stories || []);
-
-            stories.push(storyId);
-
-            commit('ADD_NOTE', { ...note, stories });
-        }
-    },
-    removeStory({ getters, commit }, { noteId, storyId })
-    {
-        console.log('removeStory:', { noteId, storyId });
-        const note = getters.getNote(noteId);
-
-        console.log('removeStory:', { note });
-        if(note)
-        {
-            const stories = structuredClone(note.stories || []);
-            const storyIndex = stories.findIndex((s) => s === storyId.toString());
-
-            console.log({
-                storyIndex,
-                stories,
-                id: storyId.toString()
-            });
-
-            if(storyIndex > -1)
-            {
-                stories.splice(storyIndex, 1);
-
-                console.log({
-                    storyIndex,
-                    stories
-                });
-
-                commit('ADD_NOTE', { ...note, stories });
-                commit('SAVE_NOTES');
-            }
-        }
-    },
-    loadAll({ commit, dispatch })
-    {
+        // INPUT DATA: get from API
         const data = readFromDbSync('notesdb.json', true);
 
         let parsed = JSON.parse(data) || {};
@@ -178,15 +81,10 @@ const actions = {
             parsed.notes = [];
         }
 
-        console.log('loadNotes', parsed);
         parsed.notes.forEach((note) =>
         {
             commit('ADD_NOTE', note);
         });
-    },
-    saveAll({ commit })
-    {
-        commit('SAVE_NOTES');
     }
 };
 

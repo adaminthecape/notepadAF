@@ -258,8 +258,6 @@ export function writeToDbSync(
         }
     }
 
-    console.info(1, 'db type:', typeof db);
-
     if(typeof db === 'string')
     {
         try
@@ -271,8 +269,6 @@ export function writeToDbSync(
             console.warn(e);
         }
     }
-
-    console.info(2, 'db type:', typeof db);
 
     if(typeof data === 'string')
     {
@@ -316,7 +312,6 @@ export function writeToDbSync(
 
 export default {
     name: 'DbMixin',
-    inject: ['$notify'],
     methods: {
         readFromDir,
         readFileWithoutError,

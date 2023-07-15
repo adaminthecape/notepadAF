@@ -52,15 +52,3 @@ export const pivotalData = {
         }
     }
 };
-
-export const logTypes = [
-    'mounted',
-    'checkoutBoth',
-    'readFromDb',
-    'writeToDb',
-    'getPivotalStory',
-    'getPivotalEndpoint',
-    'readFromDir',
-    'loadNotes',
-    'updateLogTypes'
-];

@@ -1,5 +1,4 @@
 import axios from 'axios';
-import qs from 'qs';
 
 export function getPivotalToken()
 {
@@ -156,7 +155,6 @@ export default {
             ptRenderKey: 0
         };
     },
-    inject: ['$notify'],
     methods: {
         getPivotalToken,
         getPivotalEndpoint,

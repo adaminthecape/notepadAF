@@ -14,7 +14,7 @@
           <q-item-section>
             <div>
               <div class="q-mb-sm">
-                <span class="text-bold">{{ task.message ? task.message.slice(0, 100) : '' }}</span>
+                <span class="text-bold">{{ task.message ? task.message.slice(0, 50) : '' }}</span>
               </div>
               <div>Are you sure you want to delete?</div>
               <div class="row">
@@ -43,28 +43,29 @@
 
 <script>
 import QPropsMixin from '../mixins/QPropsMixin.js';
+import SingleTaskMixin from '../mixins/SingleTaskMixin.js';
+import { cudTaskViaStore } from "src/utils";
 
 export default {
-  mixins: [QPropsMixin],
-  props: {
-    task: {
-      type: Object,
-      required: true
-    }
-  },
+  mixins: [QPropsMixin, SingleTaskMixin],
   data()
   {
     return {
       isConfirmingDeletion: false
     };
   },
-  inject: ['$addOrUpdateTask'],
   methods: {
     reallyRemoveTask()
     {
-      this.$addOrUpdateTask({ ...this.task, deleted: Date.now() }, true);
-      this.isConfirmingDeletion = false;
-      this.$emit('removed', { ...this.task, deleted: Date.now() });
+      cudTaskViaStore(
+          this.$store,
+          { ...this.task, deleted: Date.now() },
+          true
+      ).then(() =>
+      {
+        this.isConfirmingDeletion = false;
+        this.$emit('removed', { ...this.task, deleted: Date.now() });
+      });
     }
   }
 };

@@ -211,14 +211,10 @@
 </template>
 
 <script>
-import Pivotal from '../mixins/Pivotal.js';
-import DbMixin from '../mixins/jsondb.js';
-import GitMixin from '../mixins/git.js';
 import SimpleLayout from './SimpleLayout.vue';
 import SimpleModal from './SimpleModal.vue';
-import { getFromLocalStorage, saveToLocalStorage } from "src/utils";
 import BackupHandler from "./BackupHandler.vue";
-// import PivotalAction from './PivotalAction';
+import { getFromLocalStorage, saveToLocalStorage } from "src/utils";
 
 export default {
   name: 'Settings',
@@ -227,8 +223,6 @@ export default {
     SimpleModal,
     SimpleLayout
   },
-  mixins: [Pivotal, GitMixin, DbMixin],
-  props: {},
   data()
   {
     const cache = {
@@ -239,17 +233,7 @@ export default {
       pivotalProjectId: getFromLocalStorage('pivotalProjectId'),
       gitModuleBasePath: getFromLocalStorage('gitModuleBasePath')
     };
-
-    let appTabs;
-
-    try
-    {
-      appTabs = JSON.parse(localStorage.getItem('appTabs'));
-    }
-    catch(e)
-    {
-      console.warn(e);
-    }
+    const appTabs = getFromLocalStorage('appTabs', true);
 
     return {
       cache,
@@ -257,19 +241,12 @@ export default {
       appTabs
     };
   },
-  computed: {
-  },
-  async mounted()
-  {
-  },
   methods: {
     saveAppTabs()
     {
       if(Object.keys(this.appTabs || {}).length)
       {
-        console.info('saving tabs:', this.appTabs);
-
-        localStorage.setItem('appTabs', JSON.stringify(this.appTabs));
+        saveToLocalStorage('appTabs', this.appTabs);
       }
     },
     setToken(service)

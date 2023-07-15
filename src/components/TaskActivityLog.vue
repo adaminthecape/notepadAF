@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { cudTask, filterTaskList, queueTaskRefresh } from "src/utils";
+import { cudTaskViaStore, filterTaskList, getAllTasksFromStore, secondsToHumanReadable } from "src/utils";
 
 export default {
   props: {
@@ -66,19 +66,8 @@ export default {
         return;
       }
 
-      const storeFn = async (tasks) =>
-      {
-        await this.$store.dispatch('notes/update', {
-          note: {
-            id: 'tasks',
-            tasks
-          }
-        })
-      };
-
-      cudTask(
-          this.$store.getters['notes/getNote']('tasks').tasks,
-          storeFn,
+      cudTaskViaStore(
+          this.$store,
           {
             ...this.singleTask,
             activity: this.singleTask.activity.filter((l) => (
@@ -88,15 +77,13 @@ export default {
       ).then(() =>
       {
         this.listRenderIndex += 1;
-        queueTaskRefresh(this.singleTask.id);
       });
     },
     setActivity()
     {
       this.singleTask = undefined;
-      const tasks = this.$store.getters['notes/getNote']('tasks');
+      const tasks = getAllTasksFromStore(this.$store);
 
-      console.info('setActivity', tasks, this.filters, filterTaskList(tasks.tasks, this.filters));
       if(!tasks)
       {
         return;
@@ -104,8 +91,8 @@ export default {
 
       const tasksList = ((
           Object.keys(this.filters || {}).length ?
-              filterTaskList(tasks.tasks, this.filters) :
-              tasks.tasks
+              filterTaskList(tasks, this.filters) :
+              tasks
       ) || []);
 
       if(this.filters && this.filters.id && tasksList.length === 1)
@@ -124,7 +111,7 @@ export default {
               agg.push({
                 ...log,
                 duration: log.end && log.start ?
-                    this.secondsToHumanReadable(Math.floor((log.end - log.start) / 1000)) :
+                    secondsToHumanReadable(Math.floor((log.end - log.start) / 1000), true) :
                     0,
                 startDate: new Date(log.start).toLocaleString().split(':').slice(0, 2).join(':'),
                 id: task.id,
@@ -139,37 +126,6 @@ export default {
             return agg;
           }, [])
           .sort((a, b) => (a.start - b.start));
-    },
-    secondsToHumanReadable(seconds)
-    {
-      const minute = 60;
-      const hour = minute * 60;
-      const day = hour * 24;
-      const month = day * 30;
-      const year = month * 12;
-
-      if(seconds > year)
-      {
-        return `${Math.floor(seconds / year)} years`;
-      }
-      else if(seconds > (2 * month))
-      {
-        return `${Math.floor(seconds / month)} months`;
-      }
-      else if(seconds > (2 * day))
-      {
-        return `${Math.floor(seconds / day)} days`;
-      }
-      else if(seconds > (2 * hour))
-      {
-        return `${Math.floor(seconds / hour)} hrs`;
-      }
-      else if(seconds > (2 * minute))
-      {
-        return `${Math.floor(seconds / minute)} min`;
-      }
-
-      return `${seconds} sec`;
     }
   }
 };

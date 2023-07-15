@@ -524,7 +524,7 @@ export default {
       }
       else
       {
-        this.$notify('Results are in an unexpected format!');
+        console.warn('Results are in an unexpected format!');
       }
 
       this.resultsRenderIndex += 1;

@@ -117,7 +117,6 @@
               class="full-width"
               editable
               :dark="dark"
-              @updateTask="updateTask"
               @refreshTask="refreshTask"
               @filterByTag="addTagToFilters"
           />
@@ -132,8 +131,13 @@ import DisplayTask from './DisplayTask';
 import SimpleLayout from './SimpleLayout';
 import TaskTagSelector from './TaskTagSelector';
 import TaskSortDropdown from './TaskSortDropdown';
-import { v4 as uuidv4 } from 'uuid';
-import { filterTaskList, getFromLocalStorage, saveToLocalStorage } from "src/utils";
+import {
+  cudTaskViaStore,
+  filterTaskList,
+  getAllTasksFromStore,
+  getFromLocalStorage,
+  saveToLocalStorage
+} from "src/utils";
 
 export default {
   name: 'Tasks',
@@ -174,14 +178,6 @@ export default {
       refreshCheckInterval: null
     };
   },
-  provide()
-  {
-    return {
-      $updateTask: this.updateTaskInDb,
-      $getTask: this.getTask
-    };
-  },
-  inject: ['$addOrUpdateTask'],
   computed: {
     areFiltersActive()
     {
@@ -199,25 +195,8 @@ export default {
     },
     tasksList()
     {
-      if(!this.$store.getters['notes/getNote']('tasks'))
-      {
-        return [];
-      }
-
-      return this.$store.getters['notes/getNote']('tasks').tasks;
-    },
-    // taskOptions()
-    // {
-    //   if(!this.tasksList || !this.tasksList.length)
-    //   {
-    //     return [];
-    //   }
-    //
-    //   return this.tasksList.map((task) => ({
-    //     label: task.message,
-    //     value: task.id
-    //   }));
-    // }
+      return getAllTasksFromStore(this.$store) || [];
+    }
   },
   mounted()
   {
@@ -248,7 +227,9 @@ export default {
         queue.forEach((id) =>
         {
           this.refreshTask({ id });
-        })
+        });
+
+        console.info('cleared queue');
 
         saveToLocalStorage('taskRefreshQueue', []);
       }
@@ -261,36 +242,12 @@ export default {
       await this.$store.dispatch('notes/loadAll');
       this.tasksLoaded = true;
     },
-    getTask(id)
-    {
-      return this.tasksList.find((task) => task.id === id);
-    },
     /****** Filtering tasks */
     clearFilters()
     {
       this.filters = {};
       this.filterTasks();
     },
-    /** Used with q-select */
-    // filterFn(val, update)
-    // {
-    //   if(!val || val === '')
-    //   {
-    //     update(() =>
-    //     {
-    //       this.filteredTasksList = this.taskOptions;
-    //     });
-    //
-    //     return;
-    //   }
-    //
-    //   update(() =>
-    //   {
-    //     const needle = val.toLowerCase();
-    //
-    //     this.filteredTasksList = this.taskOptions.filter((n) => n.label.toLowerCase().indexOf(needle) > -1);
-    //   });
-    // },
     /** Actual filtering logic. Sorts after filtering. Saves filters to localStorage. */
     filterTasks()
     {
@@ -425,55 +382,32 @@ export default {
       this.sortTasks();
     },
     /****** Updating tasks */
-    updateTaskInDb(taskData, deleteTask = false)
-    {
-      console.info({ taskData });
-      this.$addOrUpdateTask(taskData, deleteTask).then(() =>
-      {
-        setTimeout(() =>
-        {
-          this.refreshTask(taskData);
-          this.filterTasks();
-        }, 100);
-      });
-    },
     createTask()
     {
-      const newId = uuidv4();
-
       try
       {
         if(this.newTask.message)
         {
-          const newTask = this.applyFiltersToTask({
-            id: newId,
+          const t = {
             message: this.newTask.message,
             created: Date.now()
-          });
+          };
+
+          const newTask = this.applyFilters ? this.applyFiltersToTask(t, this.filters) : t;
 
           this.tasksList.push(newTask);
 
-          this.updateTaskInDb(newTask);
+          cudTaskViaStore(this.$store, newTask).then(() =>
+          {
+            this.newTask = { message: null };
+            this.loadTasks();
+          });
         }
-
-        this.newTask = { message: null };
-
-        this.loadTasks();
       }
       catch(e)
       {
         console.error(e);
       }
-    },
-    /** updateTaskInDb with delete: false */
-    updateTask(task)
-    {
-      this.updateTaskInDb(task);
-    },
-    /** updateTaskInDb with delete: true */
-    removeTask(id)
-    {
-      this.updateTaskInDb({ id }, true);
     },
     refreshTask(task)
     {
@@ -483,52 +417,11 @@ export default {
     {
       this.taskListRenderIndex += 1;
     },
-    /** updateTaskInDb with new alert added */
-    createAlert(alert)
-    {
-      if(!alert || !alert.id || !alert.date)
-      {
-        console.warn('Not enough data for alert!', alert);
-
-        return;
-      }
-
-      const task = this.addAlertToTask(
-          this.getTask(alert.id),
-          alert
-      );
-
-      this.updateTaskInDb(task);
-    },
     /****** Helpers */
-    /** @returns task with alert */
-    addAlertToTask(task, alert)
-    {
-      if(!task)
-      {
-        console.warn('Task not found!', alert);
-
-        return;
-      }
-
-      if(!task.alerts)
-      {
-        task.alerts = [];
-      }
-
-      if(alert.id)
-      {
-        delete alert.id;
-      }
-
-      task.alerts.push(alert);
-
-      return task;
-    },
     /** @returns task with current filters merged in */
-    applyFiltersToTask(task)
+    applyFiltersToTask(task, filters)
     {
-      if(!this.applyFilters || !Object.keys(this.filters || {}).length)
+      if(!Object.keys(filters || {}).length)
       {
         return task;
       }
@@ -540,29 +433,29 @@ export default {
         task.tags = [];
       }
 
-      if(this.filters.tags && this.filters.tags.length)
+      if(filters.tags && filters.tags.length)
       {
-        task.tags = [...task.tags, ...this.filters.tags];
+        task.tags = [...task.tags, ...filters.tags];
       }
 
-      if(this.filters.keyword)
+      if(filters.keyword)
       {
-        task.tags = [...task.tags, this.filters.keyword];
+        task.tags = [...task.tags, filters.keyword];
       }
 
       ['active', 'archived'].forEach((bool) =>
       {
-        if(typeof this.filters[bool] === 'boolean')
+        if(typeof filters[bool] === 'boolean')
         {
-          task[bool] = this.filters[bool];
+          task[bool] = filters[bool];
         }
       });
 
       ['done'].forEach((num) =>
       {
-        if(typeof this.filters[num] === 'boolean')
+        if(typeof filters[num] === 'boolean')
         {
-          if(this.filters[num])
+          if(filters[num])
           {
             task[num] = now;
           }

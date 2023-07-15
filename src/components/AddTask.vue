@@ -111,7 +111,6 @@
         newTaskRenderIndex: 0
       };
     },
-    inject: ['$addOrUpdateTask'],
     methods: {
       open()
       {
@@ -134,7 +133,7 @@
 
         this.newTask.tags = tags;
 
-        this.$addOrUpdateTask(this.newTask);
+        this.updateTask(this.newTask);
         this.newTask = { ...this.initialTaskData };
         this.$refs.messageInput.focus();
       },

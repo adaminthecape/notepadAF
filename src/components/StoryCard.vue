@@ -10,16 +10,6 @@
     <template #activator="{ open }">
       <div class="col" @click="open">
         <div class="items-center q-my-sm">
-          <q-btn
-              v-if="clearable"
-              icon="close"
-              color="negative"
-              :dense="dense"
-              flat
-              :size="dense ? 'sm' : 'md'"
-              class="q-mr-xs"
-              @click.stop.prevent="removeStory"
-          />
           <q-badge
               :label="story.estimate === 0 ? 0 : story.estimate || '?'"
               class="q-mr-xs"
@@ -66,33 +56,6 @@
           >
             <q-tooltip>Copy story ID</q-tooltip>
           </q-btn>
-          <SimpleModal
-            v-if="relatedNotes.length"
-            style="display: inline"
-          >
-            <template #activator="{ open }">
-              <q-btn
-                  :label="`${relatedNotes.length} notes`"
-                  color="primary"
-                  :dense="dense"
-                  flat
-                  @click.stop.prevent="open"
-              />
-            </template>
-            <template #content>
-              <q-card
-                  v-for="noteId in relatedNotes"
-                  :key="`noteCard-${noteId}`"
-                  bordered
-                  class="q-pa-none q-ma-none"
-              >
-                <NoteCard
-                    :noteId="noteId"
-                    @selectedNote="$openNote(noteId)"
-                />
-              </q-card>
-            </template>
-          </SimpleModal>
           <q-btn-group>
             <q-btn
                 v-if="allowAddTasks"
@@ -154,7 +117,6 @@
 
 <script>
   import DisplayStory from './DisplayStory';
-  import NoteCard from './NoteCard';
   import SimpleModal from './SimpleModal';
   import AddTask from "components/AddTask";
   import { getFromLocalStorage, saveToLocalStorage, copyToClipboard } from "src/utils";
@@ -164,7 +126,6 @@
     components: {
       AddTask,
       DisplayStory,
-      NoteCard,
       SimpleModal
     },
     props: {
@@ -184,16 +145,12 @@
         type: Boolean,
         default: true
       },
-      clearable: {
-        type: Boolean,
-        default: false
-      },
       allowAddTasks: {
         type: Boolean,
         default: false
       }
     },
-    inject: ['$openLink', '$openNote', '$addOrUpdateTask', '$openTab'],
+    inject: ['$openLink', '$openNote', '$openTab'],
     computed: {
       story()
       {
@@ -222,20 +179,6 @@
     },
     methods: {
       copyToClipboard,
-      removeStory()
-      {
-        if(!this.noteId)
-        {
-          return;
-        }
-
-        this.$store.dispatch('notes/removeStory', {
-          noteId: this.noteId,
-          storyId: this.story.id
-        });
-
-        this.$emit('removed');
-      },
       openTasksForStory()
       {
         const existingFilters = getFromLocalStorage('taskFilters', true);

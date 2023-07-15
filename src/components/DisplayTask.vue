@@ -31,9 +31,9 @@
             </q-chip>
           </div>
           <!-- VIEW ALERTS: -->
-          <div v-else-if="alerts.length" style="margin-left: -10px">
+          <div v-else-if="task.alerts && task.alerts.length" style="margin-left: -10px">
             <q-btn
-                v-for="(alert, a) in alerts"
+                v-for="(alert, a) in task.alerts"
                 :key="`alert-${a}-${activeAlertsRenderKey}`"
                 size="sm"
                 class="text-bold"
@@ -72,7 +72,6 @@
                 @editTask="editTask"
                 @updateTask="updateTask"
                 @taskRemoved="$emit('refreshTask', $event)"
-                @toggleArchived="toggleArchived"
             />
           </div>
         </div>
@@ -107,7 +106,7 @@
                     class="q-ml-xs"
                     flat
                     dense
-                    @click="updateTaskAndStopEditing"
+                    @click="editTask(false)"
                 />
                 <q-btn
                     icon="list"
@@ -128,13 +127,12 @@
         <div class="row items-center" style="margin: 0 -12px;">
           <!-- ADD TAGS: -->
           <q-btn
-              v-show="!addingTag"
               icon="add"
               size="sm"
               dense
               round
               flat
-              @click="toggleAddingTag"
+              @click="addingTag = !addingTag"
           />
           <!-- MANAGE TAGS: -->
           <q-chip
@@ -145,7 +143,6 @@
               dark
           >
             <TaskTagSelector
-                ref="newTagSelector"
                 dark
                 new-value-mode
                 @cancel="addingTag = false"
@@ -181,11 +178,11 @@
 </template>
 
 <script>
-import uniq from 'lodash/uniq';
-import { timeSince, flashTaskbarIcon, clearAllFlashes } from "../utils";
+import { timeSince } from "../utils";
 import TaskTagSelector from './TaskTagSelector';
 import TaskStoryDropdown from './TaskStoryDropdown';
 import TaskOptions from './TaskOptions';
+import SingleTaskMixin from "src/mixins/SingleTaskMixin";
 
 export default {
   components: {
@@ -193,64 +190,22 @@ export default {
     TaskStoryDropdown,
     TaskOptions
   },
-  props: {
-    taskId: {
-      type: String,
-      required: true
-    }
-  },
+  mixins: [SingleTaskMixin],
   data()
   {
     return {
       addingTag: false,
-      newTag: null,
-      task: {
-        id: this.taskId,
-        message: null,
-        description: null,
-        done: null,
-        links: [],
-        tags: []
-      },
       alarmTimeouts: [],
       alarmTickTimeout: null,
       activeAlertsRenderKey: 10000,
-      isEditing: false,
-      isCreatingAlert: false
+      isEditing: false
     };
   },
   inject: ['$openLink'],
   computed: {
-    stories()
-    {
-      if(this.task)
-      {
-        return uniq(
-          `${JSON.stringify(this.task.tags || [])} ${this.task.message}`
-            .match(/1\d{8}/g)
-        ).map((id) => ({
-          id: parseInt(id, 10),
-          link: `https://www.pivotaltracker.com/story/show/${id}`
-        }));
-      }
-
-      return [];
-    },
-    alerts()
-    {
-      if(this.task && this.task.alerts && this.task.alerts.length)
-      {
-        return this.task.alerts;
-      }
-
-      return [];
-    }
   },
   mounted()
   {
-    // load stories
-    // this.$store.dispatch();
-    this.loadTask();
     this.setAlarms();
     this.tickAlarms();
   },
@@ -303,37 +258,6 @@ export default {
         });
       }
     },
-    /** load tasks */
-    loadTask()
-    {
-      const note = this.$store.getters['notes/getNote']('tasks');
-      let task = null;
-
-      if(note && note.tasks && note.tasks.length)
-      {
-        task = note.tasks.find((task) => task.id === this.taskId);
-      }
-
-      if(task && Object.keys(task).length)
-      {
-        this.task = {
-          ...this.task,
-          ...task
-        };
-      }
-
-      return null;
-    },
-    /** manage tasks */
-    updateTask(task)
-    {
-      this.$emit('updateTask', task);
-    },
-    updateTaskAndStopEditing()
-    {
-      this.updateTask(this.task);
-      this.editTask(false);
-    },
     /** manage alarms */
     tickAlarms()
     {
@@ -351,7 +275,7 @@ export default {
     {
       this.alarmTimeouts.forEach((timeout) => clearTimeout(timeout));
       this.alarmTimeouts = [];
-      clearAllFlashes();
+      // clearAllFlashes();
     },
     setAlarms()
     {
@@ -359,7 +283,7 @@ export default {
 
       const now = Date.now();
 
-      this.alerts.forEach((alert) =>
+      (this.task.alerts || []).forEach((alert) =>
       {
         const diff = (alert.unix - now);
 
@@ -373,46 +297,9 @@ export default {
     },
     triggerAlarm()
     {
-      const disable = flashTaskbarIcon();
-
-      setTimeout(() => disable(), 2 * 60 * 1000);
-    },
-    /** set alarms */
-    getTaskDataWithNewAlert(alert)
-    {
-      if(!this.task)
-      {
-        console.warn('Task not found!', alert);
-
-        return;
-      }
-
-      if(!this.task.alerts)
-      {
-        this.task.alerts = [];
-      }
-
-      if(alert.id)
-      {
-        delete alert.id;
-      }
-
-      this.task.alerts.push(alert);
-
-      return this.task;
-    },
-    addAlertToTask(alert)
-    {
-      if(!this.task || !alert || !alert.time || !alert.date)
-      {
-        console.warn('Not enough data for alert!', alert);
-
-        return;
-      }
-
-      const task = this.getTaskDataWithNewAlert(alert);
-
-      this.updateTask(task);
+      // const disable = flashTaskbarIcon();
+      //
+      // setTimeout(() => disable(), 2 * 60 * 1000);
     },
     removeAlert(alert)
     {
@@ -428,48 +315,30 @@ export default {
       this.updateTask({ ...this.task, alerts });
     },
     /** manage tags */
-    toggleAddingTag()
-    {
-      this.addingTag = !this.addingTag;
-    },
     addTag(tag)
     {
       if(!this.task.tags.includes(tag))
       {
-        this.task.tags.push(tag);
+        this.updateTask({
+          ...this.task,
+          tags: [...this.task.tags, tag]
+        });
       }
 
-      this.updateTask(this.task);
-
-      this.newTag = null;
       this.addingTag = false;
     },
     removeTag(tag)
     {
-      this.task.tags = (this.task.tags || [])
-          .filter((t) => t !== tag);
+      const tags = (this.task.tags || []).filter((t) => t !== tag);
 
-      this.updateTask(this.task);
+      this.updateTask({ ...this.task, tags });
     },
     /** manage task props */
     toggleTextarea()
     {
-      let messageType = 'textarea';
-
-      if(this.task.messageType === 'textarea')
-      {
-        messageType = undefined;
-      }
-
-      this.task.messageType = messageType;
-
-      this.updateTask({ ...this.task, messageType });
-    },
-    toggleArchived()
-    {
       this.updateTask({
         ...this.task,
-        archived: !this.task.archived
+        messageType: this.task.messageType === 'textarea' ? undefined : 'textarea'
       });
     }
   }

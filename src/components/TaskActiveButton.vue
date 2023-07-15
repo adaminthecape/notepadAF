@@ -36,11 +36,12 @@
 </template>
 
 <script>
-  import { timeSince, getTaskByIdFromStore } from '../utils';
+import { timeSince } from "../utils";
   import QPropsMixin from '../mixins/QPropsMixin.js';
+  import SingleTaskMixin from "src/mixins/SingleTaskMixin";
 
   export default {
-    mixins: [QPropsMixin],
+    mixins: [QPropsMixin, SingleTaskMixin],
     props: {
       active: {
         type: [Number, Boolean],
@@ -62,13 +63,6 @@
         logNote: undefined,
         isAddingNote: false
       };
-    },
-    inject: ['$addOrUpdateTask'],
-    computed: {
-      task()
-      {
-        return getTaskByIdFromStore(this.$store, this.taskId);
-      }
     },
     mounted()
     {
@@ -104,8 +98,6 @@
           return;
         }
 
-        console.info({ logNote: this.logNote });
-
         const task = structuredClone(this.task);
 
         if(!task.activity)
@@ -136,11 +128,10 @@
           }
         }
 
-        console.info('new activity:', task.activity);
-
-        this.$addOrUpdateTask(task).then(() =>
+        this.updateTask(task).then(() =>
         {
           this.$emit('refreshTask', task);
+          this.isAddingNote = false;
         });
       }
     }

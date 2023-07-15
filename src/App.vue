@@ -27,12 +27,6 @@
           :key="tasksRenderIndex"
       />
     </div>
-    <div v-if="currentTab === 'notes'">
-      <Notes
-          :desiredNoteId="desiredNoteId"
-          :key="notesRenderIndex"
-      />
-    </div>
     <div v-if="currentTab === 'tickets'">
       <MyTickets
           class="q-pa-md"
@@ -47,20 +41,21 @@
 </template>
 
 <script>
-  import Notes from './components/Notes';
   import TasksActivity from './components/TasksActivity';
   import MyTickets from './components/MyTickets';
   import Settings from './components/Settings';
-  import { cudTask, getFromLocalStorage, openInBrowser, saveToLocalStorage } from "src/utils";
-  import { v4 as uuidv4 } from 'uuid';
+  import {
+    getFromLocalStorage,
+    saveToLocalStorage,
+    openInBrowser
+  } from "src/utils";
 
   export default {
     name: 'App',
     components: {
-      Notes,
-      Settings,
+      TasksActivity,
       MyTickets,
-      TasksActivity
+      Settings
     },
     data()
     {
@@ -120,28 +115,15 @@
     provide()
     {
       return {
-        $notify: this.notify,
         $openLink: openInBrowser,
         $openNote: this.openNote,
-        $openTab: this.openTab,
-        $addOrUpdateTask: this.addOrUpdateTask
+        $openTab: this.openTab
       };
     },
     computed: {
       activeAppTabs()
       {
         return this.appTabs.filter((t) => t.active);
-      },
-      tasksList()
-      {
-        const note = this.$store.getters['notes/getNote']('tasks');
-
-        if(note)
-        {
-          return note.tasks.map((t) => ({ ...t, id: t.id || uuidv4() }));
-        }
-
-        return null;
       }
     },
     mounted()
@@ -154,31 +136,6 @@
       }
     },
     methods: {
-      /**
-       * Update task via db interface. Do NOT use any other fn to dispatch task updates,
-       * unless it goes through this.
-       * @param {Object} taskData
-       * @param {boolean} deleteTask
-       */
-      async addOrUpdateTask(taskData, deleteTask = false)
-      {
-        const storeFn = async (tasks) =>
-        {
-          await this.$store.dispatch('notes/update', {
-            note: {
-              id: 'tasks',
-              tasks
-            }
-          })
-        };
-
-        await cudTask(
-            this.tasksList,
-            storeFn,
-            taskData,
-            deleteTask
-        );
-      },
       openNote(noteId)
       {
         this.desiredNoteId = noteId;
@@ -189,70 +146,9 @@
       {
         this.currentTab = tab;
       },
-      setActivityCache(data)
-      {
-        this.activityCache = data;
-      },
       setTicketCache(data)
       {
         this.ticketCache = data;
-      },
-      notify(message, opts, action)
-      {
-        opts = opts ?
-            {
-              progress: typeof opts.progress === 'boolean' ? opts.progress : true,
-              timeout: opts.timeout || 2000,
-              position: opts.progress || 'bottom',
-              color: opts.color || 'primary'
-            } :
-            {
-              progress: true,
-              timeout: 2000,
-              position: 'bottom',
-              color: 'primary'
-            };
-
-        this.$q.notify({
-          message,
-          color: opts.color,
-          position: opts.position,
-          timeout: opts.timeout,
-          progress: opts.progress,
-          actions: !action ? undefined : [
-            {
-              label: action.label,
-              color: 'negative',
-              handler: () =>
-              {
-                this.$q.dialog({
-                  title: action.title,
-                  message: action.message,
-                  cancel: true,
-                  persistent: true
-                })
-                    .onOk(() =>
-                    {
-                      if(typeof action.onSuccess === 'function')
-                      {
-                        action.onSuccess();
-                      }
-                    })
-                    .onCancel(() =>
-                    {
-                      if(typeof action.onCancel === 'function')
-                      {
-                        action.onCancel();
-                      }
-                    });
-              }
-            },
-            {
-              label: 'Dismiss',
-              color: 'white'
-            }
-          ]
-        });
       }
     }
   }

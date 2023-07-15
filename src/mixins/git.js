@@ -81,7 +81,6 @@ export default {
             moduleBasePath: getFromLocalStorage('gitModuleBasePath')
         };
     },
-    inject: ['$notify'],
     methods: {
         runCmd,
         checkModule(module)

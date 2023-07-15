@@ -25,23 +25,19 @@
 
 <script>
 import QPropsMixin from '../mixins/QPropsMixin.js';
+import SingleTaskMixin from "src/mixins/SingleTaskMixin";
 import CreateAlert from "components/CreateAlert";
+import { cudTaskViaStore, queueTaskRefresh } from "src/utils";
 
 export default {
-  components: { CreateAlert }, mixins: [QPropsMixin],
-  props: {
-    task: {
-      type: Object,
-      required: true
-    }
-  },
+  components: { CreateAlert },
+  mixins: [QPropsMixin, SingleTaskMixin],
   data()
   {
     return {
       isCreatingAlert: false
     };
   },
-  inject: ['$addOrUpdateTask'],
   methods: {
     getTaskDataWithNewAlert(alert)
     {
@@ -52,7 +48,7 @@ export default {
         return;
       }
 
-      const task = { ...this.task };
+      const task = structuredClone(this.task);
 
       if(!task.alerts)
       {
@@ -79,8 +75,11 @@ export default {
 
       const task = this.getTaskDataWithNewAlert(alert);
 
-      this.$addOrUpdateTask(task);
-      this.isCreatingAlert = false;
+      cudTaskViaStore(this.$store, task).then(() =>
+      {
+        queueTaskRefresh(task.id);
+        this.isCreatingAlert = false;
+      });
     }
   }
 };

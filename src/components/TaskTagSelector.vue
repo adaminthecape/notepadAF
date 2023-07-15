@@ -23,14 +23,14 @@
         <q-item-section class="text-grey">
           <div v-if="!newValueMode">No results</div>
           <div v-else class="text-amber">
-            Press Enter to add
+            Press Enter then Tab to add
           </div>
         </q-item-section>
       </q-item>
     </template>
     <template #append>
       <q-btn
-          v-if="!newValueMode"
+          v-if="value && value.length && !newValueMode"
           icon="content_copy"
           round
           dense
@@ -41,6 +41,7 @@
         <q-tooltip>Copy</q-tooltip>
       </q-btn>
       <q-btn
+          v-if="value && value.length"
           icon="close"
           round
           dense
@@ -53,6 +54,8 @@
 </template>
 
 <script>
+import { getAllTasksFromStore } from "src/utils";
+
 export default {
   props: {
     inputValue: {
@@ -86,14 +89,7 @@ export default {
   computed: {
     tasksList()
     {
-      const note = this.$store.getters['notes/getNote']('tasks');
-
-      if(note)
-      {
-        return note.tasks;
-      }
-
-      return null;
+      return getAllTasksFromStore(this.$store);
     },
     allTags()
     {

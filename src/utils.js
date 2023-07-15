@@ -1,32 +1,9 @@
-import { shell } from 'electron';
-import * as path from 'path';
-import * as moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import { fsWriteSync, readFromDbSync } from 'src/mixins/jsondb';
 
 export function openInBrowser(link)
 {
-    shell.openExternal(link);
-}
-
-export function flashTaskbarIcon()
-{
-    const window = require ("electron").remote.getCurrentWindow();
-
-    const disable = () => window.flashFrame(false);
-
-    window.once('focus', disable);
-    window.flashFrame(true);
-
-    return disable;
-}
-
-export function clearAllFlashes()
-{
-    const window = require ("electron").remote.getCurrentWindow();
-
-    window.flashFrame(false);
-    window.focus();
+    require("electron").shell.openExternal(link);
+    // window.open(link, '_blank');
 }
 
 export function getAppBasePath()
@@ -39,6 +16,12 @@ export function getAppBasePath()
         // .replace('.quasar\\electron', '');
 }
 
+/** Local storage operations */
+/**
+ * Save a value to localStorage. Objects are automatically stringified.
+ * @param name
+ * @param data
+ */
 export function saveToLocalStorage(name, data)
 {
     if(data && typeof data === 'object')
@@ -85,11 +68,11 @@ export function getFromLocalStorage(name, forceObject = false)
     }
 }
 
-export function timeSince(time)
-{
-    return moment(time).fromNow();
-}
-
+/**
+ * Insert a value into an existing array in localStorage, if not already in the array.
+ * @param name
+ * @param data
+ */
 export function saveToLocalStorageArray(name, data)
 {
     const existingData = getFromLocalStorage(name) || [];
@@ -118,150 +101,8 @@ export function saveToLocalStorageArray(name, data)
     saveToLocalStorage(name, JSON.stringify(existingData));
 }
 
-export function saveToExternalBackup(
-    source, //: { dir: string, file: string, ext: string }
-    target //: { dir: string, file: string, ext: string }
-)
-{
-    if(!target || !source)
-    {
-        console.warn({ source, target });
-
-        throw new Error('You need a target and a source to save a backup!');
-    }
-
-    const sourcePath = path.join(source.dir, `${source.file}.${source.ext}`);
-    const targetPath = path.join(target.dir, `${target.file}.${target.ext}`);
-
-    console.warn('sourcePath:', sourcePath, targetPath);
-
-    let fileData = readFromDbSync(sourcePath, false);
-
-    if(!fileData)
-    {
-        console.warn({ source, target });
-
-        throw new Error('No data found to back up!');
-    }
-
-    if(typeof fileData === 'string')
-    {
-        try
-        {
-            fileData = JSON.parse(fileData);
-        }
-        catch(e)
-        {
-            //
-        }
-    }
-
-    if(typeof fileData === 'string')
-    {
-        try
-        {
-            fileData = JSON.parse(fileData);
-        }
-        catch(e)
-        {
-            //
-        }
-    }
-
-    console.info({ fileData });
-
-    fsWriteSync(targetPath, fileData);
-
-    saveToLocalStorageArray('external_backups', target);
-}
-
-export function restoreFromExternalBackup(
-    target, //: { dir: string, file: string, ext: string }
-    source //: { dir: string, file: string, ext: string }
-)
-{
-    if(!target || !source)
-    {
-        console.warn({ source, target });
-
-        throw new Error('You need a target and a source to save a backup!');
-    }
-
-    const sourcePath = path.join(source.dir, `${source.file}.${source.ext}`);
-    const targetPath = path.join(target.dir, `${target.file}.${target.ext}`);
-
-    const fileData = readFromDbSync(sourcePath, false);
-
-    if(!fileData)
-    {
-        console.warn({ source, target });
-
-        throw new Error('No data found to restore from!');
-    }
-
-    let dataToSave = JSON.parse(fileData);
-
-    if(typeof dataToSave === 'string')
-    {
-        try
-        {
-            dataToSave = JSON.parse(dataToSave);
-        }
-        catch(e)
-        {
-            //
-        }
-    }
-
-    if(typeof dataToSave === 'string')
-    {
-        try
-        {
-            dataToSave = JSON.parse(dataToSave);
-        }
-        catch(e)
-        {
-            //
-        }
-    }
-
-    console.info({ dataToSave });
-
-    fsWriteSync(targetPath, dataToSave);
-}
-
-export function readFromExternalBackup(
-    source //: { dir: string, file: string, ext: string }
-)
-{
-    if(!source)
-    {
-        console.warn('You need a source to load a backup!', { source });
-
-        return null;
-    }
-
-    const sourcePath = path.join(source.dir, `${source.file}.${source.ext}`);
-
-    return readFromDbSync(sourcePath, false);
-}
-
-export function copyToClipboard(value)
-{
-    if(Array.isArray(value))
-    {
-        navigator.clipboard.writeText(value.join(', '));
-    }
-    else if(value && typeof value === 'object')
-    {
-        navigator.clipboard.writeText(JSON.stringify(value));
-    }
-    else
-    {
-        navigator.clipboard.writeText(value);
-    }
-}
-
+/** Filtering tasks */
+/** Helper for `filterTaskList` */
 export function checkFilterBool(prop, task, filters)
 {
     return typeof filters[prop] === 'boolean' ?
@@ -269,6 +110,7 @@ export function checkFilterBool(prop, task, filters)
         true;
 }
 
+/** Filter the list of tasks based on provided filters */
 export function filterTaskList(tasks, filters)
 {
     return tasks.filter((task) => (
@@ -294,19 +136,24 @@ export function filterTaskList(tasks, filters)
     ));
 }
 
-export async function cudTask(
-    tasksList,
-    storeUpdater,
-    taskData,
-    deleteTask = false
-)
+/** CRUD for tasks */
+/**
+ * Create/update/delete a task, independent of store interface.
+ * Requires a store updater function which dispatches an API call.
+ * @param tasksList
+ * @param storeUpdater
+ * @param taskData
+ * @param deleteTask
+ * @returns {Promise<void>}
+ */
+export async function cudTask(tasksList, storeUpdater, taskData, deleteTask = false)
 {
     if(!storeUpdater || typeof storeUpdater !== 'function')
     {
         throw new Error('A store interface is required');
     }
 
-    console.info('addOrUpdateTask:', taskData);
+    console.info('cudTask:', taskData);
     if(!taskData)
     {
         console.warn('bad task!', taskData);
@@ -321,12 +168,14 @@ export async function cudTask(
         return;
     }
 
-    if(!taskData.id)
+    const taskDataClone = structuredClone(taskData);
+
+    if(!taskDataClone.id)
     {
-        taskData.id = uuidv4();
+        taskDataClone.id = uuidv4();
     }
 
-    taskData.updated = Date.now();
+    taskDataClone.updated = Date.now();
 
     let foundTaskIndex = -1;
 
@@ -334,7 +183,7 @@ export async function cudTask(
     {
         if(task)
         {
-            if(task.id === taskData.id)
+            if(task.id === taskDataClone.id)
             {
                 foundTaskIndex = t;
 
@@ -346,7 +195,7 @@ export async function cudTask(
 
                 return {
                     ...task,
-                    ...taskData
+                    ...taskDataClone
                 };
             }
         }
@@ -358,24 +207,200 @@ export async function cudTask(
     {
         if(foundTaskIndex === -1)
         {
-            tasks.push(taskData);
+            tasks.push(taskDataClone);
         }
     }
 
     await storeUpdater(tasks);
 }
 
+/**
+ * Update task via db interface. Do NOT use any other fn to dispatch task updates,
+ * unless it goes through here.
+ * @param {Object} store
+ * @param {Object} taskData
+ * @param {boolean} deleteTask
+ */
+export async function cudTaskViaStore(store, taskData, deleteTask = false)
+{
+    const storeFn = async (tasks) =>
+    {
+        await store.dispatch('notes/update', {
+            note: {
+                id: 'tasks',
+                tasks
+            }
+        })
+    };
+
+    await cudTask(
+        getAllTasksFromStore(store),
+        storeFn,
+        taskData,
+        deleteTask
+    );
+
+    queueTaskRefresh(taskData.id);
+}
+
+/**
+ * Add a task id to an array which is checked by TasksActivity.
+ * The task will be re-rendered when the array value is checked.
+ * @param id
+ */
 export function queueTaskRefresh(id)
 {
     console.info('queue:', id);
     saveToLocalStorageArray('taskRefreshQueue', id);
 }
 
+export function getAllTasksFromStore(store)
+{
+    if(!store) return undefined;
+
+    return store.getters['notes/getNote']('tasks') ?
+        store.getters['notes/getNote']('tasks').tasks :
+        undefined;
+}
+
 export function getTaskByIdFromStore(store, id)
 {
     if(!id || !store) return undefined;
 
-    return store.getters['notes/getNote']('tasks') ?
-        (store.getters['notes/getNote']('tasks').tasks || []).find((t) => t.id === id) :
-        undefined;
+    return getAllTasksFromStore(store).find((t) => t.id === id);
+}
+
+/** General helpers */
+/** Various time units as seconds */
+export const secondsIn = {
+    minute: 60,
+    hour: 60 * 60,
+    day: 60 * 60 * 24,
+    month: 60 * 60 * 24 * 30,
+    year: 60 * 60 * 24 * 30 * 12
+};
+
+export function secondsToHumanReadable(seconds, short = false)
+{
+    const shorts = {
+        minute: 'm',
+        hour: 'h',
+        day: 'd',
+        month: 'mo',
+        year: 'y'
+    };
+
+    let res = `${seconds} ${short ? 's' : 'seconds'}`;
+
+    Object.keys(secondsIn).forEach((x) =>
+    {
+        if(seconds > secondsIn[x])
+        {
+            if(seconds > (2 * secondsIn[x]))
+            {
+                res = `${Math.floor(seconds / secondsIn[x])} ${short ? shorts[x] : `${x}s`}`;
+            }
+            else
+            {
+                res = short ? `1 ${shorts[x]}` : `a ${x}`;
+            }
+        }
+    });
+
+    return res;
+}
+
+export function timeSince(time)
+{
+    const diff = Math.floor((Date.now() - time) / 1000);
+
+    if(diff > 0)
+    {
+        return `${secondsToHumanReadable(diff)} ago`;
+    }
+    else
+    {
+        return `in ${secondsToHumanReadable(-diff)}`;
+    }
+}
+
+/** Send an app-wide notification. */
+export function qNotify(q, message, opts, action)
+{
+    if(!q) return;
+
+    opts = opts ?
+        {
+            progress: typeof opts.progress === 'boolean' ? opts.progress : true,
+            timeout: opts.timeout || 2000,
+            position: opts.progress || 'bottom',
+            color: opts.color || 'primary'
+        } :
+        {
+            progress: true,
+            timeout: 2000,
+            position: 'bottom',
+            color: 'primary'
+        };
+
+    q.notify({
+        message,
+        color: opts.color,
+        position: opts.position,
+        timeout: opts.timeout,
+        progress: opts.progress,
+        actions: !action ? undefined : [
+            {
+                label: action.label,
+                color: 'negative',
+                handler: () =>
+                {
+                    q.dialog({
+                        title: action.title,
+                        message: action.message,
+                        cancel: true,
+                        persistent: true
+                    })
+                        .onOk(() =>
+                        {
+                            if(typeof action.onSuccess === 'function')
+                            {
+                                action.onSuccess();
+                            }
+                        })
+                        .onCancel(() =>
+                        {
+                            if(typeof action.onCancel === 'function')
+                            {
+                                action.onCancel();
+                            }
+                        });
+                }
+            },
+            {
+                label: 'Dismiss',
+                color: 'white'
+            }
+        ]
+    });
+}
+
+/**
+ * Copy text or objects to the clipboard.
+ * @param value
+ */
+export function copyToClipboard(value)
+{
+    if(Array.isArray(value))
+    {
+        navigator.clipboard.writeText(value.join(', '));
+    }
+    else if(value && typeof value === 'object')
+    {
+        navigator.clipboard.writeText(JSON.stringify(value));
+    }
+    else
+    {
+        navigator.clipboard.writeText(value);
+    }
 }
