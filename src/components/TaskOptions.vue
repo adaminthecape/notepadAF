@@ -38,26 +38,26 @@
     <TaskActiveButton
         :active="task.active"
         :size="size"
-        :task="task"
+        :taskId="task.id"
         mode="save"
         :dense="dense"
         :flat="flat"
-        @toggle="$emit('updateTask', { ...task, active: $event })"
-        @refreshTask="$refreshTask(task)"
+        @toggle="$updateTask({ ...task, active: $event })"
+        @refreshTask="queueTaskRefresh(task.id)"
     />
     <TaskArchiveButton
         :archived="task.archived"
         :size="size"
         :dense="dense"
         :flat="flat"
-        @toggle="$emit('updateTask', { ...task, archived: $event })"
+        @toggle="$updateTask({ ...task, archived: $event })"
     />
     <TaskDeleteButton
         :task="task"
         :size="size"
         :dense="dense"
         :flat="flat"
-        @removed="$emit('taskRemoved', $event)"
+        @removed="queueTaskRefresh(task.id)"
     />
   </div>
 </template>
@@ -71,6 +71,7 @@ import TaskDeleteButton from "components/TaskDeleteButton";
 import TaskAlertButton from "components/TaskAlertButton";
 import TaskActivityLog from "components/TaskActivityLog";
 import QPropsMixin from "src/mixins/QPropsMixin";
+import { getTaskByIdFromStore, queueTaskRefresh } from "src/utils";
 
 export default {
   components: {
@@ -84,8 +85,8 @@ export default {
   },
   mixins: [QPropsMixin],
   props: {
-    task: {
-      type: Object,
+    taskId: {
+      type: String,
       required: true
     },
     size: {
@@ -97,24 +98,28 @@ export default {
       default: false
     }
   },
-  inject: ['$refreshTask'],
+  inject: ['$updateTask'],
   data()
   {
     return {
       isViewingActivity: false
     };
   },
+  computed: {
+    task()
+    {
+      return getTaskByIdFromStore(this.$store, this.taskId);
+    }
+  },
   methods: {
+    queueTaskRefresh,
     toggleDone(e)
     {
-      this.$emit(
-          'updateTask',
-          {
-            ...this.task,
-            done: e,
-            alerts: e ? [] : this.task.alerts
-          }
-      );
+      this.$updateTask({
+        ...this.task,
+        done: e,
+        alerts: e ? [] : this.task.alerts
+      });
     }
   }
 }

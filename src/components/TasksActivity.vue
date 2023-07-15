@@ -132,7 +132,6 @@ import DisplayTask from './DisplayTask';
 import SimpleLayout from './SimpleLayout';
 import TaskTagSelector from './TaskTagSelector';
 import TaskSortDropdown from './TaskSortDropdown';
-import DbMixin from '../mixins/jsondb';
 import { v4 as uuidv4 } from 'uuid';
 import { filterTaskList, getFromLocalStorage, saveToLocalStorage } from "src/utils";
 
@@ -144,7 +143,6 @@ export default {
     TaskSortDropdown,
     SimpleLayout
   },
-  mixins: [DbMixin],
   props: {
     dark: {
       type: Boolean,
@@ -172,15 +170,15 @@ export default {
       taskRenderIndex: {},
       taskListRenderIndex: 0,
       sortType: null,
-      inverseSort: false
+      inverseSort: false,
+      refreshCheckInterval: null
     };
   },
   provide()
   {
     return {
       $updateTask: this.updateTaskInDb,
-      $getTask: this.getTask,
-      $refreshTask: this.refreshTask
+      $getTask: this.getTask
     };
   },
   inject: ['$addOrUpdateTask'],
@@ -208,38 +206,18 @@ export default {
 
       return this.$store.getters['notes/getNote']('tasks').tasks;
     },
-    taskOptions()
-    {
-      if(!this.tasksList || !this.tasksList.length)
-      {
-        return [];
-      }
-
-      return this.tasksList.map((task) => ({
-        label: task.message,
-        value: task.id
-      }));
-    },
-    allTags()
-    {
-      if(!this.tasksList || !this.tasksList.length)
-      {
-        return [];
-      }
-
-      return this.tasksList.reduce((agg, task) =>
-      {
-        const tags = [...task.tags || []]
-            .filter((tag) => !agg.includes(tag));
-
-        if(tags.length)
-        {
-          return agg.concat(tags);
-        }
-
-        return agg;
-      }, []);
-    }
+    // taskOptions()
+    // {
+    //   if(!this.tasksList || !this.tasksList.length)
+    //   {
+    //     return [];
+    //   }
+    //
+    //   return this.tasksList.map((task) => ({
+    //     label: task.message,
+    //     value: task.id
+    //   }));
+    // }
   },
   mounted()
   {
@@ -255,12 +233,31 @@ export default {
       this.filters = storedFilters;
       this.filterTasks();
     }
+
+    if(this.refreshCheckInterval)
+    {
+      clearInterval(this.refreshCheckInterval);
+    }
+
+    this.refreshCheckInterval = setInterval(() =>
+    {
+      const queue = getFromLocalStorage('taskRefreshQueue');
+
+      if(Array.isArray(queue) && queue.length)
+      {
+        queue.forEach((id) =>
+        {
+          this.refreshTask({ id });
+        })
+
+        saveToLocalStorage('taskRefreshQueue', []);
+      }
+    }, 250);
   },
   methods: {
     /****** Loading/fetching tasks */
     async loadTasks()
     {
-      this.$log(`loadTasks`);
       await this.$store.dispatch('notes/loadAll');
       this.tasksLoaded = true;
     },
@@ -275,25 +272,25 @@ export default {
       this.filterTasks();
     },
     /** Used with q-select */
-    filterFn(val, update)
-    {
-      if(!val || val === '')
-      {
-        update(() =>
-        {
-          this.filteredTasksList = this.taskOptions;
-        });
-
-        return;
-      }
-
-      update(() =>
-      {
-        const needle = val.toLowerCase();
-
-        this.filteredTasksList = this.taskOptions.filter((n) => n.label.toLowerCase().indexOf(needle) > -1);
-      });
-    },
+    // filterFn(val, update)
+    // {
+    //   if(!val || val === '')
+    //   {
+    //     update(() =>
+    //     {
+    //       this.filteredTasksList = this.taskOptions;
+    //     });
+    //
+    //     return;
+    //   }
+    //
+    //   update(() =>
+    //   {
+    //     const needle = val.toLowerCase();
+    //
+    //     this.filteredTasksList = this.taskOptions.filter((n) => n.label.toLowerCase().indexOf(needle) > -1);
+    //   });
+    // },
     /** Actual filtering logic. Sorts after filtering. Saves filters to localStorage. */
     filterTasks()
     {
@@ -442,7 +439,6 @@ export default {
     },
     createTask()
     {
-      this.$log('createTask', this.newTask.message);
       const newId = uuidv4();
 
       try
@@ -466,7 +462,6 @@ export default {
       }
       catch(e)
       {
-        this.$log('error', e);
         console.error(e);
       }
     },
@@ -482,7 +477,6 @@ export default {
     },
     refreshTask(task)
     {
-      console.info('refresh:', task, task.active);
       this.taskRenderIndex[task.id] = `render-${task.id}-${Date.now()}`;
     },
     refreshAll()

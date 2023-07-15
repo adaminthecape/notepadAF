@@ -470,8 +470,6 @@ export default {
   },
   async mounted()
   {
-    this.$log('mounted', 'MyActivity');
-
     await this.getActivity();
   },
   methods: {
@@ -536,7 +534,6 @@ export default {
     },
     async getActivity()
     {
-      this.$log('getActivity');
       this.isLoadingActivity = true;
 
       const uri = pivotalData.endpoints.my.activity.path;

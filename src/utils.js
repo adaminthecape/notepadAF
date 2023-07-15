@@ -1,6 +1,7 @@
 import { shell } from 'electron';
 import * as path from 'path';
 import * as moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
 import { fsWriteSync, readFromDbSync } from 'src/mixins/jsondb';
 
 export function openInBrowser(link)
@@ -93,8 +94,6 @@ export function saveToLocalStorageArray(name, data)
 {
     const existingData = getFromLocalStorage(name) || [];
 
-    console.log({ existingData });
-
     if(!existingData.some((item) =>
     {
         let itemComp;
@@ -113,12 +112,8 @@ export function saveToLocalStorageArray(name, data)
         return item === itemComp;
     }))
     {
-        console.log({ data });
-
         existingData.push(data);
     }
-
-    console.log({ existingData });
 
     saveToLocalStorage(name, JSON.stringify(existingData));
 }
@@ -297,4 +292,90 @@ export function filterTaskList(tasks, filters)
         checkFilterBool('archived', task, filters) &&
         checkFilterBool('active', task, filters)
     ));
+}
+
+export async function cudTask(
+    tasksList,
+    storeUpdater,
+    taskData,
+    deleteTask = false
+)
+{
+    if(!storeUpdater || typeof storeUpdater !== 'function')
+    {
+        throw new Error('A store interface is required');
+    }
+
+    console.info('addOrUpdateTask:', taskData);
+    if(!taskData)
+    {
+        console.warn('bad task!', taskData);
+
+        return;
+    }
+
+    if(!Array.isArray(tasksList))
+    {
+        console.warn('no tasks to update!', tasksList);
+
+        return;
+    }
+
+    if(!taskData.id)
+    {
+        taskData.id = uuidv4();
+    }
+
+    taskData.updated = Date.now();
+
+    let foundTaskIndex = -1;
+
+    const tasks = tasksList.map((task, t) =>
+    {
+        if(task)
+        {
+            if(task.id === taskData.id)
+            {
+                foundTaskIndex = t;
+
+                if(deleteTask)
+                {
+                    // blank it
+                    return null;
+                }
+
+                return {
+                    ...task,
+                    ...taskData
+                };
+            }
+        }
+
+        return task;
+    }).filter((t) => t);
+
+    if(!deleteTask)
+    {
+        if(foundTaskIndex === -1)
+        {
+            tasks.push(taskData);
+        }
+    }
+
+    await storeUpdater(tasks);
+}
+
+export function queueTaskRefresh(id)
+{
+    console.info('queue:', id);
+    saveToLocalStorageArray('taskRefreshQueue', id);
+}
+
+export function getTaskByIdFromStore(store, id)
+{
+    if(!id || !store) return undefined;
+
+    return store.getters['notes/getNote']('tasks') ?
+        (store.getters['notes/getNote']('tasks').tasks || []).find((t) => t.id === id) :
+        undefined;
 }

@@ -229,7 +229,6 @@ export default {
   },
   mixins: [Pivotal, GitMixin, DbMixin],
   props: {},
-  inject: ['$log'],
   data()
   {
     const cache = {

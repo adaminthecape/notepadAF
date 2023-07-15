@@ -64,7 +64,7 @@
               style="margin-right: -14px; margin-left: -14px"
           >
             <TaskOptions
-                :task="task"
+                :taskId="task.id"
                 :isEditing="isEditing"
                 size="md"
                 dense

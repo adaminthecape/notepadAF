@@ -253,7 +253,6 @@
 
 <script>
 import Pivotal from '../mixins/Pivotal';
-import DbMixin from '../mixins/jsondb';
 import GitMixin from '../mixins/git';
 import { pivotalData } from '../mixins/constants';
 import SimpleLayout from './SimpleLayout';
@@ -267,7 +266,7 @@ export default {
     // PivotalAction,
     SimpleLayout
   },
-  mixins: [Pivotal, GitMixin, DbMixin],
+  mixins: [Pivotal, GitMixin],
   props: {
     cachedTickets: {
       type: Array,
@@ -409,8 +408,6 @@ export default {
   },
   async mounted()
   {
-    this.$log('mounted', 'MyActivity');
-
     if(!this.cachedTickets)
     {
       await this.getTickets();
@@ -490,7 +487,6 @@ export default {
     },
     async getTickets()
     {
-      this.$log('getTickets');
       this.isLoadingActivity = true;
 
       const { path: uri, queryParams: queryParamInfo } = pivotalData.endpoints.search.all;

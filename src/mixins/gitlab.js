@@ -123,7 +123,7 @@ export default {
         return {
         };
     },
-    inject: ['$log', '$notify'],
+    inject: ['$notify'],
     methods: {
         getGitlabToken,
         setGitlabToken,

@@ -1,32 +1,11 @@
 import deepmerge from "deepmerge";
 import fs from "fs";
 import path from "path";
-import App from '../App';
 import {getAppBasePath} from "src/utils";
 
 export function $log(...args)
 {
-    try
-    {
-        App.methods.audit(...args);
-    }
-    catch(e)
-    {
-        console.warn(e);
-    }
-}
-
-let debugTitle = '';
-export function $debug(...args)
-{
-    try
-    {
-        console.warn('**** DEBUG:', debugTitle, ...args);
-    }
-    catch(e)
-    {
-        console.warn(e);
-    }
+    console.warn(...args);
 }
 
 export function readFromDir(
@@ -337,7 +316,7 @@ export function writeToDbSync(
 
 export default {
     name: 'DbMixin',
-    inject: ['$log', '$notify'],
+    inject: ['$notify'],
     methods: {
         readFromDir,
         readFileWithoutError,

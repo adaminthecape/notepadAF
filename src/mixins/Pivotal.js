@@ -156,7 +156,7 @@ export default {
             ptRenderKey: 0
         };
     },
-    inject: ['$log', '$notify'],
+    inject: ['$notify'],
     methods: {
         getPivotalToken,
         getPivotalEndpoint,

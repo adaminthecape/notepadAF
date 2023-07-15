@@ -1,17 +1,19 @@
 <template>
-  <q-list>
+  <q-list :key="`activity-list-${listRenderIndex}`">
     <q-item
         v-for="(log, l) in allActivity"
         :key="`activity-item-${l}`"
         clickable
         dense
+        @dblclick.ctrl="removeActivityLog(log)"
     >
       <q-item-section>
         <div class="flex" style="flex-direction: column">
           <div v-if="showMessage">{{ log.message }}</div>
           <div>
             <q-chip square dense>{{ log.startDate }}</q-chip>
-            <q-chip square dense>{{ log.duration }}</q-chip>
+            <q-chip square dense class="text-bold" style="min-width: 6em">{{ log.duration }}</q-chip>
+            <q-chip v-if="log.note" square dense>{{ log.note }}</q-chip>
           </div>
         </div>
       </q-item-section>
@@ -20,7 +22,7 @@
 </template>
 
 <script>
-import { filterTaskList } from "src/utils";
+import { cudTask, filterTaskList, queueTaskRefresh } from "src/utils";
 
 export default {
   props: {
@@ -36,7 +38,9 @@ export default {
   data()
   {
     return {
-      allActivity: []
+      allActivity: [],
+      singleTask: undefined,
+      listRenderIndex: 0
     };
   },
   computed: {
@@ -55,8 +59,41 @@ export default {
     this.setActivity();
   },
   methods: {
+    removeActivityLog(log)
+    {
+      if(!this.filters || !this.filters.id || !this.singleTask || !this.singleTask.activity)
+      {
+        return;
+      }
+
+      const storeFn = async (tasks) =>
+      {
+        await this.$store.dispatch('notes/update', {
+          note: {
+            id: 'tasks',
+            tasks
+          }
+        })
+      };
+
+      cudTask(
+          this.$store.getters['notes/getNote']('tasks').tasks,
+          storeFn,
+          {
+            ...this.singleTask,
+            activity: this.singleTask.activity.filter((l) => (
+                (l.start !== log.start) && (l.end !== log.end)
+            ))
+          }
+      ).then(() =>
+      {
+        this.listRenderIndex += 1;
+        queueTaskRefresh(this.singleTask.id);
+      });
+    },
     setActivity()
     {
+      this.singleTask = undefined;
       const tasks = this.$store.getters['notes/getNote']('tasks');
 
       console.info('setActivity', tasks, this.filters, filterTaskList(tasks.tasks, this.filters));
@@ -65,34 +102,42 @@ export default {
         return;
       }
 
-      this.allActivity = ((
+      const tasksList = ((
           Object.keys(this.filters || {}).length ?
               filterTaskList(tasks.tasks, this.filters) :
               tasks.tasks
-      ) || []).reduce((agg, task) =>
+      ) || []);
+
+      if(this.filters && this.filters.id && tasksList.length === 1)
       {
-        if(!task.activity) return agg;
-        if(!task.activity.length) return agg;
+        this.singleTask = tasksList[0];
+      }
 
-        task.activity.forEach((log) =>
-        {
-          agg.push({
-            ...log,
-            duration: log.end && log.start ?
-                this.secondsToHumanReadable(Math.floor((log.end - log.start) / 1000)) :
-                0,
-            startDate: new Date(log.start).toLocaleString().split(':').slice(0, 2).join(':'),
-            id: task.id,
-            message: this.showMessage ? (
-                task.message && task.message.length > 50 ?
-                    `${task.message.slice(0, 50)}...` :
-                    task.message || ''
-            ) : undefined
-          });
-        });
+      this.allActivity = tasksList
+          .reduce((agg, task) =>
+          {
+            if(!task.activity) return agg;
+            if(!task.activity.length) return agg;
 
-        return agg;
-      }, [])
+            task.activity.forEach((log) =>
+            {
+              agg.push({
+                ...log,
+                duration: log.end && log.start ?
+                    this.secondsToHumanReadable(Math.floor((log.end - log.start) / 1000)) :
+                    0,
+                startDate: new Date(log.start).toLocaleString().split(':').slice(0, 2).join(':'),
+                id: task.id,
+                message: this.showMessage ? (
+                    task.message && task.message.length > 50 ?
+                        `${task.message.slice(0, 50)}...` :
+                        task.message || ''
+                ) : undefined
+              });
+            });
+
+            return agg;
+          }, [])
           .sort((a, b) => (a.start - b.start));
     },
     secondsToHumanReadable(seconds)
@@ -105,23 +150,23 @@ export default {
 
       if(seconds > year)
       {
-        return `${Math.floor(year / seconds)} years`;
+        return `${Math.floor(seconds / year)} years`;
       }
       else if(seconds > (2 * month))
       {
-        return `${Math.floor(month / seconds)} months`;
+        return `${Math.floor(seconds / month)} months`;
       }
       else if(seconds > (2 * day))
       {
-        return `${Math.floor(day / seconds)} days`;
+        return `${Math.floor(seconds / day)} days`;
       }
       else if(seconds > (2 * hour))
       {
-        return `${Math.floor(hour / seconds)} hrs`;
+        return `${Math.floor(seconds / hour)} hrs`;
       }
       else if(seconds > (2 * minute))
       {
-        return `${Math.floor(minute / seconds)} min`;
+        return `${Math.floor(seconds / minute)} min`;
       }
 
       return `${seconds} sec`;
