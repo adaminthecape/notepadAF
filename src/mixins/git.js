@@ -23,7 +23,7 @@ export function runCmd(
 
     if(!(typeof command === 'string' && command.length))
     {
-        console.warn('command wrong!', command, args);
+        console.warn('command wrong!', command);
 
         return;
     }

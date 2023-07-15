@@ -1,13 +1,33 @@
 import axios from 'axios';
 
-export function getPivotalToken()
+function getPivotalToken()
 {
     return localStorage.getItem('pivotalToken');
 }
 
-export function getPivotalProjectId()
+function getPivotalProjectId()
 {
     return localStorage.getItem('pivotalProjectId');
+}
+
+function htmlEncode(str)
+{
+    // let i = str.length,
+    //     aRet = [];
+    //
+    // while (i--) {
+    //     const iC = str[i].charCodeAt();
+    //     if (iC < 65 || iC > 127 || (iC>90 && iC<97)) {
+    //         // aRet[i] = '&#'+iC+';';
+    //         aRet[i] = '%'+iC;
+    //     } else {
+    //         aRet[i] = str[i];
+    //     }
+    // }
+    // return aRet.join('');
+
+    return encodeURI(str)
+        .replace('+', '%2B');
 }
 
 export async function getPivotalEndpoint(endpoint, params, queryParams)
@@ -82,26 +102,6 @@ export async function getPivotalEndpoint(endpoint, params, queryParams)
     }
 }
 
-export function htmlEncode(str)
-{
-    // let i = str.length,
-    //     aRet = [];
-    //
-    // while (i--) {
-    //     const iC = str[i].charCodeAt();
-    //     if (iC < 65 || iC > 127 || (iC>90 && iC<97)) {
-    //         // aRet[i] = '&#'+iC+';';
-    //         aRet[i] = '%'+iC;
-    //     } else {
-    //         aRet[i] = str[i];
-    //     }
-    // }
-    // return aRet.join('');
-
-    return encodeURI(str)
-        .replace('+', '%2B');
-}
-
 export async function getPivotalStory(storyId, endpoint)
 {
     const projectId = getPivotalProjectId();
@@ -146,18 +146,3 @@ export async function getPivotalStory(storyId, endpoint)
         return null;
     }
 }
-
-export default {
-    name: 'PivotalMixin',
-    data()
-    {
-        return {
-            ptRenderKey: 0
-        };
-    },
-    methods: {
-        getPivotalToken,
-        getPivotalEndpoint,
-        getPivotalStory
-    }
-};

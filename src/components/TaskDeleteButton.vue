@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="task">
     <q-btn
         v-bind="allQProps"
         v-model="isConfirmingDeletion"
@@ -14,7 +14,7 @@
           <q-item-section>
             <div>
               <div class="q-mb-sm">
-                <span class="text-bold">{{ task.message ? task.message.slice(0, 50) : '' }}</span>
+                <span class="text-bold">{{ task && task.message ? task.message.slice(0, 50) : '' }}</span>
               </div>
               <div>Are you sure you want to delete?</div>
               <div class="row">
@@ -64,7 +64,6 @@ export default {
       ).then(() =>
       {
         this.isConfirmingDeletion = false;
-        this.$emit('removed', { ...this.task, deleted: Date.now() });
       });
     }
   }

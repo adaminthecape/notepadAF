@@ -1,5 +1,6 @@
 <template>
   <q-card
+      v-if="task"
       class="flex q-mb-sm"
       style="flex-direction: column; background-color: #70809020"
       flat
@@ -57,11 +58,11 @@
               <q-tooltip>Due {{ alert.date }} at {{ alert.time }}</q-tooltip>
             </q-btn>
           </div>
-          <!-- MENU: -->
           <q-space />
+          <!-- MENU: -->
           <div
               class="row items-center"
-              style="margin-right: -14px; margin-left: -14px"
+              style="margin-right: -14px"
           >
             <TaskOptions
                 :taskId="task.id"
@@ -70,8 +71,6 @@
                 dense
                 flat
                 @editTask="editTask"
-                @updateTask="updateTask"
-                @taskRemoved="$emit('refreshTask', $event)"
             />
           </div>
         </div>
@@ -134,7 +133,6 @@
               flat
               @click="addingTag = !addingTag"
           />
-          <!-- MANAGE TAGS: -->
           <q-chip
               v-show="addingTag"
               style="overflow-y: hidden"
@@ -168,6 +166,7 @@
             </div>
           </q-chip>
           <q-space />
+          <!-- VIEW STORIES: -->
           <div v-if="stories && stories.length">
             <TaskStoryDropdown :stories="stories" />
           </div>
@@ -201,14 +200,14 @@ export default {
       isEditing: false
     };
   },
-  inject: ['$openLink'],
-  computed: {
-  },
-  mounted()
-  {
-    this.setAlarms();
-    this.tickAlarms();
-  },
+  // mounted()
+  // {
+  //   if(this.task)
+  //   {
+  //     this.setAlarms();
+  //     this.tickAlarms();
+  //   }
+  // },
   methods: {
     /** helpers */
     timeSince,
@@ -259,48 +258,48 @@ export default {
       }
     },
     /** manage alarms */
-    tickAlarms()
-    {
-      if(this.alarmTickTimeout)
-      {
-        clearTimeout(this.alarmTickTimeout);
-      }
-
-      this.alarmTickTimeout = setInterval(() =>
-      {
-        this.activeAlertsRenderKey += 1;
-      }, 5000);
-    },
-    clearAlarms()
-    {
-      this.alarmTimeouts.forEach((timeout) => clearTimeout(timeout));
-      this.alarmTimeouts = [];
-      // clearAllFlashes();
-    },
-    setAlarms()
-    {
-      this.clearAlarms();
-
-      const now = Date.now();
-
-      (this.task.alerts || []).forEach((alert) =>
-      {
-        const diff = (alert.unix - now);
-
-        this.alarmTimeouts.push(setTimeout(
-            () => {
-              this.triggerAlarm();
-            },
-            diff || 1
-        ));
-      });
-    },
-    triggerAlarm()
-    {
-      // const disable = flashTaskbarIcon();
-      //
-      // setTimeout(() => disable(), 2 * 60 * 1000);
-    },
+    // tickAlarms()
+    // {
+    //   if(this.alarmTickTimeout)
+    //   {
+    //     clearTimeout(this.alarmTickTimeout);
+    //   }
+    //
+    //   this.alarmTickTimeout = setInterval(() =>
+    //   {
+    //     this.activeAlertsRenderKey += 1;
+    //   }, 5000);
+    // },
+    // clearAlarms()
+    // {
+    //   this.alarmTimeouts.forEach((timeout) => clearTimeout(timeout));
+    //   this.alarmTimeouts = [];
+    //   // clearAllFlashes();
+    // },
+    // setAlarms()
+    // {
+    //   this.clearAlarms();
+    //
+    //   const now = Date.now();
+    //
+    //   (this.task.alerts || []).forEach((alert) =>
+    //   {
+    //     const diff = (alert.unix - now);
+    //
+    //     this.alarmTimeouts.push(setTimeout(
+    //         () => {
+    //           this.triggerAlarm();
+    //         },
+    //         diff || 1
+    //     ));
+    //   });
+    // },
+    // triggerAlarm()
+    // {
+    //   // const disable = flashTaskbarIcon();
+    //   //
+    //   // setTimeout(() => disable(), 2 * 60 * 1000);
+    // },
     removeAlert(alert)
     {
       if(!this.task.alerts.length)

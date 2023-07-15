@@ -252,7 +252,7 @@
 </template>
 
 <script>
-import Pivotal from '../mixins/Pivotal';
+import { getPivotalEndpoint } from "../mixins/Pivotal";
 import GitMixin from '../mixins/git';
 import { pivotalData } from '../mixins/constants';
 import SimpleLayout from './SimpleLayout';
@@ -262,11 +262,9 @@ export default {
   name: 'MyTickets',
   components: {
     StoryCard,
-    // DisplayStory,
-    // PivotalAction,
     SimpleLayout
   },
-  mixins: [Pivotal, GitMixin],
+  mixins: [GitMixin],
   props: {
     cachedTickets: {
       type: Array,
@@ -509,7 +507,7 @@ export default {
 
       this.resultTotals = {};
 
-      const res = await this.getPivotalEndpoint(uri, {}, queryParams);
+      const res = await getPivotalEndpoint(uri, {}, queryParams);
 
       this.isLoadingActivity = false;
 

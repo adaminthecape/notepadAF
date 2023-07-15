@@ -116,7 +116,6 @@
               :taskId="task.id"
               class="full-width"
               editable
-              :dark="dark"
               @refreshTask="refreshTask"
               @filterByTag="addTagToFilters"
           />
@@ -146,12 +145,6 @@ export default {
     TaskTagSelector,
     TaskSortDropdown,
     SimpleLayout
-  },
-  props: {
-    dark: {
-      type: Boolean,
-      default: true
-    }
   },
   data()
   {
@@ -242,6 +235,7 @@ export default {
       await this.$store.dispatch('notes/loadAll');
       this.tasksLoaded = true;
     },
+
     /****** Filtering tasks */
     clearFilters()
     {
@@ -293,6 +287,7 @@ export default {
 
       this.filterTasks();
     },
+
     /****** Filtering tasks - booleans */
     getFilterBoolColor(prop)
     {
@@ -319,6 +314,7 @@ export default {
 
       this.filterTasks();
     },
+
     /****** Sorting tasks */
     sortTasks()
     {
@@ -381,6 +377,7 @@ export default {
 
       this.sortTasks();
     },
+
     /****** Updating tasks */
     createTask()
     {
@@ -395,12 +392,13 @@ export default {
 
           const newTask = this.applyFilters ? this.applyFiltersToTask(t, this.filters) : t;
 
-          this.tasksList.push(newTask);
-
           cudTaskViaStore(this.$store, newTask).then(() =>
           {
             this.newTask = { message: null };
-            this.loadTasks();
+            this.loadTasks().then(() =>
+            {
+              this.refreshAll();
+            });
           });
         }
       }
@@ -409,6 +407,8 @@ export default {
         console.error(e);
       }
     },
+
+    /****** Reactivity helpers */
     refreshTask(task)
     {
       this.taskRenderIndex[task.id] = `render-${task.id}-${Date.now()}`;
@@ -417,6 +417,7 @@ export default {
     {
       this.taskListRenderIndex += 1;
     },
+
     /****** Helpers */
     /** @returns task with current filters merged in */
     applyFiltersToTask(task, filters)

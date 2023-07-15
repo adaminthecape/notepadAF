@@ -1,5 +1,4 @@
 import { app, BrowserWindow, nativeTheme } from 'electron';
-import fs from "fs";
 
 try {
   if (process.platform === 'win32' && nativeTheme.shouldUseDarkColors === true) {

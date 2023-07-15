@@ -86,6 +86,7 @@
   import QPropsMixin from '../mixins/QPropsMixin.js';
   import TaskDoneButton from "components/TaskDoneButton";
   import TaskActiveButton from "components/TaskActiveButton";
+  import { cudTaskViaStore } from "src/utils";
 
   export default {
     components: { TaskActiveButton, TaskDoneButton },
@@ -133,7 +134,7 @@
 
         this.newTask.tags = tags;
 
-        this.updateTask(this.newTask);
+        cudTaskViaStore(this.$store, this.newTask);
         this.newTask = { ...this.initialTaskData };
         this.$refs.messageInput.focus();
       },

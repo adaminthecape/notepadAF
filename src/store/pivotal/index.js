@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { getPivotalStory } from '../../mixins/Pivotal';
+import { getPivotalStory } from 'src/mixins/Pivotal';
 
 const state = {
     stories: []

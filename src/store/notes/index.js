@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { readFromDbSync, saveAll } from '../../mixins/jsondb';
+import { readFromDbSync, saveAll } from 'src/mixins/jsondb';
 
 const state = {
     notes: []

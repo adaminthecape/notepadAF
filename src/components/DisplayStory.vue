@@ -14,7 +14,6 @@
 
 <script>
 import { QMarkdown } from '@quasar/quasar-ui-qmarkdown';
-import Pivotal from '../mixins/Pivotal';
 import SimpleLayout from './SimpleLayout';
 
 export default {
@@ -23,22 +22,11 @@ export default {
     QMarkdown,
     SimpleLayout
   },
-  mixins: [Pivotal],
   props: {
-    // story: {
-    //   type: Object,
-    //   required: true
-    // },
     storyId: {
       type: [String, Number],
       required: true
     }
-  },
-  data()
-  {
-    return {
-      // story: null
-    };
   },
   computed: {
     storyIdAsNumber()
@@ -58,8 +46,6 @@ export default {
   {
     // load story
     await this.$store.dispatch('pivotal/load', { id: this.storyIdAsNumber });
-  },
-  methods: {
   }
 };
 </script>

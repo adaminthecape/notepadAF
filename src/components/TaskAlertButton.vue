@@ -11,7 +11,7 @@
       <q-card>
         <q-item>
           <q-item-section>
-            {{ task.message }}
+            {{ task ? task.message : '' }}
             <CreateAlert
                 class="q-mt-md"
                 @newAlert="addAlertToTask"

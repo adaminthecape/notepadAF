@@ -38,7 +38,7 @@
               :dense="dense"
               flat
               class="q-mr-xs"
-              @click.stop.prevent="$openLink(story.url)"
+              @click.stop.prevent="openInBrowser(story.url)"
           />
           <q-btn
               label="Git C/O"
@@ -102,7 +102,7 @@
           :dense="dense"
           flat
           class="q-mr-xs"
-          @click.stop.prevent="$openLink(story.url)"
+          @click.stop.prevent="openInBrowser(story.url)"
       />
       <q-btn
           label="Git C/O"
@@ -119,7 +119,7 @@
   import DisplayStory from './DisplayStory';
   import SimpleModal from './SimpleModal';
   import AddTask from "components/AddTask";
-  import { getFromLocalStorage, saveToLocalStorage, copyToClipboard } from "src/utils";
+  import { getFromLocalStorage, saveToLocalStorage, copyToClipboard, openInBrowser } from "src/utils";
 
   export default {
     name: 'StoryCard',
@@ -129,10 +129,6 @@
       SimpleModal
     },
     props: {
-      // story: {
-      //   type: Object,
-      //   required: true
-      // },
       noteId: {
         type: String,
         default: null
@@ -150,7 +146,7 @@
         default: false
       }
     },
-    inject: ['$openLink', '$openNote', '$openTab'],
+    inject: ['$openTab'],
     computed: {
       story()
       {
@@ -178,6 +174,7 @@
       await this.$store.dispatch('pivotal/load', { id: parseInt(this.storyId, 10) });
     },
     methods: {
+      openInBrowser,
       copyToClipboard,
       openTasksForStory()
       {

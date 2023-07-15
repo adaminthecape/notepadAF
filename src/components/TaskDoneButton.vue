@@ -28,6 +28,11 @@
       timeSince,
       toggle()
       {
+        // do some test logic here
+        console.log('start!');
+      },
+      _toggle()
+      {
         if(this.done)
         {
           this.$emit('toggle', 0);

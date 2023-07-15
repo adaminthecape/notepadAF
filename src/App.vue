@@ -46,8 +46,7 @@
   import Settings from './components/Settings';
   import {
     getFromLocalStorage,
-    saveToLocalStorage,
-    openInBrowser
+    saveToLocalStorage
   } from "src/utils";
 
   export default {
@@ -115,8 +114,7 @@
     provide()
     {
       return {
-        $openLink: openInBrowser,
-        $openNote: this.openNote,
+        // $openNote: this.openNote,
         $openTab: this.openTab
       };
     },
@@ -136,12 +134,12 @@
       }
     },
     methods: {
-      openNote(noteId)
-      {
-        this.desiredNoteId = noteId;
-        this.currentTab = 'notes';
-        this.notesRenderIndex += 1;
-      },
+      // openNote(noteId)
+      // {
+      //   this.desiredNoteId = noteId;
+      //   this.currentTab = 'notes';
+      //   this.notesRenderIndex += 1;
+      // },
       openTab(tab)
       {
         this.currentTab = tab;
