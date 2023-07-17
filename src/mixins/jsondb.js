@@ -208,7 +208,7 @@ export function saveAll(allNotes)
     }
 
     writeToDbSync(
-        'notes',
+        'tasks',
         allNotes,
         {
             createTable: true,

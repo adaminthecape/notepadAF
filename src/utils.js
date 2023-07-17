@@ -223,22 +223,24 @@ export async function cudTask(tasksList, storeUpdater, taskData, deleteTask = fa
  */
 export async function cudTaskViaStore(store, taskData, deleteTask = false)
 {
-    const storeFn = async (tasks) =>
-    {
-        await store.dispatch('notes/update', {
-            note: {
-                id: 'tasks',
-                tasks
-            }
-        })
-    };
+    // const storeFn = async (tasks) =>
+    // {
+    //     await store.dispatch('notes/updateJson', tasks);
+    //     // await store.dispatch('notes/updateJson', {
+    //     //     note: {
+    //     //         id: 'tasks',
+    //     //         tasks
+    //     //     }
+    //     // })
+    // };
 
-    await cudTask(
-        getAllTasksFromStore(store),
-        storeFn,
-        taskData,
-        deleteTask
-    );
+    // await cudTask(
+    //     getAllTasksFromStore(store),
+    //     storeFn,
+    //     taskData,
+    //     deleteTask
+    // );
+    await store.dispatch('notes/cloudUpdateSingle', taskData);
 
     queueTaskRefresh(taskData.id);
 }
@@ -258,9 +260,10 @@ export function getAllTasksFromStore(store)
 {
     if(!store) return undefined;
 
-    return store.getters['notes/getNote']('tasks') ?
-        store.getters['notes/getNote']('tasks').tasks :
-        undefined;
+    // return store.getters['notes/getNote']('tasks') ?
+    //     store.getters['notes/getNote']('tasks').tasks :
+    //     undefined;
+    return store.getters['notes/all'];
 }
 
 export function getTaskByIdFromStore(store, id)

@@ -1,96 +1,175 @@
 import Vue from 'vue';
 import { readFromDbSync, saveAll } from 'src/mixins/jsondb';
+import { readTasksFromFirebaseDb, writeTasksToFirebaseDb } from 'src/mixins/firebase';
 
 const state = {
-    notes: []
+    tasks: [],
+    cloudLoading: false,
+    lastCloudUpdate: 0,
+    lastCloudDispatch: 0
 };
 
 const mutations = {
-    ADD_NOTE(state, note)
+    SET_CLOUD_LOADING(state, val)
     {
-        if(!note)
+        state.cloudLoading = val;
+    },
+    SET_LAST_CLOUD_UPDATE(state)
+    {
+        state.lastCloudUpdate = Date.now();
+    },
+    SET_LAST_CLOUD_DISPATCH(state)
+    {
+        state.lastCloudDispatch = Date.now();
+    },
+    SET_TASK(state, task, merge = false)
+    {
+        if(!task)
         {
             return;
         }
 
-        const allNotes = state.notes;
+        Object.keys(task).forEach((key) =>
+        {
+            if(typeof task[key] === 'undefined')
+            {
+                delete task[key];
+            }
+        });
 
-        const existingIndex = allNotes.findIndex((n) => n.id === note.id);
+        const tasks = state.tasks;
+
+        const existingIndex = tasks.findIndex((t) => t.id === task.id);
 
         if(existingIndex > -1)
         {
-            allNotes.splice(existingIndex, 1, note);
+            if(JSON.stringify(tasks[existingIndex]) === JSON.stringify(task))
+            {
+                return;
+            }
+            else if(merge)
+            {
+                tasks.splice(existingIndex, 1, {
+                    ...tasks[existingIndex],
+                    task
+                });
+            }
+            else
+            {
+                tasks.splice(existingIndex, 1, task);
+            }
         }
         else
         {
-            allNotes.push(note);
+            tasks.push(task);
         }
 
-        Vue.set(state, 'notes', allNotes);
+        Vue.set(state, 'tasks', tasks);
     },
-    SAVE_NOTES(state)
+    SAVE_TASKS_TO_JSON(state, tasks)
     {
-        saveAll(state.notes);
+        saveAll(tasks);
+    },
+    SAVE_TASKS_TO_CLOUD(state, tasks)
+    {
+        console.log('SAVE_TASKS_TO_CLOUD:', tasks);
+        if(!tasks || !tasks.length)
+        {
+            return;
+        }
+
+        writeTasksToFirebaseDb(tasks);
     }
 };
 
 const actions = {
-    update({ commit, dispatch }, { note })
+    async cloudUpdate({ commit }, tasks)
     {
-        console.log('updateNote', { note });
-        if(!note || typeof note !== 'object')
+        commit('SAVE_TASKS_TO_CLOUD', tasks);
+    },
+    async cloudUpdateSingle({ state, commit }, task)
+    {
+        console.log('cloudUpdateSingle', { task });
+        if(!task || typeof task !== 'object' || !task.id)
         {
             return;
         }
-
-        const allNotes = getters.all(state);
-        const existing = allNotes.find((n) => n.id === note.id) || {};
 
         const now = Date.now();
-        const newNote = {
-            ...existing,
-            ...note,
-            updated: now,
-            created: note.created || now
-        };
 
-        if(!newNote || !newNote.id)
+        commit('SET_TASK', {
+            ...task,
+            updated: now,
+            created: task.created || now
+        });
+
+        commit('SET_LAST_CLOUD_DISPATCH');
+        commit('SAVE_TASKS_TO_CLOUD', state.tasks);
+    },
+    watchCloudDb({ commit })
+    {
+        commit('SET_CLOUD_LOADING', true);
+
+        // init connection with cloud db & update store on change
+        readTasksFromFirebaseDb((cloudTasks) =>
+        {
+            commit('SET_CLOUD_LOADING', true);
+            if(!cloudTasks)
+            {
+                return;
+            }
+
+            commit('SET_LAST_CLOUD_UPDATE');
+
+            const localTasks = getters.all() || [];
+
+            console.log({ localTasks });
+
+            cloudTasks.tasks.forEach((task) =>
+            {
+                commit('SET_TASK', task);
+            });
+
+            setTimeout(() =>
+            {
+                commit('SET_CLOUD_LOADING', false);
+            }, 200);
+        });
+    },
+    updateJson({ commit, dispatch }, tasks)
+    {
+        console.log('updateJson', { tasks });
+        if(!tasks || !tasks.length)
         {
             return;
         }
 
-        commit('ADD_NOTE', newNote);
-
-        // OUTPUT DATA: save via API
-        commit('SAVE_NOTES');
+        commit('SAVE_TASKS_TO_JSON', tasks);
     },
-    loadAll({ commit })
+    loadAllFromJson({ commit })
     {
-        // INPUT DATA: get from API
         const data = readFromDbSync('notesdb.json', true);
 
         let parsed = JSON.parse(data) || {};
+
+        console.log('parsed data:', parsed);
 
         if(typeof parsed === 'string')
         {
             parsed = JSON.parse(parsed);
         }
 
-        if(!parsed.notes)
+        parsed.tasks.forEach((task) =>
         {
-            parsed.notes = [];
-        }
-
-        parsed.notes.forEach((note) =>
-        {
-            commit('ADD_NOTE', note);
+            commit('SET_TASK', task);
         });
     }
 };
 
 const getters = {
-    all: (state) => state.notes,
-    getNote: (state) => (id) => state.notes.find((n) => n.id === id)
+    all: (state) => state ? state.tasks : undefined,
+    getTask: (state) => (id) => state.tasks.find((n) => n.id === id),
+    isCloudLoading: (state) => state.cloudLoading
 };
 
 export default {

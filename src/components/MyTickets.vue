@@ -233,7 +233,6 @@
             />
           </div>
           <div
-              v-else
               v-for="story in storyResults"
               :key="story.id"
               class="bordered q-mb-xs"

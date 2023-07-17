@@ -26,12 +26,12 @@
     },
     methods: {
       timeSince,
-      toggle()
+      _toggle()
       {
         // do some test logic here
         console.log('start!');
       },
-      _toggle()
+      toggle()
       {
         if(this.done)
         {

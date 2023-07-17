@@ -2,6 +2,15 @@
   <SimpleLayout header>
     <template #header-title>
       <div class="row items-center" style="font-size: 0.8em">
+        <q-btn
+          class="q-mr-sm"
+          dense
+          flat
+        >
+          <q-icon v-if="!isCloudLoading" name="cloud_sync" />
+          <q-spinner v-if="isCloudLoading" size="sm" />
+          <q-tooltip v-if="isCloudLoading">Loading from cloud</q-tooltip>
+        </q-btn>
         <span v-if="!tasksList || !filteredTasksList">No tasks to show</span>
         <span v-else-if="filteredTasksList.length === tasksList.length">Showing all tasks</span>
         <span v-else>Showing {{ filteredTasksList.length }} of {{ tasksList.length }} tasks</span>
@@ -36,6 +45,20 @@
       </div>
     </template>
     <template #page-content>
+      <q-dialog v-model="isFirebaseConfigDialogOpen" persistent>
+        <q-card>
+          <q-item>
+            <q-item-section>
+              Firebase config is required!
+            </q-item-section>
+          </q-item>
+          <q-item>
+            <q-item-section>
+              <q-btn @click="$openTab('settings')">Go to Settings</q-btn>
+            </q-item-section>
+          </q-item>
+        </q-card>
+      </q-dialog>
       <!-- NEW TASK / FILTERS: -->
       <div style="display: flex; flex-direction: column">
         <q-input
@@ -168,9 +191,13 @@ export default {
       taskListRenderIndex: 0,
       sortType: null,
       inverseSort: false,
-      refreshCheckInterval: null
+      refreshCheckInterval: null,
+      isLoggingIn: false,
+      isSignedIn: false,
+      isFirebaseConfigDialogOpen: false
     };
   },
+  inject: ['$openTab'],
   computed: {
     areFiltersActive()
     {
@@ -189,6 +216,17 @@ export default {
     tasksList()
     {
       return getAllTasksFromStore(this.$store) || [];
+    },
+    isCloudLoading()
+    {
+      return this.$store.getters['notes/isCloudLoading'];
+    }
+  },
+  created()
+  {
+    if(!getFromLocalStorage('firebase_config'))
+    {
+      this.isFirebaseConfigDialogOpen = true;
     }
   },
   mounted()
@@ -232,8 +270,11 @@ export default {
     /****** Loading/fetching tasks */
     async loadTasks()
     {
-      await this.$store.dispatch('notes/loadAll');
-      this.tasksLoaded = true;
+      // await this.$store.dispatch('notes/loadAllFromJson');
+      // this.tasksLoaded = true;
+      this.$store.dispatch('notes/watchCloudDb');
+
+      setTimeout(this.filterTasks, 500);
     },
 
     /****** Filtering tasks */

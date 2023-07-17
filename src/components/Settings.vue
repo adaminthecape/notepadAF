@@ -147,6 +147,59 @@
       <q-card class="q-mb-sm">
         <q-item>
           <q-item-section>
+            <h5>Firebase</h5>
+          </q-item-section>
+          <q-item-section>
+            <SimpleModal fullWidth>
+              <template #title>
+                <h5>Firebase</h5>
+              </template>
+              <template #activator="{ open }">
+                <q-btn
+                    label="Set firebase config"
+                    @click="open"
+                />
+                <br />
+                <q-chip
+                  v-if="!!firebaseConfig"
+                  color="positive"
+                  dark
+                  square
+                  dense
+                >Firebase config applied for {{ firebaseConfig.projectId }}</q-chip>
+                <q-chip
+                  v-else
+                  color="negative"
+                  dark
+                  square
+                  dense
+                >No firebase config active!</q-chip>
+              </template>
+              <template #content>
+                <q-card>
+                  <q-item>
+                    <q-item-section>
+                      <div class="q-mb-md">Paste your firebase configuration settings (including your API key) as a JSON object below.</div>
+                      <q-input
+                        v-model="firebaseConfig"
+                        type="textarea"
+                        filled
+                      />
+                      <q-btn
+                        class="q-my-md"
+                        @click="setFirebaseConfig()"
+                      >Save</q-btn>
+                    </q-item-section>
+                  </q-item>
+                </q-card>
+              </template>
+            </SimpleModal>
+          </q-item-section>
+        </q-item>
+      </q-card>
+      <q-card class="q-mb-sm">
+        <q-item>
+          <q-item-section>
             <h5>Backups</h5>
           </q-item-section>
           <q-item-section>
@@ -231,7 +284,8 @@ export default {
         pivotal: getFromLocalStorage('pivotalToken')
       },
       pivotalProjectId: getFromLocalStorage('pivotalProjectId'),
-      gitModuleBasePath: getFromLocalStorage('gitModuleBasePath')
+      gitModuleBasePath: getFromLocalStorage('gitModuleBasePath'),
+      firebaseConfig: getFromLocalStorage('firebase_config', true)
     };
     const appTabs = getFromLocalStorage('appTabs', true);
 
@@ -266,6 +320,47 @@ export default {
     {
       saveToLocalStorage(setting, this.cache[setting]);
       this[setting] = this.cache[setting];
+    },
+    setFirebaseConfig()
+    {
+      let config = this.firebaseConfig;
+
+      if(!config)
+      {
+        return;
+      }
+
+      config = config
+        .replace('appId: ', '"appId":')
+        .replace('apiKey: ', '"apiKey":')
+        .replace('authDomain: ', '"authDomain":')
+        .replace('databaseURL: ', '"databaseURL":')
+        .replace('messagingSenderId: ', '"messagingSenderId":')
+        .replace('projectId: ', '"projectId":')
+        .replace('storageBucket: ', '"storageBucket":')
+        .replace(/\t/g, '')
+        .replace(/"\n"/g, '",\n"');
+
+      try
+      {
+        if(typeof config === 'string')
+        {
+          config = JSON.parse(config);
+        }
+      }
+      catch(e)
+      {
+        console.warn(e);
+      }
+
+      if(!config || typeof config !== 'object')
+      {
+        return;
+      }
+
+      console.log('saving config:', config);
+
+      saveToLocalStorage('firebase_config', config);
     }
   }
 };
