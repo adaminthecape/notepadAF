@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import { readFromDbSync, saveAll } from 'src/mixins/jsondb';
 import { readTasksFromFirebaseDb, writeTasksToFirebaseDb } from 'src/mixins/firebase';
+import { v4 as uuidv4 } from 'uuid';
 
 const state = {
     tasks: [],
@@ -79,6 +80,16 @@ const mutations = {
         }
 
         writeTasksToFirebaseDb(tasks);
+    },
+    SAVE_TASKS_TO_CLOUD_FROM_STATE(state)
+    {
+        console.log('SAVE_TASKS_TO_CLOUD_FROM_STATE:', state.tasks);
+        if(!state.tasks || !state.tasks.length)
+        {
+            return;
+        }
+
+        writeTasksToFirebaseDb(state.tasks);
     }
 };
 
@@ -87,10 +98,10 @@ const actions = {
     {
         commit('SAVE_TASKS_TO_CLOUD', tasks);
     },
-    async cloudUpdateSingle({ state, commit }, task)
+    async cloudUpdateSingle({ commit }, task)
     {
         console.log('cloudUpdateSingle', { task });
-        if(!task || typeof task !== 'object' || !task.id)
+        if(!task || typeof task !== 'object')
         {
             return;
         }
@@ -100,11 +111,12 @@ const actions = {
         commit('SET_TASK', {
             ...task,
             updated: now,
-            created: task.created || now
+            created: task.created || now,
+            id: task.id || uuidv4()
         });
 
         commit('SET_LAST_CLOUD_DISPATCH');
-        commit('SAVE_TASKS_TO_CLOUD', state.tasks);
+        commit('SAVE_TASKS_TO_CLOUD_FROM_STATE');
     },
     watchCloudDb({ commit })
     {

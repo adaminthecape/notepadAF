@@ -109,7 +109,7 @@ import { timeSince } from "../utils";
 
         if(!this.active) // task is now active; start a new log
         {
-          task.activity.push({ start: Date.now(), end: 0, note: this.logNote });
+          task.activity.push({ start: Date.now(), end: 0, note: this.logNote || '' });
         }
         else // task is no longer active; end the last log
         {
@@ -119,12 +119,12 @@ import { timeSince } from "../utils";
 
           if(!lastLog) // create first log
           {
-            task.activity.push({ start: this.active, end: Date.now(), note: this.logNote });
+            task.activity.push({ start: this.active, end: Date.now(), note: this.logNote || '' });
           }
           else
           {
             task.activity[task.activity.length - 1].end = Date.now();
-            task.activity[task.activity.length - 1].note = this.logNote;
+            task.activity[task.activity.length - 1].note = this.logNote || '';
           }
         }
 

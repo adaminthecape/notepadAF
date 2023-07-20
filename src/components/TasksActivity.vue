@@ -270,8 +270,8 @@ export default {
     /****** Loading/fetching tasks */
     async loadTasks()
     {
-      // await this.$store.dispatch('notes/loadAllFromJson');
       // this.tasksLoaded = true;
+      // await this.$store.dispatch('notes/loadAllFromJson');
       this.$store.dispatch('notes/watchCloudDb');
 
       setTimeout(this.filterTasks, 500);
