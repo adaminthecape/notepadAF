@@ -1,7 +1,10 @@
 import Vue from 'vue';
 import { readFromDbSync, saveAll } from 'src/mixins/jsondb';
-import { readTasksFromFirebaseDb, writeTasksToFirebaseDb } from 'src/mixins/firebase';
+import { readTasksFromFirebaseDb, writeTasksToFirebaseDb} from 'src/mixins/firebase';
 import { v4 as uuidv4 } from 'uuid';
+
+let logTitle = 'store/notes:';
+const log = (...args) => console.log(logTitle, ':', ...args);
 
 const state = {
     tasks: [],
@@ -125,6 +128,7 @@ const actions = {
         // init connection with cloud db & update store on change
         readTasksFromFirebaseDb((cloudTasks) =>
         {
+            logTitle = 'setTasksFromCloud';
             commit('SET_CLOUD_LOADING', true);
             if(!cloudTasks)
             {
@@ -135,7 +139,7 @@ const actions = {
 
             const localTasks = getters.all() || [];
 
-            console.log({ localTasks });
+            log({ localTasks });
 
             cloudTasks.tasks.forEach((task) =>
             {
@@ -147,6 +151,10 @@ const actions = {
                 commit('SET_CLOUD_LOADING', false);
             }, 200);
         });
+    },
+    getAllFromCloud({ commit })
+    {
+        logTitle = 'getAllFromCloud';
     },
     updateJson({ commit, dispatch }, tasks)
     {

@@ -1,12 +1,31 @@
 // import { google } from 'googleapis';
 // import firebase from "firebase";
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, onValue, set } from "firebase/database";
+import { getDatabase, ref, onValue, set, query } from "firebase/database";
 import { getFromLocalStorage, saveToLocalStorage } from "src/utils";
+import {
+    getAuth,
+    // createUserWithEmailAndPassword,
+    signInWithEmailAndPassword
+} from "firebase/auth";
+import {cProtocols} from "src/mixins/rtdb";
 
 const dbName = 'notes';
-let app;
-let db;
+let db,
+    intialised = false;
+
+async function initApp()
+{
+    if(intialised)
+    {
+        return;
+    }
+
+    await getApp();
+    await authenticateMe();
+
+    intialised = true;
+}
 
 async function getApp()
 {
@@ -22,12 +41,9 @@ async function getApp()
     return app;
 }
 
-function getDb()
+export async function getDb()
 {
-    if(!app)
-    {
-        app = getApp();
-    }
+    await initApp();
 
     if(db)
     {
@@ -39,12 +55,12 @@ function getDb()
     return db;
 }
 
-function getConfig()
+export function getConfig()
 {
     return getFromLocalStorage('firebase_config', true) || undefined;
 }
 
-function getAdmin()
+export function getAdmin()
 {
     return getFromLocalStorage('firebase_service_account') || undefined;
 }
@@ -103,36 +119,90 @@ export async function setAuthToken()
     });
 }
 
-async function getToken()
+function validateCredentials(credentials)
 {
-    let t = getFromLocalStorage('firebase_token', true);
-
-    if(!t)
+    try
     {
-        console.warn('No credentials found.');
+        if(!credentials)
+        {
+            throw new Error('No credentials found.');
+        }
 
-        return undefined;
+        if(!credentials.accessToken)
+        {
+            throw new Error('Access token missing or invalid.');
+        }
+
+        if(credentials.expires && (credentials.expires < Date.now()))
+        {
+            throw new Error('Access token is expired.');
+        }
+
+        return true;
     }
-
-    // if the token expiry is set but in the past, refresh it
-    if(t.expires && (t.expires < Date.now()))
+    catch(e)
     {
-        console.warn('Refreshing authentication...');
-        t = await setAuthToken();
-        console.warn('Refreshed authentication.');
+        console.warn(e);
+
+        return false;
     }
-
-    if(!t || !t.token)
-    {
-        console.warn('You are not authorized!');
-
-        return undefined;
-    }
-
-    return t.token;
 }
 
-export async function awaitStream(stream)
+function getCredentials()
+{
+    return getFromLocalStorage('authed_user', true);
+}
+
+function setCredentials(user)
+{
+    try
+    {
+        saveToLocalStorage('authed_user', JSON.stringify({
+            accessToken: user.accessToken,
+            expires: user.expires || (Date.now() + (60 * 60 * 1000))
+        }));
+    }
+    catch(e)
+    {
+        saveToLocalStorage('authed_user', '');
+    }
+}
+
+export async function getToken()
+{
+    try
+    {
+        // get existing token
+        let credentials = getCredentials();
+
+        // if no existing valid token, try to get a new one
+        if(!validateCredentials(credentials))
+        {
+            const user = await authenticateMe();
+
+            // set the credentials; if wrong, they won't work anyway
+            setCredentials(user);
+        }
+
+        credentials = getCredentials();
+
+        if(!validateCredentials(credentials))
+        {
+            return undefined;
+        }
+
+        // return the token
+        return credentials.accessToken;
+    }
+    catch(e)
+    {
+        console.error(e);
+
+        return undefined;
+    }
+}
+
+export async function pipeStream(stream)
 {
     const set = [];
     const reader = stream.pipeThrough(new TextDecoderStream()).getReader();
@@ -146,40 +216,73 @@ export async function awaitStream(stream)
     return set.join('');
 }
 
-export async function firebaseFetch()
+export async function firebaseFetch(method, url, data)
 {
-    const token = await getToken();
+    try
+    {
+        const token = await getToken();
+        const headers = new Headers();
 
-    const headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    headers.append('Authorization', `Bearer ${token}`);
+        headers.append('Content-Type', 'application/json');
+        headers.append('Authorization', `Bearer ${token}`);
 
-    const opts = {
-        method: 'GET',
-        headers
-    };
+        // const uid = '64b98f0-b996-4bf3-9732-1f3270ac6c47';
+        // const user = getFromLocalStorage('user_account', true);
 
-    const url = getConfig().databaseURL + '/notes.json';
+        // url = `${url}?auth=${token}`;
+        // const auth = {
+        //     uid,
+        //     token: {
+        //         sub: uid,
+        //         email: user.email,
+        //         email_verified: true,
+        //         firebase: {
+        //             sign_in_provider: 'password'
+        //         }
+        //     }
+        // };
 
-    const res = await fetch(url, opts);
+        const auth = getAuth();
+        const { currentUser } = auth;
 
-    console.info('res:', await awaitStream(res.body));
+        console.info('getAuth:', auth, currentUser);
+
+        const opts = { method, headers };
+
+        if(data && (method !== cProtocols.get))
+        {
+            opts.body = JSON.stringify(data);
+        }
+
+        console.info('firebaseFetch:', { token, url, opts, headers: headers.toString() });
+
+        const res = await fetch(url, opts);
+        const result = await pipeStream(res.body);
+
+        console.info('firebaseFetch:', result);
+
+        return result;
+    }
+    catch(e)
+    {
+        console.error(e);
+
+        return undefined;
+    }
 }
 
 export async function writeTasksToFirebaseDb(tasks) {
-    await firebaseFetch();
-    const db = getDb();
+    const db = await getDb();
 
-    const res = await set(ref(db, dbName), {
+    await set(ref(db, dbName), {
         tasks,
         updated: Date.now()
     });
-
-    return res;
 }
 
 export async function readTasksFromFirebaseDb(withResult)
 {
+    console.warn('readTasksFromFirebaseDb: start');
     if(typeof withResult !== 'function')
     {
         console.warn('readTasksFromFirebaseDb: Change handler required!');
@@ -187,7 +290,7 @@ export async function readTasksFromFirebaseDb(withResult)
         return;
     }
 
-    const db = getDb();
+    const db = await getDb();
     const dbRef = ref(db, dbName);
 
     onValue(dbRef, (snapshot) => {
@@ -197,4 +300,30 @@ export async function readTasksFromFirebaseDb(withResult)
 
         withResult(data);
     });
+}
+
+export async function authenticateViaEmailAndPassword(user)
+{
+    const auth = getAuth();
+
+    return new Promise((resolve, reject) =>
+    {
+        signInWithEmailAndPassword(auth, user.email, user.password)
+            .then((userCredential) => {
+                // Signed in
+                resolve(userCredential.user);
+                console.info({ userCredential });
+            })
+            .catch((error) => {
+                console.error(error);
+                reject('Authentication failed.');
+            });
+    });
+}
+
+export async function authenticateMe()
+{
+    const me = getFromLocalStorage('user_account', true);
+
+    return authenticateViaEmailAndPassword(me);
 }

@@ -1,5 +1,8 @@
 <template>
-  <div id="q-app" style="background: #eee">
+  <div v-if="!hasAccount">
+    Nothing to see here.
+  </div>
+  <div v-else id="q-app" style="background: #eee">
     <div class="row items-center">
       <q-tabs
           v-model="currentTab"
@@ -122,6 +125,10 @@
       activeAppTabs()
       {
         return this.appTabs.filter((t) => t.active);
+      },
+      hasAccount()
+      {
+        return getFromLocalStorage('user_account', true);
       }
     },
     mounted()
