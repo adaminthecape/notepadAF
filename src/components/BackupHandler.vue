@@ -147,17 +147,17 @@ export default {
   methods: {
     openFileHandler()
     {
-      const { dialog } = require('electron').remote;
-
-      dialog.showOpenDialog({
-        properties: ['openFile'/*, 'multiSelections'*/]
-      }).then(function (files)
-      {
-        if(typeof files !== 'undefined')
-        {
-          console.log('files picked:', files);
-        }
-      });
+      // const { dialog } = require('electron').remote;
+      //
+      // dialog.showOpenDialog({
+      //   properties: ['openFile'/*, 'multiSelections'*/]
+      // }).then(function (files)
+      // {
+      //   if(typeof files !== 'undefined')
+      //   {
+      //     console.log('files picked:', files);
+      //   }
+      // });
     },
     saveNewBackup()
     {

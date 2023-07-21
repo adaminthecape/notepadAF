@@ -2,18 +2,19 @@ import { v4 as uuidv4 } from 'uuid';
 
 export function openInBrowser(link)
 {
-    require("electron").shell.openExternal(link);
-    // window.open(link, '_blank');
+    // require("electron").shell.openExternal(link);
+    window.open(link, '_blank');
 }
 
 export function getAppBasePath()
 {
-    const pathParts = require('electron').remote.app.getAppPath().split('\\');
+    // const pathParts = require('electron').remote.app.getAppPath().split('\\');
 
-    return pathParts
-        .slice(0, pathParts.length - 2)
-        .join('\\');
+    // return pathParts
+    //     .slice(0, pathParts.length - 2)
+    //     .join('\\');
         // .replace('.quasar\\electron', '');
+    return undefined;
 }
 
 /** Local storage operations */
