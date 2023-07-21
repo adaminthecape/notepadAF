@@ -3,10 +3,14 @@
         <q-input
             v-model="email"
             type="email"
+            class="q-mb-md"
+            filled
         />
         <q-input
             v-model="password"
             type="password"
+            class="q-mb-md"
+            filled
         />
         <q-btn
             label="Log in"

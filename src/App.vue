@@ -62,7 +62,10 @@
     },
     data()
     {
+      const user = getFromLocalStorage('user_account', true);
+
       return {
+        hasAccount: user && user.email === 'adaminthecape@gmail.com',
         currentTab: 'tasks',
         isLogDrawerOpen: false,
         activityCache: null,
@@ -126,10 +129,6 @@
       activeAppTabs()
       {
         return this.appTabs.filter((t) => t.active);
-      },
-      hasAccount()
-      {
-        return getFromLocalStorage('user_account', true);
       }
     },
     mounted()
