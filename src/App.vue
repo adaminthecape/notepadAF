@@ -1,6 +1,6 @@
 <template>
   <div v-if="!hasAccount">
-    Nothing to see here.
+    <SetAccountDetails />
   </div>
   <div v-else id="q-app" style="background: #eee">
     <div class="row items-center">
@@ -9,7 +9,6 @@
           class="text-grey-9 shadow-5 full-width"
           activeColor="primary"
           indicatorColor="primary"
-          align="left"
           narrowIndicator
           activeBgColor="blue-2"
           dense
@@ -47,6 +46,7 @@
   import TasksActivity from './components/TasksActivity';
   import MyTickets from './components/MyTickets';
   import Settings from './components/Settings';
+  import SetAccountDetails from './components/SetAccountDetails';
   import {
     getFromLocalStorage,
     saveToLocalStorage
@@ -57,7 +57,8 @@
     components: {
       TasksActivity,
       MyTickets,
-      Settings
+      Settings,
+      SetAccountDetails
     },
     data()
     {

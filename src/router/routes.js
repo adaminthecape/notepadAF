@@ -1,10 +1,10 @@
 
 const routes = [
   {
-    path: '/',
+    path: '/tasks',
     component: () => import('src/App.vue'),
     children: [
-      { path: '', component: () => import('src/components/TasksActivity.vue') }
+      // { path: 'tasks', component: () => import('src/components/TasksActivity.vue') }
     ]
   },
 
