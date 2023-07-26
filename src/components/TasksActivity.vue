@@ -1,5 +1,5 @@
 <template>
-  <SimpleLayout header>
+  <SimpleLayout header :page-classes="['q-px-sm', 'q-pt-sm']">
     <template #header-title>
       <div class="row items-center" style="font-size: 0.8em">
         <q-btn
@@ -12,8 +12,8 @@
           <q-tooltip v-if="isCloudLoading">Loading from cloud</q-tooltip>
         </q-btn>
         <span v-if="!tasksList || !filteredTasksList">No tasks to show</span>
-        <span v-else-if="filteredTasksList.length === tasksList.length">Showing all tasks</span>
-        <span v-else>Showing {{ filteredTasksList.length }} of {{ tasksList.length }} tasks</span>
+        <span v-else-if="filteredTasksList.length === tasksList.length">All tasks</span>
+        <span v-else>{{ filteredTasksList.length }} / {{ tasksList.length }}{{ $q.screen.lt.sm ? '' : ' tasks' }}</span>
         <q-space />
         <q-btn
             v-if="areFiltersActive"
@@ -111,22 +111,33 @@
               @cancel="setFilter(filterTypes.tags, [])"
           />
         </div>
-        <q-btn-group class="row items-center q-mb-xs" flat>
-          <q-btn
-              v-for="bool in toggleableBooleans"
-              :key="`bool-toggle-${bool.value}`"
-              :label="bool.label"
-              dense
-              flat
-              :color="getFilterBoolColor(bool.value)"
-              @click="toggleFilterBool(bool.value)"
+        <div class="row items-center q-mb-xs">
+          <q-btn-group class="row items-center q-mb-xs" flat>
+            <q-btn
+                v-for="bool in toggleableBooleans"
+                :key="`bool-toggle-${bool.value}`"
+                :label="bool.label"
+                dense
+                flat
+                :color="getFilterBoolColor(bool.value)"
+                @click="toggleFilterBool(bool.value)"
+            />
+          </q-btn-group>
+          <q-space />
+          <q-pagination
+              v-model="pagination.page"
+              :max="paginationComputed.max"
+              color="grey"
+              active-color="primary"
+              direction-links
+              input
           />
-        </q-btn-group>
+        </div>
       </div>
       <q-separator class="q-mb-sm" />
       <!-- TASK LIST: -->
       <div
-          style="height: calc(100vh - 260px); overflow-y: scroll"
+          class="task-list"
           :key="`taskList-${taskListRenderIndex}`"
       >
         <div
@@ -144,6 +155,17 @@
           />
         </div>
       </div>
+      <!--<q-space />-->
+      <!--<div class="pagination-container flex flex-center">-->
+      <!--  <q-pagination-->
+      <!--      v-model="pagination.page"-->
+      <!--      :max="paginationComputed.max"-->
+      <!--      color="grey"-->
+      <!--      active-color="primary"-->
+      <!--      direction-links-->
+      <!--      input-->
+      <!--  />-->
+      <!--</div>-->
     </template>
   </SimpleLayout>
 </template>
@@ -172,7 +194,7 @@ export default {
   data()
   {
     return {
-      limit: getFromLocalStorage('taskLimit') || 20,
+      limit: getFromLocalStorage('taskLimit') || 5,
       filterTypes: {
         keyword: 'keyword',
         tags: 'tags',
@@ -195,14 +217,22 @@ export default {
       refreshCheckInterval: null,
       isLoggingIn: false,
       isSignedIn: false,
-      isFirebaseConfigDialogOpen: false
+      isFirebaseConfigDialogOpen: false,
+      pagination: {
+        page: 1,
+        max: 5
+      },
+      tmpInterval: undefined
     };
   },
   inject: ['$openTab'],
   computed: {
     limitedTasks()
     {
-      return this.filteredTasksList.slice(0, this.limit || 20);
+      const page = (this.pagination.page - 1);
+      const offset = this.limit * page;
+
+      return this.filteredTasksList.slice(offset, (this.limit || 20) + offset);
     },
     areFiltersActive()
     {
@@ -225,11 +255,17 @@ export default {
     isCloudLoading()
     {
       return this.$store.getters['notes/isCloudLoading'];
+    },
+    paginationComputed()
+    {
+      return {
+        max: this.filteredTasksList.length / this.limit
+      };
     }
   },
   created()
   {
-    if(!getFromLocalStorage('firebase_config'))
+    if(!getFromLocalStorage('firebase_config', true))
     {
       this.isFirebaseConfigDialogOpen = true;
     }
@@ -279,7 +315,14 @@ export default {
       // await this.$store.dispatch('notes/loadAllFromJson');
       this.$store.dispatch('notes/watchCloudDb');
 
-      setTimeout(this.filterTasks, 500);
+      this.tmpInterval = setInterval(() =>
+      {
+        if(!this.isCloudLoading && this.tasksList && this.tasksList.length)
+        {
+          this.filterTasks();
+          clearInterval(this.tmpInterval);
+        }
+      }, 100);
     },
 
     /****** Filtering tasks */
@@ -566,4 +609,21 @@ h3 { font-size: 1.6em; }
 h4 { font-size: 1.4em; }
 h5 { font-size: 1.2em; }
 h6 { font-size: 1em; }
+</style>
+
+<style scoped>
+.pagination-container {
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.task-list {
+  max-height: calc(100vh - 260px);
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
 </style>

@@ -1,6 +1,7 @@
 <template>
 <!--  :options="allTags.map((t) => ({ label: t, value: t }))"-->
   <q-select
+      ref="selector"
       v-model="value"
       :options="tagsToShow"
       :label="label"
@@ -22,13 +23,21 @@
       <q-item :clickable="newValueMode">
         <q-item-section class="text-grey">
           <div v-if="!newValueMode">No results</div>
-          <div v-else class="text-amber">
-            Press Enter then Tab to add
-          </div>
         </q-item-section>
       </q-item>
     </template>
     <template #append>
+      <q-btn
+          v-if="newValueMode"
+          icon="add"
+          round
+          dense
+          flat
+          size="xs"
+          @click.stop.prevent="addValue"
+      >
+        <q-tooltip>Add</q-tooltip>
+      </q-btn>
       <q-btn
           v-if="value && value.length && !newValueMode"
           icon="content_copy"
@@ -119,6 +128,17 @@ export default {
     }
   },
   methods: {
+    addValue()
+    {
+      const v = this.$refs.selector.$refs.target.value;
+
+      console.log('adding:', v);
+
+      if(v)
+      {
+        this.$emit('input', v);
+      }
+    },
     copyTags()
     {
       navigator.clipboard.writeText(this.value.join(', '));
