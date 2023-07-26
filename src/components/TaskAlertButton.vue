@@ -2,7 +2,7 @@
   <div>
     <q-btn
         v-bind="allQProps"
-        icon="add_alert"
+        icon="alarm_add"
         @click="isCreatingAlert = !isCreatingAlert"
     >
       <q-tooltip>Add alert</q-tooltip>
