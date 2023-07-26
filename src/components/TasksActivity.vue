@@ -130,7 +130,7 @@
           :key="`taskList-${taskListRenderIndex}`"
       >
         <div
-            v-for="task in filteredTasksList"
+            v-for="task in limitedTasks"
             :key="task.id"
         >
           <DisplayTask
@@ -172,6 +172,7 @@ export default {
   data()
   {
     return {
+      limit: getFromLocalStorage('taskLimit') || 20,
       filterTypes: {
         keyword: 'keyword',
         tags: 'tags',
@@ -199,6 +200,10 @@ export default {
   },
   inject: ['$openTab'],
   computed: {
+    limitedTasks()
+    {
+      return this.filteredTasksList.slice(0, this.limit || 20);
+    },
     areFiltersActive()
     {
       return this.tasksList.length !== this.filteredTasksList.length;

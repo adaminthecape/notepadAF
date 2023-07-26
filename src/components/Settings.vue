@@ -21,20 +21,13 @@
                 placeholder="Gitlab token"
             >
               <template #append>
-                <div v-if="cache.tokens.gitlab !== tokens.gitlab">
+                <div>
                   <q-btn
                       icon="check"
                       round
                       dense
                       color="secondary"
                       @click="setToken('gitlab')"
-                  />
-                  <q-btn
-                      icon="cancel"
-                      round
-                      dense
-                      color="negative"
-                      @click="revertToken('gitlab')"
                   />
                 </div>
               </template>
@@ -55,20 +48,13 @@
                 placeholder="Pivotal token"
             >
               <template #append>
-                <div v-if="cache.tokens.pivotal !== tokens.pivotal">
+                <div>
                   <q-btn
                       icon="check"
                       round
                       dense
                       color="secondary"
                       @click="setToken('pivotal')"
-                  />
-                  <q-btn
-                      icon="cancel"
-                      round
-                      dense
-                      color="negative"
-                      @click="revertToken('pivotal')"
                   />
                 </div>
               </template>
@@ -89,20 +75,13 @@
                 placeholder="Pivotal project ID"
             >
               <template #append>
-                <div v-if="cache.pivotalProjectId !== pivotalProjectId">
+                <div>
                   <q-btn
                       icon="check"
                       round
                       dense
                       color="secondary"
                       @click="setSetting('pivotalProjectId')"
-                  />
-                  <q-btn
-                      icon="cancel"
-                      round
-                      dense
-                      color="negative"
-                      @click="revertSetting('pivotalProjectId')"
                   />
                 </div>
               </template>
@@ -123,20 +102,13 @@
                 placeholder="Git base directory"
             >
               <template #append>
-                <div v-if="cache.gitModuleBasePath !== gitModuleBasePath">
+                <div>
                   <q-btn
                       icon="check"
                       round
                       dense
                       color="secondary"
                       @click="setSetting('gitModuleBasePath')"
-                  />
-                  <q-btn
-                      icon="cancel"
-                      round
-                      dense
-                      color="negative"
-                      @click="revertSetting('gitModuleBasePath')"
                   />
                 </div>
               </template>
@@ -166,7 +138,7 @@
                   dark
                   square
                   dense
-                >Firebase config applied for {{ firebaseConfig.projectId }}</q-chip>
+                >Firebase config applied</q-chip>
                 <q-chip
                   v-else
                   color="negative"
@@ -176,7 +148,7 @@
                 >No firebase config active!</q-chip>
               </template>
               <template #content>
-                <q-card>
+                <q-card style="max-width:100%;">
                   <q-item>
                     <q-item-section>
                       <div class="q-mb-md">Paste your firebase configuration settings (including your API key) as a JSON object below.</div>
@@ -185,6 +157,13 @@
                         type="textarea"
                         filled
                       />
+                      <q-card>
+                        <q-item>
+                          <q-item-section>
+                            {{ firebaseConfig || 'none' }}
+                          </q-item-section>
+                        </q-item>
+                      </q-card>
                       <q-btn
                         class="q-my-md"
                         @click="setFirebaseConfig()"
@@ -217,6 +196,40 @@
                 <BackupHandler />
               </template>
             </SimpleModal>
+          </q-item-section>
+        </q-item>
+      </q-card>
+      <q-card class="q-mb-sm">
+        <q-item>
+          <q-item-section>
+            <h5>User</h5>
+          </q-item-section>
+          <q-item-section>
+            <q-btn
+              label="Clear user"
+              @click="forgetUser"
+            />
+          </q-item-section>
+        </q-item>
+      </q-card>
+      <q-card class="q-mb-sm">
+        <q-item>
+          <q-item-section>
+            <h5>Set item</h5>
+          </q-item-section>
+          <q-item-section>
+            <q-input
+              v-model="customSetting.label"
+              type="text"
+            />
+            <q-input
+              v-model="customSetting.value"
+              type="text"
+            />
+            <q-btn
+              icon="save"
+              @click="setCustomValue"
+            />
           </q-item-section>
         </q-item>
       </q-card>
@@ -292,10 +305,37 @@ export default {
     return {
       cache,
       ...cache,
-      appTabs
+      appTabs,
+      customSetting: {
+        label: '',
+        value: ''
+      }
     };
   },
   methods: {
+    setCustomValue()
+    {
+      if(
+        !this.customSetting.label ||
+        !this.customSetting.value
+      )
+      {
+        return;
+      }
+
+      saveToLocalStorage(
+        this.customSetting.label,
+        this.customSetting.value
+      );
+    },
+    forgetUser()
+    {
+      saveToLocalStorage('user_account', '');
+      setTimeout(() =>
+      {
+        window.location.reload();
+      }, 500);
+    },
     saveAppTabs()
     {
       if(Object.keys(this.appTabs || {}).length)
