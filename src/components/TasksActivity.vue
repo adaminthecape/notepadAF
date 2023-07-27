@@ -178,6 +178,7 @@ import TaskSortDropdown from './TaskSortDropdown';
 import {
   cudTaskViaStore,
   filterTaskList,
+  sortTaskList,
   getAllTasksFromStore,
   getFromLocalStorage,
   saveToLocalStorage
@@ -204,7 +205,7 @@ export default {
       },
       filters: {},
       applyFilters: true,
-      filteredTasksList: [],
+      // filteredTasksList: [],
       newTask: {
         title: null,
         content: null
@@ -250,7 +251,16 @@ export default {
     },
     tasksList()
     {
-      return getAllTasksFromStore(this.$store) || [];
+      return (getAllTasksFromStore(this.$store) || [])
+          .filter((task) => !task.deleted);
+    },
+    filteredTasksList()
+    {
+      return sortTaskList(
+          filterTaskList(this.tasksList, this.filters),
+          this.sortType,
+          this.inverseSort
+      );
     },
     isCloudLoading()
     {
@@ -273,7 +283,6 @@ export default {
   mounted()
   {
     this.loadTasks();
-    this.filteredTasksList = this.tasksList;
 
     const storedFilters = getFromLocalStorage('taskFilters', true);
 
@@ -282,7 +291,6 @@ export default {
       this.sortType = storedFilters.sortType;
       this.inverseSort = storedFilters.inverseSort;
       this.filters = storedFilters;
-      this.filterTasks();
     }
 
     if(this.refreshCheckInterval)
@@ -339,10 +347,6 @@ export default {
         sortType: this.sortType,
         inverseSort: this.inverseSort
       });
-
-      this.filteredTasksList = filterTaskList(this.tasksList, this.filters);
-
-      this.sortTasks();
     },
     /**
      * Add OR remove given tag to current filters & filter again.
@@ -405,66 +409,17 @@ export default {
     },
 
     /****** Sorting tasks */
-    sortTasks()
-    {
-      const sortByCreated = (a, b) =>
-      {
-        if(this.inverseSort)
-        {
-          return a.created - b.created;
-        }
-
-        return b.created - a.created;
-      }
-
-      const sortByAlarm = (a, b) =>
-      {
-        const aSoonest = a.alerts && a.alerts.length ? Math.min(a.alerts.map((alert) => alert.unix)) : Infinity;
-        const bSoonest = b.alerts && b.alerts.length ? Math.min(b.alerts.map((alert) => alert.unix)) : Infinity;
-
-        if(this.inverseSort)
-        {
-          return bSoonest - aSoonest;
-        }
-
-        return aSoonest - bSoonest;
-      }
-
-      const sortByBool = (bool, a, b) =>
-      {
-        if(this.inverseSort)
-        {
-          return b[bool] - a[bool];
-        }
-
-        return a[bool] - b[bool];
-      }
-
-      switch(this.sortType)
-      {
-        case 'due':
-          return this.filteredTasksList.sort(sortByAlarm);
-        case 'done':
-          return this.filteredTasksList.sort((a, b) => sortByBool('done', a, b));
-        case 'created':
-        default:
-          return this.filteredTasksList.sort(sortByCreated);
-      }
-    },
     /** Set the sort type AND sort tasks. */
     setSort(type)
     {
-      if(type === this.sortType)
+      if(type === this.sortType) // invert it
       {
-        // invert it
         this.inverseSort = !this.inverseSort;
       }
       else
       {
         this.sortType = type;
       }
-
-      this.sortTasks();
     },
 
     /****** Updating tasks */

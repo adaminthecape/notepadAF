@@ -137,6 +137,53 @@ export function filterTaskList(tasks, filters)
     ));
 }
 
+export function sortTaskList(tasks, sortType, inverseSort)
+{
+    const sortByCreated = (a, b) =>
+    {
+        if(inverseSort)
+        {
+            return a.created - b.created;
+        }
+
+        return b.created - a.created;
+    }
+
+    const sortByAlarm = (a, b) =>
+    {
+        const aSoonest = a.alerts && a.alerts.length ? Math.min(a.alerts.map((alert) => alert.unix)) : Infinity;
+        const bSoonest = b.alerts && b.alerts.length ? Math.min(b.alerts.map((alert) => alert.unix)) : Infinity;
+
+        if(inverseSort)
+        {
+            return bSoonest - aSoonest;
+        }
+
+        return aSoonest - bSoonest;
+    }
+
+    const sortByBool = (bool, a, b) =>
+    {
+        if(this.inverseSort)
+        {
+            return b[bool] - a[bool];
+        }
+
+        return a[bool] - b[bool];
+    }
+
+    switch(sortType)
+    {
+        case 'due':
+            return tasks.sort(sortByAlarm);
+        case 'done':
+            return tasks.sort((a, b) => sortByBool('done', a, b));
+        case 'created':
+        default:
+            return tasks.sort(sortByCreated);
+    }
+}
+
 /** CRUD for tasks */
 /**
  * Create/update/delete a task, independent of store interface.
