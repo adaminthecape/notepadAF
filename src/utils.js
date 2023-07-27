@@ -164,7 +164,7 @@ export function sortTaskList(tasks, sortType, inverseSort)
 
     const sortByBool = (bool, a, b) =>
     {
-        if(this.inverseSort)
+        if(inverseSort)
         {
             return b[bool] - a[bool];
         }
