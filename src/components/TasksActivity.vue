@@ -16,7 +16,6 @@
         <span v-else>{{ filteredTasksList.length }} / {{ tasksList.length }}{{ $q.screen.lt.sm ? '' : ' tasks' }}</span>
         <q-space />
         <q-btn
-            v-if="areFiltersActive"
             icon="tune"
             size="sm"
             dense
@@ -234,10 +233,6 @@ export default {
       const offset = this.limit * page;
 
       return this.filteredTasksList.slice(offset, (this.limit || 20) + offset);
-    },
-    areFiltersActive()
-    {
-      return this.tasksList.length !== this.filteredTasksList.length;
     },
     toggleableBooleans()
     {
