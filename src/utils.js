@@ -137,6 +137,103 @@ export function filterTaskList(tasks, filters)
     ));
 }
 
+export function sortTaskList(tasks, sortType, inverseSort)
+{
+    const sortByCreated = (a, b) =>
+    {
+        if(inverseSort)
+        {
+            return a.created - b.created;
+        }
+
+        return b.created - a.created;
+    }
+
+    const sortByAlarm = (a, b) =>
+    {
+        const aSoonest = a.alerts && a.alerts.length ? Math.min(a.alerts.map((alert) => alert.unix)) : Infinity;
+        const bSoonest = b.alerts && b.alerts.length ? Math.min(b.alerts.map((alert) => alert.unix)) : Infinity;
+
+        if(inverseSort)
+        {
+            return bSoonest - aSoonest;
+        }
+
+        return aSoonest - bSoonest;
+    }
+
+    const sortByBool = (bool, a, b) =>
+    {
+        if(inverseSort)
+        {
+            return b[bool] - a[bool];
+        }
+
+        return a[bool] - b[bool];
+    }
+
+    switch(sortType)
+    {
+        case 'due':
+            return tasks.sort(sortByAlarm);
+        case 'done':
+            return tasks.sort((a, b) => sortByBool('done', a, b));
+        case 'created':
+        default:
+            return tasks.sort(sortByCreated);
+    }
+}
+/** @returns task with current filters merged in */
+export function applyFiltersToTask(task, filters)
+{
+    if(!Object.keys(filters || {}).length)
+    {
+        return task;
+    }
+
+    const now = Date.now();
+
+    if(!task.tags)
+    {
+        task.tags = [];
+    }
+
+    if(filters.tags && filters.tags.length)
+    {
+        task.tags = [...task.tags, ...filters.tags];
+    }
+
+    if(filters.keyword)
+    {
+        task.tags = [...task.tags, filters.keyword];
+    }
+
+    ['active', 'archived'].forEach((bool) =>
+    {
+        if(typeof filters[bool] === 'boolean')
+        {
+            task[bool] = filters[bool];
+        }
+    });
+
+    ['done'].forEach((num) =>
+    {
+        if(typeof filters[num] === 'boolean')
+        {
+            if(filters[num])
+            {
+                task[num] = now;
+            }
+            else
+            {
+                task[num] = 0;
+            }
+        }
+    });
+
+    return task;
+}
+
 /** CRUD for tasks */
 /**
  * Create/update/delete a task, independent of store interface.
@@ -154,7 +251,6 @@ export async function cudTask(tasksList, storeUpdater, taskData, deleteTask = fa
         throw new Error('A store interface is required');
     }
 
-    console.info('cudTask:', taskData);
     if(!taskData)
     {
         console.warn('bad task!', taskData);
@@ -253,8 +349,29 @@ export async function cudTaskViaStore(store, taskData, deleteTask = false)
  */
 export function queueTaskRefresh(id)
 {
-    console.info('queue:', id);
     saveToLocalStorageArray('taskRefreshQueue', id);
+}
+
+export function localStorageIntervalCheck(name, callback)
+{
+    if(!name || typeof callback !== 'function')
+    {
+        return;
+    }
+
+    return setInterval(() =>
+    {
+        const queue = getFromLocalStorage(name);
+
+        if(Array.isArray(queue) && queue.length)
+        {
+            callback(queue);
+
+            console.info('cleared queue:', name);
+
+            saveToLocalStorage(name, []);
+        }
+    }, 250);
 }
 
 export function getAllTasksFromStore(store)
@@ -329,7 +446,7 @@ export function timeSince(time)
 }
 
 /** Send an app-wide notification. */
-export function qNotify(q, message, opts, action)
+export function qNotify(q, message, opts = null, action = null)
 {
     if(!q) return;
 

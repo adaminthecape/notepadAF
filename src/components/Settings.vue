@@ -398,8 +398,6 @@ export default {
         return;
       }
 
-      console.log('saving config:', config);
-
       saveToLocalStorage('firebase_config', config);
     }
   }

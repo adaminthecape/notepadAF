@@ -26,11 +26,6 @@
     },
     methods: {
       timeSince,
-      _toggle()
-      {
-        // do some test logic here
-        console.log('start!');
-      },
       toggle()
       {
         if(this.done)

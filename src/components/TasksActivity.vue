@@ -16,7 +16,6 @@
         <span v-else>{{ filteredTasksList.length }} / {{ tasksList.length }}{{ $q.screen.lt.sm ? '' : ' tasks' }}</span>
         <q-space />
         <q-btn
-            v-if="areFiltersActive"
             icon="tune"
             size="sm"
             dense
@@ -29,7 +28,7 @@
         <TaskSortDropdown
             :sortType="sortType"
             :inverseSort="inverseSort"
-            @setSortType="setSort"
+            @setSortType="setSortType"
         />
         <q-btn
             class="q-ml-xs"
@@ -178,9 +177,11 @@ import TaskSortDropdown from './TaskSortDropdown';
 import {
   cudTaskViaStore,
   filterTaskList,
+  sortTaskList,
+  applyFiltersToTask,
   getAllTasksFromStore,
   getFromLocalStorage,
-  saveToLocalStorage
+  saveToLocalStorage, localStorageIntervalCheck, qNotify
 } from "src/utils";
 
 export default {
@@ -204,7 +205,7 @@ export default {
       },
       filters: {},
       applyFilters: true,
-      filteredTasksList: [],
+      // filteredTasksList: [],
       newTask: {
         title: null,
         content: null
@@ -234,10 +235,6 @@ export default {
 
       return this.filteredTasksList.slice(offset, (this.limit || 20) + offset);
     },
-    areFiltersActive()
-    {
-      return this.tasksList.length !== this.filteredTasksList.length;
-    },
     toggleableBooleans()
     {
       return [
@@ -250,7 +247,19 @@ export default {
     },
     tasksList()
     {
-      return getAllTasksFromStore(this.$store) || [];
+      return (getAllTasksFromStore(this.$store) || [])
+          .filter((task) => !task.deleted);
+    },
+    filteredTasksList()
+    {
+      return sortTaskList(
+          filterTaskList(
+              this.tasksList,
+              this.filters
+          ),
+          this.sortType,
+          this.inverseSort
+      );
     },
     isCloudLoading()
     {
@@ -273,7 +282,6 @@ export default {
   mounted()
   {
     this.loadTasks();
-    this.filteredTasksList = this.tasksList;
 
     const storedFilters = getFromLocalStorage('taskFilters', true);
 
@@ -282,7 +290,6 @@ export default {
       this.sortType = storedFilters.sortType;
       this.inverseSort = storedFilters.inverseSort;
       this.filters = storedFilters;
-      this.filterTasks();
     }
 
     if(this.refreshCheckInterval)
@@ -290,22 +297,13 @@ export default {
       clearInterval(this.refreshCheckInterval);
     }
 
-    this.refreshCheckInterval = setInterval(() =>
-    {
-      const queue = getFromLocalStorage('taskRefreshQueue');
-
-      if(Array.isArray(queue) && queue.length)
-      {
-        queue.forEach((id) =>
+    this.refreshCheckInterval = localStorageIntervalCheck(
+        'taskRefreshQueue',
+        (queue) => queue.forEach((id) =>
         {
           this.refreshTask({ id });
-        });
-
-        console.info('cleared queue');
-
-        saveToLocalStorage('taskRefreshQueue', []);
-      }
-    }, 250);
+        })
+    );
   },
   methods: {
     /****** Loading/fetching tasks */
@@ -325,12 +323,6 @@ export default {
       }, 100);
     },
 
-    /****** Filtering tasks */
-    clearFilters()
-    {
-      this.filters = {};
-      this.filterTasks();
-    },
     /** Actual filtering logic. Sorts after filtering. Saves filters to localStorage. */
     filterTasks()
     {
@@ -339,10 +331,29 @@ export default {
         sortType: this.sortType,
         inverseSort: this.inverseSort
       });
+    },
 
-      this.filteredTasksList = filterTaskList(this.tasksList, this.filters);
+    setSortType(type)
+    {
+      if(type === this.sortType) // invert it
+      {
+        this.inverseSort = !this.inverseSort;
+      }
+      else
+      {
+        this.sortType = type;
+      }
+    },
 
-      this.sortTasks();
+    refreshTask(task)
+    {
+      this.taskRenderIndex[task.id] = `render-${task.id}-${Date.now()}`;
+    },
+
+    clearFilters()
+    {
+      this.filters = {};
+      this.filterTasks();
     },
     /**
      * Add OR remove given tag to current filters & filter again.
@@ -350,41 +361,30 @@ export default {
      */
     addTagToFilters(tag)
     {
-      if(!tag)
+      if(tag)
       {
-        return;
+        this.setFilter(
+            'tags',
+            (this.filters.tags || []).includes(tag) ?
+              (this.filters.tags || []).filter((t) => t !== tag) :
+              (this.filters.tags || []).concat(tag)
+        );
       }
-
-      if(!this.filters)
-      {
-        this.filters = {};
-      }
-
-      if(!this.filters.tags)
-      {
-        this.filters.tags = [];
-      }
-
-      if(this.filters.tags.includes(tag))
-      {
-        this.filters.tags = this.filters.tags.filter((t) => t !== tag);
-      }
-      else
-      {
-        this.filters.tags.push(tag);
-      }
-
+    },
+    setFilter(type, value)
+    {
+      this.filters[type] = value;
       this.filterTasks();
     },
 
     /****** Filtering tasks - booleans */
     getFilterBoolColor(prop)
     {
-      return this.filters[prop] ?
-          'green-9' :
-          this.filters[prop] === false ?
-              'negative' :
-              'grey-9';
+      return (
+          this.filters[prop] === true && 'green-9' ||
+          this.filters[prop] === false && 'negative' ||
+          'grey-9'
+      );
     },
     toggleFilterBool(prop)
     {
@@ -404,165 +404,19 @@ export default {
       this.filterTasks();
     },
 
-    /****** Sorting tasks */
-    sortTasks()
-    {
-      const sortByCreated = (a, b) =>
-      {
-        if(this.inverseSort)
-        {
-          return a.created - b.created;
-        }
-
-        return b.created - a.created;
-      }
-
-      const sortByAlarm = (a, b) =>
-      {
-        const aSoonest = a.alerts && a.alerts.length ? Math.min(a.alerts.map((alert) => alert.unix)) : Infinity;
-        const bSoonest = b.alerts && b.alerts.length ? Math.min(b.alerts.map((alert) => alert.unix)) : Infinity;
-
-        if(this.inverseSort)
-        {
-          return bSoonest - aSoonest;
-        }
-
-        return aSoonest - bSoonest;
-      }
-
-      const sortByBool = (bool, a, b) =>
-      {
-        if(this.inverseSort)
-        {
-          return b[bool] - a[bool];
-        }
-
-        return a[bool] - b[bool];
-      }
-
-      switch(this.sortType)
-      {
-        case 'due':
-          return this.filteredTasksList.sort(sortByAlarm);
-        case 'done':
-          return this.filteredTasksList.sort((a, b) => sortByBool('done', a, b));
-        case 'created':
-        default:
-          return this.filteredTasksList.sort(sortByCreated);
-      }
-    },
-    /** Set the sort type AND sort tasks. */
-    setSort(type)
-    {
-      if(type === this.sortType)
-      {
-        // invert it
-        this.inverseSort = !this.inverseSort;
-      }
-      else
-      {
-        this.sortType = type;
-      }
-
-      this.sortTasks();
-    },
-
-    /****** Updating tasks */
     createTask()
     {
-      try
+      cudTaskViaStore(
+          this.$store,
+          this.applyFilters ?
+              applyFiltersToTask(this.newTask, this.filters) :
+              this.newTask
+      ).then(() =>
       {
-        if(this.newTask.message)
-        {
-          const t = {
-            message: this.newTask.message,
-            created: Date.now()
-          };
-
-          const newTask = this.applyFilters ? this.applyFiltersToTask(t, this.filters) : t;
-
-          cudTaskViaStore(this.$store, newTask).then(() =>
-          {
-            this.newTask = { message: null };
-            this.loadTasks().then(() =>
-            {
-              this.refreshAll();
-            });
-          });
-        }
-      }
-      catch(e)
-      {
-        console.error(e);
-      }
-    },
-
-    /****** Reactivity helpers */
-    refreshTask(task)
-    {
-      this.taskRenderIndex[task.id] = `render-${task.id}-${Date.now()}`;
-    },
-    refreshAll()
-    {
-      this.taskListRenderIndex += 1;
-    },
-
-    /****** Helpers */
-    /** @returns task with current filters merged in */
-    applyFiltersToTask(task, filters)
-    {
-      if(!Object.keys(filters || {}).length)
-      {
-        return task;
-      }
-
-      const now = Date.now();
-
-      if(!task.tags)
-      {
-        task.tags = [];
-      }
-
-      if(filters.tags && filters.tags.length)
-      {
-        task.tags = [...task.tags, ...filters.tags];
-      }
-
-      if(filters.keyword)
-      {
-        task.tags = [...task.tags, filters.keyword];
-      }
-
-      ['active', 'archived'].forEach((bool) =>
-      {
-        if(typeof filters[bool] === 'boolean')
-        {
-          task[bool] = filters[bool];
-        }
+        this.newTask = { message: null };
       });
-
-      ['done'].forEach((num) =>
-      {
-        if(typeof filters[num] === 'boolean')
-        {
-          if(filters[num])
-          {
-            task[num] = now;
-          }
-          else
-          {
-            task[num] = 0;
-          }
-        }
-      });
-
-      return task;
-    },
-    setFilter(type, value)
-    {
-      this.filters[type] = value;
-      this.filterTasks();
     }
+
   }
 };
 </script>
