@@ -42,12 +42,13 @@
 </template>
 
 <script>
-import QPropsMixin from '../mixins/QPropsMixin.js';
+import { qProps } from '../mixins/QPropsMixin.js';
 import SingleTaskMixin from '../mixins/SingleTaskMixin.js';
 import { cudTaskViaStore } from "src/utils";
 
 export default {
-  mixins: [QPropsMixin, SingleTaskMixin],
+  mixins: [SingleTaskMixin],
+  props: { ...qProps },
   data()
   {
     return {

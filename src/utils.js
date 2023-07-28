@@ -525,3 +525,13 @@ export function copyToClipboard(value)
         navigator.clipboard.writeText(value);
     }
 }
+
+export async function v_dac(path)
+{
+    return defineAsyncComponent(() => import(path));
+}
+
+export async function v_dac_vc(path)
+{
+    return defineAsyncComponent(() => import(`src/components/${path}.vue`));
+}

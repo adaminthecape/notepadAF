@@ -14,15 +14,15 @@
 </template>
 
 <script>
-import QPropsMixin from '../mixins/QPropsMixin.js';
+import { qProps } from '../mixins/QPropsMixin.js';
 
 export default {
-  mixins: [QPropsMixin],
   props: {
     editing: {
       type: Boolean,
       default: false
-    }
+    },
+    ...qProps
   },
   methods: {
     toggle()

@@ -64,7 +64,7 @@
       const user = getFromLocalStorage('user_account', true);
 
       return {
-        hasAccount: user && user.email === 'adaminthecape@gmail.com',
+        hasAccount: !!user,
         currentTab: 'tasks',
         isLogDrawerOpen: false,
         activityCache: null,

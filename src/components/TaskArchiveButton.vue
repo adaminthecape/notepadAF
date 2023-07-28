@@ -14,15 +14,15 @@
 
 <script>
 import { timeSince } from '../utils';
-import QPropsMixin from '../mixins/QPropsMixin.js';
+import { qProps } from '../mixins/QPropsMixin.js';
 
 export default {
-  mixins: [QPropsMixin],
   props: {
     archived: {
       type: [Boolean, Number],
       default: 0
-    }
+    },
+    ...qProps
   },
   methods: {
     timeSince,

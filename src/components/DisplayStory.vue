@@ -17,7 +17,7 @@ import { QMarkdown } from '@quasar/quasar-ui-qmarkdown';
 import SimpleLayout from './SimpleLayout';
 
 export default {
-  name: 'Notes',
+  name: 'DisplayStory',
   components: {
     QMarkdown,
     SimpleLayout

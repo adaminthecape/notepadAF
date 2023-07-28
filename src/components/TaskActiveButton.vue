@@ -37,11 +37,11 @@
 
 <script>
 import { timeSince } from "../utils";
-  import QPropsMixin from '../mixins/QPropsMixin.js';
+  import { qProps } from '../mixins/QPropsMixin.js';
   import SingleTaskMixin from "src/mixins/SingleTaskMixin";
 
   export default {
-    mixins: [QPropsMixin, SingleTaskMixin],
+    mixins: [SingleTaskMixin],
     props: {
       active: {
         type: [Number, Boolean],
@@ -54,7 +54,8 @@ import { timeSince } from "../utils";
       taskId: {
         type: String,
         default: undefined
-      }
+      },
+      ...qProps
     },
     data()
     {

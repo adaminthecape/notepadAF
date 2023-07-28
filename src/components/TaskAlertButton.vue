@@ -24,14 +24,15 @@
 </template>
 
 <script>
-import QPropsMixin from '../mixins/QPropsMixin.js';
+import { qProps } from '../mixins/QPropsMixin.js';
 import SingleTaskMixin from "src/mixins/SingleTaskMixin";
 import CreateAlert from "components/CreateAlert";
 import { cudTaskViaStore, queueTaskRefresh } from "src/utils";
 
 export default {
   components: { CreateAlert },
-  mixins: [QPropsMixin, SingleTaskMixin],
+  mixins: [SingleTaskMixin],
+  props: { ...qProps },
   data()
   {
     return {

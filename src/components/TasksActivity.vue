@@ -181,7 +181,8 @@ import {
   applyFiltersToTask,
   getAllTasksFromStore,
   getFromLocalStorage,
-  saveToLocalStorage, localStorageIntervalCheck, qNotify
+  saveToLocalStorage,
+  localStorageIntervalCheck
 } from "src/utils";
 
 export default {
