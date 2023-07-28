@@ -98,7 +98,7 @@ export async function setAuthToken()
     {
         jwtClient.authorize(function(error, tokens) {
             if (error) {
-                console.log("Error making request to generate access token:", error);
+                console.log("Token request ERROR:", error);
                 resolve(undefined);
             } else if (tokens.access_token === null) {
                 console.log("Provided service account does not have permission to generate access tokens");
@@ -296,8 +296,6 @@ export async function readTasksFromFirebaseDb(withResult)
     onValue(dbRef, (snapshot) => {
         const data = snapshot.val();
 
-        console.log('readTasksFromFirebaseDb: new change:', data);
-
         withResult(data);
     });
 }
@@ -312,7 +310,6 @@ export async function authenticateViaEmailAndPassword(user)
             .then((userCredential) => {
                 // Signed in
                 resolve(userCredential.user);
-                console.info({ userCredential });
             })
             .catch((error) => {
                 console.error(error);

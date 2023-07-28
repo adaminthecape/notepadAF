@@ -132,8 +132,6 @@ export default {
     {
       const v = this.$refs.selector.$refs.target.value;
 
-      console.log('adding:', v);
-
       if(v)
       {
         this.$emit('input', v);

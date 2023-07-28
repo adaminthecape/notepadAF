@@ -52,8 +52,6 @@ export function saveToExternalBackup(
         }
     }
 
-    console.info({ fileData });
-
     fsWriteSync(targetPath, fileData);
 
     saveToLocalStorageArray('external_backups', target);
@@ -108,8 +106,6 @@ export function restoreFromExternalBackup(
             //
         }
     }
-
-    console.info({ dataToSave });
 
     fsWriteSync(targetPath, dataToSave);
 }

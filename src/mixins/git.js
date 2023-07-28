@@ -19,8 +19,6 @@ export function runCmd(
     onError
 )
 {
-    console.info();
-
     if(!(typeof command === 'string' && command.length))
     {
         console.warn('command wrong!', command);
@@ -237,10 +235,6 @@ export default {
                     type,
                     data
                 }],
-                (res) =>
-                {
-                    console.log('audit:', res);
-                },
                 {
                     dbFile: 'notesdb.json',
                     shouldMerge: true,

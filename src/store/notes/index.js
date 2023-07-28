@@ -3,11 +3,10 @@ import { readFromDbSync, saveAll } from 'src/mixins/jsondb';
 import { readTasksFromFirebaseDb, writeTasksToFirebaseDb} from 'src/mixins/firebase';
 import { v4 as uuidv4 } from 'uuid';
 
-let logTitle = 'store/notes:';
-const log = (...args) => console.log(logTitle, ':', ...args);
-
 const state = {
     tasks: [],
+    taskUpdateQueue: [],
+    taskUpdateTimeout: [],
     cloudLoading: false,
     lastCloudUpdate: 0,
     lastCloudDispatch: 0
@@ -86,22 +85,77 @@ const mutations = {
     },
     SAVE_TASKS_TO_CLOUD_FROM_STATE(state)
     {
-        console.log('SAVE_TASKS_TO_CLOUD_FROM_STATE:', state.tasks);
         if(!state.tasks || !state.tasks.length)
         {
             return;
         }
 
-        writeTasksToFirebaseDb(state.tasks);
+        console.warn('SAVE_TASKS_TO_CLOUD_FROM_STATE:', state.tasks.length);
+        writeTasksToFirebaseDb(state.tasks)
+    },
+    // QUEUE_TASK_UPDATE(state, task)
+    // {
+    //     const existingIndex = state.tasks.findIndex((t) => t.id === task.id);
+    //
+    //     if(existingIndex > -1)
+    //     {
+    //         state.tasks.splice(existingIndex, 1, task);
+    //     }
+    //     else
+    //     {
+    //         state.taskUpdateQueue.push(task);
+    //     }
+    //
+    //     console.log('update queue:', state.taskUpdateQueue);
+    // },
+    QUEUE_UPDATE_ALL(state, time)
+    {
+        state.taskUpdateQueue.push(time || Date.now() + 5001);
+    },
+    CLEAR_UPDATE_ALL(state)
+    {
+        Vue.set(state, 'taskUpdateQueue', []);
+    },
+    CLEAR_UPDATE_TIMEOUT(state)
+    {
+        clearTimeout(state.taskUpdateTimeout);
+    },
+    SET_UPDATE_TIMEOUT(state, timeout)
+    {
+        state.taskUpdateTimeout = timeout;
     }
 };
 
 const actions = {
-    async cloudUpdate({ commit }, tasks)
+    timeSafeCloudUpdate({ commit })
     {
-        commit('SAVE_TASKS_TO_CLOUD', tasks);
+        const squash = () =>
+        {
+            const millisToWait = 5000;
+            const latestUpdate = state.lastCloudDispatch || 0;
+            const millisSinceLatestUpdate = Date.now() - latestUpdate;
+
+            if((millisSinceLatestUpdate > millisToWait))
+            { // update now
+                commit('SET_LAST_CLOUD_DISPATCH');
+                commit('SAVE_TASKS_TO_CLOUD_FROM_STATE');
+            }
+            else
+            { // postpone update
+                commit('CLEAR_UPDATE_TIMEOUT');
+
+                const wait = (millisToWait - millisSinceLatestUpdate);
+                const timeout = setTimeout(squash, wait);
+
+                commit('SET_UPDATE_TIMEOUT', timeout);
+            }
+
+            commit('CLEAR_UPDATE_ALL');
+        };
+
+        squash();
     },
-    async cloudUpdateSingle({ commit }, task)
+    async cloudUpdateSingle({ getters, commit, dispatch }, task)
     {
         console.log('cloudUpdateSingle', { task });
         if(!task || typeof task !== 'object')
@@ -118,17 +172,19 @@ const actions = {
             id: task.id || uuidv4()
         });
 
-        commit('SET_LAST_CLOUD_DISPATCH');
-        commit('SAVE_TASKS_TO_CLOUD_FROM_STATE');
+        dispatch('timeSafeCloudUpdate');
     },
     watchCloudDb({ commit })
     {
         commit('SET_CLOUD_LOADING', true);
 
+        // const localTasks = getFromLocalStorage('working_tasks', true);
+
+        // console.warn('Local tasks:', localTasks);
+
         // init connection with cloud db & update store on change
         readTasksFromFirebaseDb((cloudTasks) =>
         {
-            logTitle = 'setTasksFromCloud';
             commit('SET_CLOUD_LOADING', true);
             if(!cloudTasks)
             {
@@ -137,14 +193,12 @@ const actions = {
 
             commit('SET_LAST_CLOUD_UPDATE');
 
-            const localTasks = getters.all() || [];
-
-            log({ localTasks });
-
             cloudTasks.tasks.forEach((task) =>
             {
                 commit('SET_TASK', task);
             });
+
+            // saveToLocalStorage('working_tasks', cloudTasks.tasks);
 
             setTimeout(() =>
             {
@@ -152,13 +206,9 @@ const actions = {
             }, 200);
         });
     },
-    getAllFromCloud({ commit })
-    {
-        logTitle = 'getAllFromCloud';
-    },
     updateJson({ commit, dispatch }, tasks)
     {
-        console.log('updateJson', { tasks });
+        // console.log('updateJson', { tasks });
         if(!tasks || !tasks.length)
         {
             return;
@@ -172,7 +222,7 @@ const actions = {
 
         let parsed = JSON.parse(data) || {};
 
-        console.log('parsed data:', parsed);
+        // console.log('parsed data:', parsed);
 
         if(typeof parsed === 'string')
         {
@@ -189,7 +239,9 @@ const actions = {
 const getters = {
     all: (state) => state ? state.tasks : undefined,
     getTask: (state) => (id) => state.tasks.find((n) => n.id === id),
-    isCloudLoading: (state) => state.cloudLoading
+    isCloudLoading: (state) => state.cloudLoading,
+    getLastCloudDispatch: (state) => state.lastCloudDispatch,
+    getLastCloudUpdate: (state) => state.lastCloudUpdate
 };
 
 export default {

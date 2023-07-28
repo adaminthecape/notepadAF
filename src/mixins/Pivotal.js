@@ -131,11 +131,7 @@ export async function getPivotalStory(storyId, endpoint)
 
     try
     {
-        // console.info('getPivotalStory:', { endpoint, headers });
-
         const { data } = await axios.get(endpoint, { headers });
-
-        // console.info('getPivotalStory: result:', data);
 
         return data;
     }

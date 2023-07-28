@@ -48,8 +48,7 @@
   import Settings from './components/Settings';
   import SetAccountDetails from './components/SetAccountDetails';
   import {
-    getFromLocalStorage,
-    saveToLocalStorage
+    getFromLocalStorage, localStorageIntervalCheck, saveToLocalStorage
   } from "src/utils";
 
   export default {
@@ -138,6 +137,22 @@
       if(!Object.keys(appTabs || {}).length)
       {
         saveToLocalStorage('appTabs', this.appTabs);
+      }
+
+      saveToLocalStorage('currentTabQueue', []);
+
+      localStorageIntervalCheck(
+          'currentTabQueue',
+          (queue) =>
+          {
+            this.currentTab = queue[0];
+          }
+      );
+    },
+    watch: {
+      storedTab(newVal, oldVal)
+      {
+        console.log('stored tab changed to:', newVal, 'from', oldVal);
       }
     },
     methods: {

@@ -208,6 +208,15 @@ export default {
   //     this.tickAlarms();
   //   }
   // },
+  watch: {
+    task: {
+      handler()
+      {
+        this.$emit('refreshTask', { id: this.task.id });
+      },
+      deep: true
+    }
+  },
   methods: {
     /** helpers */
     timeSince,
