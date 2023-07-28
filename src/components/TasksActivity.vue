@@ -259,7 +259,7 @@ export default {
     paginationComputed()
     {
       return {
-        max: this.filteredTasksList.length / this.limit
+        max: (this.filteredTasksList.length / this.limit) + 1
       };
     }
   },
