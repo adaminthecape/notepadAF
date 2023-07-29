@@ -366,9 +366,6 @@ export function localStorageIntervalCheck(name, callback)
         if(Array.isArray(queue) && queue.length)
         {
             callback(queue);
-
-            console.info('cleared queue:', name);
-
             saveToLocalStorage(name, []);
         }
     }, 250);

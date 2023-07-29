@@ -118,7 +118,7 @@
       };
     },
     provide()
-    {
+    {``
       return {
         // $openNote: this.openNote,
         $openTab: this.openTab
