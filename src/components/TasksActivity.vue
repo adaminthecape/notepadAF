@@ -12,7 +12,7 @@
           <q-tooltip v-if="isCloudLoading">Loading from cloud</q-tooltip>
         </q-btn>
         <span v-if="!tasksList || !filteredTasksList">No tasks to show</span>
-        <span v-else-if="filteredTasksList.length === tasksList.length">All tasks</span>
+        <span v-else-if="filteredTasksList.length === tasksList.length">(DEBUG) All tasks</span>
         <span v-else>{{ filteredTasksList.length }} / {{ tasksList.length }}{{ $q.screen.lt.sm ? '' : ' tasks' }}</span>
         <q-space />
         <q-btn

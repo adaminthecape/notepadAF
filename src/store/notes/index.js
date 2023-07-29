@@ -158,7 +158,7 @@ const actions = {
     },
     async cloudUpdateSingle({ commit, dispatch }, task)
     {
-        console.log('cloudUpdateSingle', { task });
+        console.warn('cloudUpdateSingle', { task });
         if(!task || typeof task !== 'object')
         {
             return;
@@ -193,13 +193,19 @@ const actions = {
 
             commit('SET_CLOUD_LOADING', true);
 
+            console.warn('tasks from cloud:', cloudTasks.tasks);
+
             cloudTasks.tasks.forEach((task) =>
             {
                 let changed = false;
 
                 try
                 {
-                    changed = (JSON.stringify(task) === getters.getTask(task.id));
+                    const existing = getters.getTask(task.id);
+
+                    changed = !existing || (
+                        JSON.stringify(task) === JSON.stringify(existing)
+                    );
                 }
                 catch(e)
                 {
