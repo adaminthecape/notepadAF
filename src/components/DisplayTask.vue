@@ -6,7 +6,6 @@
       flat
       bordered
   >
-    DT: "{{ task.id }}"
     <q-item
         clickable
         dense

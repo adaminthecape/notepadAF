@@ -144,7 +144,6 @@
             v-for="task in limitedTasks"
             :key="task.id"
         >
-          id: "{{ task ? task.id : '!task' }}"
           <DisplayTask
               v-if="task"
               :key="taskRenderIndex[task.id]"
@@ -208,7 +207,7 @@ export default {
       },
       filters: {},
       applyFilters: true,
-      // filteredTasksList: [],
+      filteredTasksList: [],
       newTask: {
         title: null,
         message: null
