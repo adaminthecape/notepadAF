@@ -111,10 +111,37 @@ export function checkFilterBool(prop, task, filters)
         true;
 }
 
+function keywordCheck(task, filters)
+{
+    if(!task || !filters || !filters.keyword)
+    {
+        return true;
+    }
+
+    const message = (task.message || '').toLowerCase();
+    const tags = (task.tags || []).join('').toLowerCase();
+    const term = filters.keyword.toLowerCase();
+    // const terms = term.split(' ');
+
+    // if(terms.length > 1)
+    // {
+    //     terms.forEach((t) =>
+    //     {
+    //         if(t.indexOf('-') > -1)
+    //         {
+                
+    //         }
+    //     });
+    // }
+
+    return Boolean(`${message} ${tags}`.indexOf(term) > -1);
+}
+
 /** Filter the list of tasks based on provided filters */
 export function filterTaskList(tasks, filters)
 {
-    return tasks.filter((task) => (
+    return tasks.filter((task) => Boolean(
+        task &&
         (
             !filters.id ? true :
                 task.id === filters.id
@@ -124,12 +151,7 @@ export function filterTaskList(tasks, filters)
                 !task.tags ? false : task.tags.some((t) => filters.tags.includes(t))
         ) &&
         (
-            !filters.keyword ? true :
-                `${
-                    task.message.toLowerCase()
-                } ${
-                    (task.tags || []).join('').toLowerCase()
-                }`.indexOf(filters.keyword.toLowerCase()) > -1
+            keywordCheck(task, filters)
         ) &&
         checkFilterBool('done', task, filters) &&
         checkFilterBool('archived', task, filters) &&
@@ -311,6 +333,36 @@ export async function cudTask(tasksList, storeUpdater, taskData, deleteTask = fa
     await storeUpdater(tasks);
 }
 
+export function reduceIntoAssociativeArray(source, key)
+{
+    let res;
+
+    try
+    {
+        res = source.reduce((agg, item) =>
+        {
+            if(item && item[key])
+            {
+                const clonedItem = structuredClone(item);
+
+                // delete clonedItem[key];
+
+                agg[item[key]] = clonedItem;
+            }
+
+            return agg;
+        }, {});
+    }
+    catch(e)
+    {
+        console.warn(e);
+
+        res = source;
+    }
+
+    return res;
+}
+
 /**
  * Update task via db interface. Do NOT use any other fn to dispatch task updates,
  * unless it goes through here.
@@ -356,7 +408,7 @@ export function localStorageIntervalCheck(name, callback)
 {
     if(!name || typeof callback !== 'function')
     {
-        return;
+        return undefined;
     }
 
     return setInterval(() =>
@@ -378,14 +430,14 @@ export function getAllTasksFromStore(store)
     // return store.getters['notes/getNote']('tasks') ?
     //     store.getters['notes/getNote']('tasks').tasks :
     //     undefined;
-    return store.getters['notes/all'];
+    return Object.values(store.getters['notes/getTasks']);
 }
 
 export function getTaskByIdFromStore(store, id)
 {
     if(!id || !store) return undefined;
 
-    return getAllTasksFromStore(store).find((t) => t.id === id);
+    return getAllTasksFromStore(store).find((t) => t && (t.id === id));
 }
 
 /** General helpers */

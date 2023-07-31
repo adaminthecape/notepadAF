@@ -70,7 +70,7 @@ import TaskArchiveButton from "components/TaskArchiveButton";
 import TaskDeleteButton from "components/TaskDeleteButton";
 import TaskAlertButton from "components/TaskAlertButton";
 import TaskActivityLog from "components/TaskActivityLog";
-import { qProps } from "src/mixins/QPropsMixin";
+import QPropsMixin from '../mixins/QPropsMixin.js';
 import SingleTaskMixin from "src/mixins/SingleTaskMixin";
 
 export default {
@@ -83,13 +83,12 @@ export default {
     TaskDoneButton,
     TaskActiveButton
   },
-  mixins: [SingleTaskMixin],
+  mixins: [QPropsMixin, SingleTaskMixin],
   props: {
     isEditing: {
       type: Boolean,
       default: false
-    },
-    ...qProps
+    }
   },
   data()
   {

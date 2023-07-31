@@ -48,7 +48,9 @@
   import Settings from './components/Settings';
   import SetAccountDetails from './components/SetAccountDetails';
   import {
-    getFromLocalStorage, localStorageIntervalCheck, saveToLocalStorage
+    getFromLocalStorage,
+    localStorageIntervalCheck,
+    saveToLocalStorage
   } from "src/utils";
 
   export default {

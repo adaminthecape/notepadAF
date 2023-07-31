@@ -151,22 +151,6 @@
       story()
       {
         return this.$store.getters['pivotal/get'](parseInt(this.storyId, 10));
-      },
-      relatedNotes()
-      {
-        const notes = this.$store.getters['notes/all'];
-
-        if(!notes || !notes.length)
-        {
-          return [];
-        }
-
-        return notes.filter((note) =>
-        {
-          return note && note.stories && note.stories.length && note.stories.some(
-              (storyId) => parseInt(storyId, 10) === parseInt(this.storyId, 10)
-          );
-        }).map((note) => note.id);
       }
     },
     async mounted()

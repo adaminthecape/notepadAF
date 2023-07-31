@@ -1,6 +1,8 @@
 <template>
   <q-btn
-      v-bind="allQProps"
+      :size="size"
+      :flat="flat"
+      :dense="dense"
       :color="archived ? 'secondary' : undefined"
       :icon="archived ? 'unarchive' : 'move_to_inbox'"
       @click="toggle"
@@ -14,15 +16,15 @@
 
 <script>
 import { timeSince } from '../utils';
-import { qProps } from '../mixins/QPropsMixin.js';
+import QPropsMixin from '../mixins/QPropsMixin.js';
 
 export default {
+  mixins: [QPropsMixin],
   props: {
     archived: {
       type: [Boolean, Number],
       default: 0
     },
-    ...qProps
   },
   methods: {
     timeSince,

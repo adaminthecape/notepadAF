@@ -1,8 +1,10 @@
 <template>
   <div>
     <q-btn
-        v-bind="allQProps"
-        icon="alarm_add"
+        :size="size"
+        :flat="flat"
+        :dense="dense"
+        :icon="icon || 'alarm_add'"
         @click="isCreatingAlert = !isCreatingAlert"
     >
       <q-tooltip>Add alert</q-tooltip>
@@ -24,15 +26,14 @@
 </template>
 
 <script>
-import { qProps } from '../mixins/QPropsMixin.js';
+import QPropsMixin from '../mixins/QPropsMixin.js';
 import SingleTaskMixin from "src/mixins/SingleTaskMixin";
 import CreateAlert from "components/CreateAlert";
 import { cudTaskViaStore, queueTaskRefresh } from "src/utils";
 
 export default {
   components: { CreateAlert },
-  mixins: [SingleTaskMixin],
-  props: { ...qProps },
+  mixins: [QPropsMixin, SingleTaskMixin],
   data()
   {
     return {

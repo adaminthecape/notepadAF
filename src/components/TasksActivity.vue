@@ -1,5 +1,5 @@
 <template>
-  <SimpleLayout header :page-classes="['q-px-sm', 'q-pt-sm']">
+  <SimpleLayout id="tasks_list" header :page-classes="['q-px-sm', 'q-pt-sm']">
     <template #header-title>
       <div class="row items-center" style="font-size: 0.8em">
         <q-btn
@@ -12,8 +12,8 @@
           <q-tooltip v-if="isCloudLoading">Loading from cloud</q-tooltip>
         </q-btn>
         <span v-if="!tasksList || !filteredTasksList">No tasks to show</span>
-        <span v-else-if="filteredTasksList.length === tasksList.length">(DEBUG) All tasks</span>
-        <span v-else>{{ filteredTasksList.length }} / {{ tasksList.length }}{{ $q.screen.lt.sm ? '' : ' tasks' }}</span>
+        <span v-else-if="filteredTasksList.length === Object.keys(tasksList).length">All tasks</span>
+        <span v-else>{{ filteredTasksList.length }} / {{ Object.keys(tasksList).length }}{{ $q.screen.lt.sm ? '' : ' tasks' }}</span>
         <q-space />
         <q-btn
             icon="tune"
@@ -87,7 +87,8 @@
               debounce="250"
               filled
               dense
-              @input="filterTasks"
+              debounceInput="500"
+              @input="setFilter('keyword', filters.keyword)"
           >
             <template #append>
               <q-btn
@@ -143,7 +144,9 @@
             v-for="task in limitedTasks"
             :key="task.id"
         >
+          id: "{{ task ? task.id : '!task' }}"
           <DisplayTask
+              v-if="task"
               :key="taskRenderIndex[task.id]"
               noteId="tasks"
               :taskId="task.id"
@@ -179,7 +182,6 @@ import {
   filterTaskList,
   sortTaskList,
   applyFiltersToTask,
-  getAllTasksFromStore,
   getFromLocalStorage,
   saveToLocalStorage,
   localStorageIntervalCheck
@@ -209,7 +211,7 @@ export default {
       // filteredTasksList: [],
       newTask: {
         title: null,
-        content: null
+        message: null
       },
       tasksLoaded: false,
       taskRenderIndex: {},
@@ -234,7 +236,7 @@ export default {
       const page = (this.pagination.page - 1);
       const offset = this.limit * page;
 
-      return this.filteredTasksList.slice(offset, (this.limit || 20) + offset);
+      return (this.filteredTasksList || []).slice(offset, (this.limit || 20) + offset);
     },
     toggleableBooleans()
     {
@@ -248,18 +250,14 @@ export default {
     },
     tasksList()
     {
-      return (getAllTasksFromStore(this.$store) || [])
-          .filter((task) => !task.deleted);
+      // return (getAllTasksFromStore(this.$store) || [])
+      //     .filter((task) => !task.deleted);
+      return this.$store.getters['notes/getTasks'];
     },
-    filteredTasksList()
+    _filteredTasksList()
     {
-      return sortTaskList(
-          filterTaskList(
-              this.tasksList,
-              this.filters
-          ),
-          this.sortType,
-          this.inverseSort
+      return this.filterAndSortTasksList(
+        Object.values(this.tasksList)
       );
     },
     isCloudLoading()
@@ -269,7 +267,7 @@ export default {
     paginationComputed()
     {
       return {
-        max: (this.filteredTasksList.length / this.limit) + 1
+        max: ((this.filteredTasksList || []).length / this.limit) + 1
       };
     }
   },
@@ -305,6 +303,8 @@ export default {
           this.refreshTask({ id });
         })
     );
+
+    this.filterTasks();
   },
   methods: {
     /****** Loading/fetching tasks */
@@ -314,14 +314,14 @@ export default {
       // await this.$store.dispatch('notes/loadAllFromJson');
       this.$store.dispatch('notes/watchCloudDb');
 
-      this.tmpInterval = setInterval(() =>
-      {
-        if(!this.isCloudLoading && this.tasksList && this.tasksList.length)
-        {
-          this.filterTasks();
-          clearInterval(this.tmpInterval);
-        }
-      }, 100);
+      // this.tmpInterval = setInterval(() =>
+      // {
+      //   if(!this.isCloudLoading && this.tasksList && Object.keys(this.tasksList).length)
+      //   {
+      //     this.filterTasks();
+      //     clearInterval(this.tmpInterval);
+      //   }
+      // }, 100);
     },
 
     /** Actual filtering logic. Sorts after filtering. Saves filters to localStorage. */
@@ -332,6 +332,21 @@ export default {
         sortType: this.sortType,
         inverseSort: this.inverseSort
       });
+
+      this.filteredTasksList = this.filterAndSortTasksList(
+        Object.values(this.tasksList)
+      ) || [];
+    },
+    filterAndSortTasksList(list)
+    {
+      return sortTaskList(
+          filterTaskList(
+              list.filter((task) => !task.deleted),
+              this.filters
+          ),
+          this.sortType,
+          this.inverseSort
+      );
     },
 
     setSortType(type)
@@ -344,6 +359,8 @@ export default {
       {
         this.sortType = type;
       }
+
+      this.filterTasks();
     },
 
     refreshTask(task)
@@ -416,6 +433,8 @@ export default {
       {
         this.newTask = { message: null };
       });
+
+      this.filterTasks();
     }
 
   }

@@ -1,7 +1,9 @@
 <template>
   <div>
     <q-btn
-        v-bind="allQProps"
+        :size="size"
+        :flat="flat"
+        :dense="dense"
         :color="active ? 'orange' : undefined"
         :icon="active ? 'assignment_ind' : 'content_paste_go'"
         :key="renderIndex"
@@ -36,12 +38,12 @@
 </template>
 
 <script>
-import { timeSince } from "../utils";
-  import { qProps } from '../mixins/QPropsMixin.js';
+  import { timeSince } from "../utils";
+  import QPropsMixin from '../mixins/QPropsMixin.js';
   import SingleTaskMixin from "src/mixins/SingleTaskMixin";
 
   export default {
-    mixins: [SingleTaskMixin],
+    mixins: [QPropsMixin, SingleTaskMixin],
     props: {
       active: {
         type: [Number, Boolean],
@@ -54,8 +56,7 @@ import { timeSince } from "../utils";
       taskId: {
         type: String,
         default: undefined
-      },
-      ...qProps
+      }
     },
     data()
     {

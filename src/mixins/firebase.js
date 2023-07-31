@@ -280,6 +280,25 @@ export async function writeTasksToFirebaseDb(tasks) {
     });
 }
 
+export async function updateTaskDataByPath(
+    /** @type {string} */taskId,
+    /** @type {string} */path,
+    /** @type {*} */data
+) {
+    const db = await getDb();
+    const fullPath = `${
+        dbName
+    }/tasks/${
+        taskId
+    }/${
+        path.split('.').join('/')
+    }`;
+
+    console.warn('update_TaskDataByPath:', fullPath, data);
+
+    set(ref(db, fullPath), data);
+}
+
 export async function readTasksFromFirebaseDb(withResult)
 {
     console.warn('readTasksFromFirebaseDb: start');

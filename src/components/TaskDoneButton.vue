@@ -1,6 +1,8 @@
 <template>
   <q-btn
-      v-bind="allQProps"
+      :size="size"
+      :flat="flat"
+      :dense="dense"
       :color="done ? 'green-7' : undefined"
       :icon="done ? 'check_circle' : 'check_circle_outline'"
       @click="toggle"
@@ -14,15 +16,15 @@
 
 <script>
   import { timeSince } from '../utils';
-  import { qProps } from '../mixins/QPropsMixin.js';
+  import QPropsMixin from '../mixins/QPropsMixin.js';
 
   export default {
+    mixins: [QPropsMixin],
     props: {
       done: {
         type: Number,
         default: 0
-      },
-      ...qProps
+      }
     },
     methods: {
       timeSince,

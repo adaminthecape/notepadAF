@@ -397,10 +397,6 @@ export default {
     actionsForTemplate()
     {
       return Object.values(this.actionsToShow || {});
-    },
-    allNotes()
-    {
-      return this.$store.getters['notes/all'] || [];
     }
   },
   async mounted()
@@ -417,20 +413,6 @@ export default {
     }
   },
   methods: {
-    getRelatedNotes(storyId)
-    {
-      if(!this.allNotes || !this.allNotes.length)
-      {
-        return [];
-      }
-
-      return this.allNotes.filter((note) =>
-      {
-        return note && note.stories && note.stories.length && note.stories.some(
-            (storyId2) => parseInt(storyId2, 10) === parseInt(storyId, 10)
-        );
-      }).map((note) => note.id);
-    },
     sortResults()
     {
       if(!this.results || !this.results.length)
@@ -441,14 +423,6 @@ export default {
       this.sortingResults = true;
 
       let results = [...this.results];
-
-      if(this.sortType === 'notes')
-      {
-        results = results.sort((a, b) =>
-        {
-          return this.getRelatedNotes(b.id).length - this.getRelatedNotes(a.id).length;
-        });
-      }
 
       this.$set(this, 'results', results);
 

@@ -2,9 +2,11 @@ import Vue from 'vue';
 import { readFromDbSync, saveAll } from 'src/mixins/jsondb';
 import { readTasksFromFirebaseDb, writeTasksToFirebaseDb} from 'src/mixins/firebase';
 import { v4 as uuidv4 } from 'uuid';
+import { updateTaskDataByPath } from 'src/mixins/firebase.js';
+import { queueTaskRefresh } from 'src/utils';
 
 const state = {
-    tasks: [],
+    tasks: {},
     taskUpdateQueue: [],
     taskUpdateTimeout: [],
     cloudLoading: false,
@@ -32,6 +34,8 @@ const mutations = {
             return;
         }
 
+        console.warn('SET_TASK:', task.id);
+
         Object.keys(task).forEach((key) =>
         {
             if(typeof task[key] === 'undefined')
@@ -40,42 +44,7 @@ const mutations = {
             }
         });
 
-        const tasks = state.tasks;
-
-        // const existingIndex = tasks.findIndex((t) => t.id === task.id);
-
-        // if(existingIndex > -1)
-        // {
-        //     if(JSON.stringify(tasks[existingIndex]) === JSON.stringify(task))
-        //     {
-        //         return;
-        //     }
-        //     else if(merge)
-        //     {
-        //         tasks.splice(existingIndex, 1, {
-        //             ...tasks[existingIndex],
-        //             task
-        //         });
-        //     }
-        //     else
-        //     {
-        //         tasks.splice(existingIndex, 1, task);
-        //     }
-        // }
-        // else
-        // {
-        //     tasks.push(task);
-        // }
-        let existingIndex = tasks.findIndex((t) => t.id === task.id);
-
-        if(existingIndex === -1)
-        {
-            existingIndex = state.tasks.length + 1;
-        }
-
-        console.info({ existingIndex, len: state.tasks.length });
-
-        Vue.set(state.tasks, existingIndex, task);
+        state.tasks[task.id] = task;
     },
     SAVE_TASKS_TO_JSON(state, tasks)
     {
@@ -83,13 +52,13 @@ const mutations = {
     },
     SAVE_TASKS_TO_CLOUD_FROM_STATE(state)
     {
-        if(!state.tasks || !state.tasks.length)
+        if(!state.tasks || !Object.keys(state.tasks).length)
         {
             return;
         }
 
         console.warn('SAVE__TASKS_TO_CLOUD_FROM_STATE:', state.tasks.length);
-        writeTasksToFirebaseDb(state.tasks)
+        writeTasksToFirebaseDb(state.tasks);
     },
     // QUEUE_TASK_UPDATE(state, task)
     // {
@@ -136,13 +105,11 @@ const actions = {
 
             if((millisSinceLatestUpdate > millisToWait))
             { // update now
-                console.warn('updating....');
                 commit('SET_LAST_CLOUD_DISPATCH');
                 commit('SAVE_TASKS_TO_CLOUD_FROM_STATE');
             }
             else
             { // postpone update
-                console.warn('postponing....');
                 commit('CLEAR_UPDATE_TIMEOUT');
 
                 const wait = (millisToWait - millisSinceLatestUpdate);
@@ -158,22 +125,26 @@ const actions = {
     },
     async cloudUpdateSingle({ commit, dispatch }, task)
     {
-        console.warn('cloudUpdateSingle', { task });
         if(!task || typeof task !== 'object')
         {
             return;
         }
 
         const now = Date.now();
-
-        commit('SET_TASK', {
+        const taskDataToAdd = {
             ...task,
             updated: now,
             created: task.created || now,
             id: task.id || uuidv4()
-        });
+        };
 
-        dispatch('timeSafeCloudUpdate');
+        console.warn('cloudUpdateSingle', { task: taskDataToAdd });
+
+        commit('SET_TASK', taskDataToAdd);
+
+        updateTaskDataByPath(taskDataToAdd.id, '', taskDataToAdd);
+        queueTaskRefresh(taskDataToAdd.id);
+        // dispatch('timeSafeCloudUpdate');
     },
     watchCloudDb({ getters, commit })
     {
@@ -193,18 +164,17 @@ const actions = {
 
             commit('SET_CLOUD_LOADING', true);
 
-            console.warn('tasks from cloud:', cloudTasks.tasks);
-
-            cloudTasks.tasks.forEach((task) =>
+            Object.values(cloudTasks.tasks).forEach((task) =>
             {
-                let changed = false;
+                let changed = false,
+                    existing = undefined;
 
                 try
                 {
-                    const existing = getters.getTask(task.id);
+                    existing = getters.getTask(task.id);
 
                     changed = !existing || (
-                        JSON.stringify(task) === JSON.stringify(existing)
+                        JSON.stringify(task) !== JSON.stringify(existing)
                     );
                 }
                 catch(e)
@@ -214,7 +184,6 @@ const actions = {
 
                 if(changed)
                 {
-                    console.info('task changed:', task.id);
                     commit('SET_TASK', task);
                 }
             });
@@ -257,8 +226,9 @@ const actions = {
 };
 
 const getters = {
-    all: (state) => state ? state.tasks : undefined,
-    getTask: (state) => (id) => state.tasks.find((n) => n.id === id),
+    all: (state) => Object.values(state.tasks),
+    getTasks: (state) => state.tasks,
+    getTask: (state) => (id) => state.tasks[id],
     isCloudLoading: (state) => state.cloudLoading,
     getLastCloudDispatch: (state) => state.lastCloudDispatch,
     getLastCloudUpdate: (state) => state.lastCloudUpdate

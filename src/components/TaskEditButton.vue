@@ -1,6 +1,9 @@
 <template>
   <q-btn
-      v-bind="allQProps"
+      :size="size"
+      :flat="flat"
+      :dense="dense"
+      :icon="icon"
       :color="editing ? 'green-9' : undefined"
       @click="toggle"
   >
@@ -14,15 +17,15 @@
 </template>
 
 <script>
-import { qProps } from '../mixins/QPropsMixin.js';
+import QPropsMixin from '../mixins/QPropsMixin.js';
 
 export default {
+  mixins: [QPropsMixin],
   props: {
     editing: {
       type: Boolean,
       default: false
-    },
-    ...qProps
+    }
   },
   methods: {
     toggle()

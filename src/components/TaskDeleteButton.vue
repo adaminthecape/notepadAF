@@ -1,9 +1,12 @@
 <template>
   <div v-if="task">
     <q-btn
-        v-bind="allQProps"
+        :size="size"
+        :flat="flat"
+        :dense="dense"
+        :icon="icon || 'close'"
+        :color="task.deleted ? 'negative' : undefined"
         v-model="isConfirmingDeletion"
-        icon="close"
         @click="isConfirmingDeletion = !isConfirmingDeletion"
     >
       <q-tooltip>Delete task</q-tooltip>
@@ -42,13 +45,12 @@
 </template>
 
 <script>
-import { qProps } from '../mixins/QPropsMixin.js';
+import QPropsMixin from '../mixins/QPropsMixin.js';
 import SingleTaskMixin from '../mixins/SingleTaskMixin.js';
 import { cudTaskViaStore } from "src/utils";
 
 export default {
-  mixins: [SingleTaskMixin],
-  props: { ...qProps },
+  mixins: [QPropsMixin, SingleTaskMixin],
   data()
   {
     return {
