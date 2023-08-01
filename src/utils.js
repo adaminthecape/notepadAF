@@ -120,21 +120,15 @@ function keywordCheck(task, filters)
 
     const message = (task.message || '').toLowerCase();
     const tags = (task.tags || []).join('').toLowerCase();
+    const haystack = `${message} ${tags}`;
     const term = filters.keyword.toLowerCase();
-    // const terms = term.split(' ');
+    const terms = term.split(' ');
 
-    // if(terms.length > 1)
-    // {
-    //     terms.forEach((t) =>
-    //     {
-    //         if(t.indexOf('-') > -1)
-    //         {
-
-    //         }
-    //     });
-    // }
-
-    return Boolean(`${message} ${tags}`.indexOf(term) > -1);
+    return terms.every((t) => (
+        t.indexOf('-') === 0 ?
+            haystack.indexOf(t.slice(1)) === -1 :
+            haystack.indexOf(t) > -1
+    ));
 }
 
 /** Filter the list of tasks based on provided filters */
