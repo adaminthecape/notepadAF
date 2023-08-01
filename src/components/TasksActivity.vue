@@ -277,8 +277,8 @@ export default {
       isFirebaseConfigDialogOpen: false,
       pagination: defaults.pagination,
       tmpInterval: undefined,
-      categories: getFromLocalStorage('taskCategories') ||
-          defaults.categories
+      categories: [],
+      defaultCategories: defaults.categories
     };
   },
   inject: ['$openTab'],
@@ -356,9 +356,38 @@ export default {
         })
     );
 
+    this.categories = this.getCategories();
+
     this.filterTasks();
   },
   methods: {
+    getCategories()
+    {
+      const storedCategories = getFromLocalStorage('taskCategories', true);
+      const categories = [];
+
+      if(storedCategories)
+      {
+        storedCategories.forEach((cat) =>
+        {
+          const def = this.defaultCategories.find((c) => c.title === cat.title);
+
+          if(def)
+          {
+            categories.push({
+              ...cat,
+              handler: def.handler
+            });
+          }
+        });
+      }
+      else
+      {
+        categories.push(...this.defaultCategories);
+      }
+
+      return categories;
+    },
     /****** Loading/fetching tasks */
     async loadTasks()
     {
