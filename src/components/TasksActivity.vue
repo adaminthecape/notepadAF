@@ -238,7 +238,7 @@ export default {
         {
           title: 'Deleted',
           active: false,
-          handler: (task) => !task.deleted
+          handler: (task) => task.deleted
         }
       ],
       pagination: {
