@@ -1,4 +1,4 @@
-import { cudTaskViaStore, getTaskByIdFromStore, queueTaskRefresh } from "src/utils";
+import { cudTaskViaStore, getTaskByIdFromStore, queueTaskRefresh, getStoriesFromTask } from "src/utils";
 
 export default {
     props: {
@@ -16,19 +16,7 @@ export default {
         {
             if(this.task)
             {
-                return ((
-                    `${JSON.stringify(this.task.tags || [])} ${this.task.message}`
-                        .match(/1\d{8}/g)
-                ) || [])
-                    .reduce((agg, id) =>
-                    {
-                        if(!agg.some((existing) => existing.id === id))
-                        {
-                            agg.push({ id });
-                        }
-
-                        return agg;
-                    }, []);
+                return getStoriesFromTask(this.task);
             }
 
             return [];

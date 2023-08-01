@@ -129,7 +129,7 @@ function keywordCheck(task, filters)
     //     {
     //         if(t.indexOf('-') > -1)
     //         {
-                
+
     //         }
     //     });
     // }
@@ -157,6 +157,37 @@ export function filterTaskList(tasks, filters)
         checkFilterBool('archived', task, filters) &&
         checkFilterBool('active', task, filters)
     ));
+}
+
+export function filterTasksByCategory(tasks, categories)
+{
+    if(!Array.isArray(tasks) || !categories)
+    {
+        return tasks;
+    }
+
+    return tasks.filter((task) => (
+        categories.some((cat) => (
+            cat.active ? cat.handler(task) : !cat.handler(task)
+        ))
+    ));
+}
+
+export function getStoriesFromTask(task)
+{
+    return ((
+        `${JSON.stringify(task.tags || [])} ${task.message}`
+            .match(/1\d{8}/g)
+    ) || [])
+        .reduce((agg, id) =>
+        {
+            if(!agg.some((existing) => existing.id === id))
+            {
+                agg.push({ id });
+            }
+
+            return agg;
+        }, []);
 }
 
 export function sortTaskList(tasks, sortType, inverseSort)

@@ -110,6 +110,11 @@
               @input="setFilter(filterTypes.tags, $event)"
               @cancel="setFilter(filterTypes.tags, [])"
           />
+          <LocalStorageList
+              v-model="categories"
+              title="Categories"
+              listKey="taskCategories"
+          />
         </div>
         <div class="row items-center q-mb-xs">
           <q-btn-group class="row items-center q-mb-xs" flat>
@@ -176,6 +181,7 @@ import DisplayTask from './DisplayTask';
 import SimpleLayout from './SimpleLayout';
 import TaskTagSelector from './TaskTagSelector';
 import TaskSortDropdown from './TaskSortDropdown';
+import LocalStorageList from 'src/components/LocalStorageList.vue';
 import {
   cudTaskViaStore,
   filterTaskList,
@@ -183,7 +189,7 @@ import {
   applyFiltersToTask,
   getFromLocalStorage,
   saveToLocalStorage,
-  localStorageIntervalCheck
+  localStorageIntervalCheck, getStoriesFromTask, filterTasksByCategory
 } from "src/utils";
 
 export default {
@@ -192,12 +198,63 @@ export default {
     DisplayTask,
     TaskTagSelector,
     TaskSortDropdown,
-    SimpleLayout
+    SimpleLayout,
+    LocalStorageList
   },
   data()
   {
+    const defaults = {
+      categories: [
+        {
+          title: 'Work',
+          active: true,
+          handler: (task) =>
+          {
+            return Boolean((task.tags || []).includes('process') ||
+                getStoriesFromTask(task).length);
+          }
+        },
+        {
+          title: 'Daily',
+          active: true,
+          handler: (task) =>
+          {
+            return (task.tags || []).some((tag) => (
+                tag === 'daily' ||
+                tag === 'recurring' ||
+                tag === 'personal' ||
+                tag === 'health'
+            ));
+          }
+        },
+        {
+          title: 'Personal',
+          active: true,
+          handler: (task) =>
+          {
+            return !getStoriesFromTask(task).length;
+          }
+        },
+        {
+          title: 'Deleted',
+          active: false,
+          handler: (task) => !task.deleted
+        }
+      ],
+      pagination: {
+        page: 1,
+        max: 5
+      },
+      limit: 5,
+      newTask: {
+        title: null,
+        message: null
+      }
+    };
+
     return {
-      limit: getFromLocalStorage('taskLimit') || 5,
+      limit: getFromLocalStorage('taskLimit') ||
+          defaults.limit,
       filterTypes: {
         keyword: 'keyword',
         tags: 'tags',
@@ -208,10 +265,7 @@ export default {
       filters: {},
       applyFilters: true,
       filteredTasksList: [],
-      newTask: {
-        title: null,
-        message: null
-      },
+      newTask: defaults.newTask,
       tasksLoaded: false,
       taskRenderIndex: {},
       taskListRenderIndex: 0,
@@ -221,11 +275,10 @@ export default {
       isLoggingIn: false,
       isSignedIn: false,
       isFirebaseConfigDialogOpen: false,
-      pagination: {
-        page: 1,
-        max: 5
-      },
-      tmpInterval: undefined
+      pagination: defaults.pagination,
+      tmpInterval: undefined,
+      categories: getFromLocalStorage('taskCategories') ||
+          defaults.categories
     };
   },
   inject: ['$openTab'],
@@ -340,7 +393,10 @@ export default {
     {
       return sortTaskList(
           filterTaskList(
-              list.filter((task) => !task.deleted),
+              filterTasksByCategory(
+                list,
+                this.categories
+              ),
               this.filters
           ),
           this.sortType,
@@ -435,7 +491,6 @@ export default {
 
       this.filterTasks();
     }
-
   }
 };
 </script>
