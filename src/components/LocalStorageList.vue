@@ -87,6 +87,7 @@ export default {
       handler(newVal)
       {
         this.$emit('input', newVal);
+        this.items = newVal;
       },
       deep: true
     }
