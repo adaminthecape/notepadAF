@@ -12,7 +12,7 @@
         @click.ctrl="editTask"
     >
       <q-item-section>
-        <div class="row items-center" style="margin-bottom: -10px">
+        <div class="row items-center">
           <!-- VIEW DONE: -->
           <div
               v-if="task.done"
@@ -78,8 +78,7 @@
           <!-- MESSAGE: -->
           <div
               v-if="!isEditing"
-              style="white-space: pre-line;"
-              class="q-mt-sm"
+              class="q-mt-sm task-message-display"
           >{{ task.message }}</div>
           <!-- MESSAGE INPUT: -->
           <q-input
@@ -353,11 +352,10 @@ export default {
 };
 </script>
 
-<style>
-.handle {
-  align-items: center;
-  cursor: grab;
-  display: flex;
-  margin-right: 8px;
+<style scoped>
+.task-message-display {
+  white-space: pre-line;
+  border-left: 2px solid #1976D280;
+  padding: 0 4px;
 }
 </style>

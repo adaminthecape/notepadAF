@@ -238,6 +238,7 @@ export default {
         {
           title: 'Deleted',
           active: false,
+          must: true,
           handler: (task) => task.deleted
         }
       ],
