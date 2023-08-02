@@ -115,6 +115,10 @@ export default {
   border: 1px solid #9C27B0;
 }
 
+.clickable-list-item {
+  min-width: 12em;
+}
+
 .clickable-list-item.selected {
   background-color: #21BA4540;
 }
