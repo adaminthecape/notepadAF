@@ -162,7 +162,7 @@ export function filterTasksByCategory(tasks, categories)
 
     const { ands, ors } = categories.reduce((agg, cat) =>
     {
-        if(cat.must) agg.ands.push(cat);
+        if(cat.operator === 'and') agg.ands.push(cat);
         else agg.ors.push(cat);
 
         return agg;
@@ -379,11 +379,10 @@ export function reduceIntoAssociativeArray(source, key)
         {
             if(item && item[key])
             {
-                const clonedItem = structuredClone(item);
-
+                // const clonedItem = structuredClone(item);
                 // delete clonedItem[key];
-
-                agg[item[key]] = clonedItem;
+                // agg[item[key]] = clonedItem;
+                agg[item[key]] = structuredClone(item);
             }
 
             return agg;
