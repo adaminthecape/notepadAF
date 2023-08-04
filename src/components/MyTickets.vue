@@ -1,5 +1,9 @@
 <template>
-  <SimpleLayout header>
+  <SimpleLayout
+      :page-offset="100"
+      :page-classes="['q-mx-sm']"
+      header
+  >
     <template #header-left>
       <!-- controls menu activator goes here -->
     </template>
@@ -58,6 +62,9 @@
           dense
           @click="getTickets"
       />
+    </template>
+    <template #page-header>
+      Stuck to top
     </template>
     <template #page-content>
       <q-scroll-area style="height: calc(100vh - 120px)">

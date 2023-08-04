@@ -208,6 +208,7 @@ export default {
         {
           title: 'Work',
           active: true,
+          operator: 'or',
           handler: (task) =>
           {
             return Boolean((task.tags || []).includes('process') ||
@@ -217,6 +218,7 @@ export default {
         {
           title: 'Daily',
           active: true,
+          operator: 'or',
           handler: (task) =>
           {
             return (task.tags || []).some((tag) => (
@@ -230,6 +232,7 @@ export default {
         {
           title: 'Personal',
           active: true,
+          operator: 'or',
           handler: (task) =>
           {
             return !getStoriesFromTask(task).length;
@@ -238,6 +241,7 @@ export default {
         {
           title: 'Deleted',
           active: false,
+          operator: 'and',
           handler: (task) => task.deleted
         }
       ],

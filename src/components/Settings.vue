@@ -1,5 +1,9 @@
 <template>
-  <SimpleLayout header>
+  <SimpleLayout
+      :page-offset="100"
+      :page-classes="['q-mx-sm']"
+      header
+  >
     <template #header-left>
     </template>
     <template #header-title>
@@ -220,11 +224,17 @@
           <q-item-section>
             <q-input
               v-model="customSetting.label"
+              class="q-mb-xs"
               type="text"
+              filled
+              dense
             />
             <q-input
               v-model="customSetting.value"
+              class="q-mb-xs"
               type="text"
+              filled
+              dense
             />
             <q-btn
               icon="save"
