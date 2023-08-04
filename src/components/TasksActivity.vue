@@ -316,6 +316,10 @@ export default {
     {
       return this.$store.getters['notes/isCloudLoading'];
     },
+    lastCloudUpdate()
+    {
+      return this.$store.getters['notes/getLastCloudUpdate'];
+    },
     paginationComputed()
     {
       return {
@@ -361,33 +365,6 @@ export default {
     this.filterTasks();
   },
   methods: {
-    getCategories()
-    {
-      const storedCategories = getFromLocalStorage('taskCategories', true);
-      const categories = [];
-
-      if(storedCategories)
-      {
-        storedCategories.forEach((cat) =>
-        {
-          const def = this.defaultCategories.find((c) => c.title === cat.title);
-
-          if(def)
-          {
-            categories.push({
-              ...cat,
-              handler: def.handler
-            });
-          }
-        });
-      }
-      else
-      {
-        categories.push(...this.defaultCategories);
-      }
-
-      return categories;
-    },
     /****** Loading/fetching tasks */
     async loadTasks()
     {
@@ -395,14 +372,21 @@ export default {
       // await this.$store.dispatch('notes/loadAllFromJson');
       this.$store.dispatch('notes/watchCloudDb');
 
-      // this.tmpInterval = setInterval(() =>
-      // {
-      //   if(!this.isCloudLoading && this.tasksList && Object.keys(this.tasksList).length)
-      //   {
-      //     this.filterTasks();
-      //     clearInterval(this.tmpInterval);
-      //   }
-      // }, 100);
+      this.tmpInterval = setInterval(() =>
+      {
+        const check = (
+          !this.lastCloudUpdate === '' &&
+          this.tasksList &&
+          Object.keys(this.tasksList).length
+        );
+        console.log('check:', check);
+
+        if(check)
+        {
+          this.filterTasks();
+          clearInterval(this.tmpInterval);
+        }
+      }, 100);
     },
 
     /** Actual filtering logic. Sorts after filtering. Saves filters to localStorage. */
@@ -431,6 +415,33 @@ export default {
           this.sortType,
           this.inverseSort
       );
+    },
+    getCategories()
+    {
+      const storedCategories = getFromLocalStorage('taskCategories', true);
+      const categories = [];
+
+      if(storedCategories)
+      {
+        storedCategories.forEach((cat) =>
+        {
+          const def = this.defaultCategories.find((c) => c.title === cat.title);
+
+          if(def)
+          {
+            categories.push({
+              ...cat,
+              handler: def.handler
+            });
+          }
+        });
+      }
+      else
+      {
+        categories.push(...this.defaultCategories);
+      }
+
+      return categories;
     },
 
     setSortType(type)

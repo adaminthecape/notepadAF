@@ -34,8 +34,6 @@ const mutations = {
             return;
         }
 
-        console.warn('SET_TASK:', task.id);
-
         Object.keys(task).forEach((key) =>
         {
             if(typeof task[key] === 'undefined')
