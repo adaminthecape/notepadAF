@@ -7,7 +7,7 @@
       bordered
   >
     <q-item
-        clickable
+        :clickable="clickable"
         dense
         @click.ctrl="editTask"
     >
@@ -65,6 +65,7 @@
               style="margin-right: -14px"
           >
             <TaskOptions
+                v-if="showOptions"
                 :taskId="task.id"
                 :isEditing="isEditing"
                 size="md"
@@ -177,10 +178,10 @@
 
 <script>
 import { timeSince } from "../utils";
-import TaskTagSelector from './TaskTagSelector';
-import TaskStoryDropdown from './TaskStoryDropdown';
-import TaskOptions from './TaskOptions';
-import SingleTaskMixin from "src/mixins/SingleTaskMixin";
+import SingleTaskMixin from 'src/mixins/SingleTaskMixin.js';
+import TaskTagSelector from 'src/components/TaskTagSelector.vue';
+import TaskStoryDropdown from 'src/components/TaskStoryDropdown.vue';
+import TaskOptions from 'src/components/TaskOptions.vue';
 
 export default {
   components: {
@@ -189,6 +190,16 @@ export default {
     TaskOptions
   },
   mixins: [SingleTaskMixin],
+  props: {
+    showOptions: {
+      type: Boolean,
+      default: true
+    },
+    clickable: {
+      type: Boolean,
+      default: true
+    }
+  },
   data()
   {
     return {
@@ -355,7 +366,7 @@ export default {
 <style scoped>
 .task-message-display {
   white-space: pre-line;
-  border-left: 2px solid #1976D280;
+  border-left: 4px solid #1976D280;
   padding: 0 4px;
 }
 </style>

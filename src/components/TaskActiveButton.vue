@@ -14,7 +14,11 @@
         <span v-else>Start task</span>
       </q-tooltip>
     </q-btn>
-    <q-dialog v-model="isAddingNote" class="full-width">
+    <q-dialog
+        v-if="!disableAddingNote"
+        v-model="isAddingNote"
+        class="full-width"
+    >
       <q-card>
         <q-input
             v-model="logNote"
@@ -56,6 +60,10 @@
       taskId: {
         type: String,
         default: undefined
+      },
+      disableAddingNote: {
+        type: Boolean,
+        default: false
       }
     },
     data()

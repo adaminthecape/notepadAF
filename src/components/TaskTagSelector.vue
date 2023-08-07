@@ -121,6 +121,10 @@ export default {
       }, []);
     }
   },
+  created()
+  {
+    this.value = this.inputValue || [];
+  },
   watch: {
     inputValue(newVal)
     {
