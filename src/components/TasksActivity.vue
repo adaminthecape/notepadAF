@@ -211,38 +211,55 @@ export default {
           operator: 'or',
           handler: (task) =>
           {
-            return Boolean((task.tags || []).includes('process') ||
-                getStoriesFromTask(task).length);
+            const res = Boolean(
+                (task.tags || []).includes('process') ||
+                getStoriesFromTask(task).length
+            );
+
+            console.log('work:', res);
+
+            return res;
           }
         },
-        {
-          title: 'Daily',
-          active: true,
-          operator: 'or',
-          handler: (task) =>
-          {
-            return (task.tags || []).some((tag) => (
-                tag === 'daily' ||
-                tag === 'recurring' ||
-                tag === 'personal' ||
-                tag === 'health'
-            ));
-          }
-        },
+        // {
+        //   title: 'Daily',
+        //   active: true,
+        //   extra: {
+        //     tags: []
+        //   },
+        //   operator: 'or',
+        //   handler: (task, extra) =>
+        //   {
+        //     return !extra || !extra.tags ?
+        //         true :
+        //         (task.tags || []).some((tag) => extra.tags.includes(tag));
+        //   }
+        // },
         {
           title: 'Personal',
           active: true,
           operator: 'or',
-          handler: (task) =>
+          extra: {
+            tags: ['personal', 'shopping']
+          },
+          handler: (task, extra) =>
           {
-            return !getStoriesFromTask(task).length;
+            const res = !getStoriesFromTask(task).length && (
+                (!extra || !extra.tags) ? true : (
+                    task.tags || []).some((tag) => extra.tags.includes(tag)
+                )
+            );
+
+            console.log('personal:', res);
+
+            return res;
           }
-        },
-        {
-          title: 'Deleted',
-          active: false,
-          operator: 'and',
-          handler: (task) => task.deleted
+        // },
+        // {
+        //   title: 'Deleted',
+        //   active: false,
+        //   operator: 'and',
+        //   handler: (task) => task.deleted
         }
       ],
       pagination: {
@@ -379,8 +396,9 @@ export default {
           if(def)
           {
             categories.push({
-              ...cat,
-              handler: def.handler
+              ...def, // add the default props
+              ...cat, // overwrite with the saved props
+              handler: def.handler // fn must be local
             });
           }
         });
@@ -424,16 +442,16 @@ export default {
     },
     filterAndSortTasksList(list)
     {
-      return sortTaskList(
-          filterTaskList(
-              filterTasksByCategory(
-                list,
-                this.categories
+      return filterTasksByCategory(
+          sortTaskList(
+              filterTaskList(
+                  list,
+                  this.filters
               ),
-              this.filters
+              this.sortType,
+              this.inverseSort
           ),
-          this.sortType,
-          this.inverseSort
+          this.categories
       );
     },
 

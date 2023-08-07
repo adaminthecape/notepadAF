@@ -8,8 +8,8 @@
       fullWidth
   >
     <template #activator="{ open }">
-      <div class="col" @click="open">
-        <div class="items-center q-my-sm">
+      <div class="col full-width" @click="open">
+        <div class="items-center q-my-sm full-width">
           <q-badge
               :label="story.estimate === 0 ? 0 : story.estimate || '?'"
               class="q-mr-xs"
@@ -20,7 +20,7 @@
           />
           {{ story.name }}
         </div>
-        <div>
+        <div class="items-center q-my-xs full-width">
           <q-chip
               v-for="label in story.labels"
               :label="label.name"
@@ -31,32 +31,42 @@
               :size="dense ? 'sm' : 'md'"
           />
         </div>
-        <div class="q-mt-sm">
-          <q-btn
-              label="View"
-              color="primary"
-              :dense="dense"
-              flat
-              class="q-mr-xs"
-              @click.stop.prevent="openInBrowser(story.url)"
-          />
-          <q-btn
-              label="Git C/O"
-              color="negative"
-              :dense="dense"
-              flat
-              @click.stop.prevent="copyToClipboard(`git checkout PT_${story.id}`)"
-          />
-          <q-btn
-              :label="story.id"
-              color="secondary"
-              :dense="dense"
-              flat
-              @click.stop.prevent="copyToClipboard(story.id)"
+        <div class="row q-mt-xs">
+          <q-chip
+              :color="story.created_at_color || 'primary'"
+              square
+              dense
+              dark
           >
-            <q-tooltip>Copy story ID</q-tooltip>
-          </q-btn>
+            {{ new Date(story.created_at).toDateString() }}
+          </q-chip>
           <q-btn-group>
+            <q-btn
+                label="View"
+                color="primary"
+                :dense="dense"
+                flat
+                class="q-mr-xs"
+                @click.stop.prevent="openInBrowser(story.url)"
+            />
+            <q-btn
+                label="Git C/O"
+                color="negative"
+                :dense="dense"
+                flat
+                @click.stop.prevent="copyToClipboard(`git checkout PT_${story.id}`)"
+            />
+            <q-btn
+                :label="story.id"
+                color="secondary"
+                :dense="dense"
+                flat
+                @click.stop.prevent="copyToClipboard(story.id)"
+            >
+              <q-tooltip>Copy story ID</q-tooltip>
+            </q-btn>
+          </q-btn-group>
+          <q-btn-group class="q-ml-xs">
             <q-btn
                 v-if="allowAddTasks"
                 label="Tasks"

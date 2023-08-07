@@ -131,6 +131,23 @@ function keywordCheck(task, filters)
     ));
 }
 
+export function getStoriesFromTask(task)
+{
+    return ((
+        `${JSON.stringify(task.tags || [])} ${task.message}`
+            .match(/1\d{8}/g)
+    ) || [])
+        .reduce((agg, id) =>
+        {
+            if(!agg.some((existing) => existing.id === id))
+            {
+                agg.push({ id });
+            }
+
+            return agg;
+        }, []);
+}
+
 /** Filter the list of tasks based on provided filters */
 export function filterTaskList(tasks, filters)
 {
@@ -168,31 +185,32 @@ export function filterTasksByCategory(tasks, categories)
         return agg;
     }, { ands: [], ors: [] });
 
-    return tasks.filter((task) => (
-        !ors.length ? true : ors.some((cat) => (
-            cat.active ? cat.handler(task) : !cat.handler(task)
-        )) &&
-        !ands.length ? true : ands.every((cat) => (
-            cat.active ? cat.handler(task) : !cat.handler(task)
-        ))
-    ));
-}
+    const check = (cat, task) => (
+        cat.active ? cat.handler(task, cat.extra) : !cat.handler(task, cat.extra)
+    );
 
-export function getStoriesFromTask(task)
-{
-    return ((
-        `${JSON.stringify(task.tags || [])} ${task.message}`
-            .match(/1\d{8}/g)
-    ) || [])
-        .reduce((agg, id) =>
-        {
-            if(!agg.some((existing) => existing.id === id))
+    const res = tasks.filter((task) =>
+    {
+        const r = (
+            !ors.length ? true : ors.some((cat) =>
             {
-                agg.push({ id });
-            }
+                const x = Boolean(check(cat, task));
 
-            return agg;
-        }, []);
+                console.log('or:', cat.title, cat.active, x);
+
+                return x;
+            }) &&
+            !ands.length ? true : ands.every((cat) => Boolean(check(cat, task)))
+        );
+
+        console.log(r, task.message);
+
+        return r;
+    });
+
+    console.log({ res, ands, ors });
+
+    return res;
 }
 
 export function sortTaskList(tasks, sortType, inverseSort)
@@ -241,6 +259,7 @@ export function sortTaskList(tasks, sortType, inverseSort)
             return tasks.sort(sortByCreated);
     }
 }
+
 /** @returns task with current filters merged in */
 export function applyFiltersToTask(task, filters)
 {
@@ -369,7 +388,7 @@ export async function cudTask(tasksList, storeUpdater, taskData, deleteTask = fa
     await storeUpdater(tasks);
 }
 
-export function reduceIntoAssociativeArray(source, key)
+export function reduceIntoAssociativeArray(source, key, deleteKey = false)
 {
     let res;
 
@@ -379,10 +398,14 @@ export function reduceIntoAssociativeArray(source, key)
         {
             if(item && item[key])
             {
-                // const clonedItem = structuredClone(item);
-                // delete clonedItem[key];
-                // agg[item[key]] = clonedItem;
-                agg[item[key]] = structuredClone(item);
+                const clonedItem = structuredClone(item);
+
+                if(deleteKey)
+                {
+                    delete clonedItem[key];
+                }
+
+                agg[item[key]] = clonedItem;
             }
 
             return agg;
@@ -618,4 +641,13 @@ export async function v_dac(path)
 export async function v_dac_vc(path)
 {
     return defineAsyncComponent(() => import(`src/components/${path}.vue`));
+}
+
+export function goToActivityPageForTask(taskId)
+{
+    if(taskId)
+    {
+        saveToLocalStorage('desiredTaskId', taskId);
+        saveToLocalStorageArray('currentTabQueue', 'activity');
+    }
 }

@@ -64,126 +64,125 @@
       />
     </template>
     <template #page-header>
-      Stuck to top
+      <q-expansion-item
+          label="Options"
+          class="q-my-sm bordered"
+          defaultOpened
+      >
+        <q-item
+            v-for="param in queryParamNames"
+            :key="`param-${param}`"
+            clickable
+        >
+          <q-item-section caption>
+            <div class="row items-center">
+              <h5>
+                {{ param }}
+              </h5>
+              <q-space />
+              <div v-if="queryParamMultiples[param]">
+                <div class="row items-center">
+                  <q-btn
+                      label="All"
+                      class="q-pa-sm"
+                      dense
+                      flat
+                      @click="toggleSelectAll(param)"
+                  />
+                  <q-btn
+                      label="Dev"
+                      class="q-pa-sm"
+                      dense
+                      flat
+                      @click="toggleSelectAll(param, 'dev')"
+                  />
+                  <q-btn
+                      label="QA"
+                      class="q-pa-sm"
+                      dense
+                      flat
+                      @click="toggleSelectAll(param, 'qa')"
+                  />
+                </div>
+              </div>
+            </div>
+          </q-item-section>
+          <q-item-section>
+            <q-checkbox
+                v-if="['includedone'].includes(param)"
+                v-model="queryParams[param]"
+                class="q-pa-sm"
+            />
+            <q-select
+                v-else-if="queryParamOptions[param]"
+                v-model="queryParams[param]"
+                :options="queryParamOptions[param]"
+                class="q-pa-sm"
+                stack-label
+                filled
+                :multiple="queryParamMultiples[param] || false"
+            >
+              <template #append>
+                <q-btn
+                    v-if="queryParams[param]"
+                    icon="clear"
+                    dense
+                    flat
+                    @click.stop.prevent="queryParams[param] = null"
+                />
+              </template>
+            </q-select>
+            <q-input
+                v-else
+                v-model="queryParams[param]"
+                class="q-pa-sm"
+                bottom-slots
+                stack-label
+                filled
+                :mask="queryParamMasks[param] || undefined"
+            >
+              <template #append>
+                <q-btn
+                    v-if="queryParams[param]"
+                    icon="clear"
+                    dense
+                    flat
+                    @click.stop.prevent="queryParams[param] = null"
+                />
+              </template>
+            </q-input>
+          </q-item-section>
+        </q-item>
+        <!--            <q-input-->
+        <!--                v-model="queryParamToAdd"-->
+        <!--                class="q-pa-sm"-->
+        <!--                label="Custom parameter"-->
+        <!--                bottom-slots-->
+        <!--                stack-label-->
+        <!--                clearable-->
+        <!--                filled-->
+        <!--            >-->
+        <!--              <template #append>-->
+        <!--                <q-btn-->
+        <!--                    icon="add"-->
+        <!--                    @click="addQueryParam"-->
+        <!--                />-->
+        <!--              </template>-->
+        <!--            </q-input>-->
+        <div class="row">
+          <q-space />
+          <q-btn
+              icon="save"
+              label="Save options and reload"
+              class="q-ma-sm"
+              @click="getTickets"
+          />
+        </div>
+      </q-expansion-item>
     </template>
     <template #page-content>
       <q-scroll-area style="height: calc(100vh - 120px)">
         <div>
-          <q-expansion-item
-              label="Options"
-              class="q-mb-md bordered"
-              defaultOpened
-          >
-            <q-item
-                v-for="param in queryParamNames"
-                :key="`param-${param}`"
-                clickable
-            >
-              <q-item-section caption>
-                <div class="row items-center">
-                  <h5>
-                    {{ param }}
-                  </h5>
-                  <q-space />
-                  <div v-if="queryParamMultiples[param]">
-                    <div class="row items-center">
-                      <q-btn
-                          label="All"
-                          class="q-pa-sm"
-                          dense
-                          flat
-                          @click="toggleSelectAll(param)"
-                      />
-                      <q-btn
-                          label="Dev"
-                          class="q-pa-sm"
-                          dense
-                          flat
-                          @click="toggleSelectAll(param, 'dev')"
-                      />
-                      <q-btn
-                          label="QA"
-                          class="q-pa-sm"
-                          dense
-                          flat
-                          @click="toggleSelectAll(param, 'qa')"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </q-item-section>
-              <q-item-section>
-                <q-checkbox
-                    v-if="['includedone'].includes(param)"
-                    v-model="queryParams[param]"
-                    class="q-pa-sm"
-                />
-                <q-select
-                    v-else-if="queryParamOptions[param]"
-                    v-model="queryParams[param]"
-                    :options="queryParamOptions[param]"
-                    class="q-pa-sm"
-                    stack-label
-                    filled
-                    :multiple="queryParamMultiples[param] || false"
-                >
-                  <template #append>
-                    <q-btn
-                        v-if="queryParams[param]"
-                        icon="clear"
-                        dense
-                        flat
-                        @click.stop.prevent="queryParams[param] = null"
-                    />
-                  </template>
-                </q-select>
-                <q-input
-                    v-else
-                    v-model="queryParams[param]"
-                    class="q-pa-sm"
-                    bottom-slots
-                    stack-label
-                    filled
-                    :mask="queryParamMasks[param] || undefined"
-                >
-                  <template #append>
-                    <q-btn
-                        v-if="queryParams[param]"
-                        icon="clear"
-                        dense
-                        flat
-                        @click.stop.prevent="queryParams[param] = null"
-                    />
-                  </template>
-                </q-input>
-              </q-item-section>
-            </q-item>
-<!--            <q-input-->
-<!--                v-model="queryParamToAdd"-->
-<!--                class="q-pa-sm"-->
-<!--                label="Custom parameter"-->
-<!--                bottom-slots-->
-<!--                stack-label-->
-<!--                clearable-->
-<!--                filled-->
-<!--            >-->
-<!--              <template #append>-->
-<!--                <q-btn-->
-<!--                    icon="add"-->
-<!--                    @click="addQueryParam"-->
-<!--                />-->
-<!--              </template>-->
-<!--            </q-input>-->
-            <div class="row">
-              <q-space />
-              <q-btn
-                  icon="save"
-                  label="Save options and reload"
-                  class="q-ma-sm"
-                  @click="getTickets"
-              />
-            </div>
-          </q-expansion-item>
           <transition name="fade" appear>
             <div v-if="resultTotals" :key="resultsRenderIndex">
               <q-badge

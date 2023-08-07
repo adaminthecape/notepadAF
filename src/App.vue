@@ -25,7 +25,12 @@
 
     <div v-if="currentTab === 'tasks'">
       <TasksActivity
-          :desiredNoteId="desiredTaskId"
+          :key="tasksRenderIndex"
+      />
+    </div>
+    <div v-if="currentTab === 'activity'">
+      <SingleTaskDisplay
+          :task-id="desiredTaskId"
           :key="tasksRenderIndex"
       />
     </div>
@@ -52,10 +57,12 @@
     localStorageIntervalCheck,
     saveToLocalStorage
   } from "src/utils";
+  import SingleTaskDisplay from "components/SingleTaskDisplay";
 
   export default {
     name: 'App',
     components: {
+      SingleTaskDisplay,
       TasksActivity,
       MyTickets,
       Settings,
@@ -64,6 +71,72 @@
     data()
     {
       const user = getFromLocalStorage('user_account', true);
+      const storedTabs = getFromLocalStorage('appTabs', true);
+      const defaultTabs = [
+        {
+          name: 'tasks',
+          label: 'Tasks',
+          active: true
+        },
+        {
+          name: 'notes',
+          label: 'Notes',
+          active: true
+        },
+        {
+          name: 'activity',
+          label: 'Activity',
+          active: true
+        },
+        {
+          name: 'tickets',
+          label: 'Tickets',
+          active: true
+        },
+        // {
+        //   name: 'wiki',
+        //   label: 'Wiki',
+        //   active: true
+        // },
+        // {
+        //   name: 'git_history',
+        //   label: 'Git Log',
+        //   active: true
+        // },
+        // {
+        //   name: 'events',
+        //   label: 'Events',
+        //   active: true
+        // },
+        {
+          name: 'settings',
+          label: 'Settings',
+          active: true
+        }
+      ];
+      const appTabs = [];
+
+      if(storedTabs)
+      {
+        defaultTabs.forEach((tab) =>
+        {
+          const stored = storedTabs.find((t) => t.name === tab.name);
+
+          if(stored)
+          {
+            appTabs.push(stored);
+          }
+          else
+          {
+            appTabs.push(tab);
+          }
+        });
+
+      }
+      else
+      {
+        appTabs.push(...defaultTabs);
+      }
 
       return {
         hasAccount: !!user,
@@ -73,54 +146,13 @@
         ticketCache: null,
         desiredNoteId: null,
         notesRenderIndex: 0,
-        desiredTaskId: null,
+        desiredTaskId: getFromLocalStorage('desiredTaskId'),
         tasksRenderIndex: 0,
-        appTabs: getFromLocalStorage('appTabs', true) || [
-          {
-            name: 'tasks',
-            label: 'Tasks',
-            active: true
-          },
-          {
-            name: 'notes',
-            label: 'Notes',
-            active: true
-          },
-          // {
-          //   name: 'activity',
-          //   label: 'Activity',
-          //   active: true
-          // },
-          {
-            name: 'tickets',
-            label: 'Tickets',
-            active: true
-          },
-          // {
-          //   name: 'wiki',
-          //   label: 'Wiki',
-          //   active: true
-          // },
-          // {
-          //   name: 'git_history',
-          //   label: 'Git Log',
-          //   active: true
-          // },
-          // {
-          //   name: 'events',
-          //   label: 'Events',
-          //   active: true
-          // },
-          {
-            name: 'settings',
-            label: 'Settings',
-            active: true
-          }
-        ]
+        appTabs
       };
     },
     provide()
-    {``
+    {
       return {
         // $openNote: this.openNote,
         $openTab: this.openTab
@@ -216,7 +248,7 @@
 
     &:hover::-webkit-scrollbar,
     &:focus::-webkit-scrollbar {
-      width: 7px;
+      width: 6px;
     }
 
     /* &:hover::-webkit-scrollbar-track {
@@ -232,7 +264,7 @@
     &:focus::-webkit-scrollbar-thumb {
       background-color: #75757a;
       /* border: 5px solid #fff; */
-      width: 7px;
+      width: 6px;
     }
 
   }

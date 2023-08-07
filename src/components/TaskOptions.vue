@@ -1,6 +1,15 @@
 <template>
   <div class="row items-center">
     <q-btn
+        icon="description"
+        :size="size"
+        :dense="dense"
+        :flat="flat"
+        @click="goToActivityPage"
+    >
+      <q-tooltip>View activity</q-tooltip>
+    </q-btn>
+    <q-btn
         v-if="task.activity && task.activity.length"
         icon="list"
         :size="size"
@@ -72,6 +81,7 @@ import TaskAlertButton from "components/TaskAlertButton";
 import TaskActivityLog from "components/TaskActivityLog";
 import QPropsMixin from '../mixins/QPropsMixin.js';
 import SingleTaskMixin from "src/mixins/SingleTaskMixin";
+import { goToActivityPageForTask } from "src/utils";
 
 export default {
   components: {
@@ -97,6 +107,10 @@ export default {
     };
   },
   methods: {
+    goToActivityPage()
+    {
+      goToActivityPageForTask(this.task.id);
+    },
     toggleDone(newVal)
     {
       this.updateTask({

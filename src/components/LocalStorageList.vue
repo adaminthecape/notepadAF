@@ -13,24 +13,68 @@
       </q-btn>
     </template>
     <template #title>
-      {{ title }}
+      {{ extrasTitle || title }}
     </template>
     <template #content>
-      <q-list class="clickable-list">
+      <div v-if="extrasId">
+<!--        <q-list class="clickable-list">-->
+<!--          <q-item-->
+<!--              v-for="(tag, t) in items[extrasId].extra ? items[extrasId].extra.tags : []"-->
+<!--              :key="`extras-list-item-${t}`"-->
+<!--              clickable-->
+<!--              :class="{-->
+<!--                'clickable-list-item': true,-->
+<!--                'selected': tag.active-->
+<!--              }"-->
+<!--              @click="tag.active = !tag.active"-->
+<!--          >-->
+<!--            <q-item-section>-->
+<!--              {{ tag }}-->
+<!--            </q-item-section>-->
+<!--          </q-item>-->
+<!--        </q-list>-->
+        <q-card
+            v-if="items[extrasId].extra.tags"
+        >
+          <TaskTagSelector
+              :inputValue="items[extrasId].extra.tags"
+              class="full-width"
+              label="Select tags"
+              multiple
+              @input="items[extrasId].extra.tags = $event"
+          />
+        </q-card>
+        <q-btn
+            label="Back"
+            class="q-mt-sm"
+            @click="closeExtras"
+        />
+      </div>
+      <q-list v-else class="clickable-list">
         <q-item
             v-for="(item, i) in items"
             :key="`clickable-list-item-${i}`"
             clickable
             :class="{
-                      'clickable-list-item': true,
-                      'selected': item.active
-                    }"
+              'clickable-list-item': true,
+              'selected': item.active
+            }"
             @click="toggleItem(i)"
         >
           <q-item-section>
             <div class="row items-center">
               <div class="q-mr-lg">{{ item.title }}</div>
               <q-space />
+              <q-btn
+                  v-if="Object.keys(item.extra || {}).length"
+                  icon="settings"
+                  flat
+                  dense
+                  size="xs"
+                  @click.stop.prevent="openExtras(i)"
+              >
+                <q-tooltip>Edit extras</q-tooltip>
+              </q-btn>
               <q-icon v-if="item.active" name="check" />
             </div>
           </q-item-section>
@@ -42,6 +86,7 @@
 
 <script>
 import SimpleModal from "src/components/SimpleModal.vue";
+import TaskTagSelector from "src/components/TaskTagSelector.vue";
 import { getFromLocalStorage, saveToLocalStorage } from "src/utils";
 
 export default {
@@ -60,12 +105,15 @@ export default {
     }
   },
   components: {
-    SimpleModal
+    SimpleModal,
+    TaskTagSelector
   },
   data()
   {
     return {
-      items: []
+      items: [],
+      extrasId: undefined,
+      extrasTitle: undefined
     };
   },
   mounted()
@@ -104,6 +152,16 @@ export default {
           saveToLocalStorage(this.listKey, this.items);
         }
       }
+    },
+    openExtras(i)
+    {
+      this.extrasId = i;
+      this.extrasTitle = this.items[i].title;
+    },
+    closeExtras()
+    {
+      this.extrasId = undefined;
+      this.extrasTitle = undefined;
     }
   }
 };
