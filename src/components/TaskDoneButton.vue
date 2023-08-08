@@ -21,6 +21,10 @@
   export default {
     mixins: [QPropsMixin],
     props: {
+      taskId: {
+        type: String,
+        default: undefined
+      },
       done: {
         type: Number,
         default: 0
@@ -30,13 +34,22 @@
       timeSince,
       toggle()
       {
-        if(this.done)
+        const newVal = this.done ? 0 : Date.now();
+
+        if(this.taskId)
         {
-          this.$emit('toggle', 0);
+          this.$store.dispatch(
+              'notes/cloudUpdateSingleProperty',
+              {
+                taskId: this.taskId,
+                prop: 'done',
+                data: newVal
+              }
+          );
         }
         else
         {
-          this.$emit('toggle', Date.now());
+          this.$emit('toggle', newVal);
         }
       }
     }
