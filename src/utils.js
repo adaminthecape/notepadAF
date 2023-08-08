@@ -449,7 +449,10 @@ export async function cudTaskViaStore(store, taskData, deleteTask = false)
     // );
     await store.dispatch('notes/cloudUpdateSingle', taskData);
 
-    queueTaskRefresh(taskData.id);
+    setTimeout(() =>
+    {
+        queueTaskRefresh(taskData.id);
+    }, 500);
 }
 
 /**

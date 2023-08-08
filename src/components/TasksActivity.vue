@@ -424,7 +424,7 @@ export default {
       this.tmpInterval = setInterval(() =>
       {
         const check = (
-          !this.lastCloudUpdate === '' &&
+          this.lastCloudUpdate &&
           this.tasksList &&
           Object.keys(this.tasksList).length
         );
@@ -464,33 +464,6 @@ export default {
           ),
           this.categories
       );
-    },
-    getCategories()
-    {
-      const storedCategories = getFromLocalStorage('taskCategories', true);
-      const categories = [];
-
-      if(storedCategories)
-      {
-        storedCategories.forEach((cat) =>
-        {
-          const def = this.defaultCategories.find((c) => c.title === cat.title);
-
-          if(def)
-          {
-            categories.push({
-              ...cat,
-              handler: def.handler
-            });
-          }
-        });
-      }
-      else
-      {
-        categories.push(...this.defaultCategories);
-      }
-
-      return categories;
     },
 
     setSortType(type)

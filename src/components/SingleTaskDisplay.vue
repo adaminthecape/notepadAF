@@ -23,7 +23,7 @@
       <!-- Task message -->
       <DisplayTask
           :task-id="taskIdToUse"
-          :show-options="false"
+          :show-options="true"
           :clickable="false"
       />
     </template>

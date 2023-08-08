@@ -1,5 +1,8 @@
 <template>
-  <div class="row items-center">
+  <div
+    class="row items-center"
+    :key="`task-options-${task.id}-${taskRenderIndex}`"
+  >
     <q-btn
         icon="description"
         :size="size"
@@ -103,8 +106,18 @@ export default {
   data()
   {
     return {
+      taskRenderIndex: 0,
       isViewingActivity: false
     };
+  },
+  watch: {
+    task: {
+      handler()
+      {
+          this.taskRenderIndex += 1;
+      },
+      deep: true
+    }
   },
   methods: {
     goToActivityPage()
