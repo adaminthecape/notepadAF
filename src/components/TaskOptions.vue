@@ -4,6 +4,7 @@
     :key="`task-options-${task.id}-${taskRenderIndex}`"
   >
     <q-btn
+        v-if="showSingleTaskButton"
         icon="description"
         :size="size"
         :dense="dense"
@@ -13,7 +14,7 @@
       <q-tooltip>View activity</q-tooltip>
     </q-btn>
     <q-btn
-        v-if="task.activity && task.activity.length"
+        v-if="showActivityLogButton && task.activity && task.activity.length"
         icon="list"
         :size="size"
         :dense="dense"
@@ -28,12 +29,14 @@
       </q-card>
     </q-dialog>
     <TaskAlertButton
+        v-if="showAlertButton"
         :taskId="task.id"
         :size="size"
         :dense="dense"
         :flat="flat"
     />
     <TaskEditButton
+        v-if="showEditButton"
         :editing="isEditing"
         :size="size"
         :dense="dense"
@@ -41,23 +44,30 @@
         @toggle="$emit('editTask')"
     />
     <TaskDoneButton
+        v-if="showDoneButton"
+        :task-id="task.id"
         :done="task.done"
         :size="size"
         :dense="dense"
         :flat="flat"
-        @toggle="toggleDone"
     />
     <TaskActiveButton
-        :active="task.active"
+        v-if="showActiveButton"
+        :task-id="task.id"
         :size="size"
-        :taskId="task.id"
-        mode="save"
         :dense="dense"
         :flat="flat"
-        @toggle="updateTask({ ...task, active: $event })"
-        @refreshTask="queueTaskRefresh(task.id)"
+        mode="save"
+    />
+    <TaskSubtaskButton
+        v-if="showSubtaskButton"
+        :task-id="task.id"
+        :dense="dense"
+        :flat="flat"
+        :size="size"
     />
     <TaskArchiveButton
+        v-if="showArchiveButton"
         :archived="task.archived"
         :task-id="taskId"
         :size="size"
@@ -66,6 +76,7 @@
         @toggle="updateTask({ ...task, archived: $event })"
     />
     <TaskDeleteButton
+        v-if="showDeleteButton"
         :taskId="taskId"
         :size="size"
         :dense="dense"
@@ -86,9 +97,11 @@ import TaskActivityLog from "components/TaskActivityLog";
 import QPropsMixin from '../mixins/QPropsMixin.js';
 import SingleTaskMixin from "src/mixins/SingleTaskMixin";
 import { goToActivityPageForTask } from "src/utils";
+import TaskSubtaskButton from "components/TaskSubtaskButton";
 
 export default {
   components: {
+    TaskSubtaskButton,
     TaskActivityLog,
     TaskAlertButton,
     TaskDeleteButton,
@@ -102,6 +115,42 @@ export default {
     isEditing: {
       type: Boolean,
       default: false
+    },
+    showArchiveButton: {
+      type: Boolean,
+      default: true
+    },
+    showSingleTaskButton: {
+      type: Boolean,
+      default: false
+    },
+    showActiveButton: {
+      type: Boolean,
+      default: true
+    },
+    showActivityLogButton: {
+      type: Boolean,
+      default: false
+    },
+    showDoneButton: {
+      type: Boolean,
+      default: true
+    },
+    showEditButton: {
+      type: Boolean,
+      default: false
+    },
+    showAlertButton: {
+      type: Boolean,
+      default: true
+    },
+    showSubtaskButton: {
+      type: Boolean,
+      default: false
+    },
+    showDeleteButton: {
+      type: Boolean,
+      default: true
     }
   },
   data()
@@ -124,15 +173,6 @@ export default {
     goToActivityPage()
     {
       goToActivityPageForTask(this.task.id);
-    },
-    toggleDone(newVal)
-    {
-      this.updateTask({
-        ...this.task,
-        done: newVal,
-        // clear alerts on marking done
-        alerts: newVal ? [] : this.task.alerts
-      });
     }
   }
 }

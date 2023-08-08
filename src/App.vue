@@ -29,7 +29,7 @@
       />
     </div>
     <div v-if="currentTab === 'activity'">
-      <SingleTaskDisplay
+      <TaskDetailView
           :task-id="desiredTaskId"
           :key="tasksRenderIndex"
       />
@@ -57,12 +57,12 @@
     localStorageIntervalCheck,
     saveToLocalStorage
   } from "src/utils";
-  import SingleTaskDisplay from "components/SingleTaskDisplay";
+  import TaskDetailView from "components/TaskDetailView";
 
   export default {
     name: 'App',
     components: {
-      SingleTaskDisplay,
+      TaskDetailView,
       TasksActivity,
       MyTickets,
       Settings,

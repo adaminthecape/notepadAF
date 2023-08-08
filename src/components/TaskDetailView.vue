@@ -52,6 +52,20 @@
           :key="`activity-log-${logRenderKey}`"
           :task-id="taskIdToUse"
       />
+      <q-list>
+        <q-item
+            v-for="(subtask, s) in subtasks"
+            :key="`subtask-list-item-${s}`"
+        >
+          <q-input
+              v-model="subtask.note"
+              class="full-width"
+              readonly
+              filled
+              dense
+          />
+        </q-item>
+      </q-list>
     </template>
   </SimpleLayout>
 </template>
@@ -100,6 +114,10 @@ export default {
     taskIdToUse()
     {
       return this.taskId || getFromLocalStorage('desiredTaskId');
+    },
+    subtasks()
+    {
+      return this.$store.getters['notes/getTaskProperty'](this.taskIdToUse, 'next') || [];
     }
   },
   methods: {
