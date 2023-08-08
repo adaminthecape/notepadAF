@@ -2,7 +2,7 @@
 // import firebase from "firebase";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, onValue, set, query } from "firebase/database";
-import { getFromLocalStorage, saveToLocalStorage } from "src/utils";
+import {getFromLocalStorage, queueTaskRefresh, saveToLocalStorage} from "src/utils";
 import {
     getAuth,
     // createUserWithEmailAndPassword,
@@ -296,7 +296,7 @@ export async function updateTaskDataByPath(
 
     console.warn('update_TaskDataByPath:', fullPath, data);
 
-    set(ref(db, fullPath), data);
+    await set(ref(db, fullPath), data);
 }
 
 export async function readTasksFromFirebaseDb(withResult)

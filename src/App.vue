@@ -184,9 +184,11 @@
       );
     },
     watch: {
-      storedTab(newVal, oldVal)
+      currentTab(newVal, oldVal)
       {
-        console.log('stored tab changed to:', newVal, 'from', oldVal);
+        // check for stored task id & set it
+        this.desiredTaskId = getFromLocalStorage('desiredTaskId');
+        saveToLocalStorage('currentTab', newVal);
       }
     },
     methods: {

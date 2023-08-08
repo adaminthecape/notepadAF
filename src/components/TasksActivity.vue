@@ -377,6 +377,7 @@ export default {
         'taskRefreshQueue',
         (queue) => queue.forEach((id) =>
         {
+          console.log('refresh:', id);
           this.refreshTask({ id });
         })
     );
@@ -428,7 +429,6 @@ export default {
           this.tasksList &&
           Object.keys(this.tasksList).length
         );
-        console.log('check:', check);
 
         if(check)
         {

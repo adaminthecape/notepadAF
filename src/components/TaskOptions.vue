@@ -59,6 +59,7 @@
     />
     <TaskArchiveButton
         :archived="task.archived"
+        :task-id="taskId"
         :size="size"
         :dense="dense"
         :flat="flat"

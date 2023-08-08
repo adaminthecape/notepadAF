@@ -24,7 +24,7 @@
       <DisplayTask
           :task-id="taskIdToUse"
           :show-options="true"
-          :clickable="false"
+          :clickable="true"
       />
     </template>
     <template #page-content>

@@ -27,8 +27,9 @@ const mutations = {
     {
         state.lastCloudDispatch = Date.now();
     },
-    SET_TASK(state, task, merge = false)
+    SET_TASK(state, task)
     {
+        console.info('SET_TASK', task.id, task.archived, task);
         if(!task)
         {
             return;
@@ -42,7 +43,18 @@ const mutations = {
             }
         });
 
-        state.tasks[task.id] = task;
+        Vue.set(state.tasks, task.id, task);
+    },
+    SET_TASK_PROPERTY(state, taskId, prop, data)
+    {
+        if(!taskId || !prop)
+        {
+            return;
+        }
+
+        console.info('SET_TASK_PROPERTY', taskId, prop);
+
+        Vue.set(state.tasks[taskId], prop, data);
     },
     SAVE_TASKS_TO_JSON(state, tasks)
     {
@@ -140,9 +152,25 @@ const actions = {
 
         commit('SET_TASK', taskDataToAdd);
 
-        updateTaskDataByPath(taskDataToAdd.id, '', taskDataToAdd);
+        await updateTaskDataByPath(taskDataToAdd.id, '', taskDataToAdd);
         queueTaskRefresh(taskDataToAdd.id);
         // dispatch('timeSafeCloudUpdate');
+    },
+    async cloudUpdateSingleProperty({ getters, commit, dispatch }, { taskId, prop, data })
+    {
+        if(!taskId || !prop || typeof data === 'undefined')
+        {
+            return;
+        }
+
+        commit('SET_TASK_PROPERTY', taskId, prop, data);
+
+        await updateTaskDataByPath(taskId, prop, data);
+
+        setTimeout(() =>
+        {
+            queueTaskRefresh(taskId);
+        }, 250);
     },
     watchCloudDb({ getters, commit })
     {
@@ -227,6 +255,15 @@ const getters = {
     all: (state) => Object.values(state.tasks),
     getTasks: (state) => state.tasks,
     getTask: (state) => (id) => state.tasks[id],
+    getTaskProperty: (state) => (id, prop) =>
+    {
+        if(id && state.tasks[id])
+        {
+            return state.tasks[id][prop];
+        }
+
+        return undefined;
+    },
     isCloudLoading: (state) => state.cloudLoading,
     getLastCloudDispatch: (state) => state.lastCloudDispatch,
     getLastCloudUpdate: (state) => state.lastCloudUpdate
