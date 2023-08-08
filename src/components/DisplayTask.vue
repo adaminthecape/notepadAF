@@ -66,6 +66,14 @@
           >
             <TaskOptions
                 v-if="showOptions"
+                show-active-button
+                show-activity-log-button
+                show-alert-button
+                show-archive-button
+                show-delete-button
+                show-done-button
+                show-edit-button
+                show-single-task-button
                 :taskId="task.id"
                 :isEditing="isEditing"
                 size="md"

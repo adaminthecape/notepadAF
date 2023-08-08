@@ -49,10 +49,6 @@
   export default {
     mixins: [QPropsMixin, SingleTaskMixin],
     props: {
-      active: {
-        type: [Number, Boolean],
-        default: 0
-      },
       mode: {
         type: String,
         default: 'emit'
@@ -73,6 +69,12 @@
         logNote: undefined,
         isAddingNote: false
       };
+    },
+    computed: {
+      active()
+      {
+        return this.$store.getters['notes/getTaskProperty'](this.taskId, 'active');
+      }
     },
     mounted()
     {

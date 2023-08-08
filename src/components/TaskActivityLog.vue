@@ -10,10 +10,15 @@
       <q-item-section>
         <div class="flex" style="flex-direction: column">
           <div v-if="showMessage">{{ log.message }}</div>
-          <div>
-            <q-chip square dense style="width: 12em">{{ log.startDate }}</q-chip>
+          <div class="row items-center full-width">
+            <q-chip square dense class="text-bold" style="min-width: 10em">{{ log.startDate }}</q-chip>
             <q-chip square dense class="text-bold" style="min-width: 4em">{{ log.duration }}</q-chip>
-            <q-chip v-if="log.note" square dense>{{ log.note }}</q-chip>
+            <q-chip
+                v-if="log.note"
+                style="flex-grow: 1"
+                square
+                dense
+            >{{ log.note }}</q-chip>
           </div>
         </div>
       </q-item-section>

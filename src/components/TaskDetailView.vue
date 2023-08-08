@@ -52,20 +52,9 @@
           :key="`activity-log-${logRenderKey}`"
           :task-id="taskIdToUse"
       />
-      <q-list>
-        <q-item
-            v-for="(subtask, s) in subtasks"
-            :key="`subtask-list-item-${s}`"
-        >
-          <q-input
-              v-model="subtask.note"
-              class="full-width"
-              readonly
-              filled
-              dense
-          />
-        </q-item>
-      </q-list>
+      <SubtaskList
+          :task-id="taskIdToUse"
+      />
     </template>
   </SimpleLayout>
 </template>
@@ -76,10 +65,12 @@ import SimpleLayout from "src/components/SimpleLayout.vue";
 import TaskOptions from "src/components/TaskOptions.vue";
 import TaskActivityLog from "src/components/TaskActivityLog.vue";
 import DisplayTask from "components/DisplayTask";
+import SubtaskList from "components/TaskSubtaskList";
 // import TaskActiveButton from "components/TaskActiveButton";
 
 export default {
   components: {
+    SubtaskList,
     DisplayTask,
     // TaskActiveButton,
     TaskActivityLog,
@@ -114,10 +105,6 @@ export default {
     taskIdToUse()
     {
       return this.taskId || getFromLocalStorage('desiredTaskId');
-    },
-    subtasks()
-    {
-      return this.$store.getters['notes/getTaskProperty'](this.taskIdToUse, 'next') || [];
     }
   },
   methods: {
