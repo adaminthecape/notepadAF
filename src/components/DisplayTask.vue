@@ -10,6 +10,8 @@
         :clickable="clickable"
         dense
         @click.ctrl="editTask"
+        @pointerdown="waitingToEdit = true"
+        @pointerup="waitingToEdit = true"
     >
       <q-item-section>
         <div class="row items-center">
@@ -233,6 +235,10 @@ export default {
         this.$emit('refreshTask', { id: this.task.id });
       },
       deep: true
+    },
+    waitingToEdit(n, o)
+    {
+      if(o && !n) this.editTask();
     }
   },
   methods: {

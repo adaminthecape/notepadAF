@@ -19,6 +19,14 @@
                 square
                 dense
             >{{ log.note }}</q-chip>
+            <q-btn
+              color="negative"
+              icon="delete"
+              size="sm"
+              dense
+              flat
+              @click="removeActivityLog(log)"
+            />
           </div>
         </div>
       </q-item-section>
@@ -31,7 +39,7 @@
 </template>
 
 <script>
-import { cudTaskViaStore, filterTaskList, getAllTasksFromStore, secondsToHumanReadable } from "src/utils";
+import { filterTaskList, getAllTasksFromStore, secondsToHumanReadable } from "src/utils";
 
 export default {
   name: 'ActivityLog',
@@ -57,7 +65,6 @@ export default {
   {
     return {
       allActivity: [],
-      singleTask: undefined,
       listRenderIndex: 0,
       newLogMessage: ''
     };
@@ -118,16 +125,12 @@ export default {
   methods: {
     removeActivityLog(log)
     {
-      if(!this.filters || !this.filters.id || !this.singleTask || !this.singleTask.activity)
-      {
-        return;
-      }
-
-      cudTaskViaStore(
-          this.$store,
+      this.$store.dispatch(
+          'notes/cloudUpdateSingleProperty',
           {
-            ...this.singleTask,
-            activity: this.singleTask.activity.filter((l) => (
+            taskId: this.taskId,
+            prop: 'activity',
+            data: this.taskActivity.filter((l) => (
                 (l.start !== log.start) && (l.end !== log.end)
             ))
           }
@@ -143,7 +146,6 @@ export default {
         return;
       }
 
-      this.singleTask = undefined;
       const tasks = getAllTasksFromStore(this.$store);
 
       if(!tasks)
@@ -156,11 +158,6 @@ export default {
               filterTaskList(tasks, this.filters) :
               tasks
       ) || []);
-
-      if(this.filters && this.filters.id && tasksList.length === 1)
-      {
-        this.singleTask = tasksList[0];
-      }
 
       this.allActivity = tasksList;
     }

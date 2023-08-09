@@ -74,6 +74,17 @@
       active()
       {
         return this.$store.getters['notes/getTaskProperty'](this.taskId, 'active');
+      },
+      lastActivity()
+      {
+        const activity = this.$store.getters['notes/getTaskProperty'](this.taskId, 'activity') || [];
+
+        if(activity && activity.length)
+        {
+          return activity[activity.length - 1];
+        }
+
+        return undefined;
       }
     },
     mounted()
@@ -81,6 +92,21 @@
       if(this.mode === 'save' && !this.taskId)
       {
         throw new Error('You must provide a task during save mode!');
+      }
+
+      if(this.lastActivity && !this.lastActivity.end && this.lastActivity.note)
+      {
+        this.logNote = this.lastActivity.note;
+      }
+    },
+    watch: {
+      lastActivity: {
+        handler(newVal, oldVal)
+        {
+          console.log('watcher', newVal, oldVal);
+          this.logNote = newVal.note || undefined;
+        },
+        deep: true
       }
     },
     methods: {
@@ -135,8 +161,9 @@
           }
           else
           {
+            const noteToAdd = this.logNote || task.activity[task.activity.length - 1].note || '';
             task.activity[task.activity.length - 1].end = Date.now();
-            task.activity[task.activity.length - 1].note = this.logNote || '';
+            task.activity[task.activity.length - 1].note = noteToAdd;
           }
         }
 

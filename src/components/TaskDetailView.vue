@@ -14,6 +14,7 @@
         <q-space />
         <TaskOptions
             :task-id="taskIdToUse"
+            show-edit-button
             class="q-mb-sm"
             add-new
             flat
@@ -23,7 +24,7 @@
       <!-- Task message -->
       <DisplayTask
           :task-id="taskIdToUse"
-          :show-options="true"
+          :show-options="false"
           :clickable="true"
       />
     </template>
