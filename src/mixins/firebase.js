@@ -280,6 +280,28 @@ export async function writeTasksToFirebaseDb(tasks) {
     });
 }
 
+export function removeUndefined(inputData)
+{
+    const data = structuredClone(inputData);
+
+    if(typeof data === 'object')
+    {
+        Object.keys(data).forEach((key) =>
+        {
+            if(typeof data[key] === 'undefined')
+            {
+                data[key] = null;
+            }
+        })
+    }
+    else if(typeof data === 'undefined')
+    {
+        return null;
+    }
+
+    return data;
+}
+
 export async function updateTaskDataByPath(
     /** @type {string} */taskId,
     /** @type {string} */path,
@@ -296,7 +318,9 @@ export async function updateTaskDataByPath(
 
     console.warn('update_TaskDataByPath:', fullPath, data);
 
-    await set(ref(db, fullPath), data);
+    console.log(data, removeUndefined(data));
+
+    await set(ref(db, fullPath), removeUndefined(data));
 }
 
 export async function readTasksFromFirebaseDb(withResult)
