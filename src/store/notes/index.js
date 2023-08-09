@@ -356,7 +356,7 @@ const getters = {
             {
                 const isInThisBucket = checkTaskInBucket(bucket, task);
 
-                if(isInThisBucket)
+                if(isInThisBucket && !task.deleted)
                 {
                     all[bucket.title].push(task);
                 }
