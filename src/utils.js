@@ -170,6 +170,11 @@ export function filterTaskList(tasks, filters)
     ));
 }
 
+export function checkTaskInBucket(cat, task)
+{
+    return cat.active ? cat.handler(task, cat.extra) : !cat.handler(task, cat.extra);
+}
+
 export function filterTasksByCategory(tasks, categories)
 {
     if(!Array.isArray(tasks) || !categories)
@@ -185,28 +190,10 @@ export function filterTasksByCategory(tasks, categories)
         return agg;
     }, { ands: [], ors: [] });
 
-    const check = (cat, task) => (
-        cat.active ? cat.handler(task, cat.extra) : !cat.handler(task, cat.extra)
-    );
-
-    const res = tasks.filter((task) =>
-    {
-        const r = (
-            !ors.length ? true : ors.some((cat) =>
-            {
-                const x = Boolean(check(cat, task));
-
-                console.log('or:', cat.title, cat.active, x);
-
-                return x;
-            }) &&
-            !ands.length ? true : ands.every((cat) => Boolean(check(cat, task)))
-        );
-
-        console.log(r, task.message);
-
-        return r;
-    });
+    const res = tasks.filter((task) => (
+        !ors.length ? true : ors.some((cat) => Boolean(checkTaskInBucket(cat, task))) &&
+        !ands.length ? true : ands.every((cat) => Boolean(checkTaskInBucket(cat, task)))
+    ));
 
     console.log({ res, ands, ors });
 

@@ -1,8 +1,8 @@
 // import { google } from 'googleapis';
 // import firebase from "firebase";
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, onValue, set, query } from "firebase/database";
-import {getFromLocalStorage, queueTaskRefresh, saveToLocalStorage} from "src/utils";
+import { getDatabase, ref, onValue, set } from "firebase/database";
+import {getFromLocalStorage, saveToLocalStorage} from "src/utils";
 import {
     getAuth,
     // createUserWithEmailAndPassword,
@@ -280,11 +280,20 @@ export async function writeTasksToFirebaseDb(tasks) {
     });
 }
 
-export function removeUndefined(inputData)
+export function removeUndefined(inputData, depth = 0)
 {
+    if(depth > 100)
+    {
+        return null;
+    }
+
     const data = structuredClone(inputData);
 
-    if(typeof data === 'object')
+    if(Array.isArray(data))
+    {
+        return data.map((item) => removeUndefined(item));
+    }
+    else if(typeof data === 'object')
     {
         Object.keys(data).forEach((key) =>
         {
@@ -306,7 +315,8 @@ export async function updateTaskDataByPath(
     /** @type {string} */taskId,
     /** @type {string} */path,
     /** @type {*} */data
-) {
+)
+{
     const db = await getDb();
     const fullPath = `${
         dbName

@@ -11,6 +11,14 @@
         <div class="flex" style="flex-direction: column">
           <div v-if="showMessage">{{ log.message }}</div>
           <div class="row items-center full-width">
+            <q-btn
+                color="negative"
+                icon="delete"
+                size="sm"
+                dense
+                flat
+                @click="removeActivityLog(log)"
+            ><q-tooltip>Remove</q-tooltip></q-btn>
             <q-chip square dense class="text-bold" style="min-width: 10em">{{ log.startDate }}</q-chip>
             <q-chip square dense class="text-bold" style="min-width: 4em">{{ log.duration }}</q-chip>
             <q-chip
@@ -19,14 +27,6 @@
                 square
                 dense
             >{{ log.note }}</q-chip>
-            <q-btn
-              color="negative"
-              icon="delete"
-              size="sm"
-              dense
-              flat
-              @click="removeActivityLog(log)"
-            />
           </div>
         </div>
       </q-item-section>

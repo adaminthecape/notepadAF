@@ -3,9 +3,65 @@ import { readFromDbSync, saveAll } from 'src/mixins/jsondb';
 import { readTasksFromFirebaseDb, writeTasksToFirebaseDb} from 'src/mixins/firebase';
 import { v4 as uuidv4 } from 'uuid';
 import { updateTaskDataByPath } from 'src/mixins/firebase.js';
-import { queueTaskRefresh } from 'src/utils';
+import {
+    checkTaskInBucket,
+    getFromLocalStorage,
+    getStoriesFromTask,
+    queueTaskRefresh
+} from 'src/utils';
 
 const state = {
+    defaultCategories: [
+        {
+            title: 'Work',
+            active: true,
+            operator: 'or',
+            handler: (task) =>
+            {
+                return Boolean(
+                    (task.tags || []).includes('process') ||
+                    getStoriesFromTask(task).length
+                );
+            }
+        },
+        // {
+        //   title: 'Daily',
+        //   active: true,
+        //   extra: {
+        //     tags: []
+        //   },
+        //   operator: 'or',
+        //   handler: (task, extra) =>
+        //   {
+        //     return !extra || !extra.tags ?
+        //         true :
+        //         (task.tags || []).some((tag) => extra.tags.includes(tag));
+        //   }
+        // },
+        {
+            title: 'Personal',
+            active: true,
+            operator: 'or',
+            extra: {
+                tags: ['personal', 'shopping']
+            },
+            handler: (task, extra) =>
+            {
+                return !(getStoriesFromTask(task).length) && (
+                    (!extra || !extra.tags) ? true : (
+                        task.tags || []).some((tag) => extra.tags.includes(tag)
+                    )
+                );
+            }
+            // },
+            // {
+            //   title: 'Deleted',
+            //   active: false,
+            //   operator: 'and',
+            //   handler: (task) => task.deleted
+        }
+    ],
+    categories: [],
     tasks: {},
     taskUpdateQueue: [],
     taskUpdateTimeout: [],
@@ -29,7 +85,6 @@ const mutations = {
     },
     SET_TASK(state, task)
     {
-        console.info('SET_TASK', task.id, task.archived, task);
         if(!task)
         {
             return;
@@ -51,8 +106,6 @@ const mutations = {
         {
             return;
         }
-
-        console.info('SET_TASK_PROPERTY', taskId, prop);
 
         Vue.set(state.tasks[taskId], prop, data);
     },
@@ -100,10 +153,44 @@ const mutations = {
     SET_UPDATE_TIMEOUT(state, timeout)
     {
         state.taskUpdateTimeout = timeout;
+    },
+    SET_CATEGORIES(state)
+    {
+        const storedCategories = getFromLocalStorage('taskCategories', true);
+        const categories = [];
+
+        if(storedCategories)
+        {
+            storedCategories.forEach((cat) =>
+            {
+                const def = state.defaultCategories.find((c) => c.title === cat.title);
+
+                if(def)
+                {
+                    categories.push({
+                        ...def, // add the default props
+                        ...cat, // overwrite with the saved props
+                        handler: def.handler // fn must be local
+                    });
+                }
+            });
+        }
+        else
+        {
+            categories.push(...this.defaultCategories);
+        }
+
+        console.log('SET:', { categories });
+
+        Vue.set(state, 'categories', categories);
     }
 };
 
 const actions = {
+    setCategoriesFromLocalStorage({ getters, commit })
+    {
+        commit('SET_CATEGORIES');
+    },
     timeSafeCloudUpdate({ commit })
     {
         console.warn('timeSafeCloudUpdate: start');
@@ -148,8 +235,6 @@ const actions = {
             id: task.id || uuidv4()
         };
 
-        console.warn('cloudUpdateSingle', { task: taskDataToAdd });
-
         commit('SET_TASK', taskDataToAdd);
 
         await updateTaskDataByPath(taskDataToAdd.id, '', taskDataToAdd);
@@ -174,6 +259,11 @@ const actions = {
     },
     watchCloudDb({ getters, commit })
     {
+        if(getters.getLastCloudUpdate)
+        {
+            return;
+        }
+
         commit('SET_CLOUD_LOADING', true);
 
         // const localTasks = getFromLocalStorage('working_tasks', true);
@@ -254,6 +344,29 @@ const actions = {
 const getters = {
     all: (state) => Object.values(state.tasks),
     getTasks: (state) => state.tasks,
+    getTasksByBuckets: (state) => (buckets) =>
+    {
+        const all = {};
+
+        buckets.forEach((bucket) =>
+        {
+            if(!all[bucket.title]) all[bucket.title] = [];
+
+            Object.values(state.tasks).forEach((task) =>
+            {
+                const isInThisBucket = checkTaskInBucket(bucket, task);
+
+                if(isInThisBucket)
+                {
+                    all[bucket.title].push(task);
+                }
+            });
+
+            // console.log(bucket.title, ':', reduceIntoAssociativeArray(all[bucket.title], 'id'));
+        });
+
+        return all;
+    },
     getTask: (state) => (id) => state.tasks[id],
     getTaskProperty: (state) => (id, prop) =>
     {
@@ -266,7 +379,9 @@ const getters = {
     },
     isCloudLoading: (state) => state.cloudLoading,
     getLastCloudDispatch: (state) => state.lastCloudDispatch,
-    getLastCloudUpdate: (state) => state.lastCloudUpdate
+    getLastCloudUpdate: (state) => state.lastCloudUpdate,
+    getDefaultCategories: (state) => state.defaultCategories,
+    getCategories: (state) => state.categories
 };
 
 export default {

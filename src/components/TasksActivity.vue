@@ -111,7 +111,7 @@
               @cancel="setFilter(filterTypes.tags, [])"
           />
           <LocalStorageList
-              v-model="categories"
+              v-model="categoriesMutable"
               title="Categories"
               listKey="taskCategories"
           />
@@ -204,64 +204,6 @@ export default {
   data()
   {
     const defaults = {
-      categories: [
-        {
-          title: 'Work',
-          active: true,
-          operator: 'or',
-          handler: (task) =>
-          {
-            const res = Boolean(
-                (task.tags || []).includes('process') ||
-                getStoriesFromTask(task).length
-            );
-
-            console.log('work:', res);
-
-            return res;
-          }
-        },
-        // {
-        //   title: 'Daily',
-        //   active: true,
-        //   extra: {
-        //     tags: []
-        //   },
-        //   operator: 'or',
-        //   handler: (task, extra) =>
-        //   {
-        //     return !extra || !extra.tags ?
-        //         true :
-        //         (task.tags || []).some((tag) => extra.tags.includes(tag));
-        //   }
-        // },
-        {
-          title: 'Personal',
-          active: true,
-          operator: 'or',
-          extra: {
-            tags: ['personal', 'shopping']
-          },
-          handler: (task, extra) =>
-          {
-            const res = !getStoriesFromTask(task).length && (
-                (!extra || !extra.tags) ? true : (
-                    task.tags || []).some((tag) => extra.tags.includes(tag)
-                )
-            );
-
-            console.log('personal:', res);
-
-            return res;
-          }
-        // },
-        // {
-        //   title: 'Deleted',
-        //   active: false,
-        //   operator: 'and',
-        //   handler: (task) => task.deleted
-        }
-      ],
       pagination: {
         page: 1,
         max: 5
@@ -298,12 +240,15 @@ export default {
       isFirebaseConfigDialogOpen: false,
       pagination: defaults.pagination,
       tmpInterval: undefined,
-      categories: [],
-      defaultCategories: defaults.categories
+      categoriesMutable: []
     };
   },
   inject: ['$openTab'],
   computed: {
+    categories()
+    {
+      return this.$store.getters['notes/getCategories'];
+    },
     limitedTasks()
     {
       const page = (this.pagination.page - 1);
@@ -325,14 +270,30 @@ export default {
     {
       // return (getAllTasksFromStore(this.$store) || [])
       //     .filter((task) => !task.deleted);
-      return this.$store.getters['notes/getTasks'];
-    },
-    _filteredTasksList()
-    {
-      return this.filterAndSortTasksList(
-        Object.values(this.tasksList)
+      // const tasks = this.$store.getters['notes/getTasks'];
+      const catsToKeep = this.categories.filter((c) => c.active).map((c) => c.title);
+      let res = {};
+
+      const allTasks = this.$store.getters['notes/getTasksByBuckets'](
+          this.$store.getters['notes/getCategories']
       );
+
+      Object.entries(allTasks).forEach(([key, value]) =>
+      {
+        if(catsToKeep.includes(key))
+        {
+          res = { ...res, ...value };
+        }
+      });
+
+      return res;
     },
+    // filteredTasksList()
+    // {
+    //   return this.filterAndSortTasksList(
+    //     Object.values(this.tasksList)
+    //   );
+    // },
     isCloudLoading()
     {
       return this.$store.getters['notes/isCloudLoading'];
@@ -357,6 +318,7 @@ export default {
   },
   mounted()
   {
+    this.$store.dispatch('notes/setCategoriesFromLocalStorage');
     this.loadTasks();
 
     const storedFilters = getFromLocalStorage('taskFilters', true);
@@ -382,38 +344,15 @@ export default {
         })
     );
 
-    this.categories = this.getCategories();
+    this.categoriesMutable = [...this.categories];
 
     this.filterTasks();
   },
   methods: {
-    getCategories()
+    updateCategories(val)
     {
-      const storedCategories = getFromLocalStorage('taskCategories', true);
-      const categories = [];
-
-      if(storedCategories)
-      {
-        storedCategories.forEach((cat) =>
-        {
-          const def = this.defaultCategories.find((c) => c.title === cat.title);
-
-          if(def)
-          {
-            categories.push({
-              ...def, // add the default props
-              ...cat, // overwrite with the saved props
-              handler: def.handler // fn must be local
-            });
-          }
-        });
-      }
-      else
-      {
-        categories.push(...this.defaultCategories);
-      }
-
-      return categories;
+      saveToLocalStorage('taskCategories', val);
+      this.$store.dispatch('notes/setCategoriesFromLocalStorage');
     },
     /****** Loading/fetching tasks */
     async loadTasks()
@@ -453,16 +392,13 @@ export default {
     },
     filterAndSortTasksList(list)
     {
-      return filterTasksByCategory(
-          sortTaskList(
-              filterTaskList(
-                  list,
-                  this.filters
-              ),
-              this.sortType,
-              this.inverseSort
+      return sortTaskList(
+          filterTaskList(
+              list,
+              this.filters
           ),
-          this.categories
+          this.sortType,
+          this.inverseSort
       );
     },
 
