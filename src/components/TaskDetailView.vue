@@ -15,6 +15,14 @@
         <TaskOptions
             :task-id="taskIdToUse"
             show-edit-button
+            show-active-button
+            show-alert-button
+            show-delete-button
+            show-done-button
+            show-archive-button
+            show-subtask-button
+            hide-menu-button
+            show
             class="q-mb-sm"
             add-new
             flat

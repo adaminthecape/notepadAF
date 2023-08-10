@@ -85,6 +85,7 @@
         @removed="queueTaskRefresh(task.id)"
     />
     <q-btn
+        v-if="!hideMenuButton"
         icon="menu"
         dense
         flat
@@ -156,6 +157,10 @@ export default {
       default: false
     },
     showDeleteButton: {
+      type: Boolean,
+      default: false
+    },
+    hideMenuButton: {
       type: Boolean,
       default: false
     }
