@@ -5,6 +5,7 @@ export const localStorageNames = {
     appTabs: 'appTabs',
     activeTheme: 'activeTheme',
     taskCategories: 'taskCategories',
+    zoomLevel: 'zoomLevel',
     /** state */
     currentTab: 'currentTab',
     taskFilters: 'taskFilters',
@@ -21,6 +22,7 @@ export const localStorageNames = {
     gitlabToken: 'gitlabToken',
     pivotalToken: 'pivotalToken',
     pivotalProjectId: 'pivotalProjectId',
+    pivotalProjectIdAlt: 'pivotalProjectIdAlt',
     /** other config */
     external_backups: 'external_backups',
     gitModuleBasePath: 'gitModuleBasePath',

@@ -2,7 +2,10 @@
   <div v-if="!hasAccount">
     <SetAccountDetails />
   </div>
-  <div v-else id="q-app" :style="`background: ${activeThemeData.app.background}`">
+  <div
+      v-else
+      id="q-app"
+  >
     <div class="row items-center">
       <q-tabs
           v-model="currentTab"
@@ -171,6 +174,13 @@
 
       // set dark mode to the user's preference
       this.$q.dark.set(this.$store.getters['themes/getActiveTheme'] === 'dark');
+
+      const zoom = getFromLocalStorage(localStorageNames.zoomLevel);
+
+      if(zoom)
+      {
+        document.getElementsByTagName('body')[0].style.zoom = zoom;
+      }
     },
     watch: {
       currentTab(newVal, oldVal)

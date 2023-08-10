@@ -262,7 +262,7 @@ import GitMixin from '../mixins/git';
 import { pivotalData } from '../mixins/constants';
 import SimpleLayout from './SimpleLayout';
 import StoryCard from "components/StoryCard";
-import { localStorageNames } from "src/utils";
+import { getFromLocalStorage, localStorageNames } from "src/utils";
 
 export default {
   name: 'MyTickets',
@@ -279,15 +279,15 @@ export default {
   },
   data()
   {
-    const savedQueryParams = localStorage.getItem(localStorageNames.ticketQueryParams) ?
-        JSON.parse(localStorage.getItem(localStorageNames.ticketQueryParams)) :
+    const savedQueryParams = getFromLocalStorage(localStorageNames.ticketQueryParams) ?
+        JSON.parse(getFromLocalStorage(localStorageNames.ticketQueryParams)) :
         null;
 
     return {
       isLoadingActivity: false,
       isGitStatusDropdownOpen: false,
       results: this.cachedTickets || [],
-      projectId: localStorage.getItem(localStorageNames.pivotalProjectId),
+      projectId: getFromLocalStorage(localStorageNames.pivotalProjectId),
       modulesToFetch: [
         'aluminate-vue',
         'aluminate-api',

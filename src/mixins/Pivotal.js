@@ -1,14 +1,19 @@
 import axios from 'axios';
-import {localStorageNames} from "src/utils";
+import {getFromLocalStorage, localStorageNames} from "src/utils";
 
 function getPivotalToken()
 {
-    return localStorage.getItem(localStorageNames.pivotalToken);
+    return getFromLocalStorage(localStorageNames.pivotalToken);
 }
 
 function getPivotalProjectId()
 {
-    return localStorage.getItem(localStorageNames.pivotalProjectId);
+    return getFromLocalStorage(localStorageNames.pivotalProjectId);
+}
+
+export function getPivotalProjectIdAlt()
+{
+    return getFromLocalStorage(localStorageNames.pivotalProjectIdAlt);
 }
 
 function htmlEncode(str)
@@ -103,9 +108,9 @@ export async function getPivotalEndpoint(endpoint, params, queryParams)
     }
 }
 
-export async function getPivotalStory(storyId, endpoint)
+export async function getPivotalStory(storyId, endpoint, projectIdOverride)
 {
-    const projectId = getPivotalProjectId();
+    const projectId = projectIdOverride || getPivotalProjectId();
     const baseUri = 'https://www.pivotaltracker.com/services/v5/';
 
     if(!endpoint)
