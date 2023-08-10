@@ -123,7 +123,8 @@
                 :key="`bool-toggle-${bool.value}`"
                 :label="bool.label"
                 dense
-                flat
+                no-caps
+                :flat="!$q.dark.isActive"
                 :color="getFilterBoolColor(bool.value)"
                 @click="toggleFilterBool(bool.value)"
             />
@@ -189,7 +190,7 @@ import {
   applyFiltersToTask,
   getFromLocalStorage,
   saveToLocalStorage,
-  localStorageIntervalCheck, getStoriesFromTask, filterTasksByCategory
+  localStorageIntervalCheck, getStoriesFromTask, filterTasksByCategory, localStorageNames
 } from "src/utils";
 
 export default {
@@ -309,6 +310,15 @@ export default {
       };
     }
   },
+  watch: {
+    pagination: {
+      handler()
+      {
+        this.saveFilters();
+      },
+      deep: true
+    }
+  },
   created()
   {
     if(!getFromLocalStorage('firebase_config', true))
@@ -328,6 +338,14 @@ export default {
       this.sortType = storedFilters.sortType;
       this.inverseSort = storedFilters.inverseSort;
       this.filters = storedFilters;
+
+      if(storedFilters.pagination)
+      {
+        this.pagination = {
+          ...this.pagination,
+          ...storedFilters.pagination
+        };
+      }
     }
 
     if(this.refreshCheckInterval)
@@ -380,11 +398,7 @@ export default {
     /** Actual filtering logic. Sorts after filtering. Saves filters to localStorage. */
     filterTasks()
     {
-      saveToLocalStorage('taskFilters', {
-        ...this.filters,
-        sortType: this.sortType,
-        inverseSort: this.inverseSort
-      });
+      this.saveFilters();
 
       this.filteredTasksList = this.filterAndSortTasksList(
         Object.values(this.tasksList)
@@ -446,6 +460,15 @@ export default {
     {
       this.filters[type] = value;
       this.filterTasks();
+    },
+    saveFilters()
+    {
+      saveToLocalStorage(localStorageNames.taskFilters, {
+        ...this.filters,
+        sortType: this.sortType,
+        inverseSort: this.inverseSort,
+        pagination: this.pagination
+      });
     },
 
     /****** Filtering tasks - booleans */

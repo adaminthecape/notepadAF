@@ -11,7 +11,6 @@
       useInput
       :hideSelected="!multiple"
       fillInput
-      :dark="dark"
       inputDebounce="0"
       :newValueMode="newValueMode ? 'add-unique' : undefined"
       style="width: 12em"

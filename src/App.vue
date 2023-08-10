@@ -2,7 +2,7 @@
   <div v-if="!hasAccount">
     <SetAccountDetails />
   </div>
-  <div v-else id="q-app" style="background: #eee">
+  <div v-else id="q-app" :style="`background: ${activeThemeData.app.background}`">
     <div class="row items-center">
       <q-tabs
           v-model="currentTab"
@@ -10,7 +10,6 @@
           activeColor="primary"
           indicatorColor="primary"
           narrowIndicator
-          activeBgColor="blue-2"
           dense
           dark
       >
@@ -19,6 +18,7 @@
             :key="`tab-${tab.name}`"
             :name="tab.name"
             :label="tab.label"
+            :icon="tab.icon"
         />
       </q-tabs>
     </div>
@@ -53,9 +53,7 @@
   import Settings from './components/Settings';
   import SetAccountDetails from './components/SetAccountDetails';
   import {
-    getFromLocalStorage,
-    localStorageIntervalCheck,
-    saveToLocalStorage
+    getFromLocalStorage, localStorageIntervalCheck, localStorageNames, saveToLocalStorage
   } from "src/utils";
   import TaskDetailView from "components/TaskDetailView";
 
@@ -70,8 +68,8 @@
     },
     data()
     {
-      const user = getFromLocalStorage('user_account', true);
-      const storedTabs = getFromLocalStorage('appTabs', true);
+      const user = getFromLocalStorage(localStorageNames.user_account, true);
+      const storedTabs = getFromLocalStorage(localStorageNames.appTabs, true);
       const defaultTabs = [
         {
           name: 'tasks',
@@ -146,7 +144,7 @@
         ticketCache: null,
         desiredNoteId: null,
         notesRenderIndex: 0,
-        desiredTaskId: getFromLocalStorage('desiredTaskId'),
+        desiredTaskId: getFromLocalStorage(localStorageNames.desiredTaskId),
         tasksRenderIndex: 0,
         appTabs
       };
@@ -162,26 +160,37 @@
       activeAppTabs()
       {
         return this.appTabs.filter((t) => t.active);
+      },
+      activeTheme()
+      {
+        return this.$store.getters['notes/activeTheme'];
+      },
+      activeThemeData()
+      {
+        return this.$store.getters['themes/getActiveThemeData'];
       }
     },
     mounted()
     {
-      const appTabs = getFromLocalStorage('appTabs', true);
+      const appTabs = getFromLocalStorage(localStorageNames.appTabs, true);
 
       if(!Object.keys(appTabs || {}).length)
       {
-        saveToLocalStorage('appTabs', this.appTabs);
+        saveToLocalStorage(localStorageNames.appTabs, this.appTabs);
       }
 
-      saveToLocalStorage('currentTabQueue', []);
+      saveToLocalStorage(localStorageNames.currentTabQueue, []);
 
       localStorageIntervalCheck(
-          'currentTabQueue',
+          localStorageNames.currentTabQueue,
           (queue) =>
           {
             this.currentTab = queue[0];
           }
       );
+
+      // set dark mode to the user's preference
+      this.$q.dark.set(this.$store.getters['themes/getActiveTheme'] === 'dark');
     },
     watch: {
       currentTab(newVal, oldVal)

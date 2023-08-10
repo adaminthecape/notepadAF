@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import notes from '../store/notes/index';
+import themes from '../store/themes/index';
 import pivotal from '../store/pivotal/index';
 
 // import example from './module-example'
@@ -20,6 +21,7 @@ export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
         notes,
+        themes,
         pivotal
     },
 

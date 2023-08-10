@@ -243,6 +243,25 @@
           </q-item-section>
         </q-item>
       </q-card>
+      <q-card class="q-mb-sm">
+        <q-item>
+          <q-item-section>
+            <h5>Dark mode</h5>
+          </q-item-section>
+          <q-item-section>
+            <q-btn
+                v-if="$q.dark.isActive"
+                label="Set mode to light"
+                @click="toggleDarkMode"
+            />
+            <q-btn
+                v-if="!$q.dark.isActive"
+                label="Set mode to dark"
+                @click="toggleDarkMode"
+            />
+          </q-item-section>
+        </q-item>
+      </q-card>
       <q-card v-if="appTabs">
         <q-item>
           <q-item-section>
@@ -323,6 +342,19 @@ export default {
     };
   },
   methods: {
+    toggleDarkMode()
+    {
+      if(this.$q.dark.isActive)
+      {
+        this.$store.dispatch('themes/setLightMode');
+        this.$q.dark.set(false);
+      }
+      else
+      {
+        this.$store.dispatch('themes/setDarkMode');
+        this.$q.dark.set(true);
+      }
+    },
     setCustomValue()
     {
       if(

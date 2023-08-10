@@ -2,7 +2,7 @@
   <q-card
       v-if="task"
       class="flex q-mb-sm"
-      style="flex-direction: column; background-color: #70809020"
+      :style="`flex-direction: column; background-color: #70809020`"
       flat
       bordered
   >

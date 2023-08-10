@@ -10,10 +10,8 @@
     <q-header
         v-if="header"
         elevated
-        :dark="dark"
     >
       <q-toolbar
-          :dark="dark"
       >
         <slot name="header-left" />
 
@@ -37,10 +35,8 @@
     <q-footer
         v-if="footer"
         elevated
-        :dark="dark"
     >
       <q-toolbar
-          :dark="dark"
       >
         <q-toolbar-title>
           <slot name="footer-content" />
@@ -64,10 +60,6 @@ export default {
     page: {
       type: Boolean,
       default: true
-    },
-    dark: {
-      type: Boolean,
-      default: false
     },
     pageOffset: {
       type: Number,

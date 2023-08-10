@@ -1,5 +1,14 @@
 import { v4 as uuidv4 } from 'uuid';
 
+export const localStorageNames = {
+    activeTheme: 'activeTheme',
+    user_account: 'user_account',
+    appTabs: 'appTabs',
+    desiredTaskId: 'desiredTaskId',
+    currentTabQueue: 'currentTabQueue',
+    taskFilters: 'taskFilters',
+};
+
 export function openInBrowser(link)
 {
     // require("electron").shell.openExternal(link);
