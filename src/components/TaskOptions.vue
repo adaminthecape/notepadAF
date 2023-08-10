@@ -29,14 +29,14 @@
       </q-card>
     </q-dialog>
     <TaskAlertButton
-        v-if="showAlertButton"
+        v-if="showAllOptions || (showAlertButton || (task.alerts && task.alerts.length))"
         :taskId="task.id"
         :size="size"
         :dense="dense"
         :flat="flat"
     />
     <TaskEditButton
-        v-if="showEditButton"
+        v-if="showAllOptions || showEditButton || !$q.platform.is.desktop"
         :editing="isEditing"
         :size="size"
         :dense="dense"
@@ -44,7 +44,7 @@
         @toggle="$emit('editTask')"
     />
     <TaskDoneButton
-        v-if="showDoneButton"
+        v-if="showAllOptions || (showDoneButton || task.done)"
         :task-id="task.id"
         :done="task.done"
         :size="size"
@@ -52,7 +52,7 @@
         :flat="flat"
     />
     <TaskActiveButton
-        v-if="showActiveButton"
+        v-if="showAllOptions || (showActiveButton || task.active)"
         :task-id="task.id"
         :size="size"
         :dense="dense"
@@ -60,14 +60,15 @@
         mode="save"
     />
     <TaskSubtaskButton
-        v-if="showSubtaskButton"
+        v-if="showAllOptions || (showSubtaskButton)"
         :task-id="task.id"
         :dense="dense"
         :flat="flat"
         :size="size"
+        mode="save"
     />
     <TaskArchiveButton
-        v-if="showArchiveButton"
+        v-if="showAllOptions || (showArchiveButton || task.archived)"
         :archived="task.archived"
         :task-id="taskId"
         :size="size"
@@ -76,13 +77,19 @@
         @toggle="updateTask({ ...task, archived: $event })"
     />
     <TaskDeleteButton
-        v-if="showDeleteButton"
+        v-if="showAllOptions || (showDeleteButton || task.deleted)"
         :taskId="taskId"
         :size="size"
         :dense="dense"
         :flat="flat"
         @removed="queueTaskRefresh(task.id)"
     />
+    <q-btn
+        icon="menu"
+        dense
+        flat
+        @click="showAllOptions = !showAllOptions"
+    ><q-tooltip>More options</q-tooltip></q-btn>
   </div>
 </template>
 
@@ -118,7 +125,7 @@ export default {
     },
     showArchiveButton: {
       type: Boolean,
-      default: true
+      default: false
     },
     showSingleTaskButton: {
       type: Boolean,
@@ -126,7 +133,7 @@ export default {
     },
     showActiveButton: {
       type: Boolean,
-      default: true
+      default: false
     },
     showActivityLogButton: {
       type: Boolean,
@@ -134,7 +141,7 @@ export default {
     },
     showDoneButton: {
       type: Boolean,
-      default: true
+      default: false
     },
     showEditButton: {
       type: Boolean,
@@ -142,7 +149,7 @@ export default {
     },
     showAlertButton: {
       type: Boolean,
-      default: true
+      default: false
     },
     showSubtaskButton: {
       type: Boolean,
@@ -150,14 +157,15 @@ export default {
     },
     showDeleteButton: {
       type: Boolean,
-      default: true
+      default: false
     }
   },
   data()
   {
     return {
       taskRenderIndex: 0,
-      isViewingActivity: false
+      isViewingActivity: false,
+      showAllOptions: false
     };
   },
   watch: {
