@@ -187,7 +187,7 @@ const mutations = {
 };
 
 const actions = {
-    setCategoriesFromLocalStorage({ getters, commit })
+    setCategoriesFromLocalStorage({ commit })
     {
         commit('SET_CATEGORIES');
     },

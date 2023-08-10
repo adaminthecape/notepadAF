@@ -10,24 +10,133 @@
       <q-item-section>
         <div class="flex" style="flex-direction: column">
           <div v-if="showMessage">{{ log.message }}</div>
-          <div class="row items-center full-width">
-            <q-btn
-                color="negative"
-                icon="delete"
-                size="sm"
-                dense
-                flat
-                @click="removeActivityLog(log)"
-            ><q-tooltip>Remove</q-tooltip></q-btn>
-            <q-chip square dense class="text-bold" style="min-width: 10em">{{ log.startDate }}</q-chip>
-            <q-chip square dense class="text-bold" style="min-width: 4em">{{ log.duration }}</q-chip>
-            <q-chip
-                v-if="log.note"
-                style="flex-grow: 1"
-                square
-                dense
-            >{{ log.note }}</q-chip>
-          </div>
+          <q-btn-dropdown
+              class="row items-center full-width justify-start"
+              style="align-content: start"
+              flat
+              dense
+              no-caps
+          >
+            <template #label>
+              <div class="row items-center justify-start">
+                <q-chip square dense class="text-bold" style="min-width: 12em">{{ log.startDate }}</q-chip>
+                <div class="column">
+                  <q-chip
+                      class="text-bold"
+                      style="min-width: 4em"
+                      square
+                      dense
+                      @click="isIncrementDialogOpen[l] = true"
+                  >{{ log.duration }}</q-chip>
+                </div>
+                <q-chip
+                    v-if="log.note"
+                    style="flex-grow: 1"
+                    square
+                    dense
+                >{{ log.note }}</q-chip>
+                <q-space />
+              </div>
+            </template>
+            <template #default>
+              <div class="row items-center">
+                <q-item>
+                  <q-btn
+                      color="negative"
+                      icon="delete"
+                      size="md"
+                      class="full-width"
+                      dense
+                      flat
+                      @click="removeActivityLog(log)"
+                  >Remove</q-btn>
+                </q-item>
+                <q-item>
+                  <q-btn-group>
+                    <q-btn
+                        color="primary"
+                        icon="keyboard_double_arrow_left"
+                        size="md"
+                        class="full-width"
+                        dense
+                        flat
+                        :v-close-popup="false"
+                        @click.stop.prevent="incrementBy('start', log, -3600000)"
+                    />
+                    <q-btn
+                        color="primary"
+                        icon="keyboard_arrow_left"
+                        size="md"
+                        class="full-width"
+                        dense
+                        flat
+                        @click.stop.prevent="incrementBy('start', log, -600000)"
+                    />
+                    <q-btn label="Start" no-caps />
+                    <q-btn
+                        color="primary"
+                        icon="keyboard_arrow_right"
+                        size="md"
+                        class="full-width"
+                        dense
+                        flat
+                        @click.stop.prevent="incrementBy('start', log, 600000)"
+                    />
+                    <q-btn
+                        color="primary"
+                        icon="keyboard_double_arrow_right"
+                        size="md"
+                        class="full-width"
+                        dense
+                        flat
+                        @click.stop.prevent="incrementBy('start', log, 3600000)"
+                    />
+                  </q-btn-group>
+                </q-item>
+                <q-item>
+                  <q-btn-group>
+                    <q-btn
+                        color="primary"
+                        icon="keyboard_double_arrow_left"
+                        size="md"
+                        class="full-width"
+                        dense
+                        flat
+                        @click.stop.prevent="incrementBy('end', log, -3600000)"
+                    />
+                    <q-btn
+                        color="primary"
+                        icon="keyboard_arrow_left"
+                        size="md"
+                        class="full-width"
+                        dense
+                        flat
+                        @click.stop.prevent="incrementBy('end', log, -600000)"
+                    />
+                    <q-btn label="End" no-caps />
+                    <q-btn
+                        color="primary"
+                        icon="keyboard_arrow_right"
+                        size="md"
+                        class="full-width"
+                        dense
+                        flat
+                        @click.stop.prevent="incrementBy('end', log, 600000)"
+                    />
+                    <q-btn
+                        color="primary"
+                        icon="keyboard_double_arrow_right"
+                        size="md"
+                        class="full-width"
+                        dense
+                        flat
+                        @click.stop.prevent="incrementBy('end', log, 3600000)"
+                    />
+                  </q-btn-group>
+                </q-item>
+              </div>
+            </template>
+          </q-btn-dropdown>
         </div>
       </q-item-section>
     </q-item>
@@ -66,7 +175,8 @@ export default {
     return {
       allActivity: [],
       listRenderIndex: 0,
-      newLogMessage: ''
+      newLogMessage: '',
+      isIncrementDialogOpen: {}
     };
   },
   computed: {
@@ -123,21 +233,60 @@ export default {
     this.setActivity();
   },
   methods: {
-    removeActivityLog(log)
+    updateLog(data)
     {
       this.$store.dispatch(
           'notes/cloudUpdateSingleProperty',
           {
             taskId: this.taskId,
             prop: 'activity',
-            data: this.taskActivity.filter((l) => (
-                (l.start !== log.start) && (l.end !== log.end)
-            ))
+            data
           }
       ).then(() =>
       {
         this.listRenderIndex += 1;
       });
+    },
+    removeActivityLog(log)
+    {
+      this.updateLog(
+        this.taskActivity.filter((l) => (
+          (l.start !== log.start) && (l.end !== log.end)
+        ))
+      );
+    },
+    updateTime(index, newTime, startOrEnd)
+    {
+      const data = [...this.taskActivity].map((log, l) =>
+      {
+        if(l === index)
+        {
+          return {
+            ...log,
+            [startOrEnd]: newTime
+          };
+        }
+
+        return log;
+      });
+
+      this.updateLog(data);
+    },
+    incrementBy(startOrEnd, log, amount)
+    {
+      if(!startOrEnd || !amount || !log)
+      {
+        return;
+      }
+
+      console.log('incrementBy:', { log, amount, startOrEnd });
+      const index = this.taskActivity.findIndex((l) => (
+          (l.start === log.start) && (l.end === log.end)
+      ));
+
+      const newTime = this.taskActivity[index][startOrEnd] + amount;
+
+      this.updateTime(index, newTime, startOrEnd);
     },
     setActivity()
     {
