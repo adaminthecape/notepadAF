@@ -74,7 +74,6 @@
         :size="size"
         :dense="dense"
         :flat="flat"
-        @toggle="updateTask({ ...task, archived: $event })"
     />
     <TaskDeleteButton
         v-if="showAllOptions || (showDeleteButton || task.deleted)"
@@ -87,8 +86,9 @@
     <q-btn
         v-if="!hideMenuButton"
         icon="menu"
-        dense
-        flat
+        :size="size"
+        :dense="dense"
+        :flat="flat"
         @click="showAllOptions = !showAllOptions"
     ><q-tooltip>More options</q-tooltip></q-btn>
   </div>

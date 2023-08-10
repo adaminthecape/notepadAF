@@ -122,9 +122,10 @@
                 v-for="bool in toggleableBooleans"
                 :key="`bool-toggle-${bool.value}`"
                 :label="bool.label"
-                dense
+                :icon="filters[bool.value] ? bool.icon_true : bool.icon_false"
                 no-caps
-                :flat="!$q.dark.isActive"
+                dense
+                flat
                 :color="getFilterBoolColor(bool.value)"
                 @click="toggleFilterBool(bool.value)"
             />
@@ -260,9 +261,9 @@ export default {
     toggleableBooleans()
     {
       return [
-        { label: 'Done', value: 'done' },
-        { label: 'Active', value: 'active' },
-        { label: 'Archived', value: 'archived' }
+        { label: 'Done', value: 'done', icon_true: 'check_circle', icon_false: 'check_circle_outline' },
+        { label: 'Active', value: 'active', icon_true: 'assignment_ind', icon_false: 'content_paste_go' },
+        { label: 'Archived', value: 'archived', icon_true: 'unarchive', icon_false: 'move_to_inbox' }
         // { label: 'Alarm', value: 'hasAlarm' },
         // { label: 'Due', value: 'isDue' }
       ];
@@ -475,9 +476,9 @@ export default {
     getFilterBoolColor(prop)
     {
       return (
-          this.filters[prop] === true && 'green-9' ||
-          this.filters[prop] === false && 'negative' ||
-          'grey-9'
+          this.filters[prop] === true && 'green-6' ||
+          this.filters[prop] === false && 'red-6' ||
+          'grey-6'
       );
     },
     toggleFilterBool(prop)
