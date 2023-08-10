@@ -309,7 +309,7 @@
 import SimpleLayout from './SimpleLayout.vue';
 import SimpleModal from './SimpleModal.vue';
 import BackupHandler from "./BackupHandler.vue";
-import { getFromLocalStorage, saveToLocalStorage } from "src/utils";
+import { getFromLocalStorage, localStorageNames, saveToLocalStorage } from "src/utils";
 
 export default {
   name: 'Settings',
@@ -322,14 +322,14 @@ export default {
   {
     const cache = {
       tokens: {
-        gitlab: getFromLocalStorage('gitlabToken'),
-        pivotal: getFromLocalStorage('pivotalToken')
+        gitlab: getFromLocalStorage(localStorageNames.gitlabToken),
+        pivotal: getFromLocalStorage(localStorageNames.pivotalToken)
       },
-      pivotalProjectId: getFromLocalStorage('pivotalProjectId'),
-      gitModuleBasePath: getFromLocalStorage('gitModuleBasePath'),
-      firebaseConfig: getFromLocalStorage('firebase_config', true)
+      pivotalProjectId: getFromLocalStorage(localStorageNames.pivotalProjectId),
+      gitModuleBasePath: getFromLocalStorage(localStorageNames.gitModuleBasePath),
+      firebaseConfig: getFromLocalStorage(localStorageNames.firebase_config, true)
     };
-    const appTabs = getFromLocalStorage('appTabs', true);
+    const appTabs = getFromLocalStorage(localStorageNames.appTabs, true);
 
     return {
       cache,
@@ -372,7 +372,7 @@ export default {
     },
     forgetUser()
     {
-      saveToLocalStorage('user_account', '');
+      saveToLocalStorage(localStorageNames.user_account, '');
       setTimeout(() =>
       {
         window.location.reload();
@@ -382,7 +382,7 @@ export default {
     {
       if(Object.keys(this.appTabs || {}).length)
       {
-        saveToLocalStorage('appTabs', this.appTabs);
+        saveToLocalStorage(localStorageNames.appTabs, this.appTabs);
       }
     },
     setToken(service)
@@ -440,7 +440,7 @@ export default {
         return;
       }
 
-      saveToLocalStorage('firebase_config', config);
+      saveToLocalStorage(localStorageNames.firebase_config, config);
     }
   }
 };

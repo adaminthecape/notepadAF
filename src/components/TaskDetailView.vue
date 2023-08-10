@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import { getFromLocalStorage, saveToLocalStorage } from "src/utils.js";
+import { getFromLocalStorage, localStorageNames, saveToLocalStorage } from "src/utils.js";
 import SimpleLayout from "src/components/SimpleLayout.vue";
 import TaskOptions from "src/components/TaskOptions.vue";
 import TaskActivityLog from "src/components/TaskActivityLog.vue";
@@ -105,14 +105,10 @@ export default {
     },
     taskIdToUse()
     {
-      return this.taskId || getFromLocalStorage('desiredTaskId');
+      return this.taskId || getFromLocalStorage(localStorageNames.desiredTaskId);
     }
   },
   methods: {
-    saveConfig()
-    {
-      saveToLocalStorage('singleTaskConfig', this.localStorageData);
-    }
   }
 };
 </script>

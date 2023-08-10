@@ -217,7 +217,7 @@ export default {
     };
 
     return {
-      limit: getFromLocalStorage('taskLimit') ||
+      limit: getFromLocalStorage(localStorageNames.taskLimit) ||
           defaults.limit,
       filterTypes: {
         keyword: 'keyword',
@@ -321,7 +321,7 @@ export default {
   },
   created()
   {
-    if(!getFromLocalStorage('firebase_config', true))
+    if(!getFromLocalStorage(localStorageNames.firebase_config, true))
     {
       this.isFirebaseConfigDialogOpen = true;
     }
@@ -331,7 +331,7 @@ export default {
     this.$store.dispatch('notes/setCategoriesFromLocalStorage');
     this.loadTasks();
 
-    const storedFilters = getFromLocalStorage('taskFilters', true);
+    const storedFilters = getFromLocalStorage(localStorageNames.taskFilters, true);
 
     if(storedFilters)
     {
@@ -369,7 +369,7 @@ export default {
   methods: {
     updateCategories(val)
     {
-      saveToLocalStorage('taskCategories', val);
+      saveToLocalStorage(localStorageNames.taskCategories, val);
       this.$store.dispatch('notes/setCategoriesFromLocalStorage');
     },
     /****** Loading/fetching tasks */

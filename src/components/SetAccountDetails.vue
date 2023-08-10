@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { saveToLocalStorage } from 'src/utils';
+import { localStorageNames, saveToLocalStorage } from "src/utils";
 export default {
     data()
     {
@@ -32,7 +32,7 @@ export default {
     methods: {
         setCredentials()
         {
-            saveToLocalStorage('user_account', {
+            saveToLocalStorage(localStorageNames.user_account, {
                 email: this.email,
                 password: this.password
             });

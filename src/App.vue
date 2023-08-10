@@ -6,7 +6,7 @@
     <div class="row items-center">
       <q-tabs
           v-model="currentTab"
-          class="text-grey-9 shadow-5 full-width"
+          class="shadow-5 full-width"
           activeColor="primary"
           indicatorColor="primary"
           narrowIndicator
@@ -77,11 +77,6 @@
           active: true
         },
         {
-          name: 'notes',
-          label: 'Notes',
-          active: true
-        },
-        {
           name: 'activity',
           label: 'Activity',
           active: true
@@ -91,21 +86,6 @@
           label: 'Tickets',
           active: true
         },
-        // {
-        //   name: 'wiki',
-        //   label: 'Wiki',
-        //   active: true
-        // },
-        // {
-        //   name: 'git_history',
-        //   label: 'Git Log',
-        //   active: true
-        // },
-        // {
-        //   name: 'events',
-        //   label: 'Events',
-        //   active: true
-        // },
         {
           name: 'settings',
           label: 'Settings',
@@ -196,8 +176,8 @@
       currentTab(newVal, oldVal)
       {
         // check for stored task id & set it
-        this.desiredTaskId = getFromLocalStorage('desiredTaskId');
-        saveToLocalStorage('currentTab', newVal);
+        this.desiredTaskId = getFromLocalStorage(localStorageNames.desiredTaskId);
+        saveToLocalStorage(localStorageNames.currentTab, newVal);
       }
     },
     methods: {

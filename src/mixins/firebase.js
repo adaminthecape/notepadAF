@@ -2,7 +2,7 @@
 // import firebase from "firebase";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, onValue, set } from "firebase/database";
-import {getFromLocalStorage, saveToLocalStorage} from "src/utils";
+import {getFromLocalStorage, localStorageNames, saveToLocalStorage} from "src/utils";
 import {
     getAuth,
     // createUserWithEmailAndPassword,
@@ -57,12 +57,12 @@ export async function getDb()
 
 export function getConfig()
 {
-    return getFromLocalStorage('firebase_config', true) || undefined;
+    return getFromLocalStorage(localStorageNames.firebase_config, true) || undefined;
 }
 
 export function getAdmin()
 {
-    return getFromLocalStorage('firebase_service_account') || undefined;
+    return getFromLocalStorage(localStorageNames.firebase_service_account) || undefined;
 }
 
 export async function setAuthToken()
@@ -108,7 +108,7 @@ export async function setAuthToken()
                     token: tokens.access_token,
                     expires: tokens.expiry_date
                 };
-                saveToLocalStorage('firebase_token', localData);
+                // saveToLocalStorage(localStorageNames.firebase_token, localData);
                 resolve(localData);
 
                 // See the "Using the access token" section below for information
@@ -150,21 +150,21 @@ function validateCredentials(credentials)
 
 function getCredentials()
 {
-    return getFromLocalStorage('authed_user', true);
+    return getFromLocalStorage(localStorageNames.authed_user, true);
 }
 
 function setCredentials(user)
 {
     try
     {
-        saveToLocalStorage('authed_user', JSON.stringify({
+        saveToLocalStorage(localStorageNames.authed_user, JSON.stringify({
             accessToken: user.accessToken,
             expires: user.expires || (Date.now() + (60 * 60 * 1000))
         }));
     }
     catch(e)
     {
-        saveToLocalStorage('authed_user', '');
+        saveToLocalStorage(localStorageNames.authed_user, '');
     }
 }
 
@@ -227,7 +227,7 @@ export async function firebaseFetch(method, url, data)
         headers.append('Authorization', `Bearer ${token}`);
 
         // const uid = '64b98f0-b996-4bf3-9732-1f3270ac6c47';
-        // const user = getFromLocalStorage('user_account', true);
+        // const user = getFromLocalStorage(localStorageNames.user_account, true);
 
         // url = `${url}?auth=${token}`;
         // const auth = {
@@ -373,7 +373,7 @@ export async function authenticateViaEmailAndPassword(user)
 
 export async function authenticateMe()
 {
-    const me = getFromLocalStorage('user_account', true);
+    const me = getFromLocalStorage(localStorageNames.user_account, true);
 
     return authenticateViaEmailAndPassword(me);
 }

@@ -1,13 +1,14 @@
 import axios from 'axios';
+import {localStorageNames} from "src/utils";
 
 function getPivotalToken()
 {
-    return localStorage.getItem('pivotalToken');
+    return localStorage.getItem(localStorageNames.pivotalToken);
 }
 
 function getPivotalProjectId()
 {
-    return localStorage.getItem('pivotalProjectId');
+    return localStorage.getItem(localStorageNames.pivotalProjectId);
 }
 
 function htmlEncode(str)

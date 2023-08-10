@@ -1,12 +1,30 @@
 import { v4 as uuidv4 } from 'uuid';
 
 export const localStorageNames = {
-    activeTheme: 'activeTheme',
-    user_account: 'user_account',
+    /** user prefs */
     appTabs: 'appTabs',
+    activeTheme: 'activeTheme',
+    taskCategories: 'taskCategories',
+    /** state */
+    currentTab: 'currentTab',
+    taskFilters: 'taskFilters',
     desiredTaskId: 'desiredTaskId',
     currentTabQueue: 'currentTabQueue',
-    taskFilters: 'taskFilters',
+    /** user auth */
+    authed_user: 'authed_user',
+    user_account: 'user_account',
+    /** system auth */
+    firebase_config: 'firebase_config',
+    firebase_service_account: 'firebase_service_account',
+    // firebase_token: 'firebase_token',
+    /** external auth */
+    gitlabToken: 'gitlabToken',
+    pivotalToken: 'pivotalToken',
+    pivotalProjectId: 'pivotalProjectId',
+    /** other config */
+    external_backups: 'external_backups',
+    gitModuleBasePath: 'gitModuleBasePath',
+    ticketQueryParams: 'ticketQueryParams',
 };
 
 export function openInBrowser(link)
@@ -28,19 +46,28 @@ export function getAppBasePath()
 
 /** Local storage operations */
 /**
- * Save a value to localStorage. Objects are automatically stringified.
+ * Save a value to localStorage.
+ * Objects are automatically stringified.
+ * Only registered names may be used.
  * @param name
  * @param data
  */
 export function saveToLocalStorage(name, data)
 {
+    const validName = localStorageNames[name];
+
+    if(!validName)
+    {
+        return;
+    }
+
     if(data && typeof data === 'object')
     {
-        localStorage.setItem(name, JSON.stringify(data));
+        localStorage.setItem(validName, JSON.stringify(data));
     }
     else
     {
-        localStorage.setItem(name, data);
+        localStorage.setItem(validName, data);
     }
 }
 
@@ -52,7 +79,14 @@ export function saveToLocalStorage(name, data)
  */
 export function getFromLocalStorage(name, forceObject = false)
 {
-    const data = localStorage.getItem(name);
+    const validName = localStorageNames[name];
+
+    if(!validName)
+    {
+        return undefined;
+    }
+
+    const data = localStorage.getItem(validName);
 
     if(forceObject)
     {
@@ -646,7 +680,7 @@ export function goToActivityPageForTask(taskId)
 {
     if(taskId)
     {
-        saveToLocalStorage('desiredTaskId', taskId);
-        saveToLocalStorageArray('currentTabQueue', 'activity');
+        saveToLocalStorage(localStorageNames.desiredTaskId, taskId);
+        saveToLocalStorageArray(localStorageNames.currentTabQueue, 'activity');
     }
 }

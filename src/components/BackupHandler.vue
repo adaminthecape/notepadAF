@@ -100,9 +100,7 @@
 
 <script>
 import {
-  getAppBasePath,
-  getFromLocalStorage,
-  saveToLocalStorageArray
+  getAppBasePath, getFromLocalStorage, localStorageNames, saveToLocalStorageArray
 } from "src/utils.js";
 import {
   readFromExternalBackup,
@@ -119,7 +117,7 @@ export default {
   data()
   {
     return {
-      recentBackups: getFromLocalStorage('external_backups'),
+      recentBackups: getFromLocalStorage(localStorageNames.external_backups),
       chosenBackup: null,
       chosenBackupAlt: null,
       newBackupPath: null,

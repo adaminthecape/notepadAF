@@ -129,7 +129,9 @@
   import DisplayStory from './DisplayStory';
   import SimpleModal from './SimpleModal';
   import AddTask from "components/AddTask";
-  import { getFromLocalStorage, saveToLocalStorage, copyToClipboard, openInBrowser } from "src/utils";
+  import {
+    getFromLocalStorage, saveToLocalStorage, copyToClipboard, openInBrowser, localStorageNames
+  } from "src/utils";
 
   export default {
     name: 'StoryCard',
@@ -172,8 +174,8 @@
       copyToClipboard,
       openTasksForStory()
       {
-        const existingFilters = getFromLocalStorage('taskFilters', true);
-        saveToLocalStorage('taskFilters', { ...existingFilters, keyword: `${this.storyId}` });
+        const existingFilters = getFromLocalStorage(localStorageNames.taskFilters, true);
+        saveToLocalStorage(localStorageNames.taskFilters, { ...existingFilters, keyword: `${this.storyId}` });
         this.$openTab('tasks');
       }
     }

@@ -24,8 +24,8 @@ const state = {
 const mutations = {
     SET_ACTIVE_THEME(state, themeName)
     {
-        Vue.set(state, 'activeTheme', themeName);
-        saveToLocalStorage('activeTheme', themeName);
+        Vue.set(state, localStorageNames.activeTheme, themeName);
+        saveToLocalStorage(localStorageNames.activeTheme, themeName);
     }
 };
 

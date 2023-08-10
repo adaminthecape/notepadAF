@@ -6,7 +6,7 @@ import { updateTaskDataByPath } from 'src/mixins/firebase.js';
 import {
     checkTaskInBucket,
     getFromLocalStorage,
-    getStoriesFromTask,
+    getStoriesFromTask, localStorageNames,
     queueTaskRefresh
 } from 'src/utils';
 
@@ -156,7 +156,7 @@ const mutations = {
     },
     SET_CATEGORIES(state)
     {
-        const storedCategories = getFromLocalStorage('taskCategories', true);
+        const storedCategories = getFromLocalStorage(localStorageNames.taskCategories, true);
         const categories = [];
 
         if(storedCategories)
@@ -305,7 +305,6 @@ const actions = {
             });
 
             commit('SET_LAST_CLOUD_UPDATE');
-            // saveToLocalStorage('working_tasks', cloudTasks.tasks);
 
             setTimeout(() =>
             {

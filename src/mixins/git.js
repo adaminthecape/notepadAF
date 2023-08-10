@@ -1,5 +1,5 @@
 import { exec } from "child_process";
-import { getFromLocalStorage } from "src/utils";
+import {getFromLocalStorage, localStorageNames} from "src/utils";
 
 export function checkoutBoth(branchId)
 {
@@ -76,7 +76,7 @@ export default {
             isLoadingGitStatus: false,
             gitRenderKey: 0,
             gitStatus: {},
-            moduleBasePath: getFromLocalStorage('gitModuleBasePath')
+            moduleBasePath: getFromLocalStorage(localStorageNames.gitModuleBasePath)
         };
     },
     methods: {

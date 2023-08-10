@@ -10,6 +10,7 @@
     <q-header
         v-if="header"
         elevated
+        style="background-color: #00084080"
     >
       <q-toolbar
       >
