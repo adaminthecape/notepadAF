@@ -26,15 +26,15 @@
                       style="min-width: 4em"
                       square
                       dense
-                      @click="isIncrementDialogOpen[l] = true"
                   >{{ log.duration }}</q-chip>
                 </div>
                 <q-chip
-                    v-if="log.note"
                     style="flex-grow: 1"
                     square
                     dense
-                >{{ log.note }}</q-chip>
+                >
+                  <span>{{ log.note }}</span>
+                </q-chip>
                 <q-space />
               </div>
             </template>
@@ -135,6 +135,21 @@
                   </q-btn-group>
                 </q-item>
               </div>
+              <q-input
+                  v-model="log.note"
+                  dense
+                  filled
+                  @click.stop.prevent="{}"
+              >
+                <template #append>
+                  <q-btn
+                      icon="save"
+                      dense
+                      flat
+                      @click.stop.prevent="updateLog(taskActivity)"
+                  />
+                </template>
+              </q-input>
             </template>
           </q-btn-dropdown>
         </div>
@@ -240,7 +255,12 @@ export default {
           {
             taskId: this.taskId,
             prop: 'activity',
-            data
+            data: data.map((item) =>
+            {
+              delete item.isEditing;
+
+              return item;
+            })
           }
       ).then(() =>
       {
