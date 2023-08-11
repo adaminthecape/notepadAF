@@ -155,19 +155,63 @@
                 <q-card style="max-width:100%;">
                   <q-item>
                     <q-item-section>
-                      <div class="q-mb-md">Paste your firebase configuration settings (including your API key) as a JSON object below.</div>
                       <q-input
-                        v-model="firebaseConfig"
-                        type="textarea"
+                        v-model="firebaseConfig.appId"
+                        :type="visibilityToggles.appId ? 'text' : 'password'"
+                        label="App ID"
                         filled
-                      />
-                      <q-card>
-                        <q-item>
-                          <q-item-section>
-                            {{ firebaseConfig || 'none' }}
-                          </q-item-section>
-                        </q-item>
-                      </q-card>
+                      >
+                        <template #append>
+                          <q-icon
+                              :name="visibilityToggles.appId ? 'visibility_off' : 'visibility'"
+                              class="cursor-pointer"
+                              @click="visibilityToggles.appId = !visibilityToggles.appId"
+                          />
+                        </template>
+                      </q-input>
+                      <q-input
+                        v-model="firebaseConfig.apiKey"
+                        :type="visibilityToggles.apiKey ? 'text' : 'password'"
+                        label="API Key"
+                        filled
+                      >
+                        <template #append>
+                          <q-icon
+                              :name="visibilityToggles.apiKey ? 'visibility_off' : 'visibility'"
+                              class="cursor-pointer"
+                              @click="visibilityToggles.apiKey = !visibilityToggles.apiKey"
+                          />
+                        </template>
+                      </q-input>
+                      <q-input
+                        v-model="firebaseConfig.messagingSenderId"
+                        :type="visibilityToggles.messagingSenderId ? 'text' : 'password'"
+                        label="Messaging Sender ID"
+                        filled
+                      >
+                        <template #append>
+                          <q-icon
+                              :name="visibilityToggles.messagingSenderId ? 'visibility_off' : 'visibility'"
+                              class="cursor-pointer"
+                              @click="visibilityToggles.messagingSenderId = !visibilityToggles.messagingSenderId"
+                          />
+                        </template>
+                      </q-input>
+                      <q-input
+                        v-model="firebaseConfig.projectId"
+                        :type="visibilityToggles.projectId ? 'text' : 'password'"
+                        label="Project ID"
+                        filled
+                        @input="computeFirebaseVars"
+                      >
+                        <template #append>
+                          <q-icon
+                              :name="visibilityToggles.projectId ? 'visibility_off' : 'visibility'"
+                              class="cursor-pointer"
+                              @click="visibilityToggles.projectId = !visibilityToggles.projectId"
+                          />
+                        </template>
+                      </q-input>
                       <q-btn
                         class="q-my-md"
                         @click="setFirebaseConfig()"
@@ -206,37 +250,39 @@
           </q-item-section>
         </q-item>
       </q-card>
-      <!--<q-card class="q-mb-sm">-->
-      <!--  <q-item>-->
-      <!--    <q-item-section>-->
-      <!--      <h5>User</h5>-->
-      <!--    </q-item-section>-->
-      <!--    <q-item-section>-->
-      <!--      <q-btn-->
-      <!--        label="Clear user"-->
-      <!--        @click="isConfirmingUserDeletion = true"-->
-      <!--      />-->
-      <!--      <q-dialog v-model="isConfirmingUserDeletion">-->
-      <!--        <q-card>-->
-      <!--          <q-item>-->
-      <!--            <q-item-section>-->
-      <!--              Really delete user? You will not be able to use the app until you log in again!-->
-      <!--            </q-item-section>-->
-      <!--          </q-item>-->
-      <!--          <q-item>-->
-      <!--            <q-item-section>-->
-      <!--              <q-space />-->
-      <!--              <q-btn-->
-      <!--                  color="negative"-->
-      <!--                  @click="forgetUser"-->
-      <!--              >Delete</q-btn>-->
-      <!--            </q-item-section>-->
-      <!--          </q-item>-->
-      <!--        </q-card>-->
-      <!--      </q-dialog>-->
-      <!--    </q-item-section>-->
-      <!--  </q-item>-->
-      <!--</q-card>-->
+      <div>
+        <!--<q-card class="q-mb-sm">-->
+        <!--  <q-item>-->
+        <!--    <q-item-section>-->
+        <!--      <h5>User</h5>-->
+        <!--    </q-item-section>-->
+        <!--    <q-item-section>-->
+        <!--      <q-btn-->
+        <!--        label="Clear user"-->
+        <!--        @click="isConfirmingUserDeletion = true"-->
+        <!--      />-->
+        <!--      <q-dialog v-model="isConfirmingUserDeletion">-->
+        <!--        <q-card>-->
+        <!--          <q-item>-->
+        <!--            <q-item-section>-->
+        <!--              Really delete user? You will not be able to use the app until you log in again!-->
+        <!--            </q-item-section>-->
+        <!--          </q-item>-->
+        <!--          <q-item>-->
+        <!--            <q-item-section>-->
+        <!--              <q-space />-->
+        <!--              <q-btn-->
+        <!--                  color="negative"-->
+        <!--                  @click="forgetUser"-->
+        <!--              >Delete</q-btn>-->
+        <!--            </q-item-section>-->
+        <!--          </q-item>-->
+        <!--        </q-card>-->
+        <!--      </q-dialog>-->
+        <!--    </q-item-section>-->
+        <!--  </q-item>-->
+        <!--</q-card>-->
+      </div>
       <q-card class="q-mb-sm">
         <q-item>
           <q-item-section>
@@ -383,7 +429,16 @@ export default {
       },
       pivotalProjectId: getFromLocalStorage(localStorageNames.pivotalProjectId),
       gitModuleBasePath: getFromLocalStorage(localStorageNames.gitModuleBasePath),
-      firebaseConfig: getFromLocalStorage(localStorageNames.firebase_config, true)
+      firebaseConfig: getFromLocalStorage(localStorageNames.firebase_config, true) || {
+        appId: '',
+        apiKey: '',
+        messagingSenderId: '',
+        projectId: '',
+        // computed from 'projectId':
+        authDomain: '',
+        databaseURL: '',
+        storageBucket: ''
+      }
     };
     const appTabs = getFromLocalStorage(localStorageNames.appTabs, true);
 
@@ -396,10 +451,27 @@ export default {
         value: ''
       },
       currentZoomLevel: document.getElementsByTagName('body')[0].style.zoom || '100%',
-      isConfirmingUserDeletion: false
+      isConfirmingUserDeletion: false,
+      visibilityToggles: {
+        appId: false,
+        apiKey: false,
+        projectId: false,
+        messagingSenderId: false
+      }
     };
   },
   methods: {
+    computeFirebaseVars(val)
+    {
+      if(typeof val !== 'string')
+      {
+        return;
+      }
+
+      this.firebaseConfig.authDomain = `${val}.firebaseapp.com`;
+      this.firebaseConfig.databaseURL = `${val}.firebaseio.com`;
+      this.firebaseConfig.storageBucket = `${val}.appspot.com`;
+    },
     addZoom(amount)
     {
       const current = parseInt(this.currentZoomLevel.split('%')[0], 10);
@@ -479,16 +551,16 @@ export default {
         return;
       }
 
-      config = config
-        .replace('appId: ', '"appId":')
-        .replace('apiKey: ', '"apiKey":')
-        .replace('authDomain: ', '"authDomain":')
-        .replace('databaseURL: ', '"databaseURL":')
-        .replace('messagingSenderId: ', '"messagingSenderId":')
-        .replace('projectId: ', '"projectId":')
-        .replace('storageBucket: ', '"storageBucket":')
-        .replace(/\t/g, '')
-        .replace(/"\n"/g, '",\n"');
+      // config = config
+      //   .replace('appId: ', '"appId":')
+      //   .replace('apiKey: ', '"apiKey":')
+      //   .replace('authDomain: ', '"authDomain":')
+      //   .replace('databaseURL: ', '"databaseURL":')
+      //   .replace('messagingSenderId: ', '"messagingSenderId":')
+      //   .replace('projectId: ', '"projectId":')
+      //   .replace('storageBucket: ', '"storageBucket":')
+      //   .replace(/\t/g, '')
+      //   .replace(/"\n"/g, '",\n"');
 
       try
       {
