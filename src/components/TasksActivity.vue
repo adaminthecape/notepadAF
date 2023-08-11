@@ -273,20 +273,27 @@ export default {
       // return (getAllTasksFromStore(this.$store) || [])
       //     .filter((task) => !task.deleted);
       // const tasks = this.$store.getters['notes/getTasks'];
-      const catsToKeep = this.categories.filter((c) => c.active).map((c) => c.title);
+      const catsToKeep = this.categories.filter((c) => c.active).map((c) => c.title).concat('other');
       let res = {};
 
       const allTasks = this.$store.getters['notes/getTasksByBuckets'](
           this.$store.getters['notes/getCategories']
       );
 
-      Object.entries(allTasks).forEach(([key, value]) =>
+      Object.entries(allTasks).forEach(([
+          // bucket name
+          key,
+          // list of tasks in that bucket
+          value
+        ]) =>
       {
         if(catsToKeep.includes(key))
         {
           res = { ...res, ...value };
         }
       });
+
+      console.log('all:', allTasks);
 
       return res;
     },

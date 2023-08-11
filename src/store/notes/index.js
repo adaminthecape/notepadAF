@@ -19,7 +19,7 @@ const state = {
             handler: (task) =>
             {
                 return Boolean(
-                    (task.tags || []).includes('process') ||
+                    // (task.tags || []).includes('process') ||
                     getStoriesFromTask(task).length
                 );
             }
@@ -53,12 +53,18 @@ const state = {
                     )
                 );
             }
-            // },
-            // {
-            //   title: 'Deleted',
-            //   active: false,
-            //   operator: 'and',
-            //   handler: (task) => task.deleted
+        },
+        {
+          title: 'Deleted',
+          active: false,
+          operator: 'and',
+          handler: (task) => Boolean(task.deleted)
+        },
+        {
+          title: 'Other',
+          active: true,
+          operator: 'or',
+          handler: () => false
         }
     ],
     categories: [],
@@ -346,22 +352,40 @@ const getters = {
     getTasksByBuckets: (state) => (buckets) =>
     {
         const all = {};
+        console.log({ buckets });
 
-        buckets.forEach((bucket) =>
+        Object.values(state.tasks).forEach((task) =>
         {
-            if(!all[bucket.title]) all[bucket.title] = [];
-
-            Object.values(state.tasks).forEach((task) =>
+            if(task.deleted)
             {
+                return;
+            }
+
+            let isInAnyBuckets = false;
+
+            buckets.forEach((bucket) =>
+            {
+                if(!all[bucket.title]) all[bucket.title] = [];
+
                 const isInThisBucket = checkTaskInBucket(bucket, task);
 
-                if(isInThisBucket && !task.deleted)
+                if(isInThisBucket)
                 {
+                    console.log(task.id, bucket.title);
+
+                    isInAnyBuckets = true;
                     all[bucket.title].push(task);
                 }
+
+                // console.log(bucket.title, ':', reduceIntoAssociativeArray(all[bucket.title], 'id'));
             });
 
-            // console.log(bucket.title, ':', reduceIntoAssociativeArray(all[bucket.title], 'id'));
+            if(!isInAnyBuckets)
+            {
+                if(!all.other) all.other = [];
+
+                all.other.push(task);
+            }
         });
 
         return all;
