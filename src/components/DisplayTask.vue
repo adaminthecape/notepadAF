@@ -389,7 +389,7 @@ export default {
 <style scoped>
 .task-message-display {
   white-space: pre-line;
-  border-left: 4px solid #1976D280;
+  border-left: 2px solid #1976D2;
   padding: 0 4px;
 }
 </style>

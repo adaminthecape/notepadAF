@@ -522,6 +522,7 @@ export default {
           points: res.stories.total_points,
           completedPoints: res.stories.total_points_completed
         };
+        this.sortResults(this.results);
       }
       else
       {

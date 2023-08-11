@@ -22,6 +22,7 @@
             class="q-mb-sm"
             add-new
             flat
+            @editTask="editTask"
         />
         <q-space />
       </div>
@@ -29,6 +30,7 @@
     <template #page-header>
       <!-- Task message -->
       <DisplayTask
+          ref="displayTask"
           :task-id="taskIdToUse"
           :show-options="false"
           :clickable="true"
@@ -115,6 +117,10 @@ export default {
     }
   },
   methods: {
+    editTask()
+    {
+      this.$refs.displayTask.editTask();
+    }
   }
 };
 </script>

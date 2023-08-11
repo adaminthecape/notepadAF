@@ -3,7 +3,6 @@
     <q-item
         v-for="(log, l) in taskActivity"
         :key="`activity-item-${l}`"
-        clickable
         dense
         @dblclick.ctrl="removeActivityLog(log)"
     >
@@ -18,7 +17,7 @@
               no-caps
           >
             <template #label>
-              <div class="row items-center justify-start">
+              <div class="row items-center justify-start full-width">
                 <q-chip square dense class="text-bold" style="min-width: 12em">{{ log.startDate }}</q-chip>
                 <TaskActiveButton
                     v-if="!log.end"
@@ -35,6 +34,7 @@
                 >{{ !log.end ? '...' : log.duration }}</q-chip>
                 <q-chip
                     style="flex-grow: 1"
+                    class="full-width"
                     square
                     dense
                 >
@@ -44,20 +44,19 @@
               </div>
             </template>
             <template #default>
-              <div class="row items-center">
-                <q-item>
+              <div>
+                <q-item class="row items-center">
                   <q-btn
                       v-if="log.end"
                       color="negative"
                       icon="delete"
                       size="md"
-                      class="full-width"
+                      class="q-mr-xl"
                       dense
                       flat
                       @click="removeActivityLog(log)"
-                  >Remove</q-btn>
-                </q-item>
-                <q-item>
+                  />
+                  <q-space />
                   <q-btn-group>
                     <q-btn
                         color="primary"
@@ -78,7 +77,7 @@
                         flat
                         @click.stop.prevent="incrementBy('start', log, -600000)"
                     />
-                    <q-btn label="Start" no-caps />
+                    <q-btn label="Start" no-caps dense />
                     <q-btn
                         color="primary"
                         icon="keyboard_arrow_right"
@@ -98,11 +97,8 @@
                         @click.stop.prevent="incrementBy('start', log, 3600000)"
                     />
                   </q-btn-group>
-                </q-item>
-                <q-item
-                    v-if="log.end"
-                >
-                  <q-btn-group>
+                  <q-space />
+                  <q-btn-group v-if="log.end" class="q-ml-sm">
                     <q-btn
                         color="primary"
                         icon="keyboard_double_arrow_left"
@@ -121,7 +117,7 @@
                         flat
                         @click.stop.prevent="incrementBy('end', log, -600000)"
                     />
-                    <q-btn label="End" no-caps />
+                    <q-btn label="End" no-caps dense />
                     <q-btn
                         color="primary"
                         icon="keyboard_arrow_right"
