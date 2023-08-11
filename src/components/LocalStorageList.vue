@@ -16,7 +16,7 @@
       {{ extrasTitle || title }}
     </template>
     <template #content>
-      <div v-if="extrasId">
+      <div v-if="extrasId || extrasId === 0">
 <!--        <q-list class="clickable-list">-->
 <!--          <q-item-->
 <!--              v-for="(tag, t) in items[extrasId].extra ? items[extrasId].extra.tags : []"-->
@@ -150,6 +150,7 @@ export default {
         if(this.listKey)
         {
           saveToLocalStorage(this.listKey, this.items);
+          this.$emit('updated');
         }
       }
     },

@@ -16,10 +16,16 @@ const state = {
             title: 'Work',
             active: true,
             operator: 'or',
-            handler: (task) =>
+            extra: {
+                tags: []
+            },
+            handler: (task, extra) =>
             {
                 return Boolean(
-                    // (task.tags || []).includes('process') ||
+                    (
+                        Array.isArray(extra) &&
+                        (task.tags || []).some((tag) => extra.includes(tag))
+                    ) ||
                     getStoriesFromTask(task).length
                 );
             }
@@ -59,12 +65,12 @@ const state = {
           active: false,
           operator: 'and',
           handler: (task) => Boolean(task.deleted)
-        },
-        {
-          title: 'Other',
-          active: true,
-          operator: 'or',
-          handler: () => false
+        // },
+        // {
+        //   title: 'Other',
+        //   active: true,
+        //   operator: 'or',
+        //   handler: () => false
         }
     ],
     categories: [],
@@ -167,23 +173,27 @@ const mutations = {
 
         if(storedCategories)
         {
-            storedCategories.forEach((cat) =>
+            state.defaultCategories.forEach((def) =>
             {
-                const def = state.defaultCategories.find((c) => c.title === cat.title);
+                const ctg = storedCategories.find((c) => c.title === def.title);
 
-                if(def)
+                if(ctg)
                 {
                     categories.push({
                         ...def, // add the default props
-                        ...cat, // overwrite with the saved props
+                        ...ctg, // overwrite with the saved props
                         handler: def.handler // fn must be local
                     });
+                }
+                else
+                {
+                    categories.push(def);
                 }
             });
         }
         else
         {
-            categories.push(...this.defaultCategories);
+            categories.push(...state.defaultCategories);
         }
 
         Vue.set(state, 'categories', categories);
@@ -353,11 +363,6 @@ const getters = {
 
         Object.values(state.tasks).forEach((task) =>
         {
-            if(task.deleted)
-            {
-                return;
-            }
-
             let isInAnyBuckets = false;
 
             buckets.forEach((bucket) =>

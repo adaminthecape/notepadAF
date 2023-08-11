@@ -114,6 +114,7 @@
               v-model="categoriesMutable"
               title="Categories"
               listKey="taskCategories"
+              @updated="filterTasks"
           />
         </div>
         <div class="row items-center q-mb-xs">
@@ -372,16 +373,6 @@ export default {
     this.filterTasks();
   },
   methods: {
-    updateCategories(val)
-    {
-      saveToLocalStorage(localStorageNames.taskCategories, val);
-      this.$store.dispatch('notes/setCategoriesFromLocalStorage');
-
-      setTimeout(() =>
-      {
-        this.filterTasks();
-      }, 100);
-    },
     /****** Loading/fetching tasks */
     async loadTasks()
     {
