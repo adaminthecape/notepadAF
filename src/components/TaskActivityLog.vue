@@ -20,14 +20,19 @@
             <template #label>
               <div class="row items-center justify-start">
                 <q-chip square dense class="text-bold" style="min-width: 12em">{{ log.startDate }}</q-chip>
-                <div class="column">
-                  <q-chip
-                      class="text-bold"
-                      style="min-width: 4em"
-                      square
-                      dense
-                  >{{ !log.end ? '...' : log.duration }}</q-chip>
-                </div>
+                <TaskActiveButton
+                    v-if="!log.end"
+                    :task-id="taskId"
+                    mode="save"
+                    @click.stop.prevent="{}"
+                />
+                <q-chip
+                    v-else
+                    class="text-bold"
+                    style="min-width: 4em"
+                    square
+                    dense
+                >{{ !log.end ? '...' : log.duration }}</q-chip>
                 <q-chip
                     style="flex-grow: 1"
                     square
@@ -42,6 +47,7 @@
               <div class="row items-center">
                 <q-item>
                   <q-btn
+                      v-if="log.end"
                       color="negative"
                       icon="delete"
                       size="md"
@@ -93,7 +99,9 @@
                     />
                   </q-btn-group>
                 </q-item>
-                <q-item>
+                <q-item
+                    v-if="log.end"
+                >
                   <q-btn-group>
                     <q-btn
                         color="primary"
@@ -164,10 +172,10 @@
 
 <script>
 import { filterTaskList, getAllTasksFromStore, secondsToHumanReadable } from "src/utils";
+import TaskActiveButton from "components/TaskActiveButton";
 
 export default {
-  name: 'ActivityLog',
-  props: {
+  name: 'ActivityLog', components: { TaskActiveButton }, props: {
     taskId: {
       type: String,
       default: undefined

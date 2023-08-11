@@ -1,14 +1,10 @@
 <template>
   <SimpleLayout
       v-if="task"
-      :header="false"
       :key="`layout-${logRenderKey}`"
       :page-classes="['q-pa-sm']"
   >
     <template #header-title>
-      Current task
-    </template>
-    <template #page-header>
       <!-- Task controls -->
       <div class="row">
         <q-space />
@@ -29,6 +25,8 @@
         />
         <q-space />
       </div>
+    </template>
+    <template #page-header>
       <!-- Task message -->
       <DisplayTask
           :task-id="taskIdToUse"
