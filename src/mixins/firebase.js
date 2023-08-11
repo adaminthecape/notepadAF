@@ -326,10 +326,6 @@ export async function updateTaskDataByPath(
         path.split('.').join('/')
     }`;
 
-    console.warn('update_TaskDataByPath:', fullPath, data);
-
-    console.log(data, removeUndefined(data));
-
     await set(ref(db, fullPath), removeUndefined(data));
 }
 

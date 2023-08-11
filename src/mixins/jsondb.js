@@ -129,8 +129,6 @@ export function fsWriteSync(path, data)
                 pathParts.slice(0, pathParts.length - 1).join('\\')
             }\\`;
 
-            console.log({ dirPath });
-
             fs.mkdirSync(dirPath, { recursive: true } );
         }
         catch(e)

@@ -69,7 +69,6 @@ export default {
   methods: {
     save()
     {
-      console.log('save:', this.task);
       if(!this.task)
       {
         return;
@@ -84,7 +83,6 @@ export default {
 
       const data = task.next.concat({ due: 0, note: this.description || '' });
 
-      console.log('save:', data);
       this.$store.dispatch(
           'notes/cloudUpdateSingleProperty',
           { taskId: this.taskId, prop: 'next', data

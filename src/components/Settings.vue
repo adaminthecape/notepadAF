@@ -291,7 +291,7 @@
           </q-item-section>
         </q-item>
       </q-card>
-      <q-card v-if="appTabs">
+      <q-card v-if="appTabs" class="q-mb-sm">
         <q-item>
           <q-item-section>
             <h5>Tabs</h5>
@@ -330,7 +330,7 @@
           </q-item-section>
         </q-item>
       </q-card>
-      <q-card class="q-mb-sm">
+      <q-card>
         <q-item>
           <q-item-section>
             <h5>Set item</h5>

@@ -26,7 +26,7 @@
                       style="min-width: 4em"
                       square
                       dense
-                  >{{ log.duration }}</q-chip>
+                  >{{ !log.end ? '...' : log.duration }}</q-chip>
                 </div>
                 <q-chip
                     style="flex-grow: 1"
@@ -299,7 +299,6 @@ export default {
         return;
       }
 
-      console.log('incrementBy:', { log, amount, startOrEnd });
       const index = this.taskActivity.findIndex((l) => (
           (l.start === log.start) && (l.end === log.end)
       ));

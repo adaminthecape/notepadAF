@@ -293,8 +293,6 @@ export default {
         }
       });
 
-      console.log('all:', allTasks);
-
       return res;
     },
     // filteredTasksList()
@@ -365,7 +363,6 @@ export default {
         'taskRefreshQueue',
         (queue) => queue.forEach((id) =>
         {
-          console.log('refresh:', id);
           this.refreshTask({ id });
         })
     );

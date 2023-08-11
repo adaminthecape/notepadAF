@@ -103,7 +103,6 @@
       lastActivity: {
         handler(newVal, oldVal)
         {
-          console.log('watcher', newVal, oldVal);
           this.logNote = newVal.note || undefined;
         },
         deep: true

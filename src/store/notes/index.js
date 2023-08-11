@@ -186,8 +186,6 @@ const mutations = {
             categories.push(...this.defaultCategories);
         }
 
-        console.log('SET:', { categories });
-
         Vue.set(state, 'categories', categories);
     }
 };
@@ -352,7 +350,6 @@ const getters = {
     getTasksByBuckets: (state) => (buckets) =>
     {
         const all = {};
-        console.log({ buckets });
 
         Object.values(state.tasks).forEach((task) =>
         {
@@ -365,26 +362,22 @@ const getters = {
 
             buckets.forEach((bucket) =>
             {
-                if(!all[bucket.title]) all[bucket.title] = [];
+                if(!all[bucket.title]) all[bucket.title] = {};
 
-                const isInThisBucket = checkTaskInBucket(bucket, task);
+                const isInThisBucket = bucket.handler(task, bucket.extra);
 
                 if(isInThisBucket)
                 {
-                    console.log(task.id, bucket.title);
-
                     isInAnyBuckets = true;
-                    all[bucket.title].push(task);
+                    all[bucket.title][task.id] = task;
                 }
-
-                // console.log(bucket.title, ':', reduceIntoAssociativeArray(all[bucket.title], 'id'));
             });
 
             if(!isInAnyBuckets)
             {
-                if(!all.other) all.other = [];
+                if(!all.other) all.other = {};
 
-                all.other.push(task);
+                all.other[task.id] = task;
             }
         });
 
