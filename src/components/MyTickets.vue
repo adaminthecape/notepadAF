@@ -279,9 +279,7 @@ export default {
   },
   data()
   {
-    const savedQueryParams = getFromLocalStorage(localStorageNames.ticketQueryParams) ?
-        JSON.parse(getFromLocalStorage(localStorageNames.ticketQueryParams)) :
-        null;
+    const savedQueryParams = getFromLocalStorage(localStorageNames.ticketQueryParams) || undefined;
 
     return {
       isLoadingActivity: false,

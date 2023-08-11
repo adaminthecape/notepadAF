@@ -180,7 +180,10 @@
           </q-item-section>
         </q-item>
       </q-card>
-      <q-card class="q-mb-sm">
+      <q-card
+          v-if="$q.platform.is.desktop"
+          class="q-mb-sm"
+      >
         <q-item>
           <q-item-section>
             <h5>Backups</h5>
@@ -203,62 +206,88 @@
           </q-item-section>
         </q-item>
       </q-card>
+      <!--<q-card class="q-mb-sm">-->
+      <!--  <q-item>-->
+      <!--    <q-item-section>-->
+      <!--      <h5>User</h5>-->
+      <!--    </q-item-section>-->
+      <!--    <q-item-section>-->
+      <!--      <q-btn-->
+      <!--        label="Clear user"-->
+      <!--        @click="isConfirmingUserDeletion = true"-->
+      <!--      />-->
+      <!--      <q-dialog v-model="isConfirmingUserDeletion">-->
+      <!--        <q-card>-->
+      <!--          <q-item>-->
+      <!--            <q-item-section>-->
+      <!--              Really delete user? You will not be able to use the app until you log in again!-->
+      <!--            </q-item-section>-->
+      <!--          </q-item>-->
+      <!--          <q-item>-->
+      <!--            <q-item-section>-->
+      <!--              <q-space />-->
+      <!--              <q-btn-->
+      <!--                  color="negative"-->
+      <!--                  @click="forgetUser"-->
+      <!--              >Delete</q-btn>-->
+      <!--            </q-item-section>-->
+      <!--          </q-item>-->
+      <!--        </q-card>-->
+      <!--      </q-dialog>-->
+      <!--    </q-item-section>-->
+      <!--  </q-item>-->
+      <!--</q-card>-->
       <q-card class="q-mb-sm">
         <q-item>
           <q-item-section>
-            <h5>User</h5>
+            <h5>Theme</h5>
           </q-item-section>
           <q-item-section>
-            <q-btn
-              label="Clear user"
-              @click="forgetUser"
-            />
+            <q-btn-group class="row full-width">
+              <q-btn
+                  :disable="!$q.dark.isActive"
+                  label="Light mode"
+                  style="flex-grow: 1"
+                  @click="toggleDarkMode"
+              />
+              <q-btn
+                  :disable="$q.dark.isActive"
+                  label="Dark mode"
+                  style="flex-grow: 1"
+                  :dark="true"
+                  @click="toggleDarkMode"
+              />
+            </q-btn-group>
           </q-item-section>
         </q-item>
       </q-card>
       <q-card class="q-mb-sm">
         <q-item>
           <q-item-section>
-            <h5>Set item</h5>
+            <h5>Zoom</h5>
           </q-item-section>
           <q-item-section>
-            <q-input
-              v-model="customSetting.label"
-              class="q-mb-xs"
-              type="text"
-              filled
-              dense
-            />
-            <q-input
-              v-model="customSetting.value"
-              class="q-mb-xs"
-              type="text"
-              filled
-              dense
-            />
-            <q-btn
-              icon="save"
-              @click="setCustomValue"
-            />
-          </q-item-section>
-        </q-item>
-      </q-card>
-      <q-card class="q-mb-sm">
-        <q-item>
-          <q-item-section>
-            <h5>Dark mode</h5>
-          </q-item-section>
-          <q-item-section>
-            <q-btn
-                v-if="$q.dark.isActive"
-                label="Set mode to light"
-                @click="toggleDarkMode"
-            />
-            <q-btn
-                v-if="!$q.dark.isActive"
-                label="Set mode to dark"
-                @click="toggleDarkMode"
-            />
+            <q-btn-group>
+              <q-btn
+                  color="primary"
+                  icon="remove"
+                  size="md"
+                  class="full-width"
+                  dense
+                  flat
+                  @click.stop.prevent="addZoom(-10)"
+              />
+              <q-btn :label="currentZoomLevel" no-caps />
+              <q-btn
+                  color="primary"
+                  icon="add"
+                  size="md"
+                  class="full-width"
+                  dense
+                  flat
+                  @click.stop.prevent="addZoom(10)"
+              />
+            </q-btn-group>
           </q-item-section>
         </q-item>
       </q-card>
@@ -301,6 +330,33 @@
           </q-item-section>
         </q-item>
       </q-card>
+      <q-card class="q-mb-sm">
+        <q-item>
+          <q-item-section>
+            <h5>Set item</h5>
+          </q-item-section>
+          <q-item-section>
+            <q-input
+                v-model="customSetting.label"
+                class="q-mb-xs"
+                type="text"
+                filled
+                dense
+            />
+            <q-input
+                v-model="customSetting.value"
+                class="q-mb-xs"
+                type="text"
+                filled
+                dense
+            />
+            <q-btn
+                icon="save"
+                @click="setCustomValue"
+            />
+          </q-item-section>
+        </q-item>
+      </q-card>
     </template>
   </SimpleLayout>
 </template>
@@ -338,10 +394,21 @@ export default {
       customSetting: {
         label: '',
         value: ''
-      }
+      },
+      currentZoomLevel: document.getElementsByTagName('body')[0].style.zoom || '100%',
+      isConfirmingUserDeletion: false
     };
   },
   methods: {
+    addZoom(amount)
+    {
+      const current = parseInt(this.currentZoomLevel.split('%')[0], 10);
+      const zoomLevel = `${current + amount}%`;
+
+      document.getElementsByTagName('body')[0].style.zoom = zoomLevel;
+      this.currentZoomLevel = zoomLevel;
+      saveToLocalStorage(localStorageNames.zoomLevel, zoomLevel);
+    },
     toggleDarkMode()
     {
       if(this.$q.dark.isActive)
