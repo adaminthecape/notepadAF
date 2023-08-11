@@ -279,7 +279,7 @@ export default {
   },
   data()
   {
-    const savedQueryParams = getFromLocalStorage(localStorageNames.ticketQueryParams) || undefined;
+    const savedQueryParams = getFromLocalStorage(localStorageNames.ticketQueryParams) || {};
 
     return {
       isLoadingActivity: false,

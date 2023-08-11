@@ -36,7 +36,7 @@
         :flat="flat"
     />
     <TaskEditButton
-        v-if="showAllOptions || showEditButton || !$q.platform.is.desktop"
+        v-if="showAllOptions || showEditButton"
         :editing="isEditing"
         :size="size"
         :dense="dense"
