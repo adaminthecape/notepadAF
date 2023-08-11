@@ -245,6 +245,39 @@ export function filterTasksByCategory(tasks, categories)
     return res;
 }
 
+export function stringSort(arr, prop, inverse)
+{
+    arr.sort((a, b) =>
+    {
+        if (a[prop] < b[prop]) {
+            return inverse ? 1 : -1;
+        }
+        if (a[prop] > b[prop]) {
+            return inverse ? -1 : 1;
+        }
+        return 0;
+    });
+}
+
+export function intSort(arr, prop, inverse)
+{
+    arr.sort((a, b) =>
+    {
+        return inverse ? (a[prop] - b[prop]) : (b[prop] - a[prop]);
+    });
+}
+
+export function dateSort(arr, prop, inverse)
+{
+    arr.sort((a, b) =>
+    {
+        const aComp = new Date(a[prop]).getTime();
+        const bComp = new Date(b[prop]).getTime();
+
+        return inverse ? (aComp - bComp) : (bComp - aComp);
+    });
+}
+
 export function sortTaskList(tasks, sortType, inverseSort)
 {
     const sortByCreated = (a, b) =>

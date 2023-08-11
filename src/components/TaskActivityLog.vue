@@ -175,7 +175,9 @@ import { filterTaskList, getAllTasksFromStore, secondsToHumanReadable } from "sr
 import TaskActiveButton from "components/TaskActiveButton";
 
 export default {
-  name: 'ActivityLog', components: { TaskActiveButton }, props: {
+  name: 'ActivityLog',
+  components: { TaskActiveButton },
+  props: {
     taskId: {
       type: String,
       default: undefined

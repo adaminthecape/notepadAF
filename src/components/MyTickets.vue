@@ -11,52 +11,49 @@
       Tickets
     </template>
     <template #header-right>
-      <q-btn-dropdown
-          label="Options"
-          class="q-mr-sm"
-      >
-      </q-btn-dropdown>
-      <q-btn-dropdown
-          v-model="isGitStatusDropdownOpen"
-          label="Git status"
-          :loading="isLoadingGitStatus"
-          class="q-mr-sm"
-          @click="isGitStatusDropdownOpen ? undefined : getGitStatusForAllModules()"
-      >
-        <q-list>
-          <q-item
-              clickable
-              @click="checkoutBoth('master')"
-          >
-            <q-item-section>
-              Checkout to master
-            </q-item-section>
-          </q-item>
-          <div
-              v-for="module in modulesToFetch"
-              :key="`status-${module}-${gitRenderKey}`"
-          >
-            <q-item
-                v-if="gitStatus[module]"
-                clickable
-            >
-              <q-item-section side>
-                {{ module }}
-              </q-item-section>
-              <q-item-section caption>
-                <div class="row items-center">
-                  {{ gitStatus[module].branch }}
-                  <q-icon
-                      v-if="gitStatus[module].safeToChange"
-                      color="positive"
-                      icon="check_circle"
-                  />
-                </div>
-              </q-item-section>
-            </q-item>
-          </div>
-        </q-list>
-      </q-btn-dropdown>
+      <!-- git dropdown: --><div>
+        <!--      <q-btn-dropdown-->
+        <!--          v-model="isGitStatusDropdownOpen"-->
+        <!--          label="Git status"-->
+        <!--          :loading="isLoadingGitStatus"-->
+        <!--          class="q-mr-sm"-->
+        <!--          @click="isGitStatusDropdownOpen ? undefined : getGitStatusForAllModules()"-->
+        <!--      >-->
+        <!--        <q-list>-->
+        <!--          <q-item-->
+        <!--              clickable-->
+        <!--              @click="checkoutBoth('master')"-->
+        <!--          >-->
+        <!--            <q-item-section>-->
+        <!--              Checkout to master-->
+        <!--            </q-item-section>-->
+        <!--          </q-item>-->
+        <!--          <div-->
+        <!--              v-for="module in modulesToFetch"-->
+        <!--              :key="`status-${module}-${gitRenderKey}`"-->
+        <!--          >-->
+        <!--            <q-item-->
+        <!--                v-if="gitStatus[module]"-->
+        <!--                clickable-->
+        <!--            >-->
+        <!--              <q-item-section side>-->
+        <!--                {{ module }}-->
+        <!--              </q-item-section>-->
+        <!--              <q-item-section caption>-->
+        <!--                <div class="row items-center">-->
+        <!--                  {{ gitStatus[module].branch }}-->
+        <!--                  <q-icon-->
+        <!--                      v-if="gitStatus[module].safeToChange"-->
+        <!--                      color="positive"-->
+        <!--                      icon="check_circle"-->
+        <!--                  />-->
+        <!--                </div>-->
+        <!--              </q-item-section>-->
+        <!--            </q-item>-->
+        <!--          </div>-->
+        <!--        </q-list>-->
+        <!--      </q-btn-dropdown>-->
+      </div>
       <q-btn
           icon="refresh"
           dense
@@ -197,21 +194,12 @@
                   </div>
                   <q-space />
                   <div>
-                    <q-select
-                        v-model="sortType"
-                        :options="sortTypes"
-                        label="Sort by:"
-                        :loading="sortingResults"
-                        clearable
-                        emitValue
-                        outlined
-                        dense
-                        dark
-                    >
-                      <template #default>
-                        Sort...
-                      </template>
-                    </q-select>
+                    <TaskSortDropdown
+                        :sortType="sortType"
+                        :sortTypes="sortTypes"
+                        :inverseSort="inverseSort"
+                        @setSortType="setSortType"
+                    />
                   </div>
                 </div>
               </q-badge>
@@ -240,7 +228,7 @@
           </div>
           <div
               v-for="story in storyResults"
-              :key="story.id"
+              :key="`${story.id}-${listRenderKey}`"
               class="bordered q-mb-xs"
           >
             <q-item clickable class="q-pa-sm">
@@ -261,12 +249,14 @@ import { getPivotalEndpoint } from "../mixins/Pivotal";
 import GitMixin from '../mixins/git';
 import { pivotalData } from '../mixins/constants';
 import SimpleLayout from './SimpleLayout';
-import StoryCard from "components/StoryCard";
-import { getFromLocalStorage, localStorageNames } from "src/utils";
+import StoryCard from "src/components/StoryCard";
+import { dateSort, getFromLocalStorage, intSort, localStorageNames, stringSort } from "src/utils.js";
+import TaskSortDropdown from "components/TaskSortDropdown";
 
 export default {
   name: 'MyTickets',
   components: {
+    TaskSortDropdown,
     StoryCard,
     SimpleLayout
   },
@@ -337,78 +327,79 @@ export default {
       queryParamToAdd: null,
       resultTotals: {},
       resultsRenderIndex: 0,
-      sortType: null,
-      sortTypes: ['notes', 'epic'],
-      sortingResults: false
+      sortType: undefined,
+      inverseSort: false,
+      sortTypes: ['created', 'name', 'updated', 'points'],
+      sortingResults: false,
+      listRenderKey: 0,
+      storyResults: []
     };
   },
   computed: {
-    resultTotalsKeys()
-    {
-      return Object.keys(this.resultTotals);
-    },
     queryParamNames()
     {
       return Object.keys(this.queryParams);
     },
-    storyResults()
-    {
-      return this.results || [];
-    },
-    actionsToShow()
-    {
-      return (this.results || []).reduce((agg, action) =>
-      {
-        const { guid } = action;
-
-        if(!agg[guid])
-        {
-          agg[guid] = {};
-        }
-
-        const [date, time] = new Date(action.occurred_at).toISOString().split('T');
-
-        agg[guid].stories = [];
-        agg[guid].guid = action.guid;
-        agg[guid].message = action.message;
-        agg[guid].date = date;
-        agg[guid].time = time.split('.')[0];
-        agg[guid].type = action.kind;
-        agg[guid].projectId = action.project.id;
-
-        if(action.changes && action.changes.length)
-        {
-          agg[guid].changes = action.changes.map((change) => (
-              `${change.change_type} ${change.kind} to "${change.name}"`
-          ));
-        }
-
-        if(action.primary_resources)
-        {
-          agg[guid].storyIds = [];
-          agg[guid].resources = [];
-          agg[guid].resourceIds = [];
-
-          action.primary_resources.forEach((resource) =>
-          {
-            agg[guid].resourceIds.push(resource.id);
-            agg[guid].resources.push(resource);
-          });
-        }
-
-        return agg;
-      }, {});
-    },
-    actionsForTemplate()
-    {
-      return Object.values(this.actionsToShow || {});
-    }
+    // actionsToShow()
+    // {
+    //   return (this.results || []).reduce((agg, action) =>
+    //   {
+    //     const { guid } = action;
+    //
+    //     if(!agg[guid])
+    //     {
+    //       agg[guid] = {};
+    //     }
+    //
+    //     const [date, time] = new Date(action.occurred_at).toISOString().split('T');
+    //
+    //     agg[guid].stories = [];
+    //     agg[guid].guid = action.guid;
+    //     agg[guid].message = action.message;
+    //     agg[guid].date = date;
+    //     agg[guid].time = time.split('.')[0];
+    //     agg[guid].type = action.kind;
+    //     agg[guid].projectId = action.project.id;
+    //
+    //     if(action.changes && action.changes.length)
+    //     {
+    //       agg[guid].changes = action.changes.map((change) => (
+    //           `${change.change_type} ${change.kind} to "${change.name}"`
+    //       ));
+    //     }
+    //
+    //     if(action.primary_resources)
+    //     {
+    //       agg[guid].storyIds = [];
+    //       agg[guid].resources = [];
+    //       agg[guid].resourceIds = [];
+    //
+    //       action.primary_resources.forEach((resource) =>
+    //       {
+    //         agg[guid].resourceIds.push(resource.id);
+    //         agg[guid].resources.push(resource);
+    //       });
+    //     }
+    //
+    //     return agg;
+    //   }, {});
+    // },
+    // actionsForTemplate()
+    // {
+    //   return Object.values(this.actionsToShow || {});
+    // }
   },
   async mounted()
   {
     if(!this.cachedTickets)
     {
       await this.getTickets();
+    }
+    else
+    {
+      this.storyResults = this.cachedTickets;
+      this.resultTotals.hits = this.cachedTickets.length;
+      this.resultTotals.points = this.cachedTickets.reduce((acc, t) => (acc + t.estimate), 0);
     }
   },
   watch: {
@@ -418,38 +409,72 @@ export default {
     }
   },
   methods: {
-    sortResults()
+    setSortType(type)
     {
-      if(!this.results || !this.results.length)
+      if(type === this.sortType) // invert it
       {
-        return;
+        this.inverseSort = !this.inverseSort;
+      }
+      else
+      {
+        this.sortType = type;
       }
 
-      this.sortingResults = true;
+      this.sortResults(this.results);
+    },
+    sortResults(results)
+    {
+      if(!results || !results.length)
+      {
+        return [];
+      }
 
-      let results = [...this.results];
+      // this.sortingResults = true;
+      // let results = [...this.results];
+      // this.$set(this, 'results', results);
+      // this.sortingResults = false;
 
-      this.$set(this, 'results', results);
+      this.listRenderKey += 1;
 
-      this.sortingResults = false;
+      if(this.sortType === 'created')
+      {
+        dateSort(this.results, 'created_at', this.inverseSort);
+      }
+
+      if(this.sortType === 'name')
+      {
+        stringSort(this.results, 'name', this.inverseSort);
+      }
+
+      if(this.sortType === 'updated')
+      {
+        dateSort(this.results, 'updated_at', this.inverseSort);
+      }
+
+      if(this.sortType === 'points')
+      {
+        intSort(this.results, 'estimate', this.inverseSort);
+      }
+
+      this.$set(this, 'storyResults', this.results);
     },
     saveParams(params)
     {
       localStorage.setItem(localStorageNames.ticketQueryParams, JSON.stringify(params));
     },
-    addQueryParam()
-    {
-      const param = this.queryParamToAdd;
-
-      if(!param || this.queryParamNames.includes(param))
-      {
-        return;
-      }
-
-      this.queryParams[param] = null;
-
-      this.queryParamToAdd = null;
-    },
+    // addQueryParam()
+    // {
+    //   const param = this.queryParamToAdd;
+    //
+    //   if(!param || this.queryParamNames.includes(param))
+    //   {
+    //     return;
+    //   }
+    //
+    //   this.queryParams[param] = null;
+    //
+    //   this.queryParamToAdd = null;
+    // },
     padLeft(str, padChar, totalLength)
     {
       str = str.toString();

@@ -62,16 +62,14 @@
         type: String,
         default: undefined
       },
+      sortTypes: {
+        type: Array,
+        default: () => (['due', 'created', 'done'])
+      },
       inverseSort: {
         type: Boolean,
         default: false
       }
-    },
-    data()
-    {
-      return {
-        sortTypes: ['due', 'created', 'done']
-      };
     },
     methods: {
       setSort(type)
