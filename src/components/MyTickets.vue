@@ -279,9 +279,7 @@ export default {
   },
   data()
   {
-    const savedQueryParams = getFromLocalStorage(localStorageNames.ticketQueryParams) ?
-        JSON.parse(getFromLocalStorage(localStorageNames.ticketQueryParams)) :
-        null;
+    const savedQueryParams = getFromLocalStorage(localStorageNames.ticketQueryParams) || {};
 
     return {
       isLoadingActivity: false,
@@ -469,6 +467,8 @@ export default {
 
       const { path: uri, queryParams: queryParamInfo } = pivotalData.endpoints.search.all;
       let queryParams;
+
+      console.log('getTickets:', queryParamInfo, this.queryParams);
 
       if(queryParamInfo)
       {

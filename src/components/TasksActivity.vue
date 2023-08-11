@@ -121,7 +121,7 @@
             <q-btn
                 v-for="bool in toggleableBooleans"
                 :key="`bool-toggle-${bool.value}`"
-                :label="bool.label"
+                :label="$q.screen.lt.md ? undefined : bool.label"
                 :icon="filters[bool.value] ? bool.icon_true : bool.icon_false"
                 no-caps
                 dense
