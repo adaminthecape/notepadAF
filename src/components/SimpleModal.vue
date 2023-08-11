@@ -17,12 +17,14 @@
         <div class="modal-actions row">
           <q-space />
           <slot name="actions" v-bind="{ open, close, toggle }" />
-          <q-btn
-              label="Close"
-              color="negative"
-              flat
-              @click="close"
-          />
+          <slot name="close" v-bind="{ open, close, toggle }">
+            <q-btn
+                label="Close"
+                color="negative"
+                flat
+                @click="close"
+            />
+          </slot>
         </div>
       </q-card>
     </q-dialog>

@@ -192,7 +192,8 @@ import {
   applyFiltersToTask,
   getFromLocalStorage,
   saveToLocalStorage,
-  localStorageIntervalCheck, getStoriesFromTask, filterTasksByCategory, localStorageNames
+  localStorageIntervalCheck,
+  localStorageNames
 } from "src/utils";
 
 export default {

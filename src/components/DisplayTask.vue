@@ -128,28 +128,42 @@
         </div>
         <div class="row items-center" style="margin: 0 -12px;">
           <!-- ADD TAGS: -->
-          <q-btn
-              icon="add"
-              size="sm"
-              dense
-              round
-              flat
-              @click="addingTag = !addingTag"
-          />
-          <q-chip
-              v-show="addingTag"
-              style="overflow-y: hidden"
-              square
-              dense
-              dark
+          <AddTag
+              @input="addTag"
           >
-            <TaskTagSelector
-                dark
-                new-value-mode
-                @cancel="addingTag = false"
-                @input="addTag"
-            />
-          </q-chip>
+            <template #activator="{ open }">
+              <q-btn
+                  icon="add"
+                  size="sm"
+                  dense
+                  round
+                  flat
+                  @click="open"
+              />
+            </template>
+          </AddTag>
+          <!--<q-btn-->
+          <!--    icon="add"-->
+          <!--    size="sm"-->
+          <!--    dense-->
+          <!--    round-->
+          <!--    flat-->
+          <!--    @click="addingTag = !addingTag"-->
+          <!--/>-->
+          <!--<q-chip-->
+          <!--    v-show="addingTag"-->
+          <!--    style="overflow-y: hidden"-->
+          <!--    square-->
+          <!--    dense-->
+          <!--    dark-->
+          <!--&gt;-->
+          <!--  <TaskTagSelector-->
+          <!--      dark-->
+          <!--      new-value-mode-->
+          <!--      @cancel="addingTag = false"-->
+          <!--      @input="addTag"-->
+          <!--  />-->
+          <!--</q-chip>-->
           <!-- VIEW TAGS: -->
           <q-chip
               v-for="(tag, tagIndex) in task.tags"
@@ -182,13 +196,15 @@
 <script>
 import { timeSince } from "../utils";
 import SingleTaskMixin from 'src/mixins/SingleTaskMixin.js';
-import TaskTagSelector from 'src/components/TaskTagSelector.vue';
+// import TaskTagSelector from 'src/components/TaskTagSelector.vue';
 import TaskStoryDropdown from 'src/components/TaskStoryDropdown.vue';
 import TaskOptions from 'src/components/TaskOptions.vue';
+import AddTag from "components/AddTag";
 
 export default {
   components: {
-    TaskTagSelector,
+    AddTag,
+    // TaskTagSelector,
     TaskStoryDropdown,
     TaskOptions
   },
