@@ -376,6 +376,11 @@ export default {
     {
       saveToLocalStorage(localStorageNames.taskCategories, val);
       this.$store.dispatch('notes/setCategoriesFromLocalStorage');
+
+      setTimeout(() =>
+      {
+        this.filterTasks();
+      }, 100);
     },
     /****** Loading/fetching tasks */
     async loadTasks()
