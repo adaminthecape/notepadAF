@@ -45,17 +45,47 @@
 </template>
 
 <script>
-import QPropsMixin from '../mixins/QPropsMixin.js';
-import SingleTaskMixin from '../mixins/SingleTaskMixin.js';
 import { cudTaskViaStore } from "src/utils";
+import { getTask } from 'src/storeHelpers.js';
 
 export default {
-  mixins: [QPropsMixin, SingleTaskMixin],
+  props: {
+    size: {
+        type: String,
+        default: undefined
+    },
+    icon: {
+        type: String,
+        default: undefined
+    },
+    color: {
+        type: String,
+        default: undefined
+    },
+    flat: {
+        type: Boolean,
+        default: false
+    },
+    dense: {
+        type: Boolean,
+        default: false
+    },
+    taskId: {
+      type: String,
+      default: undefined
+    }
+  },
   data()
   {
     return {
       isConfirmingDeletion: false
     };
+  },
+  computed: {
+    task()
+    {
+      return getTask(this.$store, this.taskId);
+    }
   },
   methods: {
     reallyRemoveTask()

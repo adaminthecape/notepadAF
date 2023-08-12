@@ -247,7 +247,7 @@
 <script>
 import { getPivotalEndpoint } from "../mixins/Pivotal";
 import GitMixin from '../mixins/git';
-import { pivotalData } from '../mixins/constants';
+import { pivotalData } from 'src/constants';
 import SimpleLayout from './SimpleLayout';
 import StoryCard from "src/components/StoryCard";
 import { dateSort, getFromLocalStorage, intSort, localStorageNames, stringSort } from "src/utils.js";

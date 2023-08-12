@@ -36,11 +36,29 @@
 </template>
 
 <script>
-import QPropsMixin from '../mixins/QPropsMixin.js';
-
+import { getTask } from 'src/storeHelpers';
 export default {
-  mixins: [QPropsMixin],
   props: {
+    size: {
+        type: String,
+        default: undefined
+    },
+    icon: {
+        type: String,
+        default: undefined
+    },
+    color: {
+        type: String,
+        default: undefined
+    },
+    flat: {
+        type: Boolean,
+        default: false
+    },
+    dense: {
+        type: Boolean,
+        default: false
+    },
     taskId: {
       type: String,
       default: undefined
@@ -56,7 +74,7 @@ export default {
   computed: {
     task()
     {
-      return this.$store.getters['notes/getTask'](this.taskId);
+      return getTask(this.$store, this.taskId);
     }
   },
   mounted()

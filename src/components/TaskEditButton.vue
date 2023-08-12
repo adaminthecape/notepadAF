@@ -17,11 +17,28 @@
 </template>
 
 <script>
-import QPropsMixin from '../mixins/QPropsMixin.js';
-
 export default {
-  mixins: [QPropsMixin],
   props: {
+    size: {
+        type: String,
+        default: undefined
+    },
+    icon: {
+        type: String,
+        default: undefined
+    },
+    color: {
+        type: String,
+        default: undefined
+    },
+    flat: {
+        type: Boolean,
+        default: false
+    },
+    dense: {
+        type: Boolean,
+        default: false
+    },
     editing: {
       type: Boolean,
       default: false

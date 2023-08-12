@@ -195,11 +195,11 @@
 
 <script>
 import { timeSince } from "../utils";
-import SingleTaskMixin from 'src/mixins/SingleTaskMixin.js';
 // import TaskTagSelector from 'src/components/TaskTagSelector.vue';
 import TaskStoryDropdown from 'src/components/TaskStoryDropdown.vue';
 import TaskOptions from 'src/components/TaskOptions.vue';
 import AddTag from "components/AddTag";
+import { getTask } from 'src/storeHelpers';
 
 export default {
   components: {
@@ -217,6 +217,10 @@ export default {
     clickable: {
       type: Boolean,
       default: true
+    },
+    taskId: {
+      type: String,
+      default: undefined
     }
   },
   data()
@@ -228,6 +232,12 @@ export default {
       activeAlertsRenderKey: 10000,
       isEditing: false
     };
+  },
+  computed: {
+    task()
+    {
+      return getTask(this.$store, this.taskId);
+    }
   },
   // mounted()
   // {

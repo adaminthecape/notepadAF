@@ -43,12 +43,30 @@
 
 <script>
   import { timeSince } from "../utils";
-  import QPropsMixin from '../mixins/QPropsMixin.js';
-  import SingleTaskMixin from "src/mixins/SingleTaskMixin";
+import { getTask } from 'src/storeHelpers';
 
   export default {
-    mixins: [QPropsMixin, SingleTaskMixin],
     props: {
+      size: {
+          type: String,
+          default: undefined
+      },
+      icon: {
+          type: String,
+          default: undefined
+      },
+      color: {
+          type: String,
+          default: undefined
+      },
+      flat: {
+          type: Boolean,
+          default: false
+      },
+      dense: {
+          type: Boolean,
+          default: false
+      },
       mode: {
         type: String,
         default: 'emit'
@@ -71,6 +89,10 @@
       };
     },
     computed: {
+      task()
+      {
+        return getTask(this.$store, this.taskId);
+      },
       active()
       {
         return this.$store.getters['notes/getTaskProperty'](this.taskId, 'active');

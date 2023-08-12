@@ -26,14 +26,37 @@
 </template>
 
 <script>
-import QPropsMixin from '../mixins/QPropsMixin.js';
-import SingleTaskMixin from "src/mixins/SingleTaskMixin";
 import CreateAlert from "components/CreateAlert";
 import { cudTaskViaStore, queueTaskRefresh } from "src/utils";
 
 export default {
   components: { CreateAlert },
-  mixins: [QPropsMixin, SingleTaskMixin],
+  props: {
+    size: {
+        type: String,
+        default: undefined
+    },
+    icon: {
+        type: String,
+        default: undefined
+    },
+    color: {
+        type: String,
+        default: undefined
+    },
+    flat: {
+        type: Boolean,
+        default: false
+    },
+    dense: {
+        type: Boolean,
+        default: false
+    },
+    taskId: {
+      type: String,
+      default: undefined
+    }
+  },
   data()
   {
     return {
