@@ -9,6 +9,7 @@
     "lint": "eslint --ext .js,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
+    "build-clean": "quasar build && robocopy /E dist/spa public",
     "build": "quasar build --publish",
     "postinstall": "install-app-deps",
     "start": "npm install && electron ./app",

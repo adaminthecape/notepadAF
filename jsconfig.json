@@ -33,6 +33,10 @@
   "exclude": [
     "dist",
     ".quasar",
-    "node_modules"
+    "node_modules",
+    "public",
+    ".firebase",
+    "_public",
+    "src-electron"
   ]
 }
