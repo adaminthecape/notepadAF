@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+// import { exec } from "child_process";
 import {getFromLocalStorage, localStorageNames} from "src/utils";
 
 export function checkoutBoth(branchId)
