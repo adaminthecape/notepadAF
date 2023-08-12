@@ -1,6 +1,7 @@
 import { store } from "quasar/wrappers";
 
 export function getTask(store, taskId) {
+  console.log('getTask:', taskId, store.getters["notes/getTask"](taskId));
   return store.getters["notes/getTask"](taskId);
 }
 
@@ -9,7 +10,7 @@ export function getTaskProperty(store, taskId, prop) {
 }
 
 export function getTasks(store) {
-  return store.getters["notes/getTasks"](taskId);
+  return store.getters["notes/getTasks"];
 }
 
 export function getTasksByBuckets(store, buckets) {
@@ -20,6 +21,7 @@ export function getTasksByBuckets(store, buckets) {
 
 export function getStory(store, storyId)
 {
+  console.log('getStory:', storyId, store, store.getters['pivotal/get'](storyId));
   return store.getters['pivotal/get'](storyId);
 }
 

@@ -7,7 +7,7 @@
     bordered
   >
     <q-item
-      :clickable="clickable"
+      clickable
       dense
       @click.ctrl="editTask"
       @pointerdown="waitingToEdit = true"
@@ -209,10 +209,6 @@ export default {
       type: Boolean,
       default: true,
     },
-    clickable: {
-      type: Boolean,
-      default: true,
-    },
     taskId: {
       type: String,
       default: undefined,
@@ -232,8 +228,11 @@ export default {
       return getTask(this.$store, this.taskId);
     },
     stories() {
-      return getStoriesFromTask(this.task);
+      return getStoriesFromTask(getTask(this.$store, this.taskId));
     },
+  },
+  mounted() {
+    console.log("DisplayTask:", this.taskId, this.task, getStoriesFromTask(getTask(this.$store, this.taskId)));
   },
   // mounted()
   // {
