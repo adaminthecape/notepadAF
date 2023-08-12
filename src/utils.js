@@ -184,8 +184,11 @@ export function getStoriesFromTask(task)
         return [];
     }
 
+    console.log('get stories from task:', `${(task.tags || []).join('|')}|${task.message}`, `${(task.tags || []).join('|')}|${task.message}`
+    .match(/1\d{8}/g));
+
     return ((
-        `${JSON.stringify(task.tags || [])} ${task.message}`
+        `${(task.tags || []).join('|')}|${task.message}`
             .match(/1\d{8}/g)
     ) || [])
         .reduce((agg, id) =>

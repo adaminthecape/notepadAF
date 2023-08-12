@@ -1,7 +1,6 @@
 import { store } from "quasar/wrappers";
 
 export function getTask(store, taskId) {
-  console.log('getTask:', taskId, store.getters["notes/getTask"](taskId));
   return store.getters["notes/getTask"](taskId);
 }
 

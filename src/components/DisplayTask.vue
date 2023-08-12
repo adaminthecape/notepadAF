@@ -82,8 +82,8 @@
         </div>
         <div class="row items-center">
           <!-- MESSAGE: -->
-          <div v-if="!isEditing" class="q-mt-sm task-message-display">
-            {{ task.message }}
+          <div v-if="!isEditing">
+            <span class="q-mt-sm task-message-display">{{ task.message }}</span>
           </div>
           <!-- MESSAGE INPUT: -->
           <q-input
@@ -232,7 +232,20 @@ export default {
       return getTask(this.$store, this.taskId);
     },
     stories() {
-      return getStoriesFromTask(getTask(this.$store, this.taskId));
+      console.log('get stories:', this.task, getStoriesFromTask(this.task));
+      return ((
+          `${(this.task.tags || []).join('|')}|${this.task.message}`
+              .match(/1\d{8}/g)
+      ) || [])
+          .reduce((agg, id) =>
+          {
+              if(!agg.some((existing) => existing.id === id))
+              {
+                  agg.push({ id });
+              }
+
+              return agg;
+          }, []);
     },
   },
   mounted() {
