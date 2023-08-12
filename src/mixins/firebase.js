@@ -8,7 +8,6 @@ import {
     // createUserWithEmailAndPassword,
     signInWithEmailAndPassword
 } from "firebase/auth";
-import {cProtocols} from "src/mixins/rtdb";
 
 const dbName = 'notes';
 let db,
@@ -63,60 +62,6 @@ export function getConfig()
 export function getAdmin()
 {
     return getFromLocalStorage(localStorageNames.firebase_service_account) || undefined;
-}
-
-export async function setAuthToken()
-{
-    const { google } = require('googleapis');
-
-    // Load the service account key JSON file.
-    const serviceAccount = getAdmin();
-
-    if(!serviceAccount)
-    {
-        console.warn('No credentials found!');
-
-        return undefined;
-    }
-
-    // Define the required scopes.
-    const scopes = [
-        "https://www.googleapis.com/auth/userinfo.email",
-        "https://www.googleapis.com/auth/firebase.database"
-    ];
-
-    // Authenticate a JWT client with the service account.
-    const jwtClient = new google.auth.JWT(
-        serviceAccount.client_email,
-        null,
-        serviceAccount.private_key,
-        scopes
-    );
-
-    // Use the JWT client to generate an access token.
-    await new Promise((resolve, reject) =>
-    {
-        jwtClient.authorize(function(error, tokens) {
-            if (error) {
-                console.log("Token request ERROR:", error);
-                resolve(undefined);
-            } else if (tokens.access_token === null) {
-                console.log("Provided service account does not have permission to generate access tokens");
-                resolve(undefined);
-            } else {
-                const localData = {
-                    token: tokens.access_token,
-                    expires: tokens.expiry_date
-                };
-                // saveToLocalStorage(localStorageNames.firebase_token, localData);
-                resolve(localData);
-
-                // See the "Using the access token" section below for information
-                // on how to use the access token to send authenticated requests to
-                // the Realtime Database REST API.
-            }
-        });
-    });
 }
 
 function validateCredentials(credentials)
@@ -214,61 +159,6 @@ export async function pipeStream(stream)
     }
 
     return set.join('');
-}
-
-export async function firebaseFetch(method, url, data)
-{
-    try
-    {
-        const token = await getToken();
-        const headers = new Headers();
-
-        headers.append('Content-Type', 'application/json');
-        headers.append('Authorization', `Bearer ${token}`);
-
-        // const uid = '64b98f0-b996-4bf3-9732-1f3270ac6c47';
-        // const user = getFromLocalStorage(localStorageNames.user_account, true);
-
-        // url = `${url}?auth=${token}`;
-        // const auth = {
-        //     uid,
-        //     token: {
-        //         sub: uid,
-        //         email: user.email,
-        //         email_verified: true,
-        //         firebase: {
-        //             sign_in_provider: 'password'
-        //         }
-        //     }
-        // };
-
-        const auth = getAuth();
-        const { currentUser } = auth;
-
-        console.info('getAuth:', auth, currentUser);
-
-        const opts = { method, headers };
-
-        if(data && (method !== cProtocols.get))
-        {
-            opts.body = JSON.stringify(data);
-        }
-
-        console.info('firebaseFetch:', { token, url, opts, headers: headers.toString() });
-
-        const res = await fetch(url, opts);
-        const result = await pipeStream(res.body);
-
-        console.info('firebaseFetch:', result);
-
-        return result;
-    }
-    catch(e)
-    {
-        console.error(e);
-
-        return undefined;
-    }
 }
 
 export async function writeTasksToFirebaseDb(tasks) {

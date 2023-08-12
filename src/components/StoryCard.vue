@@ -1,86 +1,89 @@
 <template>
-  <div v-if="!story" class="row items-center justify-center" style="width: 90vw">
+  <div
+    v-if="!story"
+    class="row items-center justify-center"
+    style="width: 90vw"
+  >
     <q-spinner size="md" color="primary" class="q-ma-md" />
     <span>Loading {{ storyId }} ...</span>
   </div>
-  <SimpleModal
-      v-else
-      fullWidth
-  >
+  <SimpleModal v-else fullWidth>
     <template #activator="{ open }">
       <div class="col full-width" @click="open">
         <div class="items-center q-my-sm full-width">
           <q-badge
-              :label="story.estimate === 0 ? 0 : story.estimate || '?'"
-              class="q-mr-xs"
+            :label="story.estimate === 0 ? 0 : story.estimate || '?'"
+            class="q-mr-xs"
           />
           <q-icon
-              :name="story.story_type === 'feature' ? 'star' : 'bug_report'"
-              :color="story.story_type === 'feature' ? 'warning' : 'negative'"
+            :name="story.story_type === 'feature' ? 'star' : 'bug_report'"
+            :color="story.story_type === 'feature' ? 'warning' : 'negative'"
           />
           {{ story.name }}
         </div>
         <div class="items-center q-my-xs full-width">
           <q-chip
-              v-for="label in story.labels"
-              :label="label.name"
-              :key="label.name"
-              :color="label.name.includes('(') ? 'primary' : 'secondary'"
-              class="q-ma-none q-mr-xs"
-              style="color: #ddd"
-              :size="dense ? 'sm' : 'md'"
+            v-for="label in story.labels"
+            :label="label.name"
+            :key="label.name"
+            :color="label.name.includes('(') ? 'primary' : 'secondary'"
+            class="q-ma-none q-mr-xs"
+            style="color: #ddd"
+            :size="dense ? 'sm' : 'md'"
           />
         </div>
         <div class="row q-mt-xs">
           <q-chip
-              :color="story.created_at_color || 'primary'"
-              square
-              dense
-              dark
+            :color="story.created_at_color || 'primary'"
+            square
+            dense
+            dark
           >
             {{ new Date(story.created_at).toDateString() }}
           </q-chip>
           <q-btn-group>
             <q-btn
-                label="View"
-                color="primary"
-                :dense="dense"
-                flat
-                class="q-mr-xs"
-                @click.stop.prevent="openInBrowser(story.url)"
+              label="View"
+              color="primary"
+              :dense="dense"
+              flat
+              class="q-mr-xs"
+              @click.stop.prevent="openInBrowser(story.url)"
             />
             <q-btn
-                label="Git C/O"
-                color="negative"
-                :dense="dense"
-                flat
-                @click.stop.prevent="copyToClipboard(`git checkout PT_${story.id}`)"
+              label="Git C/O"
+              color="negative"
+              :dense="dense"
+              flat
+              @click.stop.prevent="
+                copyToClipboard(`git checkout PT_${story.id}`)
+              "
             />
             <q-btn
-                :label="story.id"
-                color="secondary"
-                :dense="dense"
-                flat
-                @click.stop.prevent="copyToClipboard(story.id)"
+              :label="story.id"
+              color="secondary"
+              :dense="dense"
+              flat
+              @click.stop.prevent="copyToClipboard(story.id)"
             >
               <q-tooltip>Copy story ID</q-tooltip>
             </q-btn>
           </q-btn-group>
           <q-btn-group class="q-ml-xs">
             <q-btn
-                v-if="allowAddTasks"
-                label="Tasks"
-                color="primary"
-                :dense="dense"
-                flat
-                @click.stop.prevent="openTasksForStory"
+              v-if="allowAddTasks"
+              label="Tasks"
+              color="primary"
+              :dense="dense"
+              flat
+              @click.stop.prevent="openTasksForStory"
             >
               <q-tooltip>View tasks for {{ storyId }}</q-tooltip>
             </q-btn>
             <AddTask
-                v-if="allowAddTasks"
-                :initialTaskData="{ stories: [story.id] }"
-                dense
+              v-if="allowAddTasks"
+              :initialTaskData="{ stories: [story.id] }"
+              dense
             />
           </q-btn-group>
         </div>
@@ -91,13 +94,13 @@
         <h5 class="q-mb-sm">{{ story.name }}</h5>
         <div>
           <q-chip
-              v-for="label in story.labels"
-              :label="label.name"
-              :key="label.name"
-              :color="label.name.includes('(') ? 'primary' : 'secondary'"
-              class="q-ma-none q-mr-xs"
-              style="color: #ddd"
-              :size="dense ? 'sm' : 'md'"
+            v-for="label in story.labels"
+            :label="label.name"
+            :key="label.name"
+            :color="label.name.includes('(') ? 'primary' : 'secondary'"
+            class="q-ma-none q-mr-xs"
+            style="color: #ddd"
+            :size="dense ? 'sm' : 'md'"
           />
         </div>
       </div>
@@ -107,77 +110,83 @@
     </template>
     <template #actions>
       <q-btn
-          label="View"
-          color="primary"
-          :dense="dense"
-          flat
-          class="q-mr-xs"
-          @click.stop.prevent="openInBrowser(story.url)"
+        label="View"
+        color="primary"
+        :dense="dense"
+        flat
+        class="q-mr-xs"
+        @click.stop.prevent="openInBrowser(story.url)"
       />
       <q-btn
-          label="Git C/O"
-          color="negative"
-          :dense="dense"
-          flat
-          @click.stop.prevent="$emit('checkoutBoth', story.id)"
+        label="Git C/O"
+        color="negative"
+        :dense="dense"
+        flat
+        @click.stop.prevent="$emit('checkoutBoth', story.id)"
       />
     </template>
   </SimpleModal>
 </template>
 
 <script>
-  import DisplayStory from './DisplayStory';
-  import SimpleModal from './SimpleModal';
-  import AddTask from "components/AddTask";
-  import {
-    getFromLocalStorage, saveToLocalStorage, copyToClipboard, openInBrowser, localStorageNames
-  } from "src/utils";
+import {
+  getFromLocalStorage,
+  saveToLocalStorage,
+  copyToClipboard,
+  openInBrowser,
+  localStorageNames,
+  saveToLocalStorageArray,
+} from "src/utils";
 
-  export default {
-    name: 'StoryCard',
-    components: {
-      AddTask,
-      DisplayStory,
-      SimpleModal
+export default {
+  name: "StoryCard",
+  components: {
+    AddTask: () => import('src/components/AddTask.vue'),
+    DisplayStory: () => import('src/components/DisplayStory.vue'),
+    SimpleModal: () => import('src/components/SimpleModal.vue'),
+  },
+  props: {
+    noteId: {
+      type: String,
+      default: null,
     },
-    props: {
-      noteId: {
-        type: String,
-        default: null
-      },
-      storyId: {
-        type: [String, Number],
-        required: true
-      },
-      dense: {
-        type: Boolean,
-        default: true
-      },
-      allowAddTasks: {
-        type: Boolean,
-        default: false
-      }
+    storyId: {
+      type: [String, Number],
+      required: true,
     },
-    inject: ['$openTab'],
-    computed: {
-      story()
-      {
-        return this.$store.getters['pivotal/get'](parseInt(this.storyId, 10));
-      }
+    dense: {
+      type: Boolean,
+      default: true,
     },
-    async mounted()
-    {
-      await this.$store.dispatch('pivotal/load', { id: parseInt(this.storyId, 10) });
+    allowAddTasks: {
+      type: Boolean,
+      default: false,
     },
-    methods: {
-      openInBrowser,
-      copyToClipboard,
-      openTasksForStory()
-      {
-        const existingFilters = getFromLocalStorage(localStorageNames.taskFilters, true);
-        saveToLocalStorage(localStorageNames.taskFilters, { ...existingFilters, keyword: `${this.storyId}` });
-        this.$openTab('tasks');
-      }
-    }
-  };
+  },
+  computed: {
+    story() {
+      return this.$store.getters["pivotal/get"](parseInt(this.storyId, 10));
+    },
+  },
+  async mounted() {
+    await this.$store.dispatch("pivotal/load", {
+      id: parseInt(this.storyId, 10),
+    });
+  },
+  methods: {
+    openInBrowser,
+    copyToClipboard,
+    openTasksForStory() {
+      const existingFilters = getFromLocalStorage(
+        localStorageNames.taskFilters,
+        true
+      );
+      saveToLocalStorage(localStorageNames.taskFilters, {
+        ...existingFilters,
+        keyword: `${this.storyId}`,
+      });
+      saveToLocalStorageArray(localStorageNames.currentTab, "tasks");
+    },
+  },
+};
 </script>

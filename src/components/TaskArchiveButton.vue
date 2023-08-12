@@ -1,12 +1,12 @@
 <template>
   <div>
     <q-btn
-        :size="size"
-        :flat="flat"
-        :dense="dense"
-        :color="archived ? 'secondary' : undefined"
-        :icon="archived ? 'unarchive' : 'move_to_inbox'"
-        @click="toggle"
+      :size="size"
+      :flat="flat"
+      :dense="dense"
+      :color="archived ? 'secondary' : undefined"
+      :icon="archived ? 'unarchive' : 'move_to_inbox'"
+      @click="toggle"
     >
       <q-tooltip>
         <span v-if="archived">Archived {{ timeSince(archived) }}</span>
@@ -17,45 +17,40 @@
 </template>
 
 <script>
-import { timeSince } from '../utils';
-import QPropsMixin from '../mixins/QPropsMixin.js';
+import { timeSince, cudTaskPropertyViaStore } from "../utils";
+import QPropsMixin from "../mixins/QPropsMixin.js";
 
 export default {
   mixins: [QPropsMixin],
   props: {
     taskId: {
       type: String,
-      default: undefined
-    }
+      default: undefined,
+    },
   },
   computed: {
-    archived()
-    {
-      return this.$store.getters['notes/getTaskProperty'](this.taskId, 'archived');
-    }
+    archived() {
+      return this.$store.getters["notes/getTaskProperty"](
+        this.taskId,
+        "archived"
+      );
+    },
   },
   methods: {
     timeSince,
-    toggle()
-    {
+    toggle() {
       const newVal = this.archived ? 0 : Date.now();
 
-      if(this.taskId)
-      {
-        this.$store.dispatch(
-            'notes/cloudUpdateSingleProperty',
-          {
-            taskId: this.taskId,
-            prop: 'archived',
-            data: newVal
-          }
-        );
+      if (this.taskId) {
+        cudTaskPropertyViaStore(this.$store, {
+          taskId: this.taskId,
+          prop: "archived",
+          data: newVal,
+        });
+      } else {
+        this.$emit("toggle", newVal);
       }
-      else
-      {
-        this.$emit('toggle', newVal);
-      }
-    }
-  }
+    },
+  },
 };
 </script>

@@ -178,6 +178,11 @@ function keywordCheck(task, filters)
 
 export function getStoriesFromTask(task)
 {
+    if(!task || !task.stories)
+    {
+        return [];
+    }
+
     return ((
         `${JSON.stringify(task.tags || [])} ${task.message}`
             .match(/1\d{8}/g)
@@ -495,28 +500,25 @@ export function reduceIntoAssociativeArray(source, key, deleteKey = false)
  */
 export async function cudTaskViaStore(store, taskData, deleteTask = false)
 {
-    // const storeFn = async (tasks) =>
-    // {
-    //     await store.dispatch('notes/updateJson', tasks);
-    //     // await store.dispatch('notes/updateJson', {
-    //     //     note: {
-    //     //         id: 'tasks',
-    //     //         tasks
-    //     //     }
-    //     // })
-    // };
-
-    // await cudTask(
-    //     getAllTasksFromStore(store),
-    //     storeFn,
-    //     taskData,
-    //     deleteTask
-    // );
     await store.dispatch('notes/cloudUpdateSingle', taskData);
 
     setTimeout(() =>
     {
         queueTaskRefresh(taskData.id);
+    }, 500);
+}
+
+export async function cudTaskPropertyViaStore(store, { taskId, prop, data })
+{
+    await store.dispatch('notes/cloudUpdateSingleProperty', {
+        taskId,
+        prop,
+        data
+    });
+
+    setTimeout(() =>
+    {
+        queueTaskRefresh(taskId);
     }, 500);
 }
 
@@ -718,4 +720,16 @@ export function goToActivityPageForTask(taskId)
         saveToLocalStorage(localStorageNames.desiredTaskId, taskId);
         saveToLocalStorageArray(localStorageNames.currentTabQueue, 'activity');
     }
+}
+
+export function padLeft(str, padChar, totalLength)
+{
+  str = str.toString();
+
+  while(str.length < totalLength)
+  {
+    str = `${padChar}${str}`;
+  }
+
+  return str;
 }

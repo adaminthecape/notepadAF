@@ -121,10 +121,6 @@ const mutations = {
 
         Vue.set(state.tasks[taskId], prop, data);
     },
-    SAVE_TASKS_TO_JSON(state, tasks)
-    {
-        saveAll(tasks);
-    },
     SAVE_TASKS_TO_CLOUD_FROM_STATE(state)
     {
         if(!state.tasks || !Object.keys(state.tasks).length)
@@ -205,35 +201,35 @@ const actions = {
     {
         commit('SET_CATEGORIES');
     },
-    timeSafeCloudUpdate({ commit })
-    {
-        console.warn('timeSafeCloudUpdate: start');
-        const squash = () =>
-        {
-            const millisToWait = 5000;
-            const latestUpdate = state.lastCloudDispatch || 0;
-            const millisSinceLatestUpdate = Date.now() - latestUpdate;
+    // timeSafeCloudUpdate({ commit })
+    // {
+    //     console.warn('timeSafeCloudUpdate: start');
+    //     const squash = () =>
+    //     {
+    //         const millisToWait = 5000;
+    //         const latestUpdate = state.lastCloudDispatch || 0;
+    //         const millisSinceLatestUpdate = Date.now() - latestUpdate;
 
-            if((millisSinceLatestUpdate > millisToWait))
-            { // update now
-                commit('SET_LAST_CLOUD_DISPATCH');
-                commit('SAVE_TASKS_TO_CLOUD_FROM_STATE');
-            }
-            else
-            { // postpone update
-                commit('CLEAR_UPDATE_TIMEOUT');
+    //         if((millisSinceLatestUpdate > millisToWait))
+    //         { // update now
+    //             commit('SET_LAST_CLOUD_DISPATCH');
+    //             commit('SAVE_TASKS_TO_CLOUD_FROM_STATE');
+    //         }
+    //         else
+    //         { // postpone update
+    //             commit('CLEAR_UPDATE_TIMEOUT');
 
-                const wait = (millisToWait - millisSinceLatestUpdate);
-                const timeout = setTimeout(squash, wait);
+    //             const wait = (millisToWait - millisSinceLatestUpdate);
+    //             const timeout = setTimeout(squash, wait);
 
-                commit('SET_UPDATE_TIMEOUT', timeout);
-            }
+    //             commit('SET_UPDATE_TIMEOUT', timeout);
+    //         }
 
-            commit('CLEAR_UPDATE_ALL');
-        };
+    //         commit('CLEAR_UPDATE_ALL');
+    //     };
 
-        squash();
-    },
+    //     squash();
+    // },
     async cloudUpdateSingle({ commit, dispatch }, task)
     {
         if(!task || typeof task !== 'object')
@@ -253,9 +249,8 @@ const actions = {
 
         await updateTaskDataByPath(taskDataToAdd.id, '', taskDataToAdd);
         queueTaskRefresh(taskDataToAdd.id);
-        // dispatch('timeSafeCloudUpdate');
     },
-    async cloudUpdateSingleProperty({ getters, commit, dispatch }, { taskId, prop, data })
+    async cloudUpdateSingleProperty({ commit }, { taskId, prop, data })
     {
         if(!taskId || !prop || typeof data === 'undefined')
         {
@@ -326,32 +321,6 @@ const actions = {
             }, 200);
         });
     },
-    updateJson({ commit, dispatch }, tasks)
-    {
-        // console.log('updateJson', { tasks });
-        if(!tasks || !tasks.length)
-        {
-            return;
-        }
-
-        commit('SAVE_TASKS_TO_JSON', tasks);
-    },
-    loadAllFromJson({ commit })
-    {
-        const data = readFromDbSync('notesdb.json', true);
-
-        let parsed = JSON.parse(data) || {};
-
-        if(typeof parsed === 'string')
-        {
-            parsed = JSON.parse(parsed);
-        }
-
-        parsed.tasks.forEach((task) =>
-        {
-            commit('SET_TASK', task);
-        });
-    }
 };
 
 const getters = {

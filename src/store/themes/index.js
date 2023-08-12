@@ -1,10 +1,11 @@
 import Vue from 'vue';
-import {getFromLocalStorage, localStorageNames, saveToLocalStorage} from "src/utils";
+import {
+    getFromLocalStorage,
+    localStorageNames, 
+    saveToLocalStorage
+} from "src/utils";
+import { themeTypes } from 'src/constants.js';
 
-const themeTypes = {
-    light: 'light',
-    dark: 'dark'
-};
 const state = {
     activeTheme: getFromLocalStorage(localStorageNames.activeTheme) || themeTypes.light,
     themes: {

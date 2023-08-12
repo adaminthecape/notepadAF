@@ -1,11 +1,11 @@
 <template>
   <div>
     <q-btn
-        :size="size"
-        :flat="flat"
-        :dense="dense"
-        :icon="icon || 'alarm_add'"
-        @click="isCreatingAlert = !isCreatingAlert"
+      :size="size"
+      :flat="flat"
+      :dense="dense"
+      :icon="icon || 'alarm_add'"
+      @click="isCreatingAlert = !isCreatingAlert"
     >
       <q-tooltip>Add alert</q-tooltip>
     </q-btn>
@@ -13,11 +13,8 @@
       <q-card>
         <q-item>
           <q-item-section>
-            {{ task ? task.message : '' }}
-            <CreateAlert
-                class="q-mt-md"
-                @newAlert="addAlertToTask"
-            />
+            {{ task ? task.message : "" }}
+            <CreateAlert class="q-mt-md" @newAlert="addAlertToTask" />
           </q-item-section>
         </q-item>
       </q-card>
@@ -26,39 +23,44 @@
 </template>
 
 <script>
-import QPropsMixin from '../mixins/QPropsMixin.js';
-import SingleTaskMixin from "src/mixins/SingleTaskMixin";
+import QPropsMixin from "../mixins/QPropsMixin.js";
 import CreateAlert from "components/CreateAlert";
 import { cudTaskViaStore, queueTaskRefresh } from "src/utils";
 
 export default {
   components: { CreateAlert },
-  mixins: [QPropsMixin, SingleTaskMixin],
-  data()
-  {
+  mixins: [QPropsMixin],
+  props: {
+    taskId: {
+      type: String,
+      default: undefined,
+    },
+  },
+  data() {
     return {
-      isCreatingAlert: false
+      isCreatingAlert: false,
     };
   },
+  computed: {
+    task() {
+      return this.$store.getters["notes/getTask"](this.taskId);
+    },
+  },
   methods: {
-    getTaskDataWithNewAlert(alert)
-    {
-      if(!this.task)
-      {
-        console.warn('Task not found!', alert);
+    getTaskDataWithNewAlert(alert) {
+      if (!this.task) {
+        console.warn("Task not found!", alert);
 
         return;
       }
 
       const task = structuredClone(this.task);
 
-      if(!task.alerts)
-      {
+      if (!task.alerts) {
         task.alerts = [];
       }
 
-      if(alert.id)
-      {
+      if (alert.id) {
         delete alert.id;
       }
 
@@ -66,23 +68,20 @@ export default {
 
       return task;
     },
-    addAlertToTask(alert)
-    {
-      if(!this.task || !alert || !alert.time || !alert.date)
-      {
-        console.warn('Not enough data for alert!', alert);
+    addAlertToTask(alert) {
+      if (!this.task || !alert || !alert.time || !alert.date) {
+        console.warn("Not enough data for alert!", alert);
 
         return;
       }
 
       const task = this.getTaskDataWithNewAlert(alert);
 
-      cudTaskViaStore(this.$store, task).then(() =>
-      {
+      cudTaskViaStore(this.$store, task).then(() => {
         queueTaskRefresh(task.id);
         this.isCreatingAlert = false;
       });
-    }
-  }
+    },
+  },
 };
 </script>

@@ -11,49 +11,6 @@
       Tickets
     </template>
     <template #header-right>
-      <!-- git dropdown: --><div>
-        <!--      <q-btn-dropdown-->
-        <!--          v-model="isGitStatusDropdownOpen"-->
-        <!--          label="Git status"-->
-        <!--          :loading="isLoadingGitStatus"-->
-        <!--          class="q-mr-sm"-->
-        <!--          @click="isGitStatusDropdownOpen ? undefined : getGitStatusForAllModules()"-->
-        <!--      >-->
-        <!--        <q-list>-->
-        <!--          <q-item-->
-        <!--              clickable-->
-        <!--              @click="checkoutBoth('master')"-->
-        <!--          >-->
-        <!--            <q-item-section>-->
-        <!--              Checkout to master-->
-        <!--            </q-item-section>-->
-        <!--          </q-item>-->
-        <!--          <div-->
-        <!--              v-for="module in modulesToFetch"-->
-        <!--              :key="`status-${module}-${gitRenderKey}`"-->
-        <!--          >-->
-        <!--            <q-item-->
-        <!--                v-if="gitStatus[module]"-->
-        <!--                clickable-->
-        <!--            >-->
-        <!--              <q-item-section side>-->
-        <!--                {{ module }}-->
-        <!--              </q-item-section>-->
-        <!--              <q-item-section caption>-->
-        <!--                <div class="row items-center">-->
-        <!--                  {{ gitStatus[module].branch }}-->
-        <!--                  <q-icon-->
-        <!--                      v-if="gitStatus[module].safeToChange"-->
-        <!--                      color="positive"-->
-        <!--                      icon="check_circle"-->
-        <!--                  />-->
-        <!--                </div>-->
-        <!--              </q-item-section>-->
-        <!--            </q-item>-->
-        <!--          </div>-->
-        <!--        </q-list>-->
-        <!--      </q-btn-dropdown>-->
-      </div>
       <q-btn
           icon="refresh"
           dense
@@ -150,22 +107,6 @@
             </q-input>
           </q-item-section>
         </q-item>
-        <!--            <q-input-->
-        <!--                v-model="queryParamToAdd"-->
-        <!--                class="q-pa-sm"-->
-        <!--                label="Custom parameter"-->
-        <!--                bottom-slots-->
-        <!--                stack-label-->
-        <!--                clearable-->
-        <!--                filled-->
-        <!--            >-->
-        <!--              <template #append>-->
-        <!--                <q-btn-->
-        <!--                    icon="add"-->
-        <!--                    @click="addQueryParam"-->
-        <!--                />-->
-        <!--              </template>-->
-        <!--            </q-input>-->
         <div class="row">
           <q-space />
           <q-btn
@@ -340,54 +281,6 @@ export default {
     {
       return Object.keys(this.queryParams);
     },
-    // actionsToShow()
-    // {
-    //   return (this.results || []).reduce((agg, action) =>
-    //   {
-    //     const { guid } = action;
-    //
-    //     if(!agg[guid])
-    //     {
-    //       agg[guid] = {};
-    //     }
-    //
-    //     const [date, time] = new Date(action.occurred_at).toISOString().split('T');
-    //
-    //     agg[guid].stories = [];
-    //     agg[guid].guid = action.guid;
-    //     agg[guid].message = action.message;
-    //     agg[guid].date = date;
-    //     agg[guid].time = time.split('.')[0];
-    //     agg[guid].type = action.kind;
-    //     agg[guid].projectId = action.project.id;
-    //
-    //     if(action.changes && action.changes.length)
-    //     {
-    //       agg[guid].changes = action.changes.map((change) => (
-    //           `${change.change_type} ${change.kind} to "${change.name}"`
-    //       ));
-    //     }
-    //
-    //     if(action.primary_resources)
-    //     {
-    //       agg[guid].storyIds = [];
-    //       agg[guid].resources = [];
-    //       agg[guid].resourceIds = [];
-    //
-    //       action.primary_resources.forEach((resource) =>
-    //       {
-    //         agg[guid].resourceIds.push(resource.id);
-    //         agg[guid].resources.push(resource);
-    //       });
-    //     }
-    //
-    //     return agg;
-    //   }, {});
-    // },
-    // actionsForTemplate()
-    // {
-    //   return Object.values(this.actionsToShow || {});
-    // }
   },
   async mounted()
   {
@@ -429,11 +322,6 @@ export default {
         return [];
       }
 
-      // this.sortingResults = true;
-      // let results = [...this.results];
-      // this.$set(this, 'results', results);
-      // this.sortingResults = false;
-
       if(this.sortType === 'created')
       {
         dateSort(this.results, 'created_at', this.inverseSort);
@@ -459,30 +347,6 @@ export default {
     saveParams(params)
     {
       localStorage.setItem(localStorageNames.ticketQueryParams, JSON.stringify(params));
-    },
-    // addQueryParam()
-    // {
-    //   const param = this.queryParamToAdd;
-    //
-    //   if(!param || this.queryParamNames.includes(param))
-    //   {
-    //     return;
-    //   }
-    //
-    //   this.queryParams[param] = null;
-    //
-    //   this.queryParamToAdd = null;
-    // },
-    padLeft(str, padChar, totalLength)
-    {
-      str = str.toString();
-
-      while(str.length < totalLength)
-      {
-        str = `${padChar}${str}`;
-      }
-
-      return str;
     },
     async getTickets()
     {

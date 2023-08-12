@@ -1,55 +1,51 @@
 <template>
-  <q-list
-      :key="`subtask-list-${listRenderIndex}`"
-      class="q-px-sm"
-  >
+  <q-list :key="`subtask-list-${listRenderIndex}`" class="q-px-sm">
     <q-item
-        v-for="(subtask, s) in subtasks"
-        :key="`subtask-item-${s}`"
-        clickable
-        dense
-        @dblclick.ctrl="removeSubtask(s)"
+      v-for="(subtask, s) in subtasks"
+      :key="`subtask-item-${s}`"
+      clickable
+      dense
+      @dblclick.ctrl="removeSubtask(s)"
     >
       <q-item-section>
         <div class="row items-center full-width">
-          <q-chip
-              v-if="subtask.note"
-              style="flex-grow: 1"
-              square
-              dense
-          >{{ subtask.note }}</q-chip>
+          <q-chip v-if="subtask.note" style="flex-grow: 1" square dense>{{
+            subtask.note
+          }}</q-chip>
           <q-btn
-              color="primary"
-              icon="start"
-              size="sm"
-              dense
-              flat
-              @click="startSubtask(s)"
-          ><q-tooltip>Start</q-tooltip></q-btn>
+            color="primary"
+            icon="start"
+            size="sm"
+            dense
+            flat
+            @click="startSubtask(s)"
+            ><q-tooltip>Start</q-tooltip></q-btn
+          >
           <q-btn
-              color="negative"
-              icon="delete"
-              size="sm"
-              dense
-              flat
-              @click="removeSubtask(s)"
-          ><q-tooltip>Remove</q-tooltip></q-btn>
+            color="negative"
+            icon="delete"
+            size="sm"
+            dense
+            flat
+            @click="removeSubtask(s)"
+            ><q-tooltip>Remove</q-tooltip></q-btn
+          >
         </div>
       </q-item-section>
     </q-item>
     <q-input
-        v-if="addNew"
-        v-model="newLogMessage"
-        placeholder="Add subtask..."
-        filled
-        dense
+      v-if="addNew"
+      v-model="newLogMessage"
+      placeholder="Add subtask..."
+      filled
+      dense
     >
       <template #append>
         <q-btn
-            icon="save"
-            dense
-            flat
-            @click="saveNew({ due: 0, note: newLogMessage })"
+          icon="save"
+          dense
+          flat
+          @click="saveNew({ due: 0, note: newLogMessage })"
         />
       </template>
     </q-input>
@@ -57,48 +53,47 @@
 </template>
 
 <script>
-import { qNotify, queueTaskRefresh } from "src/utils";
+import { qNotify, queueTaskRefresh, cudTaskViaStore, cudTaskPropertyViaStore } from "src/utils";
 
 export default {
-  name: 'SubtaskList',
+  name: "SubtaskList",
   props: {
     taskId: {
       type: String,
-      default: undefined
+      default: undefined,
     },
     addNew: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
-  data()
-  {
+  data() {
     return {
       listRenderIndex: 0,
-      newLogMessage: ''
+      newLogMessage: "",
     };
   },
   computed: {
-    task()
-    {
-      return this.$store.getters['notes/getTask'](this.taskId);
+    task() {
+      return this.$store.getters["notes/getTask"](this.taskId);
     },
-    subtasks()
-    {
-      return this.$store.getters['notes/getTaskProperty'](this.taskId, 'next') || [];
+    subtasks() {
+      return (
+        this.$store.getters["notes/getTaskProperty"](this.taskId, "next") || []
+      );
     },
-    isActive()
-    {
-      return !!this.$store.getters['notes/getTaskProperty'](this.taskId, 'active');
-    }
+    isActive() {
+      return !!this.$store.getters["notes/getTaskProperty"](
+        this.taskId,
+        "active"
+      );
+    },
   },
   methods: {
-    startSubtask(index)
-    {
+    startSubtask(index) {
       // is the task active? then quit
-      if(this.isActive)
-      {
-        qNotify(this.$q, 'You must finish the current activity first');
+      if (this.isActive) {
+        qNotify(this.$q, "You must finish the current activity first");
 
         return;
       }
@@ -107,63 +102,47 @@ export default {
       const activity = (this.task.activity || []).concat({
         start: Date.now(),
         end: 0,
-        note: this.subtasks[index].note || ''
+        note: this.subtasks[index].note || "",
       });
 
-      this.$store.dispatch(
-          'notes/cloudUpdateSingle',
-          {
-            ...this.task,
-            activity: activity,
-            active: Date.now()
-          }
-      ).then(() =>
-      {
+      cudTaskViaStore(this.$store, {
+        ...this.task,
+        activity: activity,
+        active: Date.now(),
+      }).then(() => {
         this.removeSubtask(index);
-        setTimeout(() =>
-        {
+        setTimeout(() => {
           queueTaskRefresh(this.taskId);
         }, 250);
       });
     },
-    removeSubtask(index)
-    {
+    removeSubtask(index) {
       const data = this.subtasks.filter((s, i) => i !== index);
 
-      this.$store.dispatch(
-          'notes/cloudUpdateSingleProperty',
-          {
-            taskId: this.taskId,
-            prop: 'next',
-            data
-          }
-      ).then(() =>
-      {
+      cudTaskPropertyViaStore(this.$store, {
+        taskId: this.taskId,
+        prop: "next",
+        data,
+      }).then(() => {
         this.listRenderIndex += 1;
       });
     },
-    saveNew(newItem)
-    {
-      if(!this.taskId || !newItem)
-      {
+    saveNew(newItem) {
+      if (!this.taskId || !newItem) {
         return;
       }
 
       const data = this.subtasks.concat(newItem);
-      this.newLogMessage = '';
+      this.newLogMessage = "";
 
-      this.$store.dispatch(
-          'notes/cloudUpdateSingleProperty',
-          {
-            taskId: this.taskId,
-            prop: 'next',
-            data
-          }
-      ).then(() =>
-      {
+      cudTaskPropertyViaStore(this.$store, {
+        taskId: this.taskId,
+        prop: "next",
+        data,
+      }).then(() => {
         this.listRenderIndex += 1;
       });
-    }
-  }
+    },
+  },
 };
 </script>

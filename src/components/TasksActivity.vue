@@ -2,42 +2,37 @@
   <SimpleLayout id="tasks_list" header :page-classes="['q-px-sm', 'q-pt-sm']">
     <template #header-title>
       <div class="row items-center" style="font-size: 0.8em">
-        <q-btn
-          class="q-mr-sm"
-          dense
-          flat
-        >
+        <q-btn class="q-mr-sm" dense flat>
           <q-icon v-if="!isCloudLoading" name="cloud_sync" />
           <q-spinner v-if="isCloudLoading" size="sm" />
           <q-tooltip v-if="isCloudLoading">Loading from cloud</q-tooltip>
         </q-btn>
         <span v-if="!tasksList || !filteredTasksList">No tasks to show</span>
-        <span v-else-if="filteredTasksList.length === Object.keys(tasksList).length">All tasks</span>
-        <span v-else>{{ filteredTasksList.length }} / {{ Object.keys(tasksList).length }}{{ $q.screen.lt.sm ? '' : ' tasks' }}</span>
-        <q-space />
-        <q-btn
-            icon="tune"
-            size="sm"
-            dense
-            round
-            flat
-            @click="clearFilters"
+        <span
+          v-else-if="filteredTasksList.length === Object.keys(tasksList).length"
+          >All tasks</span
         >
+        <span v-else
+          >{{ filteredTasksList.length }} / {{ Object.keys(tasksList).length
+          }}{{ $q.screen.lt.sm ? "" : " tasks" }}</span
+        >
+        <q-space />
+        <q-btn icon="tune" size="sm" dense round flat @click="clearFilters">
           <q-tooltip>Clear filters</q-tooltip>
         </q-btn>
         <TaskSortDropdown
-            :sortType="sortType"
-            :inverseSort="inverseSort"
-            @setSortType="setSortType"
+          :sortType="sortType"
+          :inverseSort="inverseSort"
+          @setSortType="setSortType"
         />
         <q-btn
-            class="q-ml-xs"
-            :icon="applyFilters ? 'lock' : 'lock_open'"
-            size="sm"
-            dense
-            flat
-            dark
-            @click="applyFilters = !applyFilters"
+          class="q-ml-xs"
+          :icon="applyFilters ? 'lock' : 'lock_open'"
+          size="sm"
+          dense
+          flat
+          dark
+          @click="applyFilters = !applyFilters"
         >
           <q-tooltip>Apply filters to new task</q-tooltip>
         </q-btn>
@@ -47,13 +42,19 @@
       <q-dialog v-model="isFirebaseConfigDialogOpen" persistent>
         <q-card>
           <q-item>
-            <q-item-section>
-              Firebase config is required!
-            </q-item-section>
+            <q-item-section> Firebase config is required! </q-item-section>
           </q-item>
           <q-item>
             <q-item-section>
-              <q-btn @click="$openTab('settings')">Go to Settings</q-btn>
+              <q-btn
+                @click="
+                  saveToLocalStorageArray(
+                    localStorageNames.currentTab,
+                    'settings'
+                  )
+                "
+                >Go to Settings</q-btn
+              >
             </q-item-section>
           </q-item>
         </q-card>
@@ -61,106 +62,95 @@
       <!-- NEW TASK / FILTERS: -->
       <div style="display: flex; flex-direction: column">
         <q-input
-            ref="newTaskInput"
-            v-model="newTask.message"
-            placeholder="Add a task"
-            class="full-width q-mb-xs"
-            filled
-            dense
-            style="background: #FFFF0020;"
+          ref="newTaskInput"
+          v-model="newTask.message"
+          placeholder="Add a task"
+          class="full-width q-mb-xs"
+          filled
+          dense
+          style="background: #ffff0020"
         >
           <template #append>
-            <q-btn
-                icon="add_task"
-                dense
-                flat
-                @click="createTask()"
-            />
+            <q-btn icon="add_task" dense flat @click="createTask()" />
           </template>
         </q-input>
         <div class="row items-center q-mb-xs">
           <q-input
-              v-model="filters.keyword"
-              placeholder="Filter by keyword"
-              class="q-mr-xs"
-              style="flex-grow: 1; max-width: 40%"
-              debounce="250"
-              filled
-              dense
-              debounceInput="500"
-              @input="setFilter('keyword', filters.keyword)"
+            v-model="filters.keyword"
+            placeholder="Filter by keyword"
+            class="q-mr-xs"
+            style="flex-grow: 1; max-width: 40%"
+            debounce="250"
+            filled
+            dense
+            debounceInput="500"
+            @input="setFilter('keyword', filters.keyword)"
           >
             <template #append>
               <q-btn
-                  v-if="filters.keyword"
-                  icon="close"
-                  round
-                  dense
-                  flat
-                  size="xs"
-                  @click.stop.prevent="setFilter(filterTypes.keyword, undefined)"
+                v-if="filters.keyword"
+                icon="close"
+                round
+                dense
+                flat
+                size="xs"
+                @click.stop.prevent="setFilter(filterTypes.keyword, undefined)"
               />
             </template>
           </q-input>
           <TaskTagSelector
-              :inputValue="filters.tags || []"
-              label="Filter by tags"
-              style="flex-grow: 1; max-width: 60%"
-              multiple
-              @input="setFilter(filterTypes.tags, $event)"
-              @cancel="setFilter(filterTypes.tags, [])"
+            :inputValue="filters.tags || []"
+            label="Filter by tags"
+            style="flex-grow: 1; max-width: 60%"
+            multiple
+            @input="setFilter(filterTypes.tags, $event)"
+            @cancel="setFilter(filterTypes.tags, [])"
           />
           <LocalStorageList
-              v-model="categoriesMutable"
-              title="Categories"
-              listKey="taskCategories"
-              @updated="filterTasks"
+            v-model="categoriesMutable"
+            title="Categories"
+            listKey="taskCategories"
+            @updated="filterTasks"
           />
         </div>
         <div class="row items-center q-mb-xs">
           <q-btn-group class="row items-center q-mb-xs" flat>
             <q-btn
-                v-for="bool in toggleableBooleans"
-                :key="`bool-toggle-${bool.value}`"
-                :label="$q.screen.lt.md ? undefined : bool.label"
-                :icon="filters[bool.value] ? bool.icon_true : bool.icon_false"
-                no-caps
-                dense
-                flat
-                :color="getFilterBoolColor(bool.value)"
-                @click="toggleFilterBool(bool.value)"
+              v-for="bool in toggleableBooleans"
+              :key="`bool-toggle-${bool.value}`"
+              :label="$q.screen.lt.md ? undefined : bool.label"
+              :icon="filters[bool.value] ? bool.icon_true : bool.icon_false"
+              no-caps
+              dense
+              flat
+              :color="getFilterBoolColor(bool.value)"
+              @click="toggleFilterBool(bool.value)"
             />
           </q-btn-group>
           <q-space />
           <q-pagination
-              v-model="pagination.page"
-              :max="paginationComputed.max"
-              color="grey"
-              active-color="primary"
-              direction-links
-              input
+            v-model="pagination.page"
+            :max="paginationComputed.max"
+            color="grey"
+            active-color="primary"
+            direction-links
+            input
           />
         </div>
       </div>
       <q-separator class="q-mb-sm" />
       <!-- TASK LIST: -->
-      <div
-          class="task-list"
-          :key="`taskList-${taskListRenderIndex}`"
-      >
-        <div
-            v-for="task in limitedTasks"
-            :key="task.id"
-        >
+      <div class="task-list" :key="`taskList-${taskListRenderIndex}`">
+        <div v-for="task in limitedTasks" :key="task.id">
           <DisplayTask
-              v-if="task"
-              :key="taskRenderIndex[task.id]"
-              noteId="tasks"
-              :taskId="task.id"
-              class="full-width"
-              editable
-              @refreshTask="refreshTask"
-              @filterByTag="addTagToFilters"
+            v-if="task"
+            :key="taskRenderIndex[task.id]"
+            noteId="tasks"
+            :taskId="task.id"
+            class="full-width"
+            editable
+            @refreshTask="refreshTask"
+            @filterByTag="addTagToFilters"
           />
         </div>
       </div>
@@ -180,11 +170,11 @@
 </template>
 
 <script>
-import DisplayTask from './DisplayTask';
-import SimpleLayout from './SimpleLayout';
-import TaskTagSelector from './TaskTagSelector';
-import TaskSortDropdown from './TaskSortDropdown';
-import LocalStorageList from 'src/components/LocalStorageList.vue';
+import DisplayTask from "./DisplayTask";
+import SimpleLayout from "./SimpleLayout";
+import TaskTagSelector from "./TaskTagSelector";
+import TaskSortDropdown from "./TaskSortDropdown";
+import LocalStorageList from "src/components/LocalStorageList.vue";
 import {
   cudTaskViaStore,
   filterTaskList,
@@ -193,41 +183,39 @@ import {
   getFromLocalStorage,
   saveToLocalStorage,
   localStorageIntervalCheck,
-  localStorageNames
+  localStorageNames,
 } from "src/utils";
 
 export default {
-  name: 'Tasks',
+  name: "Tasks",
   components: {
     DisplayTask,
     TaskTagSelector,
     TaskSortDropdown,
     SimpleLayout,
-    LocalStorageList
+    LocalStorageList,
   },
-  data()
-  {
+  data() {
     const defaults = {
       pagination: {
         page: 1,
-        max: 5
+        max: 5,
       },
       limit: 5,
       newTask: {
         title: null,
-        message: null
-      }
+        message: null,
+      },
     };
 
     return {
-      limit: getFromLocalStorage(localStorageNames.taskLimit) ||
-          defaults.limit,
+      limit: getFromLocalStorage(localStorageNames.taskLimit) || defaults.limit,
       filterTypes: {
-        keyword: 'keyword',
-        tags: 'tags',
-        active: 'active',
-        archived: 'archived',
-        done: 'done'
+        keyword: "keyword",
+        tags: "tags",
+        active: "active",
+        archived: "archived",
+        done: "done",
       },
       filters: {},
       applyFilters: true,
@@ -244,56 +232,72 @@ export default {
       isFirebaseConfigDialogOpen: false,
       pagination: defaults.pagination,
       tmpInterval: undefined,
-      categoriesMutable: []
+      categoriesMutable: [],
     };
   },
-  inject: ['$openTab'],
   computed: {
-    categories()
-    {
-      return this.$store.getters['notes/getCategories'];
+    categories() {
+      return this.$store.getters["notes/getCategories"];
     },
-    limitedTasks()
-    {
-      const page = (this.pagination.page - 1);
+    limitedTasks() {
+      const page = this.pagination.page - 1;
       const offset = this.limit * page;
 
-      return (this.filteredTasksList || []).slice(offset, (this.limit || 20) + offset);
+      return (this.filteredTasksList || []).slice(
+        offset,
+        (this.limit || 20) + offset
+      );
     },
-    toggleableBooleans()
-    {
+    toggleableBooleans() {
       return [
-        { label: 'Done', value: 'done', icon_true: 'check_circle', icon_false: 'check_circle_outline' },
-        { label: 'Active', value: 'active', icon_true: 'assignment_ind', icon_false: 'content_paste_go' },
-        { label: 'Archived', value: 'archived', icon_true: 'unarchive', icon_false: 'move_to_inbox' }
+        {
+          label: "Done",
+          value: "done",
+          icon_true: "check_circle",
+          icon_false: "check_circle_outline",
+        },
+        {
+          label: "Active",
+          value: "active",
+          icon_true: "assignment_ind",
+          icon_false: "content_paste_go",
+        },
+        {
+          label: "Archived",
+          value: "archived",
+          icon_true: "unarchive",
+          icon_false: "move_to_inbox",
+        },
         // { label: 'Alarm', value: 'hasAlarm' },
         // { label: 'Due', value: 'isDue' }
       ];
     },
-    tasksList()
-    {
+    tasksList() {
       // return (getAllTasksFromStore(this.$store) || [])
       //     .filter((task) => !task.deleted);
       // const tasks = this.$store.getters['notes/getTasks'];
-      const catsToKeep = this.categories.filter((c) => c.active).map((c) => c.title).concat('other');
+      const catsToKeep = this.categories
+        .filter((c) => c.active)
+        .map((c) => c.title)
+        .concat("other");
       let res = {};
 
-      const allTasks = this.$store.getters['notes/getTasksByBuckets'](
-          this.$store.getters['notes/getCategories']
+      const allTasks = this.$store.getters["notes/getTasksByBuckets"](
+        this.$store.getters["notes/getCategories"]
       );
 
-      Object.entries(allTasks).forEach(([
+      Object.entries(allTasks).forEach(
+        ([
           // bucket name
           key,
           // list of tasks in that bucket
-          value
-        ]) =>
-      {
-        if(catsToKeep.includes(key))
-        {
-          res = { ...res, ...value };
+          value,
+        ]) => {
+          if (catsToKeep.includes(key)) {
+            res = { ...res, ...value };
+          }
         }
-      });
+      );
 
       return res;
     },
@@ -303,68 +307,60 @@ export default {
     //     Object.values(this.tasksList)
     //   );
     // },
-    isCloudLoading()
-    {
-      return this.$store.getters['notes/isCloudLoading'];
+    isCloudLoading() {
+      return this.$store.getters["notes/isCloudLoading"];
     },
-    lastCloudUpdate()
-    {
-      return this.$store.getters['notes/getLastCloudUpdate'];
+    lastCloudUpdate() {
+      return this.$store.getters["notes/getLastCloudUpdate"];
     },
-    paginationComputed()
-    {
+    paginationComputed() {
       return {
-        max: ((this.filteredTasksList || []).length / this.limit) + 1
+        max: (this.filteredTasksList || []).length / this.limit + 1,
       };
-    }
+    },
   },
   watch: {
     pagination: {
-      handler()
-      {
+      handler() {
         this.saveFilters();
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
-  created()
-  {
-    if(!getFromLocalStorage(localStorageNames.firebase_config, true))
-    {
+  created() {
+    if (!getFromLocalStorage(localStorageNames.firebase_config, true)) {
       this.isFirebaseConfigDialogOpen = true;
     }
   },
-  mounted()
-  {
-    this.$store.dispatch('notes/setCategoriesFromLocalStorage');
+  mounted() {
     this.loadTasks();
 
-    const storedFilters = getFromLocalStorage(localStorageNames.taskFilters, true);
+    const storedFilters = getFromLocalStorage(
+      localStorageNames.taskFilters,
+      true
+    );
 
-    if(storedFilters)
-    {
+    if (storedFilters) {
       this.sortType = storedFilters.sortType;
       this.inverseSort = storedFilters.inverseSort;
       this.filters = storedFilters;
 
-      if(storedFilters.pagination)
-      {
+      if (storedFilters.pagination) {
         this.pagination = {
           ...this.pagination,
-          ...storedFilters.pagination
+          ...storedFilters.pagination,
         };
       }
     }
 
-    if(this.refreshCheckInterval)
-    {
+    if (this.refreshCheckInterval) {
       clearInterval(this.refreshCheckInterval);
     }
 
     this.refreshCheckInterval = localStorageIntervalCheck(
-        'taskRefreshQueue',
-        (queue) => queue.forEach((id) =>
-        {
+      "taskRefreshQueue",
+      (queue) =>
+        queue.forEach((id) => {
           this.refreshTask({ id });
         })
     );
@@ -375,22 +371,17 @@ export default {
   },
   methods: {
     /****** Loading/fetching tasks */
-    async loadTasks()
-    {
-      // this.tasksLoaded = true;
-      // await this.$store.dispatch('notes/loadAllFromJson');
-      this.$store.dispatch('notes/watchCloudDb');
+    async loadTasks() {
+      this.$store.dispatch("notes/setCategoriesFromLocalStorage");
+      this.$store.dispatch("notes/watchCloudDb");
 
-      this.tmpInterval = setInterval(() =>
-      {
-        const check = (
+      this.tmpInterval = setInterval(() => {
+        const check =
           this.lastCloudUpdate &&
           this.tasksList &&
-          Object.keys(this.tasksList).length
-        );
+          Object.keys(this.tasksList).length;
 
-        if(check)
-        {
+        if (check) {
           this.filterTasks();
           clearInterval(this.tmpInterval);
         }
@@ -398,47 +389,36 @@ export default {
     },
 
     /** Actual filtering logic. Sorts after filtering. Saves filters to localStorage. */
-    filterTasks()
-    {
+    filterTasks() {
       this.saveFilters();
 
-      this.filteredTasksList = this.filterAndSortTasksList(
-        Object.values(this.tasksList)
-      ) || [];
+      this.filteredTasksList =
+        this.filterAndSortTasksList(Object.values(this.tasksList)) || [];
     },
-    filterAndSortTasksList(list)
-    {
+    filterAndSortTasksList(list) {
       return sortTaskList(
-          filterTaskList(
-              list,
-              this.filters
-          ),
-          this.sortType,
-          this.inverseSort
+        filterTaskList(list, this.filters),
+        this.sortType,
+        this.inverseSort
       );
     },
 
-    setSortType(type)
-    {
-      if(type === this.sortType) // invert it
-      {
+    setSortType(type) {
+      if (type === this.sortType) {
+        // invert it
         this.inverseSort = !this.inverseSort;
-      }
-      else
-      {
+      } else {
         this.sortType = type;
       }
 
       this.filterTasks();
     },
 
-    refreshTask(task)
-    {
+    refreshTask(task) {
       this.taskRenderIndex[task.id] = `render-${task.id}-${Date.now()}`;
     },
 
-    clearFilters()
-    {
+    clearFilters() {
       this.filters = {};
       this.filterTasks();
     },
@@ -446,75 +426,62 @@ export default {
      * Add OR remove given tag to current filters & filter again.
      * @param tag - Tag to add or remove, if already in filters.
      */
-    addTagToFilters(tag)
-    {
-      if(tag)
-      {
+    addTagToFilters(tag) {
+      if (tag) {
         this.setFilter(
-            'tags',
-            (this.filters.tags || []).includes(tag) ?
-              (this.filters.tags || []).filter((t) => t !== tag) :
-              (this.filters.tags || []).concat(tag)
+          "tags",
+          (this.filters.tags || []).includes(tag)
+            ? (this.filters.tags || []).filter((t) => t !== tag)
+            : (this.filters.tags || []).concat(tag)
         );
       }
     },
-    setFilter(type, value)
-    {
+    setFilter(type, value) {
       this.filters[type] = value;
       this.filterTasks();
     },
-    saveFilters()
-    {
+    saveFilters() {
       saveToLocalStorage(localStorageNames.taskFilters, {
         ...this.filters,
         sortType: this.sortType,
         inverseSort: this.inverseSort,
-        pagination: this.pagination
+        pagination: this.pagination,
       });
     },
 
     /****** Filtering tasks - booleans */
-    getFilterBoolColor(prop)
-    {
+    getFilterBoolColor(prop) {
       return (
-          this.filters[prop] === true && 'green-6' ||
-          this.filters[prop] === false && 'red-6' ||
-          'grey-6'
+        (this.filters[prop] === true && "green-6") ||
+        (this.filters[prop] === false && "red-6") ||
+        "grey-6"
       );
     },
-    toggleFilterBool(prop)
-    {
-      if(this.filters[prop] === true)
-      {
+    toggleFilterBool(prop) {
+      if (this.filters[prop] === true) {
         this.filters[prop] = false;
-      }
-      else if(this.filters[prop] === false)
-      {
+      } else if (this.filters[prop] === false) {
         this.filters[prop] = null;
-      }
-      else
-      {
+      } else {
         this.filters[prop] = true;
       }
 
       this.filterTasks();
     },
 
-    createTask()
-    {
+    createTask() {
       cudTaskViaStore(
-          this.$store,
-          this.applyFilters ?
-              applyFiltersToTask(this.newTask, this.filters) :
-              this.newTask
-      ).then(() =>
-      {
+        this.$store,
+        this.applyFilters
+          ? applyFiltersToTask(this.newTask, this.filters)
+          : this.newTask
+      ).then(() => {
         this.newTask = { message: null };
       });
 
       this.filterTasks();
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -553,13 +520,32 @@ pre {
   max-height: 20em;
 }
 
-h1, h2, h3, h4, h5, h6 { line-height: 1em; }
-h1 { font-size: 2em; }
-h2 { font-size: 1.8em; }
-h3 { font-size: 1.6em; }
-h4 { font-size: 1.4em; }
-h5 { font-size: 1.2em; }
-h6 { font-size: 1em; }
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1em;
+}
+h1 {
+  font-size: 2em;
+}
+h2 {
+  font-size: 1.8em;
+}
+h3 {
+  font-size: 1.6em;
+}
+h4 {
+  font-size: 1.4em;
+}
+h5 {
+  font-size: 1.2em;
+}
+h6 {
+  font-size: 1em;
+}
 </style>
 
 <style scoped>

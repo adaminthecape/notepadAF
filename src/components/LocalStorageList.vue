@@ -85,8 +85,6 @@
 </template>
 
 <script>
-import SimpleModal from "src/components/SimpleModal.vue";
-import TaskTagSelector from "src/components/TaskTagSelector.vue";
 import { getFromLocalStorage, saveToLocalStorage } from "src/utils";
 
 export default {
@@ -105,8 +103,8 @@ export default {
     }
   },
   components: {
-    SimpleModal,
-    TaskTagSelector
+    SimpleModal: () => import("src/components/SimpleModal.vue"),
+    TaskTagSelector: () => import("src/components/TaskTagSelector.vue")
   },
   data()
   {

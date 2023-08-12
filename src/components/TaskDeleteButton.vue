@@ -1,13 +1,13 @@
 <template>
   <div v-if="task">
     <q-btn
-        :size="size"
-        :flat="flat"
-        :dense="dense"
-        :icon="icon || 'close'"
-        :color="task.deleted ? 'negative' : undefined"
-        v-model="isConfirmingDeletion"
-        @click="isConfirmingDeletion = !isConfirmingDeletion"
+      :size="size"
+      :flat="flat"
+      :dense="dense"
+      :icon="icon || 'close'"
+      :color="task.deleted ? 'negative' : undefined"
+      v-model="isConfirmingDeletion"
+      @click="isConfirmingDeletion = !isConfirmingDeletion"
     >
       <q-tooltip>Delete task</q-tooltip>
     </q-btn>
@@ -17,23 +17,25 @@
           <q-item-section>
             <div>
               <div class="q-mb-sm">
-                <span class="text-bold">{{ task && task.message ? task.message.slice(0, 50) : '' }}</span>
+                <span class="text-bold">{{
+                  task && task.message ? task.message.slice(0, 50) : ""
+                }}</span>
               </div>
               <div>Are you sure you want to delete?</div>
               <div class="row">
                 <q-space />
                 <q-btn
-                    label="Cancel"
-                    dense
-                    flat
-                    @click.stop.prevent="isConfirmingDeletion = false"
+                  label="Cancel"
+                  dense
+                  flat
+                  @click.stop.prevent="isConfirmingDeletion = false"
                 />
                 <q-btn
-                    color="negative"
-                    label="Remove"
-                    dense
-                    flat
-                    @click.stop.prevent="reallyRemoveTask"
+                  color="negative"
+                  label="Remove"
+                  dense
+                  flat
+                  @click.stop.prevent="reallyRemoveTask"
                 />
               </div>
             </div>
@@ -45,30 +47,37 @@
 </template>
 
 <script>
-import QPropsMixin from '../mixins/QPropsMixin.js';
-import SingleTaskMixin from '../mixins/SingleTaskMixin.js';
+import QPropsMixin from "../mixins/QPropsMixin.js";
 import { cudTaskViaStore } from "src/utils";
 
 export default {
-  mixins: [QPropsMixin, SingleTaskMixin],
-  data()
-  {
+  mixins: [QPropsMixin],
+  props: {
+    taskId: {
+      type: String,
+      default: undefined,
+    },
+  },
+  data() {
     return {
-      isConfirmingDeletion: false
+      isConfirmingDeletion: false,
     };
   },
+  computed: {
+    task() {
+      return this.$store.getters["notes/getTask"](this.taskId);
+    },
+  },
   methods: {
-    reallyRemoveTask()
-    {
+    reallyRemoveTask() {
       cudTaskViaStore(
-          this.$store,
-          { ...this.task, deleted: Date.now() },
-          true
-      ).then(() =>
-      {
+        this.$store,
+        { ...this.task, deleted: Date.now() },
+        true
+      ).then(() => {
         this.isConfirmingDeletion = false;
       });
-    }
-  }
+    },
+  },
 };
 </script>
