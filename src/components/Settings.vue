@@ -39,20 +39,30 @@
           <q-item-section>
             <q-input
               v-model="tokens.pivotal"
-              type="password"
-              filled
+              :type="visibilityToggles.pivotalToken ? 'text' : 'password'"
               placeholder="Pivotal token"
+              filled
             >
               <template #append>
-                <div>
-                  <q-btn
-                    icon="check"
-                    round
-                    dense
-                    color="secondary"
+                <q-icon
+                  :name="
+                    visibilityToggles.pivotalToken
+                      ? 'visibility_off'
+                      : 'visibility'
+                  "
+                  class="cursor-pointer"
+                  @click="
+                    visibilityToggles.pivotalToken =
+                      !visibilityToggles.pivotalToken
+                  "
+                />
+                <q-btn
+                  icon="check"
+                  round
+                  dense
+                  color="secondary"
                     @click="setToken('pivotal')"
-                  />
-                </div>
+                />
               </template>
             </q-input>
           </q-item-section>
@@ -473,6 +483,7 @@ export default {
       isConfirmingUserDeletion: false,
       visibilityToggles: {
         pivotalProjectId: false,
+        pivotalToken: false,
         appId: false,
         apiKey: false,
         projectId: false,
