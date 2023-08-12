@@ -40,9 +40,9 @@
 import { cudTaskViaStore, timeSince } from "src/utils";
 import { getTask, getTaskProperty } from "src/storeHelpers";
 
-export default {
-  props: {
-    size: {
+  export default {
+    props: {
+      size: {
         type: String,
         default: undefined
     },
@@ -64,11 +64,11 @@ export default {
     },
     mode: {
       type: String,
-      default: "emit",
+      default: 'emit'
     },
     taskId: {
       type: String,
-      default: undefined,
+      default: undefined
     },
     disableAddingNote: {
       type: Boolean,

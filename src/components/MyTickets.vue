@@ -171,16 +171,13 @@ import {
   localStorageNames,
   getFromLocalStorage,
 } from "src/utils.js";
-import TaskSortDropdown from "components/TaskSortDropdown";
-import SimpleLayout from "./SimpleLayout";
-import StoryCard from "src/components/StoryCard";
 
 export default {
   name: "MyTickets",
   components: {
-    TaskSortDropdown,
-    StoryCard,
-    SimpleLayout,
+    TaskSortDropdown: () => import("src/components/TaskSortDropdown.vue"),
+    StoryCard: () => import("src/components/StoryCard.vue"),
+    SimpleLayout: () => import("src/components/SimpleLayout.vue"),
   },
   props: {
     cachedTickets: {

@@ -51,41 +51,12 @@ import { cudTaskViaStore } from "src/utils";
 import { getTask } from "src/storeHelpers";
 
 export default {
-  props: {
-    size: {
-        type: String,
-        default: undefined
-    },
-    icon: {
-        type: String,
-        default: undefined
-    },
-    color: {
-        type: String,
-        default: undefined
-    },
-    flat: {
-        type: Boolean,
-        default: false
-    },
-    dense: {
-        type: Boolean,
-        default: false
-    },
-    taskId: {
-      type: String,
-      default: undefined,
-    },
-  },
-  data() {
+  mixins: [QPropsMixin, SingleTaskMixin],
+  data()
+  {
     return {
       isConfirmingDeletion: false,
     };
-  },
-  computed: {
-    task() {
-      return getTask(this.$store, this.taskId);
-    },
   },
   methods: {
     reallyRemoveTask() {

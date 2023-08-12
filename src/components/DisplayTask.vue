@@ -196,7 +196,7 @@
 
 <script>
 import { cudTaskViaStore, timeSince, getStoriesFromTask } from "../utils";
-import { getTask } from "src/storeHelpers";
+import { getTask } from 'src/storeHelpers';
 
 export default {
   components: {
@@ -213,6 +213,10 @@ export default {
       type: String,
       default: undefined,
     },
+    clickable: {
+      type: Boolean,
+      default: true
+    }
   },
   data() {
     return {

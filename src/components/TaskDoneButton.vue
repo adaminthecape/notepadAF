@@ -17,41 +17,23 @@
 <script>
 import { timeSince, cudTaskPropertyViaStore } from "../utils";
 
-export default {
-  props: {
-    size: {
-      type: String,
-      default: undefined,
+  export default {
+    mixins: [QPropsMixin],
+    props: {
+      taskId: {
+        type: String,
+        default: undefined
+      },
+      done: {
+        type: Number,
+        default: 0
+      }
     },
-    icon: {
-      type: String,
-      default: undefined,
-    },
-    color: {
-      type: String,
-      default: undefined,
-    },
-    flat: {
-      type: Boolean,
-      default: false,
-    },
-    dense: {
-      type: Boolean,
-      default: false,
-    },
-    taskId: {
-      type: String,
-      default: undefined,
-    },
-    done: {
-      type: Number,
-      default: 0,
-    },
-  },
-  methods: {
-    timeSince,
-    toggle() {
-      const newVal = this.done ? 0 : Date.now();
+    methods: {
+      timeSince,
+      toggle()
+      {
+        const newVal = this.done ? 0 : Date.now();
 
       if (this.taskId) {
         cudTaskPropertyViaStore(this.$store, {
