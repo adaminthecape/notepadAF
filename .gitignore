@@ -33,3 +33,13 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
+
+.gitignore
+_public
+public
+dist
+src-electron
+notesdb.json
+firebase.json
+.firebase
+.firebaserc
