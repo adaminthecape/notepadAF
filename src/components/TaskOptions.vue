@@ -100,14 +100,14 @@ import { getTask } from "src/storeHelpers";
 
 export default {
   components: {
-    TaskSubtaskButton,
-    TaskActivityLog,
-    TaskAlertButton,
-    TaskDeleteButton,
-    TaskArchiveButton,
-    TaskEditButton,
-    TaskDoneButton,
-    TaskActiveButton
+    TaskSubtaskButton: () => import("src/components/TaskSubtaskButton.vue"),
+    TaskActivityLog: () => import("src/components/TaskActivityLog.vue"),
+    TaskAlertButton: () => import("src/components/TaskAlertButton.vue"),
+    TaskDeleteButton: () => import("src/components/TaskDeleteButton.vue"),
+    TaskArchiveButton: () => import("src/components/TaskArchiveButton.vue"),
+    TaskEditButton: () => import("src/components/TaskEditButton.vue"),
+    TaskDoneButton: () => import("src/components/TaskDoneButton.vue"),
+    TaskActiveButton: () => import("src/components/TaskActiveButton.vue"),
   },
   props: {
     isEditing: {
@@ -164,6 +164,30 @@ export default {
       type: Boolean,
       default: false,
     },
+    taskId: {
+      type: String,
+      default: undefined,
+    },
+    size: {
+        type: String,
+        default: undefined
+    },
+    icon: {
+        type: String,
+        default: undefined
+    },
+    color: {
+        type: String,
+        default: undefined
+    },
+    flat: {
+        type: Boolean,
+        default: false
+    },
+    dense: {
+        type: Boolean,
+        default: false
+    },
   },
   data() {
     return {
@@ -186,10 +210,7 @@ export default {
     },
   },
   methods: {
-    goToActivityPage()
-    {
-      goToActivityPageForTask(this.task.id);
-    }
+    goToActivityPageForTask
   }
 }
 </script>

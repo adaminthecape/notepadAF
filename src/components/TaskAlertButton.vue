@@ -1,12 +1,7 @@
 <template>
   <div>
-    <q-btn
-      :size="size"
-      :flat="flat"
-      :dense="dense"
-      :icon="icon || 'alarm_add'"
-      @click="isCreatingAlert = !isCreatingAlert"
-    >
+    <q-btn :size="size" :flat="flat" :dense="dense" :icon="icon || 'alarm_add'"
+      @click="isCreatingAlert = !isCreatingAlert">
       <q-tooltip>Add alert</q-tooltip>
     </q-btn>
     <q-dialog v-model="isCreatingAlert">
@@ -29,9 +24,33 @@ import { getTask } from "src/storeHelpers";
 
 export default {
   components: { CreateAlert },
-  mixins: [QPropsMixin, SingleTaskMixin],
-  data()
-  {
+  props: {
+    taskId: {
+      type: String,
+      default: undefined,
+    },
+    size: {
+      type: String,
+      default: undefined
+    },
+    icon: {
+      type: String,
+      default: undefined
+    },
+    color: {
+      type: String,
+      default: undefined
+    },
+    flat: {
+      type: Boolean,
+      default: false
+    },
+    dense: {
+      type: Boolean,
+      default: false
+    },
+  },
+  data() {
     return {
       isCreatingAlert: false,
     };
