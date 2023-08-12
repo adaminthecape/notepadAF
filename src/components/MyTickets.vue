@@ -434,8 +434,6 @@ export default {
       // this.$set(this, 'results', results);
       // this.sortingResults = false;
 
-      this.listRenderKey += 1;
-
       if(this.sortType === 'created')
       {
         dateSort(this.results, 'created_at', this.inverseSort);
