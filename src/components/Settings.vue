@@ -61,7 +61,7 @@
                   round
                   dense
                   color="secondary"
-                    @click="setToken('pivotal')"
+                  @click="setToken('pivotal')"
                 />
               </template>
             </q-input>
