@@ -17,7 +17,8 @@
 </template>
 
 <script>
-import { timeSince, cudTaskPropertyViaStore } from "../utils";
+import { timeSince, cudTaskPropertyViaStore } from "src/utils";
+import { getTaskProperty } from "src/storeHelpers";
 
 export default {
   props: {
@@ -48,7 +49,8 @@ export default {
   },
   computed: {
     archived() {
-      return this.$store.getters["notes/getTaskProperty"](
+      return getTaskProperty(
+        this.$store,
         this.taskId,
         "archived"
       );

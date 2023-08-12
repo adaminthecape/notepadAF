@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { getTasks } from "src/storeHelpers";
 
 export const localStorageNames = {
     /** user prefs */
@@ -555,10 +556,7 @@ export function getAllTasksFromStore(store)
 {
     if(!store) return undefined;
 
-    // return store.getters['notes/getNote']('tasks') ?
-    //     store.getters['notes/getNote']('tasks').tasks :
-    //     undefined;
-    return Object.values(store.getters['notes/getTasks']);
+    return Object.values(getTasks(store));
 }
 
 export function getTaskByIdFromStore(store, id)

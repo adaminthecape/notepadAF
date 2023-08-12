@@ -69,7 +69,8 @@
 </template>
 
 <script>
-import { getFromLocalStorage, localStorageNames, saveToLocalStorage } from "src/utils.js";
+import { getFromLocalStorage, localStorageNames } from "src/utils.js";
+import { getTask } from "src/storeHelpers.js";
 import SimpleLayout from "src/components/SimpleLayout.vue";
 import TaskOptions from "src/components/TaskOptions.vue";
 import TaskActivityLog from "src/components/TaskActivityLog.vue";
@@ -109,7 +110,7 @@ export default {
   computed: {
     task()
     {
-      return this.$store.getters['notes/getTask'](this.taskIdToUse);
+      return getTask(this.$store, this.taskIdToUse);
     },
     taskIdToUse()
     {

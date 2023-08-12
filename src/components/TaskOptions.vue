@@ -99,6 +99,7 @@
 
 <script>
 import { goToActivityPageForTask } from "src/utils";
+import { getTask } from "src/storeHelpers";
 
 export default {
   components: {
@@ -190,7 +191,7 @@ export default {
   },
   computed: {
     task() {
-      return this.$store.getters["notes/getTask"](this.taskId);
+      return getTask(this.$store, this.taskId);
     },
   },
   watch: {

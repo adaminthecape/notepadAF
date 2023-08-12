@@ -137,6 +137,7 @@ import {
   localStorageNames,
   saveToLocalStorageArray,
 } from "src/utils";
+import { getStory, loadStory } from "src/storeHelpers";
 
 export default {
   name: "StoryCard",
@@ -165,13 +166,11 @@ export default {
   },
   computed: {
     story() {
-      return this.$store.getters["pivotal/get"](parseInt(this.storyId, 10));
+      return getStory(this.$store, parseInt(this.storyId, 10));
     },
   },
   async mounted() {
-    await this.$store.dispatch("pivotal/load", {
-      id: parseInt(this.storyId, 10),
-    });
+    await loadStory(this.$store, parseInt(this.storyId, 10));
   },
   methods: {
     openInBrowser,

@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import { getAllTasksFromStore } from "src/utils";
+import { getTasks } from "src/storeHelpers";
 
 export default {
   components: {
@@ -53,7 +53,7 @@ export default {
   },
   computed: {
     tasksList() {
-      return getAllTasksFromStore(this.$store);
+      return getTasks(this.$store);
     },
     allTags() {
       if (!this.tasksList || !this.tasksList.length) {

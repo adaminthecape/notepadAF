@@ -38,6 +38,7 @@
 
 <script>
 import { cudTaskViaStore, timeSince } from "src/utils";
+import { getTask, getTaskProperty } from "src/storeHelpers";
 
 export default {
   props: {
@@ -83,14 +84,15 @@ export default {
   },
   computed: {
     active() {
-      return this.$store.getters["notes/getTaskProperty"](
+      return getTaskProperty(
+        this.$store,
         this.taskId,
         "active"
       );
     },
     lastActivity() {
       const activity =
-        this.$store.getters["notes/getTaskProperty"](this.taskId, "activity") ||
+      getTaskProperty(this.$store, this.taskId, "activity") ||
         [];
 
       if (activity && activity.length) {
@@ -100,7 +102,7 @@ export default {
       return undefined;
     },
     task() {
-      return this.$store.getters["notes/getTask"](this.taskId);
+      return getTask(this.$store, this.taskId);
     },
   },
   mounted() {

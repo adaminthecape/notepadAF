@@ -53,7 +53,13 @@
 </template>
 
 <script>
-import { qNotify, queueTaskRefresh, cudTaskViaStore, cudTaskPropertyViaStore } from "src/utils";
+import {
+  qNotify,
+  queueTaskRefresh,
+  cudTaskViaStore,
+  cudTaskPropertyViaStore,
+} from "src/utils";
+import { getTask, getTaskProperty } from "src/storeHelpers";
 
 export default {
   name: "SubtaskList",
@@ -75,18 +81,13 @@ export default {
   },
   computed: {
     task() {
-      return this.$store.getters["notes/getTask"](this.taskId);
+      return getTask(this.$store, this.taskId);
     },
     subtasks() {
-      return (
-        this.$store.getters["notes/getTaskProperty"](this.taskId, "next") || []
-      );
+      return getTaskProperty(this.$store, this.taskId, "next") || [];
     },
     isActive() {
-      return !!this.$store.getters["notes/getTaskProperty"](
-        this.taskId,
-        "active"
-      );
+      return !!getTaskProperty(this.$store, this.taskId, "active");
     },
   },
   methods: {

@@ -15,6 +15,7 @@
 <script>
 import { QMarkdown } from '@quasar/quasar-ui-qmarkdown';
 import SimpleLayout from './SimpleLayout';
+import { getStory, loadStory } from "src/storeHelpers";
 
 export default {
   name: 'DisplayStory',
@@ -35,7 +36,7 @@ export default {
     },
     story()
     {
-      return this.$store.getters['pivotal/get'](this.storyIdAsNumber);
+      return getStory(this.$store, this.storyIdAsNumber);
     },
     description()
     {
@@ -44,8 +45,7 @@ export default {
   },
   async mounted()
   {
-    // load story
-    await this.$store.dispatch('pivotal/load', { id: this.storyIdAsNumber });
+    await loadStory(this.$store, this.storyIdAsNumber);
   }
 };
 </script>

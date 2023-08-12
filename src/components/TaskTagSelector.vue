@@ -62,7 +62,7 @@
 </template>
 
 <script>
-import { getAllTasksFromStore } from "src/utils";
+import { getTasks } from "src/storeHelpers";
 
 export default {
   props: {
@@ -97,7 +97,7 @@ export default {
   computed: {
     tasksList()
     {
-      return getAllTasksFromStore(this.$store);
+      return getTasks(this.$store);
     },
     allTags()
     {

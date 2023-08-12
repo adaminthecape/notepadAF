@@ -29,6 +29,7 @@
 
 <script>
 import { cudTaskPropertyViaStore } from "src/utils";
+import { getTask } from "src/storeHelpers";
 
 export default {
   props: {
@@ -65,7 +66,7 @@ export default {
   },
   computed: {
     task() {
-      return this.$store.getters["notes/getTask"](this.taskId);
+      return getTask(this.$store, this.taskId);
     },
   },
   mounted() {

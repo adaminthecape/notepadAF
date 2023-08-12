@@ -185,6 +185,7 @@ import {
   localStorageIntervalCheck,
   localStorageNames,
 } from "src/utils";
+import { getTasksByBuckets } from "src/storeHelpers";
 
 export default {
   name: "Tasks",
@@ -273,18 +274,13 @@ export default {
       ];
     },
     tasksList() {
-      // return (getAllTasksFromStore(this.$store) || [])
-      //     .filter((task) => !task.deleted);
-      // const tasks = this.$store.getters['notes/getTasks'];
       const catsToKeep = this.categories
         .filter((c) => c.active)
         .map((c) => c.title)
         .concat("other");
       let res = {};
 
-      const allTasks = this.$store.getters["notes/getTasksByBuckets"](
-        this.$store.getters["notes/getCategories"]
-      );
+      const allTasks = getTasksByBuckets(this.$store);
 
       Object.entries(allTasks).forEach(
         ([

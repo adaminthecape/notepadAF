@@ -174,10 +174,10 @@
 <script>
 import {
   filterTaskList,
-  getAllTasksFromStore,
   secondsToHumanReadable,
   cudTaskPropertyViaStore
 } from "src/utils";
+import { getTask } from "src/storeHelpers";
 import TaskActiveButton from "components/TaskActiveButton";
 
 export default {
@@ -212,7 +212,7 @@ export default {
   computed: {
     taskList() {
       if (this.taskId) {
-        return [this.$store.getters["notes/getTask"](this.taskId)];
+        return [getTask(this.$store, this.taskId)];
       }
 
       return this.allActivity;
@@ -319,7 +319,7 @@ export default {
         return;
       }
 
-      const tasks = getAllTasksFromStore(this.$store);
+      const tasks = getTasks(this.$store);
 
       if (!tasks) {
         return;

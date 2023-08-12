@@ -25,6 +25,7 @@
 <script>
 import CreateAlert from "components/CreateAlert";
 import { cudTaskViaStore, queueTaskRefresh } from "src/utils";
+import { getTask } from "src/storeHelpers";
 
 export default {
   components: { CreateAlert },
@@ -61,7 +62,7 @@ export default {
   },
   computed: {
     task() {
-      return this.$store.getters["notes/getTask"](this.taskId);
+      return getTask(this.$store, this.taskId);
     },
   },
   methods: {
