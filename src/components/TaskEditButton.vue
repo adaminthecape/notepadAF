@@ -1,37 +1,51 @@
 <template>
   <q-btn
-      :size="size"
-      :flat="flat"
-      :dense="dense"
-      :icon="icon"
-      :color="editing ? 'green-9' : undefined"
-      @click="toggle"
+    :size="size"
+    :flat="flat"
+    :dense="dense"
+    :icon="icon"
+    :color="editing ? 'green-9' : undefined"
+    @click="toggle"
   >
     <template>
-      <q-icon
-          :name="icon || 'post_add'"
-      />
+      <q-icon :name="icon || 'post_add'" />
     </template>
     <q-tooltip>Edit Task</q-tooltip>
   </q-btn>
 </template>
 
 <script>
-import QPropsMixin from '../mixins/QPropsMixin.js';
-
 export default {
-  mixins: [QPropsMixin],
   props: {
+    size: {
+      type: String,
+      default: undefined,
+    },
+    icon: {
+      type: String,
+      default: undefined,
+    },
+    color: {
+      type: String,
+      default: undefined,
+    },
+    flat: {
+      type: Boolean,
+      default: false,
+    },
+    dense: {
+      type: Boolean,
+      default: false,
+    },
     editing: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   methods: {
-    toggle()
-    {
-      this.$emit('toggle', !this.editing);
-    }
-  }
+    toggle() {
+      this.$emit("toggle", !this.editing);
+    },
+  },
 };
 </script>

@@ -83,7 +83,6 @@
 </template>
 
 <script>
-  import QPropsMixin from '../mixins/QPropsMixin.js';
   import { cudTaskViaStore } from "src/utils";
 
   export default {
@@ -91,8 +90,27 @@
       TaskActiveButton: () => import("src/components/TaskActiveButton.vue"),
       TaskDoneButton: () => import("src/components/TaskDoneButton.vue")
     },
-    mixins: [QPropsMixin],
     props: {
+      size: {
+          type: String,
+          default: undefined
+      },
+      icon: {
+          type: String,
+          default: undefined
+      },
+      color: {
+          type: String,
+          default: undefined
+      },
+      flat: {
+          type: Boolean,
+          default: false
+      },
+      dense: {
+          type: Boolean,
+          default: false
+      },
       initialTaskData: {
         type: Object,
         default: () => ({})
