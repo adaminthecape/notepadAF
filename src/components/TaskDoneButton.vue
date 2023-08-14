@@ -1,5 +1,6 @@
 <template>
-  <q-btn :size="size" :flat="flat" :dense="dense" :color="done ? 'green-7' : undefined"
+  <q-btn
+:size="size" :flat="flat" :dense="dense" :color="done ? 'green-7' : undefined"
     :icon="done ? 'check_circle' : 'check_circle_outline'" @click="toggle">
     <q-tooltip>
       <span v-if="done">Finished {{ timeSince(done) }}</span>
@@ -9,7 +10,7 @@
 </template>
 
 <script>
-import { timeSince, cudTaskPropertyViaStore } from "../utils";
+import { timeSince, cudTaskPropertyViaStore } from 'src/utils';
 
 export default {
   props: {
@@ -50,11 +51,11 @@ export default {
       if (this.taskId) {
         cudTaskPropertyViaStore(this.$store, {
           taskId: this.taskId,
-          prop: "done",
+          prop: 'done',
           data: newVal,
         });
       } else {
-        this.$emit("toggle", newVal);
+        this.$emit('toggle', newVal);
       }
     },
   },

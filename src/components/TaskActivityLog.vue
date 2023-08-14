@@ -1,47 +1,20 @@
 <template>
   <q-list :key="`activity-list-${listRenderIndex}`">
-    <q-item
-      v-for="(log, l) in taskActivity"
-      :key="`activity-item-${l}`"
-      dense
-      @dblclick.ctrl="removeActivityLog(log)"
-    >
+    <q-item v-for="(log, l) in taskActivity" :key="`activity-item-${l}`" dense @dblclick.ctrl="removeActivityLog(log)">
       <q-item-section>
         <div class="flex" style="flex-direction: column">
           <div v-if="showMessage">{{ log.message }}</div>
-          <q-btn-dropdown
-            class="row items-center full-width justify-start"
-            style="align-content: start"
-            flat
-            dense
-            no-caps
-          >
+          <q-btn-dropdown class="row items-center full-width justify-start" style="align-content: start" flat dense
+            no-caps>
             <template #label>
               <div class="row items-center justify-start full-width">
-                <q-chip
-                  square
-                  dense
-                  class="text-bold"
-                  style="min-width: 12em"
-                  >{{ log.startDate }}</q-chip
-                >
-                <TaskActiveButton
-                  v-if="!log.end"
-                  :task-id="taskId"
-                  mode="save"
-                  @click.stop.prevent="
-                    {
-                    }
-                  "
-                />
-                <q-chip
-                  v-else
-                  class="text-bold"
-                  style="min-width: 4em"
-                  square
-                  dense
-                  >{{ !log.end ? "..." : log.duration }}</q-chip
-                >
+                <q-chip square dense class="text-bold" style="min-width: 12em">{{ log.startDate }}</q-chip>
+                <TaskActiveButton v-if="!log.end" :task-id="taskId" mode="save" @click.stop.prevent="
+                                    {
+                }
+                  " />
+                <q-chip v-else class="text-bold" style="min-width: 4em" square dense>{{ !log.end ? "..." : log.duration
+                }}</q-chip>
                 <q-chip style="flex-grow: 1" class="full-width" square dense>
                   <span>{{ log.note }}</span>
                 </q-chip>
@@ -51,115 +24,40 @@
             <template #default>
               <div>
                 <q-item class="row items-center">
-                  <q-btn
-                    v-if="log.end"
-                    color="negative"
-                    icon="delete"
-                    size="md"
-                    class="q-mr-sm"
-                    dense
-                    flat
-                    @click="removeActivityLog(log)"
-                  />
+                  <q-btn v-if="log.end" color="negative" icon="delete" size="md" class="q-mr-sm" dense flat
+                    @click="removeActivityLog(log)" />
                   <q-space />
                   <q-btn-group>
-                    <q-btn
-                      color="primary"
-                      icon="keyboard_double_arrow_left"
-                      size="md"
-                      class="full-width"
-                      dense
-                      flat
-                      :v-close-popup="false"
-                      @click.stop.prevent="incrementBy('start', log, -3600000)"
-                    />
-                    <q-btn
-                      color="primary"
-                      icon="keyboard_arrow_left"
-                      size="md"
-                      class="full-width"
-                      dense
-                      flat
-                      @click.stop.prevent="incrementBy('start', log, -600000)"
-                    />
+                    <q-btn color="primary" icon="keyboard_double_arrow_left" size="md" class="full-width" dense flat
+                      :v-close-popup="false" @click.stop.prevent="incrementBy('start', log, -3600000)" />
+                    <q-btn color="primary" icon="keyboard_arrow_left" size="md" class="full-width" dense flat
+                      @click.stop.prevent="incrementBy('start', log, -600000)" />
                     <q-btn label="Start" no-caps dense />
-                    <q-btn
-                      color="primary"
-                      icon="keyboard_arrow_right"
-                      size="md"
-                      class="full-width"
-                      dense
-                      flat
-                      @click.stop.prevent="incrementBy('start', log, 600000)"
-                    />
-                    <q-btn
-                      color="primary"
-                      icon="keyboard_double_arrow_right"
-                      size="md"
-                      class="full-width"
-                      dense
-                      flat
-                      @click.stop.prevent="incrementBy('start', log, 3600000)"
-                    />
+                    <q-btn color="primary" icon="keyboard_arrow_right" size="md" class="full-width" dense flat
+                      @click.stop.prevent="incrementBy('start', log, 600000)" />
+                    <q-btn color="primary" icon="keyboard_double_arrow_right" size="md" class="full-width" dense flat
+                      @click.stop.prevent="incrementBy('start', log, 3600000)" />
                   </q-btn-group>
                   <q-space />
                   <q-btn-group v-if="log.end" class="q-ml-sm">
-                    <q-btn
-                      color="primary"
-                      icon="keyboard_double_arrow_left"
-                      size="md"
-                      class="full-width"
-                      dense
-                      flat
-                      @click.stop.prevent="incrementBy('end', log, -3600000)"
-                    />
-                    <q-btn
-                      color="primary"
-                      icon="keyboard_arrow_left"
-                      size="md"
-                      class="full-width"
-                      dense
-                      flat
-                      @click.stop.prevent="incrementBy('end', log, -600000)"
-                    />
+                    <q-btn color="primary" icon="keyboard_double_arrow_left" size="md" class="full-width" dense flat
+                      @click.stop.prevent="incrementBy('end', log, -3600000)" />
+                    <q-btn color="primary" icon="keyboard_arrow_left" size="md" class="full-width" dense flat
+                      @click.stop.prevent="incrementBy('end', log, -600000)" />
                     <q-btn label="End" no-caps dense />
-                    <q-btn
-                      color="primary"
-                      icon="keyboard_arrow_right"
-                      size="md"
-                      class="full-width"
-                      dense
-                      flat
-                      @click.stop.prevent="incrementBy('end', log, 600000)"
-                    />
-                    <q-btn
-                      color="primary"
-                      icon="keyboard_double_arrow_right"
-                      size="md"
-                      class="full-width"
-                      dense
-                      flat
-                      @click.stop.prevent="incrementBy('end', log, 3600000)"
-                    />
+                    <q-btn color="primary" icon="keyboard_arrow_right" size="md" class="full-width" dense flat
+                      @click.stop.prevent="incrementBy('end', log, 600000)" />
+                    <q-btn color="primary" icon="keyboard_double_arrow_right" size="md" class="full-width" dense flat
+                      @click.stop.prevent="incrementBy('end', log, 3600000)" />
                   </q-btn-group>
                 </q-item>
               </div>
-              <q-input
-                v-model="log.note"
-                dense
-                filled
-                @click.stop.prevent="
-                  {
-                  }
-                "
-              >
+              <q-input v-model="log.note" dense filled @click.stop.prevent="
+                                {
+              }
+                ">
                 <template #append>
-                  <q-btn
-                    icon="save"
-                    dense
-                    flat
-                    @click.stop.prevent="updateLog(taskActivity)"
-                  />
+                  <q-btn icon="save" dense flat @click.stop.prevent="updateLog(taskActivity)" />
                 </template>
               </q-input>
             </template>
@@ -176,12 +74,12 @@ import {
   filterTaskList,
   secondsToHumanReadable,
   cudTaskPropertyViaStore
-} from "src/utils";
-import { getTask } from "src/storeHelpers";
-import TaskActiveButton from "components/TaskActiveButton";
+} from 'src/utils';
+import { getTask } from 'src/storeHelpers';
+import TaskActiveButton from 'components/TaskActiveButton';
 
 export default {
-  name: "ActivityLog",
+  name: 'TaskActivityLog',
   components: { TaskActiveButton },
   props: {
     taskId: {
@@ -205,7 +103,7 @@ export default {
     return {
       allActivity: [],
       listRenderIndex: 0,
-      newLogMessage: "",
+      newLogMessage: '',
       isIncrementDialogOpen: {},
     };
   },
@@ -229,20 +127,20 @@ export default {
               duration:
                 log.end && log.start
                   ? secondsToHumanReadable(
-                      Math.floor((log.end - log.start) / 1000),
-                      true
-                    )
+                    Math.floor((log.end - log.start) / 1000),
+                    true
+                  )
                   : 0,
               startDate: new Date(log.start)
                 .toLocaleString()
-                .split(":")
+                .split(':')
                 .slice(0, 2)
-                .join(":"),
+                .join(':'),
               id: task.id,
               message: this.showMessage
                 ? task.message && task.message.length > 50
                   ? `${task.message.slice(0, 50)}...`
-                  : task.message || ""
+                  : task.message || ''
                 : undefined,
             });
           });
@@ -269,7 +167,7 @@ export default {
         this.$store,
         {
           taskId: this.taskId,
-          prop: "activity",
+          prop: 'activity',
           data: data.map((item) => {
             delete item.isEditing;
 
@@ -319,7 +217,7 @@ export default {
         return;
       }
 
-      const tasks = getTasks(this.$store);
+      const tasks = this.$store.getters['notes/getTasks'];
 
       if (!tasks) {
         return;

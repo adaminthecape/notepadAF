@@ -17,27 +17,11 @@
     </template>
     <template #content>
       <div v-if="extrasId || extrasId === 0">
-<!--        <q-list class="clickable-list">-->
-<!--          <q-item-->
-<!--              v-for="(tag, t) in items[extrasId].extra ? items[extrasId].extra.tags : []"-->
-<!--              :key="`extras-list-item-${t}`"-->
-<!--              clickable-->
-<!--              :class="{-->
-<!--                'clickable-list-item': true,-->
-<!--                'selected': tag.active-->
-<!--              }"-->
-<!--              @click="tag.active = !tag.active"-->
-<!--          >-->
-<!--            <q-item-section>-->
-<!--              {{ tag }}-->
-<!--            </q-item-section>-->
-<!--          </q-item>-->
-<!--        </q-list>-->
         <q-card
             v-if="items[extrasId].extra.tags"
         >
           <TaskTagSelector
-              :inputValue="items[extrasId].extra.tags"
+              :input-value="items[extrasId].extra.tags"
               class="full-width"
               label="Select tags"
               multiple
@@ -85,7 +69,7 @@
 </template>
 
 <script>
-import { getFromLocalStorage, saveToLocalStorage } from "src/utils";
+import { getFromLocalStorage, saveToLocalStorage } from 'src/utils';
 
 export default {
   props: {
@@ -103,25 +87,21 @@ export default {
     }
   },
   components: {
-    SimpleModal: () => import("src/components/SimpleModal.vue"),
-    TaskTagSelector: () => import("src/components/TaskTagSelector.vue")
+    SimpleModal: () => import('src/components/SimpleModal.vue'),
+    TaskTagSelector: () => import('src/components/TaskTagSelector.vue')
   },
-  data()
-  {
+  data() {
     return {
       items: [],
       extrasId: undefined,
       extrasTitle: undefined
     };
   },
-  mounted()
-  {
-    if(this.listKey)
-    {
+  mounted() {
+    if (this.listKey) {
       const storedItems = getFromLocalStorage(this.listKey, true);
 
-      if(storedItems)
-      {
+      if (storedItems) {
         this.items = storedItems;
       }
     }
@@ -130,8 +110,7 @@ export default {
   },
   watch: {
     value: {
-      handler(newVal)
-      {
+      handler(newVal) {
         this.$emit('input', newVal);
         this.items = newVal;
       },
@@ -139,26 +118,21 @@ export default {
     }
   },
   methods: {
-    toggleItem(num)
-    {
-      if(this.items[num])
-      {
+    toggleItem(num) {
+      if (this.items[num]) {
         this.items[num].active = !this.items[num].active;
 
-        if(this.listKey)
-        {
+        if (this.listKey) {
           saveToLocalStorage(this.listKey, this.items);
           this.$emit('updated');
         }
       }
     },
-    openExtras(i)
-    {
+    openExtras(i) {
       this.extrasId = i;
       this.extrasTitle = this.items[i].title;
     },
-    closeExtras()
-    {
+    closeExtras() {
       this.extrasId = undefined;
       this.extrasTitle = undefined;
     }

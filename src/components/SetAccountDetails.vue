@@ -20,25 +20,24 @@
 </template>
 
 <script>
-import { localStorageNames, saveToLocalStorage } from "src/utils";
-export default {
-    data()
-    {
-        return {
-            email: '',
-            password: ''
-        };
-    },
-    methods: {
-        setCredentials()
-        {
-            saveToLocalStorage(localStorageNames.user_account, {
-                email: this.email,
-                password: this.password
-            });
+import { localStorageNames, saveToLocalStorage } from 'src/utils';
 
-            window.location.reload();
-        }
+export default {
+  data() {
+    return {
+      email: '',
+      password: ''
+    };
+  },
+  methods: {
+    setCredentials() {
+      saveToLocalStorage(localStorageNames.user_account, {
+        email: this.email,
+        password: this.password
+      });
+
+      window.location.reload();
     }
+  }
 };
 </script>

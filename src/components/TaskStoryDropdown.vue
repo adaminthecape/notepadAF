@@ -14,7 +14,7 @@
           <StoryCard
               v-for="story in stories"
               :key="story.id"
-              :storyId="story.id"
+              :story-id="story.id"
           />
         </q-item-section>
       </q-item>
@@ -36,8 +36,7 @@ export default {
     }
   },
   computed: {
-    storyIds()
-    {
+    storyIds() {
       return this.stories.map((s) => s.id).join(', ');
     }
   }

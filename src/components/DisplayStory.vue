@@ -14,8 +14,8 @@
 
 <script>
 import { QMarkdown } from '@quasar/quasar-ui-qmarkdown';
-import SimpleLayout from './SimpleLayout';
-import { getStory, loadStory } from "src/storeHelpers";
+import SimpleLayout from 'src/SimpleLayout';
+import { getStory, loadStory } from 'src/storeHelpers.js';
 
 export default {
   name: 'DisplayStory',
@@ -30,21 +30,17 @@ export default {
     }
   },
   computed: {
-    storyIdAsNumber()
-    {
+    storyIdAsNumber() {
       return typeof this.storyId === 'string' ? parseInt(this.storyId, 10) : this.storyId;
     },
-    story()
-    {
+    story() {
       return getStory(this.$store, this.storyIdAsNumber);
     },
-    description()
-    {
+    description() {
       return !this.story ? null : this.story.description;
     }
   },
-  async mounted()
-  {
+  async mounted() {
     await loadStory(this.$store, this.storyIdAsNumber);
   }
 };
@@ -81,11 +77,36 @@ pre {
   max-height: 20em;
 }
 
-h1, h2, h3, h4, h5, h6 { line-height: 1em; }
-h1 { font-size: 2em; }
-h2 { font-size: 1.8em; }
-h3 { font-size: 1.6em; }
-h4 { font-size: 1.4em; }
-h5 { font-size: 1.2em; }
-h6 { font-size: 1em; }
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1em;
+}
+
+h1 {
+  font-size: 2em;
+}
+
+h2 {
+  font-size: 1.8em;
+}
+
+h3 {
+  font-size: 1.6em;
+}
+
+h4 {
+  font-size: 1.4em;
+}
+
+h5 {
+  font-size: 1.2em;
+}
+
+h6 {
+  font-size: 1em;
+}
 </style>

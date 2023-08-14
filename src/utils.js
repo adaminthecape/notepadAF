@@ -556,7 +556,7 @@ export function getAllTasksFromStore(store)
 {
     if(!store) return undefined;
 
-    return Object.values(getTasks(store));
+    return Object.values(store.getters['notes/getTasks']);
 }
 
 export function getTaskByIdFromStore(store, id)

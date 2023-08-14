@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import { padLeft } from "src/utils";
+import { padLeft } from 'src/utils';
 
 export default {
   props: {
@@ -76,7 +76,7 @@ export default {
     return {
       createAlertDate: date,
       createAlertTime: time,
-      createAlertMessage: "",
+      createAlertMessage: '',
     };
   },
   computed: {},
@@ -91,20 +91,20 @@ export default {
       const d = new Date(
         (this.createAlertDate && this.createAlertTime
           ? new Date(
-              `${this.createAlertDate} ${this.createAlertTime}`
-            ).getTime()
+            `${this.createAlertDate} ${this.createAlertTime}`
+          ).getTime()
           : Date.now()) + add
       );
-      const time = `${padLeft(d.getHours(), "0", 2)}:${padLeft(
+      const time = `${padLeft(d.getHours(), '0', 2)}:${padLeft(
         d.getMinutes(),
-        "0",
+        '0',
         2
       )}`;
-      const date = `${padLeft(d.getMonth() + 1, "0", 2)}/${padLeft(
+      const date = `${padLeft(d.getMonth() + 1, '0', 2)}/${padLeft(
         d.getDate(),
-        "0",
+        '0',
         2
-      )}/${padLeft(d.getFullYear(), "0", 4)}`;
+      )}/${padLeft(d.getFullYear(), '0', 4)}`;
 
       return { date, time };
     },
@@ -116,7 +116,7 @@ export default {
 
       alert.unix = new Date(`${alert.date} ${alert.time}`).getTime();
 
-      this.$emit("newAlert", alert);
+      this.$emit('newAlert', alert);
     },
   },
 };

@@ -1,6 +1,7 @@
 <template>
   <div>
-    <q-btn :size="size" :flat="flat" :dense="dense" :icon="icon || 'alarm_add'"
+    <q-btn
+:size="size" :flat="flat" :dense="dense" :icon="icon || 'alarm_add'"
       @click="isCreatingAlert = !isCreatingAlert">
       <q-tooltip>Add alert</q-tooltip>
     </q-btn>
@@ -18,9 +19,9 @@
 </template>
 
 <script>
-import CreateAlert from "components/CreateAlert";
-import { cudTaskViaStore, queueTaskRefresh } from "src/utils";
-import { getTask } from "src/storeHelpers";
+import CreateAlert from 'components/CreateAlert';
+import { cudTaskViaStore, queueTaskRefresh } from 'src/utils';
+import { getTask } from 'src/storeHelpers';
 
 export default {
   components: { CreateAlert },
@@ -63,7 +64,7 @@ export default {
   methods: {
     getTaskDataWithNewAlert(alert) {
       if (!this.task) {
-        console.warn("Task not found!", alert);
+        console.warn('Task not found!', alert);
 
         return;
       }
@@ -84,7 +85,7 @@ export default {
     },
     addAlertToTask(alert) {
       if (!this.task || !alert || !alert.time || !alert.date) {
-        console.warn("Not enough data for alert!", alert);
+        console.warn('Not enough data for alert!', alert);
 
         return;
       }

@@ -1,90 +1,43 @@
 <template>
-  <div
-    v-if="!story"
-    class="row items-center justify-center"
-    style="width: 90vw"
-  >
+  <div v-if="!story" class="row items-center justify-center" style="width: 90vw">
     <q-spinner size="md" color="primary" class="q-ma-md" />
     <span>Loading {{ storyId }} ...</span>
   </div>
-  <SimpleModal v-else fullWidth>
+  <SimpleModal v-else full-width>
     <template #activator="{ open }">
       <div class="col full-width" @click="open">
         <div class="items-center q-my-sm full-width">
-          <q-badge
-            :label="story.estimate === 0 ? 0 : story.estimate || '?'"
-            class="q-mr-xs"
-          />
-          <q-icon
-            :name="story.story_type === 'feature' ? 'star' : 'bug_report'"
-            :color="story.story_type === 'feature' ? 'warning' : 'negative'"
-          />
+          <q-badge :label="story.estimate === 0 ? 0 : story.estimate || '?'" class="q-mr-xs" />
+          <q-icon :name="story.story_type === 'feature' ? 'star' : 'bug_report'"
+            :color="story.story_type === 'feature' ? 'warning' : 'negative'" />
           {{ story.name }}
         </div>
         <div class="items-center q-my-xs full-width">
-          <q-chip
-            v-for="label in story.labels"
-            :label="label.name"
-            :key="label.name"
-            :color="label.name.includes('(') ? 'primary' : 'secondary'"
-            class="q-ma-none q-mr-xs"
-            style="color: #ddd"
-            :size="dense ? 'sm' : 'md'"
-          />
+          <q-chip v-for="label in story.labels" :label="label.name" :key="label.name"
+            :color="label.name.includes('(') ? 'primary' : 'secondary'" class="q-ma-none q-mr-xs" style="color: #ddd"
+            :size="dense ? 'sm' : 'md'" />
         </div>
         <div class="row q-mt-xs">
-          <q-chip
-            :color="story.created_at_color || 'primary'"
-            square
-            dense
-            dark
-          >
+          <q-chip :color="story.created_at_color || 'primary'" square dense dark>
             {{ new Date(story.created_at).toDateString() }}
           </q-chip>
           <q-btn-group>
-            <q-btn
-              label="View"
-              color="primary"
-              :dense="dense"
-              flat
-              class="q-mr-xs"
-              @click.stop.prevent="openInBrowser(story.url)"
-            />
-            <q-btn
-              label="Git C/O"
-              color="negative"
-              :dense="dense"
-              flat
-              @click.stop.prevent="
-                copyToClipboard(`git checkout PT_${story.id}`)
-              "
-            />
-            <q-btn
-              :label="story.id"
-              color="secondary"
-              :dense="dense"
-              flat
-              @click.stop.prevent="copyToClipboard(story.id)"
-            >
+            <q-btn label="View" color="primary" :dense="dense" flat class="q-mr-xs"
+              @click.stop.prevent="openInBrowser(story.url)" />
+            <q-btn label="Git C/O" color="negative" :dense="dense" flat @click.stop.prevent="
+              copyToClipboard(`git checkout PT_${story.id}`)
+              " />
+            <q-btn :label="story.id" color="secondary" :dense="dense" flat
+              @click.stop.prevent="copyToClipboard(story.id)">
               <q-tooltip>Copy story ID</q-tooltip>
             </q-btn>
           </q-btn-group>
           <q-btn-group class="q-ml-xs">
-            <q-btn
-              v-if="allowAddTasks"
-              label="Tasks"
-              color="primary"
-              :dense="dense"
-              flat
-              @click.stop.prevent="openTasksForStory"
-            >
+            <q-btn v-if="allowAddTasks" label="Tasks" color="primary" :dense="dense" flat
+              @click.stop.prevent="openTasksForStory">
               <q-tooltip>View tasks for {{ storyId }}</q-tooltip>
             </q-btn>
-            <AddTask
-              v-if="allowAddTasks"
-              :initialTaskData="{ stories: [story.id] }"
-              dense
-            />
+            <AddTask v-if="allowAddTasks" :initial-task-data="{ stories: [story.id] }" dense />
           </q-btn-group>
         </div>
       </div>
@@ -93,37 +46,19 @@
       <div class="col">
         <h5 class="q-mb-sm">{{ story.name }}</h5>
         <div>
-          <q-chip
-            v-for="label in story.labels"
-            :label="label.name"
-            :key="label.name"
-            :color="label.name.includes('(') ? 'primary' : 'secondary'"
-            class="q-ma-none q-mr-xs"
-            style="color: #ddd"
-            :size="dense ? 'sm' : 'md'"
-          />
+          <q-chip v-for="label in story.labels" :label="label.name" :key="label.name"
+            :color="label.name.includes('(') ? 'primary' : 'secondary'" class="q-ma-none q-mr-xs" style="color: #ddd"
+            :size="dense ? 'sm' : 'md'" />
         </div>
       </div>
     </template>
     <template #content>
-      <DisplayStory :storyId="story.id" />
+      <DisplayStory :story-id="story.id" />
     </template>
     <template #actions>
-      <q-btn
-        label="View"
-        color="primary"
-        :dense="dense"
-        flat
-        class="q-mr-xs"
-        @click.stop.prevent="openInBrowser(story.url)"
-      />
-      <q-btn
-        label="Git C/O"
-        color="negative"
-        :dense="dense"
-        flat
-        @click.stop.prevent="$emit('checkoutBoth', story.id)"
-      />
+      <q-btn label="View" color="primary" :dense="dense" flat class="q-mr-xs"
+        @click.stop.prevent="openInBrowser(story.url)" />
+      <q-btn label="Git C/O" color="negative" :dense="dense" flat @click.stop.prevent="$emit('checkoutBoth', story.id)" />
     </template>
   </SimpleModal>
 </template>
@@ -136,11 +71,11 @@ import {
   openInBrowser,
   localStorageNames,
   saveToLocalStorageArray,
-} from "src/utils";
-import { getStory, loadStory } from "src/storeHelpers";
+} from 'src/utils';
+import { getStory, loadStory } from 'src/storeHelpers';
 
 export default {
-  name: "StoryCard",
+  name: 'StoryCard',
   components: {
     AddTask: () => import('src/components/AddTask.vue'),
     DisplayStory: () => import('src/components/DisplayStory.vue'),
@@ -184,7 +119,7 @@ export default {
         ...existingFilters,
         keyword: `${this.storyId}`,
       });
-      saveToLocalStorageArray(localStorageNames.currentTab, "tasks");
+      saveToLocalStorageArray(localStorageNames.currentTab, 'tasks');
     },
   },
 };

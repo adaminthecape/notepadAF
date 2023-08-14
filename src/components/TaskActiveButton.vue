@@ -37,30 +37,30 @@
 </template>
 
 <script>
-import { cudTaskViaStore, timeSince } from "src/utils";
-import { getTask, getTaskProperty } from "src/storeHelpers";
+import { cudTaskViaStore, timeSince } from 'src/utils';
+import { getTask, getTaskProperty } from 'src/storeHelpers';
 
-  export default {
-    props: {
-      size: {
-        type: String,
-        default: undefined
+export default {
+  props: {
+    size: {
+      type: String,
+      default: undefined
     },
     icon: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined
     },
     color: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined
     },
     flat: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false
     },
     dense: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false
     },
     mode: {
       type: String,
@@ -87,12 +87,12 @@ import { getTask, getTaskProperty } from "src/storeHelpers";
       return getTaskProperty(
         this.$store,
         this.taskId,
-        "active"
+        'active'
       );
     },
     lastActivity() {
       const activity =
-      getTaskProperty(this.$store, this.taskId, "activity") ||
+        getTaskProperty(this.$store, this.taskId, 'activity') ||
         [];
 
       if (activity && activity.length) {
@@ -106,8 +106,8 @@ import { getTask, getTaskProperty } from "src/storeHelpers";
     },
   },
   mounted() {
-    if (this.mode === "save" && !this.taskId) {
-      throw new Error("You must provide a task during save mode!");
+    if (this.mode === 'save' && !this.taskId) {
+      throw new Error('You must provide a task during save mode!');
     }
 
     if (this.lastActivity && !this.lastActivity.end && this.lastActivity.note) {
@@ -125,14 +125,14 @@ import { getTask, getTaskProperty } from "src/storeHelpers";
   methods: {
     timeSince,
     toggle() {
-      if (this.mode === "save") {
+      if (this.mode === 'save') {
         if (this.active) {
           this.isAddingNote = true;
         } else {
           this.save();
         }
       } else {
-        this.$emit("toggle", this.active ? 0 : Date.now());
+        this.$emit('toggle', this.active ? 0 : Date.now());
       }
     },
     save() {
@@ -153,7 +153,7 @@ import { getTask, getTaskProperty } from "src/storeHelpers";
         task.activity.push({
           start: Date.now(),
           end: 0,
-          note: this.logNote || "",
+          note: this.logNote || '',
         });
       } // task is no longer active; end the last log
       else {
@@ -166,18 +166,18 @@ import { getTask, getTaskProperty } from "src/storeHelpers";
           task.activity.push({
             start: this.active,
             end: Date.now(),
-            note: this.logNote || "",
+            note: this.logNote || '',
           });
         } else {
           const noteToAdd =
-            this.logNote || task.activity[task.activity.length - 1].note || "";
+            this.logNote || task.activity[task.activity.length - 1].note || '';
           task.activity[task.activity.length - 1].end = Date.now();
           task.activity[task.activity.length - 1].note = noteToAdd;
         }
       }
 
       cudTaskViaStore(this.$store, task).then(() => {
-        this.$emit("refreshTask", task);
+        this.$emit('refreshTask', task);
         this.isAddingNote = false;
       });
     },

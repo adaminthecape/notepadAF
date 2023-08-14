@@ -48,23 +48,19 @@ export default {
       default: false
     }
   },
-  data()
-  {
+  data() {
     return {
       isModalOpen: false
     };
   },
   methods: {
-    close()
-    {
+    close() {
       this.isModalOpen = false;
     },
-    open()
-    {
+    open() {
       this.isModalOpen = true;
     },
-    toggle()
-    {
+    toggle() {
       this.isModalOpen = !this.isModalOpen;
     }
   }
@@ -102,11 +98,36 @@ pre {
   max-height: 20em;
 }
 
-h1, h2, h3, h4, h5, h6 { line-height: 1em; }
-h1 { font-size: 2em; }
-h2 { font-size: 1.8em; }
-h3 { font-size: 1.6em; }
-h4 { font-size: 1.4em; }
-h5 { font-size: 1.2em; }
-h6 { font-size: 1em; }
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1em;
+}
+
+h1 {
+  font-size: 2em;
+}
+
+h2 {
+  font-size: 1.8em;
+}
+
+h3 {
+  font-size: 1.6em;
+}
+
+h4 {
+  font-size: 1.4em;
+}
+
+h5 {
+  font-size: 1.2em;
+}
+
+h6 {
+  font-size: 1em;
+}
 </style>

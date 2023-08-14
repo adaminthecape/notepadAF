@@ -4,22 +4,10 @@
   </div>
   <div v-else id="q-app">
     <div class="row items-center">
-      <q-tabs
-        v-model="currentTab"
-        class="shadow-5 full-width"
-        activeColor="primary"
-        indicatorColor="primary"
-        narrowIndicator
-        dense
-        dark
-      >
-        <q-tab
-          v-for="tab in activeAppTabs"
-          :key="`tab-${tab.name}`"
-          :name="tab.name"
-          :label="tab.label"
-          :icon="tab.icon"
-        />
+      <q-tabs v-model="currentTab" class="shadow-5 full-width" active-color="primary" indicator-color="primary"
+        narrow-indicator dense dark>
+        <q-tab v-for="tab in activeAppTabs" :key="`tab-${tab.name}`" :name="tab.name" :label="tab.label"
+          :icon="tab.icon" />
       </q-tabs>
     </div>
 
@@ -30,11 +18,7 @@
       <TaskDetailView :task-id="desiredTaskId" :key="tasksRenderIndex" />
     </div>
     <div v-if="currentTab === 'tickets'">
-      <MyTickets
-        class="q-pa-md"
-        :cachedTickets="ticketCache"
-        @updatedTickets="setTicketCache"
-      />
+      <MyTickets class="q-pa-md" :cached-tickets="ticketCache" @updatedTickets="setTicketCache" />
     </div>
     <div v-if="currentTab === 'settings'">
       <Settings class="q-pa-md" />
@@ -48,17 +32,17 @@ import {
   localStorageIntervalCheck,
   localStorageNames,
   saveToLocalStorage,
-} from "src/utils";
-import { defaultTabs, themeTypes } from "src/constants";
+} from 'src/utils';
+import { defaultTabs, themeTypes } from 'src/constants';
 
 export default {
-  name: "App",
+  name: 'App',
   components: {
-    TaskDetailView: () => import("src/components/TaskDetailView.vue"),
-    TasksActivity: () => import("src/components/TasksActivity.vue"),
-    MyTickets: () => import("src/components/MyTickets.vue"),
-    SetAccountDetails: () => import("src/components/SetAccountDetails.vue"),
-    Settings: () => import("src/components/Settings.vue"),
+    TaskDetailView: () => import('src/components/TaskDetailView.vue'),
+    TasksActivity: () => import('src/components/TasksActivity.vue'),
+    MyTickets: () => import('src/components/MyTickets.vue'),
+    SetAccountDetails: () => import('src/components/SetAccountDetails.vue'),
+    Settings: () => import('src/components/Settings.vue'),
   },
   data() {
     const hasAccount = !!getFromLocalStorage(
@@ -79,7 +63,7 @@ export default {
 
     return {
       hasAccount,
-      currentTab: "tasks",
+      currentTab: 'tasks',
       isLogDrawerOpen: false,
       activityCache: undefined,
       ticketCache: undefined,
@@ -120,12 +104,12 @@ export default {
       const zoom = getFromLocalStorage(localStorageNames.zoomLevel);
 
       if (zoom) {
-        document.getElementsByTagName("body")[0].style.zoom = zoom;
+        document.getElementsByTagName('body')[0].style.zoom = zoom;
       }
     },
     setTheme() {
       // set dark mode to the user's preference
-      const theme = this.$store.getters["themes/getActiveTheme"];
+      const theme = this.$store.getters['themes/getActiveTheme'];
       const isDark = theme === themeTypes.dark;
       this.$q.dark.set(isDark);
     },

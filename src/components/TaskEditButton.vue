@@ -22,24 +22,24 @@ export default {
       default: undefined,
     },
     size: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined
     },
     icon: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined
     },
     color: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined
     },
     flat: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false
     },
     dense: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false
     },
     editing: {
       type: Boolean,
@@ -48,7 +48,7 @@ export default {
   },
   methods: {
     toggle() {
-      this.$emit("toggle", !this.editing);
+      this.$emit('toggle', !this.editing);
     },
   },
 };

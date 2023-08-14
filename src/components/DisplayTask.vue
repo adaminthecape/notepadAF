@@ -15,8 +15,11 @@
             </q-chip>
           </div>
           <!-- VIEW ALERTS: -->
-          <div v-else-if="task.alerts && task.alerts.length" style="margin-left: -10px">
-            <q-btn v-for="(alert, a) in task.alerts" :key="`alert-${a}-${activeAlertsRenderKey}`" size="sm"
+          <div
+            v-else-if="task.alerts && task.alerts.length"
+            style="margin-left: -10px">
+            <q-btn
+v-for="(alert, a) in task.alerts" :key="`alert-${a}-${activeAlertsRenderKey}`" size="sm"
               class="text-bold" :class="{ 'q-ml-xs': !!a }" unelevated outline dense
               :color="alert.unix < Date.now() - 600000 ? 'negative' : 'primary'">
               <div class="row items-center">
@@ -30,7 +33,8 @@
           <q-space />
           <!-- MENU: -->
           <div class="row items-center" style="margin-right: -14px">
-            <TaskOptions v-if="showOptions" show-single-task-button :taskId="task.id" :isEditing="isEditing" size="md"
+            <TaskOptions
+v-if="showOptions" show-single-task-button :task-id="task.id" :is-editing="isEditing" size="md"
               dense flat @editTask="editTask" />
           </div>
         </div>
@@ -40,17 +44,21 @@
             <span class="q-mt-sm task-message-display">{{ task.message }}</span>
           </div>
           <!-- MESSAGE INPUT: -->
-          <q-input v-else ref="messageInput" v-model="task.message" :type="task.messageType" placeholder="Edit task"
+          <q-input
+v-else ref="messageInput" v-model="task.message" :type="task.messageType" placeholder="Edit task"
             class="full-width q-mb-xs" dense @keydown.alt.down.stop.prevent="toggleTextarea">
             <template #append>
-              <div :style="task.messageType === 'textarea'
-                ? 'display: flex; flex-direction: column; margin-top: 40px'
-                : ''
-                ">
-                <q-btn icon="save_as" :color="isEditing ? 'positive' : 'neutral'" size="sm" class="q-ml-xs" flat dense
+              <div
+:style="task.messageType === 'textarea'
+  ? 'display: flex; flex-direction: column; margin-top: 40px'
+  : ''
+  ">
+                <q-btn
+icon="save_as" :color="isEditing ? 'positive' : 'neutral'" size="sm" class="q-ml-xs" flat dense
                   @click="editTask(false)" />
-                <q-btn icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
-                  " size="sm" class="q-ml-xs" :outline="task.messageType === 'textarea'"
+                <q-btn
+icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
+  " size="sm" class="q-ml-xs" :outline="task.messageType === 'textarea'"
                   :flat="task.messageType !== 'textarea'" dense @click="toggleTextarea">
                   <q-tooltip>{{
                     task.messageType !== "textarea"
@@ -92,7 +100,8 @@
           <!--  />-->
           <!--</q-chip>-->
           <!-- VIEW TAGS: -->
-          <q-chip v-for="(tag, tagIndex) in task.tags" :key="`tag-${tagIndex}`" square dense dark
+          <q-chip
+v-for="(tag, tagIndex) in task.tags" :key="`tag-${tagIndex}`" square dense dark
             style="margin-right: -2px" removable @remove="removeTag(tag)">
             <div class="row items-center">
               <span style="margin-top: -2px" @click="$emit('filterByTag', tag)">{{ tag }}</span>
@@ -110,15 +119,15 @@
 </template>
 
 <script>
-import { cudTaskViaStore, timeSince, getStoriesFromTask } from "../utils";
+import { cudTaskViaStore, timeSince, getStoriesFromTask } from '../utils';
 import { getTask } from 'src/storeHelpers';
 import { useVuexStore } from 'src/store/index.js';
 
 export default {
   components: {
-    AddTag: () => import("src/components/AddTag.vue"),
-    TaskStoryDropdown: () => import("src/components/TaskStoryDropdown.vue"),
-    TaskOptions: () => import("src/components/TaskOptions.vue"),
+    AddTag: () => import('src/components/AddTag.vue'),
+    TaskStoryDropdown: () => import('src/components/TaskStoryDropdown.vue'),
+    TaskOptions: () => import('src/components/TaskOptions.vue'),
   },
   props: {
     showOptions: {
@@ -145,7 +154,7 @@ export default {
   },
   computed: {
     task() {
-      return this.$store.getters["notes/getTask"](this.taskId);
+      return this.$store.getters['notes/getTask'](this.taskId);
       // return getTask(this.$store, this.taskId);
     },
     stories() {
@@ -173,7 +182,7 @@ export default {
   watch: {
     task: {
       handler() {
-        this.$emit("refreshTask", { id: this.task.id });
+        this.$emit('refreshTask', { id: this.task.id });
       },
       deep: true,
     },
@@ -185,7 +194,7 @@ export default {
     /** helpers */
     timeSince,
     editTask(force = undefined) {
-      if (typeof force === "boolean") {
+      if (typeof force === 'boolean') {
         this.isEditing = force;
       } else {
         this.isEditing = !this.isEditing;
@@ -193,7 +202,7 @@ export default {
 
       if (this.isEditing) {
         // if now editing, focus the input
-        this.focusOnNextTick("messageInput");
+        this.focusOnNextTick('messageInput');
       } // otherwise, save the task
       else {
         cudTaskViaStore(this.$store, this.task);
@@ -270,10 +279,10 @@ export default {
     },
     /** manage tags */
     addTag(tag) {
-      if (!this.task.tags.includes(tag)) {
+      if (!(this.task.tags || []).includes(tag)) {
         cudTaskViaStore(this.$store, {
           ...this.task,
-          tags: [...this.task.tags, tag],
+          tags: [...(this.task.tags || []), tag],
         });
       }
 
@@ -289,7 +298,7 @@ export default {
       cudTaskViaStore(this.$store, {
         ...this.task,
         messageType:
-          this.task.messageType === "textarea" ? undefined : "textarea",
+          this.task.messageType === 'textarea' ? undefined : 'textarea',
       });
     },
   },

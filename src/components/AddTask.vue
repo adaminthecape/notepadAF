@@ -83,80 +83,75 @@
 </template>
 
 <script>
-  import { cudTaskViaStore } from "src/utils";
+import { cudTaskViaStore } from 'src/utils';
 
-  export default {
-    components: {
-      TaskActiveButton: () => import("src/components/TaskActiveButton.vue"),
-      TaskDoneButton: () => import("src/components/TaskDoneButton.vue")
+export default {
+  components: {
+    TaskActiveButton: () => import('src/components/TaskActiveButton.vue'),
+    TaskDoneButton: () => import('src/components/TaskDoneButton.vue')
+  },
+  props: {
+    size: {
+      type: String,
+      default: undefined
     },
-    props: {
-      size: {
-          type: String,
-          default: undefined
-      },
-      icon: {
-          type: String,
-          default: undefined
-      },
-      color: {
-          type: String,
-          default: undefined
-      },
-      flat: {
-          type: Boolean,
-          default: false
-      },
-      dense: {
-          type: Boolean,
-          default: false
-      },
-      initialTaskData: {
-        type: Object,
-        default: () => ({})
-      }
+    icon: {
+      type: String,
+      default: undefined
     },
-    data()
-    {
-      return {
-        isAddingTask: false,
-        newTask: {
-          done: 0,
-          active: 0,
-          archived: 0,
-          message: '',
-          stories: [],
-          ...(this.initialTaskData || {})
-        },
-        newTaskRenderIndex: 0
-      };
+    color: {
+      type: String,
+      default: undefined
     },
-    methods: {
-      open()
-      {
-        this.isAddingTask = !this.isAddingTask;
-      },
-      toggleTextarea()
-      {
-        this.newTask.messageType = (this.newTask.messageType === 'textarea') ? undefined : 'textarea';
-
-        this.newTaskRenderIndex += 1;
-      },
-      addNewTask()
-      {
-        const tags = Array.isArray(this.newTask.tags) ? this.newTask.tags : [];
-
-        if(Array.isArray(this.newTask.stories))
-        {
-          tags.push(...this.newTask.stories.map((s) => `${s}`));
-        }
-
-        this.newTask.tags = tags;
-
-        cudTaskViaStore(this.$store, this.newTask);
-        this.newTask = { ...this.initialTaskData };
-        this.$refs.messageInput.focus();
-      },
+    flat: {
+      type: Boolean,
+      default: false
+    },
+    dense: {
+      type: Boolean,
+      default: false
+    },
+    initialTaskData: {
+      type: Object,
+      default: () => ({})
     }
-  };
+  },
+  data() {
+    return {
+      isAddingTask: false,
+      newTask: {
+        done: 0,
+        active: 0,
+        archived: 0,
+        message: '',
+        stories: [],
+        ...(this.initialTaskData || {})
+      },
+      newTaskRenderIndex: 0
+    };
+  },
+  methods: {
+    open() {
+      this.isAddingTask = !this.isAddingTask;
+    },
+    toggleTextarea() {
+      this.newTask.messageType = (this.newTask.messageType === 'textarea') ? undefined : 'textarea';
+
+      this.newTaskRenderIndex += 1;
+    },
+    addNewTask() {
+      const tags = Array.isArray(this.newTask.tags) ? this.newTask.tags : [];
+
+      if (Array.isArray(this.newTask.stories)) {
+        tags.push(...this.newTask.stories.map((s) => `${s}`));
+      }
+
+      this.newTask.tags = tags;
+
+      cudTaskViaStore(this.$store, this.newTask);
+      this.newTask = { ...this.initialTaskData };
+      this.$refs.messageInput.focus();
+    },
+  }
+};
 </script>

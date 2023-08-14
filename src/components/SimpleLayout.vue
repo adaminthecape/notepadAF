@@ -76,8 +76,7 @@ export default {
     }
   },
   computed: {
-    screenWidth()
-    {
+    screenWidth() {
       return this.$q.screen.width;
     }
   }

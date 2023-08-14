@@ -2,7 +2,7 @@
   <q-btn-dropdown
       class="q-ml-xs"
       size="md"
-      emitValue
+      emit-value
       clearable
       dense
       dark
@@ -56,26 +56,25 @@
 </template>
 
 <script>
-  export default {
-    props: {
-      sortType: {
-        type: String,
-        default: undefined
-      },
-      sortTypes: {
-        type: Array,
-        default: () => (['due', 'created', 'done'])
-      },
-      inverseSort: {
-        type: Boolean,
-        default: false
-      }
+export default {
+  props: {
+    sortType: {
+      type: String,
+      default: undefined
     },
-    methods: {
-      setSort(type)
-      {
-        this.$emit('setSortType', type);
-      }
+    sortTypes: {
+      type: Array,
+      default: () => (['due', 'created', 'done'])
+    },
+    inverseSort: {
+      type: Boolean,
+      default: false
     }
-  };
+  },
+  methods: {
+    setSort(type) {
+      this.$emit('setSortType', type);
+    }
+  }
+};
 </script>

@@ -69,13 +69,13 @@
 </template>
 
 <script>
-import { getFromLocalStorage, localStorageNames } from "src/utils.js";
-import { getTask } from "src/storeHelpers.js";
-import SimpleLayout from "src/components/SimpleLayout.vue";
-import TaskOptions from "src/components/TaskOptions.vue";
-import TaskActivityLog from "src/components/TaskActivityLog.vue";
-import DisplayTask from "components/DisplayTask";
-import SubtaskList from "components/TaskSubtaskList";
+import { getFromLocalStorage, localStorageNames } from 'src/utils.js';
+import { getTask } from 'src/storeHelpers.js';
+import SimpleLayout from 'src/components/SimpleLayout.vue';
+import TaskOptions from 'src/components/TaskOptions.vue';
+import TaskActivityLog from 'src/components/TaskActivityLog.vue';
+import DisplayTask from 'components/DisplayTask';
+import SubtaskList from 'components/TaskSubtaskList';
 // import TaskActiveButton from "components/TaskActiveButton";
 
 export default {
@@ -93,8 +93,7 @@ export default {
       required: true
     }
   },
-  data()
-  {
+  data() {
     return {
       localStorageData: {},
       // newLogMessage: '',
@@ -102,24 +101,20 @@ export default {
     };
   },
   watch: {
-    'task.active'()
-    {
+    'task.active'() {
       this.logRenderKey += 1;
     }
   },
   computed: {
-    task()
-    {
+    task() {
       return getTask(this.$store, this.taskIdToUse);
     },
-    taskIdToUse()
-    {
+    taskIdToUse() {
       return this.taskId || getFromLocalStorage(localStorageNames.desiredTaskId);
     }
   },
   methods: {
-    editTask()
-    {
+    editTask() {
       this.$refs.displayTask.editTask();
     }
   }

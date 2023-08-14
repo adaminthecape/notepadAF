@@ -30,7 +30,7 @@
     </q-dialog>
     <TaskAlertButton
         v-if="showAllOptions || (showAlertButton || (task.alerts && task.alerts.length))"
-        :taskId="task.id"
+        :task-id="task.id"
         :size="size"
         :dense="dense"
         :flat="flat"
@@ -77,7 +77,7 @@
     />
     <TaskDeleteButton
         v-if="showAllOptions || (showDeleteButton || task.deleted)"
-        :taskId="taskId"
+        :task-id="taskId"
         :size="size"
         :dense="dense"
         :flat="flat"
@@ -98,19 +98,19 @@
 import {
   queueTaskRefresh,
   goToActivityPageForTask
-} from "src/utils";
-import { getTask } from "src/storeHelpers";
+} from 'src/utils';
+import { getTask } from 'src/storeHelpers';
 
 export default {
   components: {
-    TaskSubtaskButton: () => import("src/components/TaskSubtaskButton.vue"),
-    TaskActivityLog: () => import("src/components/TaskActivityLog.vue"),
-    TaskAlertButton: () => import("src/components/TaskAlertButton.vue"),
-    TaskDeleteButton: () => import("src/components/TaskDeleteButton.vue"),
-    TaskArchiveButton: () => import("src/components/TaskArchiveButton.vue"),
-    TaskEditButton: () => import("src/components/TaskEditButton.vue"),
-    TaskDoneButton: () => import("src/components/TaskDoneButton.vue"),
-    TaskActiveButton: () => import("src/components/TaskActiveButton.vue"),
+    TaskSubtaskButton: () => import('src/components/TaskSubtaskButton.vue'),
+    TaskActivityLog: () => import('src/components/TaskActivityLog.vue'),
+    TaskAlertButton: () => import('src/components/TaskAlertButton.vue'),
+    TaskDeleteButton: () => import('src/components/TaskDeleteButton.vue'),
+    TaskArchiveButton: () => import('src/components/TaskArchiveButton.vue'),
+    TaskEditButton: () => import('src/components/TaskEditButton.vue'),
+    TaskDoneButton: () => import('src/components/TaskDoneButton.vue'),
+    TaskActiveButton: () => import('src/components/TaskActiveButton.vue'),
   },
   props: {
     isEditing: {
@@ -162,24 +162,24 @@ export default {
       default: undefined,
     },
     size: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined
     },
     icon: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined
     },
     color: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined
     },
     flat: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false
     },
     dense: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false
     },
   },
   data() {

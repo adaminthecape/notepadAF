@@ -8,17 +8,17 @@
       :multiple="multiple"
       dense
       filled
-      useInput
-      :hideSelected="!multiple"
-      fillInput
-      inputDebounce="0"
-      :newValueMode="newValueMode ? 'add-unique' : undefined"
+      use-input
+      :hide-selected="!multiple"
+      fill-input
+      input-debounce="0"
+      :new-value-mode="newValueMode ? 'add-unique' : undefined"
       style="width: 12em"
       @filter="filterFn"
       @keydown.tab="emitInput(value, true)"
       @input="emitInput(value, false)"
   >
-    <template v-slot:no-option>
+    <template #no-option>
       <q-item :clickable="newValueMode">
         <q-item-section class="text-grey">
           <div v-if="!newValueMode">No results</div>
@@ -62,8 +62,6 @@
 </template>
 
 <script>
-import { getTasks } from "src/storeHelpers";
-
 export default {
   props: {
     inputValue: {
@@ -87,32 +85,26 @@ export default {
       default: false
     }
   },
-  data()
-  {
+  data() {
     return {
       tagsToShow: [],
       value: null
     };
   },
   computed: {
-    tasksList()
-    {
-      return getTasks(this.$store);
+    tasksList() {
+      return this.$store.getters['notes/getTasks'];
     },
-    allTags()
-    {
-      if(!this.tasksList || !this.tasksList.length)
-      {
+    allTags() {
+      if (!this.tasksList || !this.tasksList.length) {
         return [];
       }
 
-      return this.tasksList.reduce((agg, task) =>
-      {
+      return this.tasksList.reduce((agg, task) => {
         const tags = [...task.tags || []]
-            .filter((tag) => !agg.includes(tag));
+          .filter((tag) => !agg.includes(tag));
 
-        if(tags.length)
-        {
+        if (tags.length) {
           return agg.concat(tags);
         }
 
@@ -120,59 +112,47 @@ export default {
       }, []);
     }
   },
-  created()
-  {
+  created() {
     this.value = this.inputValue || [];
   },
   watch: {
-    inputValue(newVal)
-    {
+    inputValue(newVal) {
       this.value = newVal;
     }
   },
   methods: {
-    addValue()
-    {
+    addValue() {
       const v = this.$refs.selector.$refs.target.value;
 
-      if(v)
-      {
+      if (v) {
         this.$emit('input', v);
       }
     },
-    copyTags()
-    {
+    copyTags() {
       navigator.clipboard.writeText(this.value.join(', '));
     },
-    filterFn(val, update/*, abort*/)
-    {
+    filterFn(val, update/*, abort*/) {
       update(() => {
-        if (val === '')
-        {
+        if (val === '') {
           this.tagsToShow = this.allTags;
         }
-        else
-        {
+        else {
           this.tagsToShow = this.allTags.filter(v => v.toLowerCase().indexOf(val.toLowerCase()) > -1);
         }
       })
     },
-    emitInput(value, tab = false)
-    {
-      if(tab && this.multiple)
-      {
+    emitInput(value, tab = false) {
+      if (tab && this.multiple) {
         return;
       }
 
-      if(!tab && !this.multiple)
-      {
+      if (!tab && !this.multiple) {
         return;
       }
 
       this.$emit('input', value);
     },
-    clearInput()
-    {
+    clearInput() {
       this.value = null;
       this.$emit('cancel');
     }

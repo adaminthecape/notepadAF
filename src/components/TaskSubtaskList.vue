@@ -1,52 +1,23 @@
 <template>
   <q-list :key="`subtask-list-${listRenderIndex}`" class="q-px-sm">
-    <q-item
-      v-for="(subtask, s) in subtasks"
-      :key="`subtask-item-${s}`"
-      clickable
-      dense
-      @dblclick.ctrl="removeSubtask(s)"
-    >
+    <q-item v-for="(subtask, s) in subtasks" :key="`subtask-item-${s}`" clickable dense @dblclick.ctrl="removeSubtask(s)">
       <q-item-section>
         <div class="row items-center full-width">
           <q-chip v-if="subtask.note" style="flex-grow: 1" square dense>{{
             subtask.note
           }}</q-chip>
           <q-btn
-            color="primary"
-            icon="start"
-            size="sm"
-            dense
-            flat
-            @click="startSubtask(s)"
-            ><q-tooltip>Start</q-tooltip></q-btn
-          >
+color="primary" icon="start" size="sm" dense flat
+            @click="startSubtask(s)"><q-tooltip>Start</q-tooltip></q-btn>
           <q-btn
-            color="negative"
-            icon="delete"
-            size="sm"
-            dense
-            flat
-            @click="removeSubtask(s)"
-            ><q-tooltip>Remove</q-tooltip></q-btn
-          >
+color="negative" icon="delete" size="sm" dense flat
+            @click="removeSubtask(s)"><q-tooltip>Remove</q-tooltip></q-btn>
         </div>
       </q-item-section>
     </q-item>
-    <q-input
-      v-if="addNew"
-      v-model="newLogMessage"
-      placeholder="Add subtask..."
-      filled
-      dense
-    >
+    <q-input v-if="addNew" v-model="newLogMessage" placeholder="Add subtask..." filled dense>
       <template #append>
-        <q-btn
-          icon="save"
-          dense
-          flat
-          @click="saveNew({ due: 0, note: newLogMessage })"
-        />
+        <q-btn icon="save" dense flat @click="saveNew({ due: 0, note: newLogMessage })" />
       </template>
     </q-input>
   </q-list>
@@ -58,11 +29,11 @@ import {
   queueTaskRefresh,
   cudTaskViaStore,
   cudTaskPropertyViaStore,
-} from "src/utils";
-import { getTask, getTaskProperty } from "src/storeHelpers";
+} from 'src/utils';
+import { getTask, getTaskProperty } from 'src/storeHelpers';
 
 export default {
-  name: "SubtaskList",
+  name: 'SubtaskList',
   props: {
     taskId: {
       type: String,
@@ -76,7 +47,7 @@ export default {
   data() {
     return {
       listRenderIndex: 0,
-      newLogMessage: "",
+      newLogMessage: '',
     };
   },
   computed: {
@@ -84,17 +55,17 @@ export default {
       return getTask(this.$store, this.taskId);
     },
     subtasks() {
-      return getTaskProperty(this.$store, this.taskId, "next") || [];
+      return getTaskProperty(this.$store, this.taskId, 'next') || [];
     },
     isActive() {
-      return !!getTaskProperty(this.$store, this.taskId, "active");
+      return !!getTaskProperty(this.$store, this.taskId, 'active');
     },
   },
   methods: {
     startSubtask(index) {
       // is the task active? then quit
       if (this.isActive) {
-        qNotify(this.$q, "You must finish the current activity first");
+        qNotify(this.$q, 'You must finish the current activity first');
 
         return;
       }
@@ -103,7 +74,7 @@ export default {
       const activity = (this.task.activity || []).concat({
         start: Date.now(),
         end: 0,
-        note: this.subtasks[index].note || "",
+        note: this.subtasks[index].note || '',
       });
 
       cudTaskViaStore(this.$store, {
@@ -122,7 +93,7 @@ export default {
 
       cudTaskPropertyViaStore(this.$store, {
         taskId: this.taskId,
-        prop: "next",
+        prop: 'next',
         data,
       }).then(() => {
         this.listRenderIndex += 1;
@@ -134,11 +105,11 @@ export default {
       }
 
       const data = this.subtasks.concat(newItem);
-      this.newLogMessage = "";
+      this.newLogMessage = '';
 
       cudTaskPropertyViaStore(this.$store, {
         taskId: this.taskId,
-        prop: "next",
+        prop: 'next',
         data,
       }).then(() => {
         this.listRenderIndex += 1;

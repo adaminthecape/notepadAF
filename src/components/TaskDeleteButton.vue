@@ -47,8 +47,8 @@
 </template>
 
 <script>
-import { cudTaskViaStore } from "src/utils";
-import { getTask } from "src/storeHelpers";
+import { cudTaskViaStore } from 'src/utils';
+import { getTask } from 'src/storeHelpers';
 
 export default {
   props: {
@@ -57,35 +57,33 @@ export default {
       default: undefined,
     },
     size: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined
     },
     icon: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined
     },
     color: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined
     },
     flat: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false
     },
     dense: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false
     },
   },
-  data()
-  {
+  data() {
     return {
       isConfirmingDeletion: false,
     };
   },
   computed: {
-    task()
-    {
+    task() {
       return getTask(this.$store, this.taskId);
     }
   },

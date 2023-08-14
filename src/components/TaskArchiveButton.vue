@@ -17,8 +17,8 @@
 </template>
 
 <script>
-import { timeSince, cudTaskPropertyViaStore } from "src/utils";
-import { getTaskProperty } from "src/storeHelpers";
+import { timeSince, cudTaskPropertyViaStore } from 'src/utils';
+import { getTaskProperty } from 'src/storeHelpers';
 
 export default {
   props: {
@@ -27,24 +27,24 @@ export default {
       default: undefined,
     },
     size: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined
     },
     icon: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined
     },
     color: {
-        type: String,
-        default: undefined
+      type: String,
+      default: undefined
     },
     flat: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false
     },
     dense: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false
     },
   },
   computed: {
@@ -52,7 +52,7 @@ export default {
       return getTaskProperty(
         this.$store,
         this.taskId,
-        "archived"
+        'archived'
       );
     },
   },
@@ -64,11 +64,11 @@ export default {
       if (this.taskId) {
         cudTaskPropertyViaStore(this.$store, {
           taskId: this.taskId,
-          prop: "archived",
+          prop: 'archived',
           data: newVal,
         });
       } else {
-        this.$emit("toggle", newVal);
+        this.$emit('toggle', newVal);
       }
     },
   },
