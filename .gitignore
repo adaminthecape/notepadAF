@@ -1,8 +1,6 @@
 .DS_Store
 .thumbs.db
 node_modules
-.vscode
-.editorconfig
 
 # Quasar core related directories
 .quasar
@@ -33,13 +31,3 @@ yarn-error.log*
 *.ntvs*
 *.njsproj
 *.sln
-
-.gitignore
-_public
-public
-dist
-src-electron
-notesdb.json
-firebase.json
-.firebase
-.firebaserc
