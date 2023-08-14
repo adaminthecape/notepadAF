@@ -235,37 +235,37 @@
         </q-item>
       </q-card>
       <div>
-        <!--<q-card class="q-mb-sm">-->
-        <!--  <q-item>-->
-        <!--    <q-item-section>-->
-        <!--      <h5>User</h5>-->
-        <!--    </q-item-section>-->
-        <!--    <q-item-section>-->
-        <!--      <q-btn-->
-        <!--        label="Clear user"-->
-        <!--        @click="isConfirmingUserDeletion = true"-->
-        <!--      />-->
-        <!--      <q-dialog v-model="isConfirmingUserDeletion">-->
-        <!--        <q-card>-->
-        <!--          <q-item>-->
-        <!--            <q-item-section>-->
-        <!--              Really delete user? You will not be able to use the app until you log in again!-->
-        <!--            </q-item-section>-->
-        <!--          </q-item>-->
-        <!--          <q-item>-->
-        <!--            <q-item-section>-->
-        <!--              <q-space />-->
-        <!--              <q-btn-->
-        <!--                  color="negative"-->
-        <!--                  @click="forgetUser"-->
-        <!--              >Delete</q-btn>-->
-        <!--            </q-item-section>-->
-        <!--          </q-item>-->
-        <!--        </q-card>-->
-        <!--      </q-dialog>-->
-        <!--    </q-item-section>-->
-        <!--  </q-item>-->
-        <!--</q-card>-->
+        <q-card class="q-mb-sm">
+         <q-item>
+           <q-item-section>
+             <h5>User</h5>
+           </q-item-section>
+           <q-item-section>
+             <q-btn
+               label="Clear user"
+               @click="isConfirmingUserDeletion = true"
+             />
+             <q-dialog v-model="isConfirmingUserDeletion">
+               <q-card>
+                 <q-item>
+                   <q-item-section>
+                     Really delete user? You will not be able to use the app until you log in again!
+                   </q-item-section>
+                 </q-item>
+                 <q-item>
+                   <q-item-section>
+                     <q-space />
+                     <q-btn
+                         color="negative"
+                         @click="forgetUser"
+                     >Delete</q-btn>
+                   </q-item-section>
+                 </q-item>
+               </q-card>
+             </q-dialog>
+           </q-item-section>
+         </q-item>
+        </q-card>
       </div>
       <q-card class="q-mb-sm">
         <q-item>

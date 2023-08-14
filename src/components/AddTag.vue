@@ -64,7 +64,7 @@ export default {
         const tags = [...(task.tags || [])].filter((tag) => !agg.includes(tag));
 
         if (tags.length) {
-          return agg.concat(tags);
+          return [...agg, ...tags];
         }
 
         return agg;

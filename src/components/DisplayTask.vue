@@ -1,32 +1,11 @@
 <template>
-  <q-card
-    v-if="task"
-    class="flex q-mb-sm"
-    :style="`flex-direction: column; background-color: #70809020`"
-    flat
-    bordered
-  >
-    <q-item
-      clickable
-      dense
-      @click.ctrl="editTask"
-      @pointerdown="waitingToEdit = true"
-      @pointerup="waitingToEdit = true"
-    >
+  <q-card v-if="task" class="flex q-mb-sm" :style="`flex-direction: column; background-color: #70809020`" flat bordered>
+    <q-item clickable dense @click.ctrl="editTask" @pointerdown="waitingToEdit = true" @pointerup="waitingToEdit = true">
       <q-item-section>
         <div class="row items-center">
           <!-- VIEW DONE: -->
-          <div
-            v-if="task.done"
-            style="margin-left: -14px"
-            class="row items-center"
-          >
-            <q-chip
-              class="row items-center"
-              style="background: #00ff0020"
-              square
-              dense
-            >
+          <div v-if="task.done" style="margin-left: -14px" class="row items-center">
+            <q-chip class="row items-center" style="background: #00ff0020" square dense>
               <q-icon name="task_alt" size="xs" class="q-mr-xs" />
               <span>{{ new Date(task.done).toDateString() }}</span>
               <q-icon name="schedule" size="xs" class="q-mx-xs" />
@@ -36,31 +15,14 @@
             </q-chip>
           </div>
           <!-- VIEW ALERTS: -->
-          <div
-            v-else-if="task.alerts && task.alerts.length"
-            style="margin-left: -10px"
-          >
-            <q-btn
-              v-for="(alert, a) in task.alerts"
-              :key="`alert-${a}-${activeAlertsRenderKey}`"
-              size="sm"
-              class="text-bold"
-              :class="{ 'q-ml-xs': !!a }"
-              unelevated
-              outline
-              dense
-              :color="alert.unix < Date.now() - 600000 ? 'negative' : 'primary'"
-            >
+          <div v-else-if="task.alerts && task.alerts.length" style="margin-left: -10px">
+            <q-btn v-for="(alert, a) in task.alerts" :key="`alert-${a}-${activeAlertsRenderKey}`" size="sm"
+              class="text-bold" :class="{ 'q-ml-xs': !!a }" unelevated outline dense
+              :color="alert.unix < Date.now() - 600000 ? 'negative' : 'primary'">
               <div class="row items-center">
                 <q-icon name="notification_important" />
                 <span>{{ timeSince(new Date(alert.unix)) }}</span>
-                <q-icon
-                  name="close"
-                  size="xs"
-                  dense
-                  flat
-                  @dblclick.stop.prevent="removeAlert(alert)"
-                />
+                <q-icon name="close" size="xs" dense flat @dblclick.stop.prevent="removeAlert(alert)" />
               </div>
               <q-tooltip>Due {{ alert.date }} at {{ alert.time }}</q-tooltip>
             </q-btn>
@@ -68,16 +30,8 @@
           <q-space />
           <!-- MENU: -->
           <div class="row items-center" style="margin-right: -14px">
-            <TaskOptions
-              v-if="showOptions"
-              show-single-task-button
-              :taskId="task.id"
-              :isEditing="isEditing"
-              size="md"
-              dense
-              flat
-              @editTask="editTask"
-            />
+            <TaskOptions v-if="showOptions" show-single-task-button :taskId="task.id" :isEditing="isEditing" size="md"
+              dense flat @editTask="editTask" />
           </div>
         </div>
         <div class="row items-center">
@@ -86,49 +40,22 @@
             <span class="q-mt-sm task-message-display">{{ task.message }}</span>
           </div>
           <!-- MESSAGE INPUT: -->
-          <q-input
-            v-else
-            ref="messageInput"
-            v-model="task.message"
-            :type="task.messageType"
-            placeholder="Edit task"
-            class="full-width q-mb-xs"
-            dense
-            @keydown.alt.down.stop.prevent="toggleTextarea"
-          >
+          <q-input v-else ref="messageInput" v-model="task.message" :type="task.messageType" placeholder="Edit task"
+            class="full-width q-mb-xs" dense @keydown.alt.down.stop.prevent="toggleTextarea">
             <template #append>
-              <div
-                :style="
-                  task.messageType === 'textarea'
-                    ? 'display: flex; flex-direction: column; margin-top: 40px'
-                    : ''
-                "
-              >
-                <q-btn
-                  icon="save_as"
-                  :color="isEditing ? 'positive' : 'neutral'"
-                  size="sm"
-                  class="q-ml-xs"
-                  flat
-                  dense
-                  @click="editTask(false)"
-                />
-                <q-btn
-                  icon="list"
-                  :color="
-                    task.messageType === 'textarea' ? 'positive' : 'neutral'
-                  "
-                  size="sm"
-                  class="q-ml-xs"
-                  :outline="task.messageType === 'textarea'"
-                  :flat="task.messageType !== 'textarea'"
-                  dense
-                  @click="toggleTextarea"
-                >
+              <div :style="task.messageType === 'textarea'
+                ? 'display: flex; flex-direction: column; margin-top: 40px'
+                : ''
+                ">
+                <q-btn icon="save_as" :color="isEditing ? 'positive' : 'neutral'" size="sm" class="q-ml-xs" flat dense
+                  @click="editTask(false)" />
+                <q-btn icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
+                  " size="sm" class="q-ml-xs" :outline="task.messageType === 'textarea'"
+                  :flat="task.messageType !== 'textarea'" dense @click="toggleTextarea">
                   <q-tooltip>{{
                     task.messageType !== "textarea"
-                      ? "Convert to textarea"
-                      : "Convert to input"
+                    ? "Convert to textarea"
+                    : "Convert to input"
                   }}</q-tooltip>
                 </q-btn>
               </div>
@@ -165,22 +92,10 @@
           <!--  />-->
           <!--</q-chip>-->
           <!-- VIEW TAGS: -->
-          <q-chip
-            v-for="(tag, tagIndex) in task.tags"
-            :key="`tag-${tagIndex}`"
-            square
-            dense
-            dark
-            style="margin-right: -2px"
-            removable
-            @remove="removeTag(tag)"
-          >
+          <q-chip v-for="(tag, tagIndex) in task.tags" :key="`tag-${tagIndex}`" square dense dark
+            style="margin-right: -2px" removable @remove="removeTag(tag)">
             <div class="row items-center">
-              <span
-                style="margin-top: -2px"
-                @click="$emit('filterByTag', tag)"
-                >{{ tag }}</span
-              >
+              <span style="margin-top: -2px" @click="$emit('filterByTag', tag)">{{ tag }}</span>
             </div>
           </q-chip>
           <q-space />
@@ -197,6 +112,7 @@
 <script>
 import { cudTaskViaStore, timeSince, getStoriesFromTask } from "../utils";
 import { getTask } from 'src/storeHelpers';
+import { useVuexStore } from 'src/store/index.js';
 
 export default {
   components: {
@@ -229,27 +145,22 @@ export default {
   },
   computed: {
     task() {
-      return getTask(this.$store, this.taskId);
+      return this.$store.getters["notes/getTask"](this.taskId);
+      // return getTask(this.$store, this.taskId);
     },
     stories() {
-      console.log('get stories:', this.task, getStoriesFromTask(this.task));
       return ((
-          `${(this.task.tags || []).join('|')}|${this.task.message}`
-              .match(/1\d{8}/g)
+        `${(this.task.tags || []).join('|')}|${this.task.message}`
+          .match(/1\d{8}/g)
       ) || [])
-          .reduce((agg, id) =>
-          {
-              if(!agg.some((existing) => existing.id === id))
-              {
-                  agg.push({ id });
-              }
+        .reduce((agg, id) => {
+          if (!agg.some((existing) => existing.id === id)) {
+            agg.push({ id });
+          }
 
-              return agg;
-          }, []);
+          return agg;
+        }, []);
     },
-  },
-  mounted() {
-    console.log("DisplayTask:", this.taskId, this.task, getStoriesFromTask(getTask(this.$store, this.taskId)));
   },
   // mounted()
   // {
@@ -289,6 +200,10 @@ export default {
       }
     },
     focusOnNextTick(refName, depth = 0) {
+      if (depth > 10) {
+        return;
+      }
+
       if (this.$refs[refName]) {
         this.$refs[refName].focus();
       } else {
@@ -296,10 +211,6 @@ export default {
           if (this.$refs[refName]) {
             this.$refs[refName].focus();
           } else {
-            if (depth > 10) {
-              return;
-            }
-
             this.focusOnNextTick(refName, depth);
           }
         });

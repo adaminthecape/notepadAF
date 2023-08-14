@@ -25,7 +25,7 @@
     </q-btn>
     <q-dialog v-model="isViewingActivity">
       <q-card>
-        <TaskActivityLog :filters="{ id: task.id }" />
+        <TaskActivityLog :task-id="taskId" />
       </q-card>
     </q-dialog>
     <TaskAlertButton
@@ -94,8 +94,11 @@
   </div>
 </template>
 
-<script>
-import { goToActivityPageForTask } from "src/utils";
+<script lang="ts">
+import {
+  queueTaskRefresh,
+  goToActivityPageForTask
+} from "src/utils";
 import { getTask } from "src/storeHelpers";
 
 export default {
@@ -113,51 +116,41 @@ export default {
     isEditing: {
       type: Boolean,
       default: false,
-      default: false,
     },
     showArchiveButton: {
       type: Boolean,
-      default: false,
       default: false,
     },
     showSingleTaskButton: {
       type: Boolean,
       default: false,
-      default: false,
     },
     showActiveButton: {
       type: Boolean,
-      default: false,
       default: false,
     },
     showActivityLogButton: {
       type: Boolean,
       default: false,
-      default: false,
     },
     showDoneButton: {
       type: Boolean,
-      default: false,
       default: false,
     },
     showEditButton: {
       type: Boolean,
       default: false,
-      default: false,
     },
     showAlertButton: {
       type: Boolean,
-      default: false,
       default: false,
     },
     showSubtaskButton: {
       type: Boolean,
       default: false,
-      default: false,
     },
     showDeleteButton: {
       type: Boolean,
-      default: false,
       default: false,
     },
     hideMenuButton: {
@@ -210,6 +203,7 @@ export default {
     },
   },
   methods: {
+    queueTaskRefresh,
     goToActivityPageForTask
   }
 }

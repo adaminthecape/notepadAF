@@ -8,6 +8,23 @@ import pivotal from '../store/pivotal/index';
 
 Vue.use(Vuex)
 
+export function useVuexStore()
+{
+  const Store = new Vuex.Store({
+    modules: {
+        notes,
+        themes,
+        pivotal
+    },
+
+    // enable strict mode (adds overhead!)
+    // for dev mode only
+    strict: process.env.DEBUGGING
+  })
+
+  return Store
+}
+
 /*
  * If not building with SSR mode, you can
  * directly export the Store instantiation;
