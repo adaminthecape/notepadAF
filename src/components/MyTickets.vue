@@ -27,18 +27,22 @@
           </q-item-section>
           <q-item-section>
             <q-checkbox v-if="['includedone'].includes(param)" v-model="queryParams[param]" class="q-pa-sm" />
-            <q-select v-else-if="queryParamOptions[param]" v-model="queryParams[param]"
+            <q-select
+v-else-if="queryParamOptions[param]" v-model="queryParams[param]"
               :options="queryParamOptions[param]" class="q-pa-sm" stack-label filled
               :multiple="queryParamMultiples[param] || false">
               <template #append>
-                <q-btn v-if="queryParams[param]" icon="clear" dense flat
+                <q-btn
+v-if="queryParams[param]" icon="clear" dense flat
                   @click.stop.prevent="queryParams[param] = null" />
               </template>
             </q-select>
-            <q-input v-else v-model="queryParams[param]" class="q-pa-sm" bottom-slots stack-label filled
+            <q-input
+v-else v-model="queryParams[param]" class="q-pa-sm" bottom-slots stack-label filled
               :mask="queryParamMasks[param] || undefined">
               <template #append>
-                <q-btn v-if="queryParams[param]" icon="clear" dense flat
+                <q-btn
+v-if="queryParams[param]" icon="clear" dense flat
                   @click.stop.prevent="queryParams[param] = null" />
               </template>
             </q-input>
@@ -55,7 +59,8 @@
         <div>
           <transition name="fade" appear>
             <div v-if="resultTotals" :key="resultsRenderIndex">
-              <q-badge v-if="resultTotals.hits > 0" color="primary" style="font-size: 1.2em; user-select: none"
+              <q-badge
+v-if="resultTotals.hits > 0" color="primary" style="font-size: 1.2em; user-select: none"
                 class="q-pa-md q-mb-md full-width">
                 <div class="row items-center full-width">
                   <div>
@@ -64,12 +69,14 @@
                   </div>
                   <q-space />
                   <div>
-                    <TaskSortDropdown :sort-type="sortType" :sort-types="sortTypes" :inverse-sort="inverseSort"
+                    <TaskSortDropdown
+:sort-type="sortType" :sort-types="sortTypes" :inverse-sort="inverseSort"
                       @setSortType="setSortType" />
                   </div>
                 </div>
               </q-badge>
-              <q-badge v-else color="primary" style="font-size: 1.2em; user-select: none"
+              <q-badge
+v-else color="primary" style="font-size: 1.2em; user-select: none"
                 class="q-pa-md q-mb-md full-width">
                 <div class="row items-center full-width">
                   <div>No results found.</div>
@@ -124,12 +131,6 @@ export default {
       isGitStatusDropdownOpen: false,
       results: this.cachedTickets || [],
       projectId: getFromLocalStorage(localStorageNames.pivotalProjectId),
-      modulesToFetch: [
-        'aluminate-vue',
-        'aluminate-api',
-        'core-api',
-        'localhost',
-      ],
       params: {},
       queryParamMultiples: {
         epic: true,

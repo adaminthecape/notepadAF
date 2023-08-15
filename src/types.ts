@@ -5,11 +5,17 @@ export type Task = {
   updated: number;
   done?: number | boolean;
   active?: number | boolean;
+  deleted?: number | boolean;
   activity?: TaskActivityLog[];
+  subtasks?: TaskSubtask[];
   archived?: number | boolean;
   tags?: string[];
   alerts?: TaskAlert[];
 };
+
+export interface TaskSubtask {
+  [key: string]: any;
+}
 
 export interface TaskActivityLog {
   [key: string]: any;

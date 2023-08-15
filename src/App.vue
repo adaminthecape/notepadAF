@@ -4,9 +4,11 @@
   </div>
   <div v-else id="q-app">
     <div class="row items-center">
-      <q-tabs v-model="currentTab" class="shadow-5 full-width" active-color="primary" indicator-color="primary"
+      <q-tabs
+v-model="currentTab" class="shadow-5 full-width" active-color="primary" indicator-color="primary"
         narrow-indicator dense dark>
-        <q-tab v-for="tab in activeAppTabs" :key="`tab-${tab.name}`" :name="tab.name" :label="tab.label"
+        <q-tab
+v-for="tab in activeAppTabs" :key="`tab-${tab.name}`" :name="tab.name" :label="tab.label"
           :icon="tab.icon" />
       </q-tabs>
     </div>
@@ -34,6 +36,7 @@ import {
   saveToLocalStorage,
 } from 'src/utils';
 import { defaultTabs, themeTypes } from 'src/constants';
+import useTaskStore from './pinia/taskStore';
 
 export default {
   name: 'App',
@@ -107,11 +110,13 @@ export default {
         document.getElementsByTagName('body')[0].style.zoom = zoom;
       }
     },
-    setTheme() {
-      // set dark mode to the user's preference
-      const theme = this.$store.getters['themes/getActiveTheme'];
-      const isDark = theme === themeTypes.dark;
-      this.$q.dark.set(isDark);
+      setTheme()
+      {
+        const store = useTaskStore();
+        // set dark mode to the user's preference
+        const theme = store.getters['themes/getActiveTheme'];
+        const isDark = theme === themeTypes.dark;
+        this.$q.dark.set(isDark);
     },
     watchTabChanges() {
       saveToLocalStorage(localStorageNames.currentTabQueue, []);

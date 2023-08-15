@@ -14,42 +14,26 @@
   </q-btn>
 </template>
 
-<script>
-export default {
-  props: {
-    taskId: {
-      type: String,
-      default: undefined,
-    },
-    size: {
-      type: String,
-      default: undefined
-    },
-    icon: {
-      type: String,
-      default: undefined
-    },
-    color: {
-      type: String,
-      default: undefined
-    },
-    flat: {
-      type: Boolean,
-      default: false
-    },
-    dense: {
-      type: Boolean,
-      default: false
-    },
-    editing: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  methods: {
-    toggle() {
-      this.$emit('toggle', !this.editing);
-    },
-  },
-};
+<script setup lang="ts">
+import {
+    defineEmits,
+    defineProps
+} from 'vue';
+import { useQuasarProps } from 'src/components/composables/QuasarProps';
+import { useSingleTaskProps } from 'src/components/composables/SingleTaskProps';
+
+const { size, icon, color, flat, dense } = useQuasarProps();
+const { taskId, task } = useSingleTaskProps();
+
+const editing = defineProps<boolean>();
+
+const emit = defineEmits<{
+    (event: 'toggle', isEditing: boolean): void;
+}>();
+
+function toggle()
+{
+    console.log('Edit toggle:', editing);
+    emit('toggle', !editing);
+}
 </script>

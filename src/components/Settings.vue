@@ -26,7 +26,8 @@
             <h5>Pivotal token</h5>
           </q-item-section>
           <q-item-section>
-            <q-input v-model="tokens.pivotal" :type="visibilityToggles.pivotalToken ? 'text' : 'password'"
+            <q-input
+v-model="tokens.pivotal" :type="visibilityToggles.pivotalToken ? 'text' : 'password'"
               placeholder="Pivotal token" filled>
               <template #append>
                 <div>
@@ -43,7 +44,8 @@
             <h5>Pivotal project ID</h5>
           </q-item-section>
           <q-item-section>
-            <q-input v-model="pivotalProjectId" :type="visibilityToggles.pivotalProjectId ? 'text' : 'password'"
+            <q-input
+v-model="pivotalProjectId" :type="visibilityToggles.pivotalProjectId ? 'text' : 'password'"
               placeholder="Pivotal project ID" filled>
               <template #append>
                 <div>
@@ -90,34 +92,42 @@
                 <q-card style="max-width: 100%">
                   <q-item>
                     <q-item-section>
-                      <q-input v-model="firebaseConfig.appId" :type="visibilityToggles.appId ? 'text' : 'password'"
+                      <q-input
+v-model="firebaseConfig.appId" :type="visibilityToggles.appId ? 'text' : 'password'"
                         label="App ID" filled>
                         <template #append>
-                          <q-icon :name="visibilityToggles.appId ? 'visibility_off' : 'visibility'" class="cursor-pointer"
+                          <q-icon
+:name="visibilityToggles.appId ? 'visibility_off' : 'visibility'" class="cursor-pointer"
                             @click="visibilityToggles.appId = !visibilityToggles.appId" />
                         </template>
                       </q-input>
-                      <q-input v-model="firebaseConfig.apiKey" :type="visibilityToggles.apiKey ? 'text' : 'password'"
+                      <q-input
+v-model="firebaseConfig.apiKey" :type="visibilityToggles.apiKey ? 'text' : 'password'"
                         label="API Key" filled>
                         <template #append>
-                          <q-icon :name="visibilityToggles.apiKey ? 'visibility_off' : 'visibility'"
+                          <q-icon
+:name="visibilityToggles.apiKey ? 'visibility_off' : 'visibility'"
                             class="cursor-pointer" @click="visibilityToggles.apiKey = !visibilityToggles.apiKey" />
                         </template>
                       </q-input>
-                      <q-input v-model="firebaseConfig.messagingSenderId"
+                      <q-input
+v-model="firebaseConfig.messagingSenderId"
                         :type="visibilityToggles.messagingSenderId ? 'text' : 'password'" label="Messaging Sender ID"
                         filled>
                         <template #append>
-                          <q-icon :name="visibilityToggles.messagingSenderId ? 'visibility_off' : 'visibility'"
+                          <q-icon
+:name="visibilityToggles.messagingSenderId ? 'visibility_off' : 'visibility'"
                             class="cursor-pointer"
                             @click="visibilityToggles.messagingSenderId = !visibilityToggles.messagingSenderId" />
                         </template>
                       </q-input>
-                      <q-input v-model="firebaseConfig.projectId"
+                      <q-input
+v-model="firebaseConfig.projectId"
                         :type="visibilityToggles.projectId ? 'text' : 'password'" label="Project ID" filled
                         @input="computeFirebaseVars">
                         <template #append>
-                          <q-icon :name="visibilityToggles.projectId ? 'visibility_off' : 'visibility'"
+                          <q-icon
+:name="visibilityToggles.projectId ? 'visibility_off' : 'visibility'"
                             class="cursor-pointer" @click="visibilityToggles.projectId = !visibilityToggles.projectId" />
                         </template>
                       </q-input>
@@ -145,7 +155,7 @@
                 <q-btn label="Open backup handler" @click="open" />
               </template>
               <template #content>
-                <BackupHandler />
+                <!-- <BackupHandler /> -->
               </template>
             </SimpleModal>
           </q-item-section>
@@ -186,7 +196,8 @@
           <q-item-section>
             <q-btn-group class="row full-width">
               <q-btn :disable="!$q.dark.isActive" label="Light mode" style="flex-grow: 1" @click="toggleDarkMode" />
-              <q-btn :disable="$q.dark.isActive" label="Dark mode" style="flex-grow: 1" :dark="true"
+              <q-btn
+:disable="$q.dark.isActive" label="Dark mode" style="flex-grow: 1" :dark="true"
                 @click="toggleDarkMode" />
             </q-btn-group>
           </q-item-section>
@@ -199,10 +210,12 @@
           </q-item-section>
           <q-item-section>
             <q-btn-group>
-              <q-btn color="primary" icon="remove" size="md" class="full-width" dense flat
+              <q-btn
+color="primary" icon="remove" size="md" class="full-width" dense flat
                 @click.stop.prevent="addZoom(-10)" />
               <q-btn :label="currentZoomLevel" no-caps />
-              <q-btn color="primary" icon="add" size="md" class="full-width" dense flat
+              <q-btn
+color="primary" icon="add" size="md" class="full-width" dense flat
                 @click.stop.prevent="addZoom(10)" />
             </q-btn-group>
           </q-item-section>

@@ -1,13 +1,13 @@
 // import { google } from 'googleapis';
 // import firebase from "firebase";
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, onValue, set } from "firebase/database";
-import {getFromLocalStorage, localStorageNames, saveToLocalStorage} from "src/utils";
+import { initializeApp } from '@firebase/app';
+import { getDatabase, ref, onValue, set } from '@firebase/database';
+import {getFromLocalStorage, localStorageNames, saveToLocalStorage} from 'src/utils';
 import {
     getAuth,
     // createUserWithEmailAndPassword,
     signInWithEmailAndPassword
-} from "firebase/auth";
+} from '@firebase/auth';
 
 const dbName = 'notes';
 let db,

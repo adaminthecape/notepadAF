@@ -14,6 +14,9 @@
   },
   "dependencies": {
     "@babel/eslint-parser": "^7.21.3",
+    "@firebase/app": "^0.9.15",
+    "@firebase/auth": "^1.1.0",
+    "@firebase/database": "^1.0.1",
     "@quasar/extras": "^1.0.0",
     "@quasar/quasar-ui-qmarkdown": "^1.4.4",
     "axios": "^1.2.1",
@@ -26,7 +29,7 @@
     "uuid": "^9.0.0",
     "vite-plugin-require": "^1.1.10",
     "vue": "^3.0.0",
-    "vue-router": "^4.0.0",
+    "vue-router": "^4.0.13",
     "vuedraggable": "^2.24.3"
   },
   "devDependencies": {
