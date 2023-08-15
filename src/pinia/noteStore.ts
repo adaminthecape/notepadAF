@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { Note } from 'src/components/tasks/types';
+import { Note } from 'src/types';
 import { readFromDbSync, saveAll } from 'src/mixins/jsondb.js';
 
 export type MyInterface = {

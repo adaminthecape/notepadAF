@@ -1,7 +1,11 @@
 <template>
   <q-btn
-:size="size" :flat="flat" :dense="dense" :color="done ? 'green-7' : undefined"
-    :icon="done ? 'check_circle' : 'check_circle_outline'" @click="toggle">
+    :size="size"
+    :flat="flat"
+    :dense="dense"
+    :color="done ? 'green-7' : undefined"
+    :icon="done ? 'check_circle' : 'check_circle_outline'"
+    @click="toggle">
     <q-tooltip>
       <span v-if="done">Finished {{ timeSince(done) }}</span>
       <span v-else>Finish task</span>

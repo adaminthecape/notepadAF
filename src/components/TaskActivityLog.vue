@@ -4,15 +4,17 @@
       <q-item-section>
         <div class="flex" style="flex-direction: column">
           <div v-if="showMessage">{{ log.message }}</div>
-          <q-btn-dropdown class="row items-center full-width justify-start" style="align-content: start" flat dense
+          <q-btn-dropdown
+class="row items-center full-width justify-start" style="align-content: start" flat dense
             no-caps>
             <template #label>
               <div class="row items-center justify-start full-width">
                 <q-chip square dense class="text-bold" style="min-width: 12em">{{ log.startDate }}</q-chip>
-                <TaskActiveButton v-if="!log.end" :task-id="taskId" mode="save" @click.stop.prevent="
+                <TaskActiveButton
+v-if="!log.end" :task-id="taskId" mode="save" @click.stop.prevent="
                                     {
-                }
-                  " />
+}
+  " />
                 <q-chip v-else class="text-bold" style="min-width: 4em" square dense>{{ !log.end ? "..." : log.duration
                 }}</q-chip>
                 <q-chip style="flex-grow: 1" class="full-width" square dense>
@@ -24,38 +26,48 @@
             <template #default>
               <div>
                 <q-item class="row items-center">
-                  <q-btn v-if="log.end" color="negative" icon="delete" size="md" class="q-mr-sm" dense flat
+                  <q-btn
+v-if="log.end" color="negative" icon="delete" size="md" class="q-mr-sm" dense flat
                     @click="removeActivityLog(log)" />
                   <q-space />
                   <q-btn-group>
-                    <q-btn color="primary" icon="keyboard_double_arrow_left" size="md" class="full-width" dense flat
+                    <q-btn
+color="primary" icon="keyboard_double_arrow_left" size="md" class="full-width" dense flat
                       :v-close-popup="false" @click.stop.prevent="incrementBy('start', log, -3600000)" />
-                    <q-btn color="primary" icon="keyboard_arrow_left" size="md" class="full-width" dense flat
+                    <q-btn
+color="primary" icon="keyboard_arrow_left" size="md" class="full-width" dense flat
                       @click.stop.prevent="incrementBy('start', log, -600000)" />
                     <q-btn label="Start" no-caps dense />
-                    <q-btn color="primary" icon="keyboard_arrow_right" size="md" class="full-width" dense flat
+                    <q-btn
+color="primary" icon="keyboard_arrow_right" size="md" class="full-width" dense flat
                       @click.stop.prevent="incrementBy('start', log, 600000)" />
-                    <q-btn color="primary" icon="keyboard_double_arrow_right" size="md" class="full-width" dense flat
+                    <q-btn
+color="primary" icon="keyboard_double_arrow_right" size="md" class="full-width" dense flat
                       @click.stop.prevent="incrementBy('start', log, 3600000)" />
                   </q-btn-group>
                   <q-space />
                   <q-btn-group v-if="log.end" class="q-ml-sm">
-                    <q-btn color="primary" icon="keyboard_double_arrow_left" size="md" class="full-width" dense flat
+                    <q-btn
+color="primary" icon="keyboard_double_arrow_left" size="md" class="full-width" dense flat
                       @click.stop.prevent="incrementBy('end', log, -3600000)" />
-                    <q-btn color="primary" icon="keyboard_arrow_left" size="md" class="full-width" dense flat
+                    <q-btn
+                    color="primary" icon="keyboard_arrow_left" size="md" class="full-width" dense flat
                       @click.stop.prevent="incrementBy('end', log, -600000)" />
                     <q-btn label="End" no-caps dense />
-                    <q-btn color="primary" icon="keyboard_arrow_right" size="md" class="full-width" dense flat
+                    <q-btn
+color="primary" icon="keyboard_arrow_right" size="md" class="full-width" dense flat
                       @click.stop.prevent="incrementBy('end', log, 600000)" />
-                    <q-btn color="primary" icon="keyboard_double_arrow_right" size="md" class="full-width" dense flat
+                    <q-btn
+color="primary" icon="keyboard_double_arrow_right" size="md" class="full-width" dense flat
                       @click.stop.prevent="incrementBy('end', log, 3600000)" />
                   </q-btn-group>
                 </q-item>
               </div>
-              <q-input v-model="log.note" dense filled @click.stop.prevent="
+              <q-input
+v-model="log.note" dense filled @click.stop.prevent="
                                 {
-              }
-                ">
+}
+  ">
                 <template #append>
                   <q-btn icon="save" dense flat @click.stop.prevent="updateLog(taskActivity)" />
                 </template>
