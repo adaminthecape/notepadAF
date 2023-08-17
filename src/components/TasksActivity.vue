@@ -108,11 +108,11 @@ v-if="task" :key="taskRenderIndex[task.id]" note-id="tasks" :task-id="task.id" c
 </template>
 
 <script>
-import DisplayTask from './DisplayTask';
-import SimpleLayout from './SimpleLayout';
-import TaskTagSelector from './TaskTagSelector';
-import TaskSortDropdown from './TaskSortDropdown';
-import LocalStorageList from 'src/components/LocalStorageList.vue';
+import DisplayTask from 'src/components/DisplayTask';
+import SimpleLayout from 'src/components/SimpleLayout';
+import TaskTagSelector from 'src/components/TaskTagSelector';
+import TaskSortDropdown from 'src/components/TaskSortDropdown';
+import LocalStorageList from 'src/components/LocalStorageList';
 import {
   cudTaskViaStore,
   filterTaskList,
@@ -124,6 +124,7 @@ import {
   localStorageNames,
 } from 'src/utils';
 import { getTasksByBuckets } from 'src/storeHelpers';
+import useTaskStore from 'src/pinia/taskStore';
 
 export default {
   name: 'TasksContainer',
@@ -175,8 +176,12 @@ export default {
     };
   },
   computed: {
+    store() {
+      return useTaskStore();
+    },
     categories() {
-      return this.$store.getters['notes/getCategories'];
+      return this.store.getCategories;
+      // return this.$store.getters['notes/getCategories'];
     },
     limitedTasks() {
       const page = this.pagination.page - 1;
@@ -216,24 +221,19 @@ export default {
         .filter((c) => c.active)
         .map((c) => c.title)
         .concat('other');
-      let res = {};
+      let tasksToKeep = {};
 
       const allTasks = getTasksByBuckets(this.$store);
 
       Object.entries(allTasks).forEach(
-        ([
-          // bucket name
-          key,
-          // list of tasks in that bucket
-          value,
-        ]) => {
-          if (catsToKeep.includes(key)) {
-            res = { ...res, ...value };
+        ([bucketName, tasksInBucket]) => {
+          if (catsToKeep.includes(bucketName)) {
+            tasksToKeep = { ...tasksToKeep, ...tasksInBucket };
           }
         }
       );
 
-      return res;
+      return tasksToKeep;
     },
     // filteredTasksList()
     // {
@@ -242,10 +242,12 @@ export default {
     //   );
     // },
     isCloudLoading() {
-      return this.$store.getters['notes/isCloudLoading'];
+      return this.store.isCloudLoading;
+      // return this.$store.getters['notes/isCloudLoading'];
     },
     lastCloudUpdate() {
-      return this.$store.getters['notes/getLastCloudUpdate'];
+      return this.store.getLastCloudUpdate;
+      // return this.$store.getters['notes/getLastCloudUpdate'];
     },
     paginationComputed() {
       return {
@@ -306,8 +308,10 @@ export default {
   methods: {
     /****** Loading/fetching tasks */
     async loadTasks() {
-      this.$store.dispatch('notes/setCategoriesFromLocalStorage');
-      this.$store.dispatch('notes/watchCloudDb');
+      this.store.setCategoriesFromLocalStorage();
+      this.store.watchCloudDb();
+      // this.$store.dispatch('notes/setCategoriesFromLocalStorage');
+      // this.$store.dispatch('notes/watchCloudDb');
 
       this.tmpInterval = setInterval(() => {
         const check =
@@ -420,19 +424,11 @@ export default {
 </script>
 
 <style>
-body {
-  background: #eee;
-}
-
 .full-height {
   min-height: 92vh;
   max-height: 92vh;
   max-width: 50%;
   overflow-y: scroll;
-}
-
-pre {
-  white-space: pre-wrap;
 }
 
 .markdown-attention {
@@ -452,39 +448,6 @@ pre {
   border: 1px solid #aaa;
   overflow-y: scroll;
   max-height: 20em;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  line-height: 1em;
-}
-
-h1 {
-  font-size: 2em;
-}
-
-h2 {
-  font-size: 1.8em;
-}
-
-h3 {
-  font-size: 1.6em;
-}
-
-h4 {
-  font-size: 1.4em;
-}
-
-h5 {
-  font-size: 1.2em;
-}
-
-h6 {
-  font-size: 1em;
 }
 </style>
 

@@ -267,15 +267,14 @@ color="primary" icon="add" size="md" class="full-width" dense flat
 </template>
 
 <script>
-import SimpleLayout from './SimpleLayout.vue';
-import SimpleModal from './SimpleModal.vue';
-import BackupHandler from './BackupHandler.vue';
+import SimpleLayout from 'src/components/SimpleLayout.vue';
+import SimpleModal from 'src/components/SimpleModal.vue';
 import { getFromLocalStorage, localStorageNames, saveToLocalStorage } from 'src/utils';
+import { useThemeStore } from 'src/pinia/themeStore';
 
 export default {
   name: 'SettingsManager',
   components: {
-    BackupHandler,
     SimpleModal,
     SimpleLayout
   },
@@ -345,11 +344,12 @@ export default {
       saveToLocalStorage(localStorageNames.zoomLevel, zoomLevel);
     },
     toggleDarkMode() {
+      const themes = useThemeStore();
       if (this.$q.dark.isActive) {
-        this.$store.dispatch('themes/setLightMode');
+        themes.setLightMode();
         this.$q.dark.set(false);
       } else {
-        this.$store.dispatch('themes/setDarkMode');
+        themes.setDarkMode();
         this.$q.dark.set(true);
       }
     },

@@ -36,16 +36,16 @@ import {
   defineAsyncComponent,
   computed
 } from 'vue';
-import { useVuexStore } from 'src/store';
+import useTaskStore from '@/pinia/taskStore';
 
-const store = useVuexStore();
+const store = useTaskStore();
 
 const SimpleModal = defineAsyncComponent(() => import('src/components/SimpleModal.vue'));
 
 const value = ref<string>('');
 
 const tasksList = computed<Task[]>(() => {
-  return Object.values(store.getters['notes/getTasks']);
+  return Object.values(store.getTasks);
 });
 
 const allTags = computed(() => {
@@ -54,7 +54,7 @@ const allTags = computed(() => {
   }
 
   return tasksList.value.reduce(
-    (agg: string[], task: Task): string[] => {
+    (agg, task: Task) => {
       const tags = [...(task.tags || [])].filter(
         (tag) => !agg.includes(tag)
       );
@@ -65,7 +65,7 @@ const allTags = computed(() => {
 
       return agg;
     },
-    []
+    [] as string[]
   );
 });
 

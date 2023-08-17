@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import CreateAlert from './tasks/CreateAlert.vue';
+import CreateAlert from 'src/components/CreateAlert.vue';
 
 export default {
   components: {

@@ -19,25 +19,19 @@
     </div>
 </template>
 
-<script>
-import { localStorageNames, saveToLocalStorage } from 'src/utils';
+<script setup>
+import { ref } from 'vue';
+import { localStorageNames, saveToLocalStorage } from 'src/utils.js';
 
-export default {
-  data() {
-    return {
-      email: '',
-      password: ''
-    };
-  },
-  methods: {
-    setCredentials() {
-      saveToLocalStorage(localStorageNames.user_account, {
-        email: this.email,
-        password: this.password
-      });
+const email = ref('');
+const password = ref('');
 
-      window.location.reload();
-    }
-  }
-};
+function setCredentials() {
+  saveToLocalStorage(localStorageNames.user_account, {
+    email: email.value,
+    password: password.value
+  });
+
+  window.location.reload();
+}
 </script>

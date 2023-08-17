@@ -120,8 +120,7 @@ v-for="(tag, tagIndex) in task.tags" :key="`tag-${tagIndex}`" square dense dark
 
 <script>
 import { cudTaskViaStore, timeSince, getStoriesFromTask } from '../utils';
-import { getTask } from 'src/storeHelpers';
-import { useVuexStore } from 'src/store/index.js';
+import useTaskStore from '@/pinia/taskStore';
 
 export default {
   components: {
@@ -153,8 +152,12 @@ export default {
     };
   },
   computed: {
+    store() {
+      return useTaskStore();
+    },
     task() {
-      return this.$store.getters['notes/getTask'](this.taskId);
+      return this.store.getTask(this.taskId);
+      // return this.$store.getters['notes/getTask'](this.taskId);
       // return getTask(this.$store, this.taskId);
     },
     stories() {

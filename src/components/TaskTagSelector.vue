@@ -62,6 +62,7 @@
 </template>
 
 <script>
+import useTaskStore from '@/pinia/taskStore';
 export default {
   props: {
     inputValue: {
@@ -93,7 +94,8 @@ export default {
   },
   computed: {
     tasksList() {
-      return this.$store.getters['notes/getTasks'];
+      return useTaskStore().getTasks;
+      // return this.$store.getters['notes/getTasks'];
     },
     allTags() {
       if (!this.tasksList || !this.tasksList.length) {

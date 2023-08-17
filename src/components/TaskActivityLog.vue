@@ -89,6 +89,7 @@ import {
 } from 'src/utils';
 import { getTask } from 'src/storeHelpers';
 import TaskActiveButton from 'components/TaskActiveButton';
+import useTaskStore from '@/pinia/taskStore';
 
 export default {
   name: 'TaskActivityLog',
@@ -229,7 +230,8 @@ export default {
         return;
       }
 
-      const tasks = this.$store.getters['notes/getTasks'];
+      const tasks = useTaskStore().getTasks;
+      // const tasks = this.$store.getters['notes/getTasks'];
 
       if (!tasks) {
         return;

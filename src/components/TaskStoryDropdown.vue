@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import StoryCard from './StoryCard';
+import StoryCard from 'src/components/StoryCard';
 
 export default {
   components: {

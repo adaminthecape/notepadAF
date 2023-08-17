@@ -1,8 +1,12 @@
 <template>
   <div>
     <q-btn
-:size="size" :flat="flat" :dense="dense" :icon="icon || 'alarm_add'"
-      @click="isCreatingAlert = !isCreatingAlert">
+      :size="size"
+      :flat="flat"
+      :dense="dense"
+      :icon="icon || 'alarm_add'"
+      @click="isCreatingAlert = !isCreatingAlert"
+    >
       <q-tooltip>Add alert</q-tooltip>
     </q-btn>
     <q-dialog v-model="isCreatingAlert">
@@ -10,7 +14,10 @@
         <q-item>
           <q-item-section>
             {{ task ? task.message : "" }}
-            <CreateAlert class="q-mt-md" @newAlert="addAlertToTask" />
+            <CreateAlert
+              class="q-mt-md"
+              @new-alert="addAlertToTask"
+            />
           </q-item-section>
         </q-item>
       </q-card>
@@ -18,85 +25,66 @@
   </div>
 </template>
 
-<script>
-import CreateAlert from 'components/CreateAlert';
+<script setup lang="ts">
 import { cudTaskViaStore, queueTaskRefresh } from 'src/utils';
-import { getTask } from 'src/storeHelpers';
+import { ref, computed, defineAsyncComponent } from 'vue';
+import useTaskStore from '@/pinia/taskStore';
+import { Task, TaskAlert } from '@/types';
 
-export default {
-  components: { CreateAlert },
-  props: {
-    taskId: {
-      type: String,
-      default: undefined,
-    },
-    size: {
-      type: String,
-      default: undefined
-    },
-    icon: {
-      type: String,
-      default: undefined
-    },
-    color: {
-      type: String,
-      default: undefined
-    },
-    flat: {
-      type: Boolean,
-      default: false
-    },
-    dense: {
-      type: Boolean,
-      default: false
-    },
-  },
-  data() {
-    return {
-      isCreatingAlert: false,
-    };
-  },
-  computed: {
-    task() {
-      return getTask(this.$store, this.taskId);
-    },
-  },
-  methods: {
-    getTaskDataWithNewAlert(alert) {
-      if (!this.task) {
-        console.warn('Task not found!', alert);
+const store = useTaskStore();
+const props = defineProps<{
+  taskId: string;
+  size: string;
+  icon: string;
+  color: string;
+  flat: boolean;
+  dense: boolean;
+}>();
+const task = computed<Task>(() => store.getTask(props.taskId));
 
-        return;
-      }
+const CreateAlert = defineAsyncComponent(() =>
+  import('src/components/CreateAlert.vue'));
 
-      const task = structuredClone(this.task);
+const isCreatingAlert = ref(false);
 
-      if (!task.alerts) {
-        task.alerts = [];
-      }
+function getTaskDataWithNewAlert(alert: TaskAlert) {
+  if (!task.value) {
+    console.warn('Task not found!', alert);
 
-      if (alert.id) {
-        delete alert.id;
-      }
+    return undefined;
+  }
 
-      task.alerts.push(alert);
+  const taskData = structuredClone(task.value);
 
-      return task;
-    },
-    addAlertToTask(alert) {
-      if (!this.task || !alert || !alert.time || !alert.date) {
-        console.warn('Not enough data for alert!', alert);
+  if (!taskData.alerts) {
+    taskData.alerts = [];
+  }
 
-        return;
-      }
+  if (alert.id) {
+    delete alert.id;
+  }
 
-      const task = this.getTaskDataWithNewAlert(alert);
+  taskData.alerts.push(alert);
 
-      cudTaskViaStore(this.$store, task).then(() => {
-        queueTaskRefresh(task.id);
-        this.isCreatingAlert = false;
-      });
-    },
-  },
+  return taskData;
+};
+
+function addAlertToTask(alert: TaskAlert) {
+  if (!task.value || !alert || !alert.time || !alert.date) {
+    console.warn('Not enough data for alert!', alert);
+
+    return;
+  }
+
+  const taskData = getTaskDataWithNewAlert(alert);
+
+  if (!taskData) {
+    return;
+  }
+
+  cudTaskViaStore(store, taskData as Task).then(() => {
+    queueTaskRefresh(taskData.id);
+    isCreatingAlert.value = false;
+  });
 };
 </script>
