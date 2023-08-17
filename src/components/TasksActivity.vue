@@ -32,6 +32,7 @@ class="q-ml-xs" :icon="applyFilters ? 'lock' : 'lock_open'" size="sm" dense flat
           <q-item>
             <q-item-section>
               <q-btn @click="goToSettings">Go to Settings</q-btn>
+                <FirebaseConfigModal />
             </q-item-section>
           </q-item>
         </q-card>
@@ -136,6 +137,8 @@ const SimpleLayout = defineAsyncComponent(() =>
     import('src/components/SimpleLayout.vue'));
 const LocalStorageList = defineAsyncComponent(() =>
     import('src/components/LocalStorageList.vue'));
+const FirebaseConfigModal = defineAsyncComponent(() =>
+    import('src/components/FirebaseConfigModal.vue'));
 
 // prompt going to firebase settings if there is no config
 const isFirebaseConfigDialogOpen = ref(!getFromLocalStorage(localStorageNames.firebase_config, true));

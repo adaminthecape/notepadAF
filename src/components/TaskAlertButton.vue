@@ -34,11 +34,11 @@ import { Task, TaskAlert } from 'src/types';
 const store = useTaskStore();
 const props = defineProps<{
   taskId: string;
-  size: string;
-  icon: string;
-  color: string;
-  flat: boolean;
-  dense: boolean;
+  size?: string;
+  icon?: string;
+  color?: string;
+  flat?: boolean;
+  dense?: boolean;
 }>();
 const task = computed<Task>(() => store.getTask(props.taskId));
 

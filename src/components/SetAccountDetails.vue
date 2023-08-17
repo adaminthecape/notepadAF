@@ -1,5 +1,8 @@
 <template>
     <div style="display: flex; flex-direction: column;" class="q-pa-lg">
+        <div class="q-pa-sm">
+            <FirebaseConfigModal />
+        </div>
         <q-input
             v-model="email"
             type="email"
@@ -20,8 +23,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { defineAsyncComponent, ref } from 'vue';
 import { localStorageNames, saveToLocalStorage } from 'src/utils.js';
+
+const FirebaseConfigModal = defineAsyncComponent(() =>
+    import('src/components/FirebaseConfigModal.vue'));
 
 const email = ref('');
 const password = ref('');

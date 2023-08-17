@@ -78,89 +78,30 @@ v-model="pivotalProjectId" :type="visibilityToggles.pivotalProjectId ? 'text' : 
             <h5>Firebase</h5>
           </q-item-section>
           <q-item-section>
-            <SimpleModal full-width>
-              <template #title>
-                <h5>Firebase</h5>
-              </template>
-              <template #activator="{ open }">
-                <q-btn label="Set firebase config" @click="open" />
-                <br />
-                <q-chip v-if="!!firebaseConfig" color="positive" dark square dense>Firebase config applied</q-chip>
-                <q-chip v-else color="negative" dark square dense>No firebase config active!</q-chip>
-              </template>
-              <template #content>
-                <q-card style="max-width: 100%">
-                  <q-item>
-                    <q-item-section>
-                      <q-input
-v-model="firebaseConfig.appId" :type="visibilityToggles.appId ? 'text' : 'password'"
-                        label="App ID" filled>
-                        <template #append>
-                          <q-icon
-:name="visibilityToggles.appId ? 'visibility_off' : 'visibility'" class="cursor-pointer"
-                            @click="visibilityToggles.appId = !visibilityToggles.appId" />
-                        </template>
-                      </q-input>
-                      <q-input
-v-model="firebaseConfig.apiKey" :type="visibilityToggles.apiKey ? 'text' : 'password'"
-                        label="API Key" filled>
-                        <template #append>
-                          <q-icon
-:name="visibilityToggles.apiKey ? 'visibility_off' : 'visibility'"
-                            class="cursor-pointer" @click="visibilityToggles.apiKey = !visibilityToggles.apiKey" />
-                        </template>
-                      </q-input>
-                      <q-input
-v-model="firebaseConfig.messagingSenderId"
-                        :type="visibilityToggles.messagingSenderId ? 'text' : 'password'" label="Messaging Sender ID"
-                        filled>
-                        <template #append>
-                          <q-icon
-:name="visibilityToggles.messagingSenderId ? 'visibility_off' : 'visibility'"
-                            class="cursor-pointer"
-                            @click="visibilityToggles.messagingSenderId = !visibilityToggles.messagingSenderId" />
-                        </template>
-                      </q-input>
-                      <q-input
-v-model="firebaseConfig.projectId"
-                        :type="visibilityToggles.projectId ? 'text' : 'password'" label="Project ID" filled
-                        @input="computeFirebaseVars">
-                        <template #append>
-                          <q-icon
-:name="visibilityToggles.projectId ? 'visibility_off' : 'visibility'"
-                            class="cursor-pointer" @click="visibilityToggles.projectId = !visibilityToggles.projectId" />
-                        </template>
-                      </q-input>
-                      <q-btn class="q-my-md" @click="setFirebaseConfig()">Save</q-btn>
-                    </q-item-section>
-                  </q-item>
-                </q-card>
-              </template>
-            </SimpleModal>
+            <FirebaseConfigModal />
           </q-item-section>
         </q-item>
       </q-card>
-      <q-card v-if="$q.platform.is.desktop" class="q-mb-sm">
-        <q-item>
-          <q-item-section>
-            <h5>Backups</h5>
-          </q-item-section>
-          <q-item-section>
-            <SimpleModal full-width>
-              <template #title>
-                <h5>Backups</h5>
-              </template>
-              <template #activator="{ open }">
-                <q-btn label="Open backup handler" @click="open" />
-                <q-btn label="Open backup handler" @click="open" />
-              </template>
-              <template #content>
-                <!-- <BackupHandler /> -->
-              </template>
-            </SimpleModal>
-          </q-item-section>
-        </q-item>
-      </q-card>
+<!--      <q-card v-if="$q.platform.is.desktop" class="q-mb-sm">-->
+<!--        <q-item>-->
+<!--          <q-item-section>-->
+<!--            <h5>Backups</h5>-->
+<!--          </q-item-section>-->
+<!--          <q-item-section>-->
+<!--            <SimpleModal full-width>-->
+<!--              <template #title>-->
+<!--                <h5>Backups</h5>-->
+<!--              </template>-->
+<!--              <template #activator="{ open }">-->
+<!--                <q-btn label="Open backup handler" @click="open" />-->
+<!--              </template>-->
+<!--              <template #content>-->
+<!--                &lt;!&ndash; <BackupHandler /> &ndash;&gt;-->
+<!--              </template>-->
+<!--            </SimpleModal>-->
+<!--          </q-item-section>-->
+<!--        </q-item>-->
+<!--      </q-card>-->
       <div>
         <q-card class="q-mb-sm">
           <q-item>
@@ -242,7 +183,6 @@ color="primary" icon="add" size="md" class="full-width" dense flat
                 <q-item>
                   <q-space />
                   <q-btn label="Save" @click="saveAppTabs" />
-                  <q-btn label="Save" @click="saveAppTabs" />
                 </q-item>
               </template>
             </SimpleModal>
@@ -258,7 +198,6 @@ color="primary" icon="add" size="md" class="full-width" dense flat
             <q-input v-model="customSetting.label" class="q-mb-xs" type="text" filled dense />
             <q-input v-model="customSetting.value" class="q-mb-xs" type="text" filled dense />
             <q-btn icon="save" @click="setCustomValue" />
-            <q-btn icon="save" @click="setCustomValue" />
           </q-item-section>
         </q-item>
       </q-card>
@@ -269,6 +208,7 @@ color="primary" icon="add" size="md" class="full-width" dense flat
 <script>
 import SimpleLayout from 'src/components/SimpleLayout.vue';
 import SimpleModal from 'src/components/SimpleModal.vue';
+import FirebaseConfigModal from 'src/components/FirebaseConfigModal.vue';
 import { getFromLocalStorage, localStorageNames, saveToLocalStorage } from 'src/utils';
 import { useThemeStore } from 'src/pinia/themeStore';
 
@@ -276,10 +216,11 @@ export default {
   name: 'SettingsManager',
   components: {
     SimpleModal,
-    SimpleLayout
+    SimpleLayout,
+    FirebaseConfigModal
   },
   data() {
-    const cache = {
+    const settings = {
       tokens: {
         gitlab: getFromLocalStorage(localStorageNames.gitlabToken),
         pivotal: getFromLocalStorage(localStorageNames.pivotalToken),
@@ -305,17 +246,16 @@ export default {
     const appTabs = getFromLocalStorage(localStorageNames.appTabs, true);
 
     return {
-      cache,
-      ...cache,
-      appTabs,
-      customSetting: {
-        label: '',
-        value: '',
-      },
-      currentZoomLevel:
+        settings,
+        appTabs,
+        customSetting: {
+            label: '',
+            value: '',
+        },
+        currentZoomLevel:
         document.getElementsByTagName('body')[0].style.zoom || '100%',
-      isConfirmingUserDeletion: false,
-      visibilityToggles: {
+        isConfirmingUserDeletion: false,
+        visibilityToggles: {
         pivotalProjectId: false,
         pivotalToken: false,
         appId: false,
@@ -326,15 +266,6 @@ export default {
     };
   },
   methods: {
-    computeFirebaseVars(val) {
-      if (typeof val !== 'string') {
-        return;
-      }
-
-      this.firebaseConfig.authDomain = `${val}.firebaseapp.com`;
-      this.firebaseConfig.databaseURL = `${val}.firebaseio.com`;
-      this.firebaseConfig.storageBucket = `${val}.appspot.com`;
-    },
     addZoom(amount) {
       const current = parseInt(this.currentZoomLevel.split('%')[0], 10);
       const zoomLevel = `${current + amount}%`;
@@ -384,38 +315,6 @@ export default {
     revertSetting(setting) {
       saveToLocalStorage(setting, this.cache[setting]);
       this[setting] = this.cache[setting];
-    },
-    setFirebaseConfig() {
-      let config = this.firebaseConfig;
-
-      if (!config) {
-        return;
-      }
-
-      // config = config
-      //   .replace('appId: ', '"appId":')
-      //   .replace('apiKey: ', '"apiKey":')
-      //   .replace('authDomain: ', '"authDomain":')
-      //   .replace('databaseURL: ', '"databaseURL":')
-      //   .replace('messagingSenderId: ', '"messagingSenderId":')
-      //   .replace('projectId: ', '"projectId":')
-      //   .replace('storageBucket: ', '"storageBucket":')
-      //   .replace(/\t/g, '')
-      //   .replace(/"\n"/g, '",\n"');
-
-      try {
-        if (typeof config === 'string') {
-          config = JSON.parse(config);
-        }
-      } catch (e) {
-        console.warn(e);
-      }
-
-      if (!config || typeof config !== 'object') {
-        return;
-      }
-
-      saveToLocalStorage(localStorageNames.firebase_config, config);
     },
   },
 };

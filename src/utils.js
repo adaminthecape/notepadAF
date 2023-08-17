@@ -9,7 +9,7 @@ export const localStorageNames = {
     zoomLevel: 'zoomLevel',
     /** state */
     currentTab: 'currentTab',
-    taskLimit: 'taskFilters',
+    taskLimit: 'taskLimit',
     taskFilters: 'taskFilters',
     desiredTaskId: 'desiredTaskId',
     currentTabQueue: 'currentTabQueue',

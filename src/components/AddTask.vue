@@ -1,157 +1,138 @@
 <template>
-  <div style="display: inline">
-    <slot name="activator" v-bind="{ open: open }">
-      <q-btn
-          icon="add_task"
-          color="primary"
-          :dense="dense"
-          flat
-          @click.stop.prevent="open"
-      >
-        <q-tooltip>Add a task</q-tooltip>
-      </q-btn>
-    </slot>
-    <q-dialog v-model="isAddingTask">
-      <q-card class="q-pa-md full-width">
-        <q-item-section>
-          <h5 class="q-my-none">
-            Add task
-          </h5>
-          <q-input
-              ref="messageInput"
-              :key="newTaskRenderIndex"
-              v-model="newTask.message"
-              :type="newTask.messageType"
-              placeholder="Edit task"
-              class="full-width q-my-sm"
-              outlined
-              dense
-              @keydown.alt.down.stop.prevent="toggleTextarea"
-          >
-            <template #append>
-              <div
-                  :style="newTask.messageType === 'textarea' ?
+    <div style="display: inline">
+        <slot name="activator" v-bind="{ open: open }">
+            <q-btn
+                icon="add_task"
+                color="primary"
+                :dense="dense"
+                flat
+                @click.stop.prevent="open"
+            >
+                <q-tooltip>Add a task</q-tooltip>
+            </q-btn>
+        </slot>
+        <q-dialog v-model="isAddingTask">
+            <q-card class="q-pa-md full-width">
+                <q-item-section>
+                    <h5 class="q-my-none">
+                        Add task
+                    </h5>
+                    <q-input
+                        ref="messageInput"
+                        :key="newTaskRenderIndex"
+                        v-model="newTask.message"
+                        :type="newTask.messageType"
+                        placeholder="Edit task"
+                        class="full-width q-my-sm"
+                        outlined
+                        dense
+                        @keydown.alt.down.stop.prevent="toggleTextarea"
+                    >
+                        <template #append>
+                            <div
+                                :style="newTask.messageType === 'textarea' ?
                     'display: flex; flex-direction: column; margin-top: 40px' :
                     ''"
-              >
-                <q-btn
-                    icon="list"
-                    :color="newTask.messageType === 'textarea' ? 'positive' : 'neutral'"
-                    size="sm"
-                    class="q-ml-xs"
-                    :outline="newTask.messageType === 'textarea'"
-                    :flat="newTask.messageType !== 'textarea'"
-                    dense
-                    @click="toggleTextarea"
-                >
-                  <q-tooltip>{{ newTask.messageType !== 'textarea' ? 'Convert to textarea' : 'Convert to input' }}</q-tooltip>
-                </q-btn>
-              </div>
-            </template>
-          </q-input>
-          <div class="row">
-            <TaskDoneButton
-                :done="newTask.done"
-                class="q-mr-sm"
-                dense
-                @toggle="newTask.done = $event; newTaskRenderIndex += 1"
-            />
-            <TaskActiveButton
-                :active="newTask.active"
-                dense
-                @toggle="newTask.active = $event; newTaskRenderIndex += 1"
-            />
-            <q-space />
-            <div
-                v-if="newTask.stories && newTask.stories.length"
-                class="q-mr-sm q-my-sm"
-            >
-              {{ newTask.stories }}
-            </div>
-            <q-btn
-                label="Save"
-                icon="save"
-                color="primary"
-                dense
-                @click="addNewTask"
-            />
-          </div>
-        </q-item-section>
-      </q-card>
-    </q-dialog>
-  </div>
+                            >
+                                <q-btn
+                                    icon="list"
+                                    :color="newTask.messageType === 'textarea' ? 'positive' : 'neutral'"
+                                    size="sm"
+                                    class="q-ml-xs"
+                                    :outline="newTask.messageType === 'textarea'"
+                                    :flat="newTask.messageType !== 'textarea'"
+                                    dense
+                                    @click="toggleTextarea"
+                                >
+                                    <q-tooltip>{{ newTask.messageType !== 'textarea' ? 'Convert to textarea' : 'Convert to input' }}</q-tooltip>
+                                </q-btn>
+                            </div>
+                        </template>
+                    </q-input>
+                    <div class="row">
+                        <TaskDoneButton
+                            :done="newTask.done"
+                            class="q-mr-sm"
+                            dense
+                            @toggle="newTask.done = $event; newTaskRenderIndex += 1"
+                        />
+                        <TaskActiveButton
+                            :active="newTask.active"
+                            dense
+                            @toggle="newTask.active = $event; newTaskRenderIndex += 1"
+                        />
+                        <q-space />
+                        <div
+                            v-if="newTask.stories && newTask.stories.length"
+                            class="q-mr-sm q-my-sm"
+                        >
+                            {{ newTask.stories }}
+                        </div>
+                        <q-btn
+                            label="Save"
+                            icon="save"
+                            color="primary"
+                            dense
+                            @click="addNewTask"
+                        />
+                    </div>
+                </q-item-section>
+            </q-card>
+        </q-dialog>
+    </div>
 </template>
 
 <script>
 import { cudTaskViaStore } from 'src/utils';
+import { Task } from 'src/types';
+import { ref, defineProps, defineAsyncComponent } from 'vue';
 
-export default {
-  components: {
-    TaskActiveButton: () => import('src/components/TaskActiveButton.vue'),
-    TaskDoneButton: () => import('src/components/TaskDoneButton.vue')
-  },
-  props: {
-    size: {
-      type: String,
-      default: undefined
-    },
-    icon: {
-      type: String,
-      default: undefined
-    },
-    color: {
-      type: String,
-      default: undefined
-    },
-    flat: {
-      type: Boolean,
-      default: false
-    },
-    dense: {
-      type: Boolean,
-      default: false
-    },
-    initialTaskData: {
-      type: Object,
-      default: () => ({})
+const TaskActiveButton = defineAsyncComponent(() =>
+    import('src/components/TaskActiveButton.vue'));
+const TaskDoneButton = defineAsyncComponent(() =>
+    import('src/components/TaskDoneButton.vue'));
+
+const props = defineProps<{
+    size?: string;
+    icon?: string;
+    color?: string;
+    flat?: boolean;
+    dense?: boolean;
+    initialTaskData?: Partial<Task>;
+}>();
+
+const isAddingTask = ref<boolean>(false);
+const newTaskRenderIndex = ref<number>(0);
+const newTask = ref<Partial<Task>>({
+    done: 0,
+    active: 0,
+    archived: 0,
+    message: '',
+    stories: [],
+    ...(props.initialTaskData || {})
+});
+
+function open() {
+    this.isAddingTask = !this.isAddingTask;
+}
+
+function toggleTextarea() {
+    newTask.value.messageType = (newTask.value.messageType === 'textarea') ? undefined : 'textarea';
+
+    newTaskRenderIndex.value += 1;
+}
+
+function addNewTask() {
+    const tags = Array.isArray(this.newTask.tags) ? this.newTask.tags : [];
+
+    if (Array.isArray(newTask.value.stories)) {
+        tags.push(...newTask.value.stories.map((s) => `${s}`));
     }
-  },
-  data() {
-    return {
-      isAddingTask: false,
-      newTask: {
-        done: 0,
-        active: 0,
-        archived: 0,
-        message: '',
-        stories: [],
-        ...(this.initialTaskData || {})
-      },
-      newTaskRenderIndex: 0
-    };
-  },
-  methods: {
-    open() {
-      this.isAddingTask = !this.isAddingTask;
-    },
-    toggleTextarea() {
-      this.newTask.messageType = (this.newTask.messageType === 'textarea') ? undefined : 'textarea';
 
-      this.newTaskRenderIndex += 1;
-    },
-    addNewTask() {
-      const tags = Array.isArray(this.newTask.tags) ? this.newTask.tags : [];
+    newTask.value.tags = tags;
 
-      if (Array.isArray(this.newTask.stories)) {
-        tags.push(...this.newTask.stories.map((s) => `${s}`));
-      }
-
-      this.newTask.tags = tags;
-
-      cudTaskViaStore(this.$store, this.newTask);
-      this.newTask = { ...this.initialTaskData };
-      this.$refs.messageInput.focus();
-    },
-  }
-};
+    cudTaskViaStore(this.$store, newTask.value);
+    newTask.value = { ...props.initialTaskData };
+    // this.$refs.messageInput.focus();
+}
 </script>
