@@ -82,10 +82,10 @@
     </div>
 </template>
 
-<script>
-import { cudTaskViaStore } from 'src/utils';
+<script setup lang="ts">
 import { Task } from 'src/types';
-import { ref, defineProps, defineAsyncComponent } from 'vue';
+import { ref, defineAsyncComponent } from 'vue';
+import useTaskStore from 'src/pinia/taskStore';
 
 const TaskActiveButton = defineAsyncComponent(() =>
     import('src/components/TaskActiveButton.vue'));
@@ -103,7 +103,7 @@ const props = defineProps<{
 
 const isAddingTask = ref<boolean>(false);
 const newTaskRenderIndex = ref<number>(0);
-const newTask = ref<Partial<Task>>({
+const newTask = ref<Partial<Task & { stories: (number|string)[] }>>({
     done: 0,
     active: 0,
     archived: 0,
@@ -113,17 +113,18 @@ const newTask = ref<Partial<Task>>({
 });
 
 function open() {
-    this.isAddingTask = !this.isAddingTask;
+    isAddingTask.value = !isAddingTask.value;
 }
 
 function toggleTextarea() {
     newTask.value.messageType = (newTask.value.messageType === 'textarea') ? undefined : 'textarea';
-
     newTaskRenderIndex.value += 1;
 }
 
-function addNewTask() {
-    const tags = Array.isArray(this.newTask.tags) ? this.newTask.tags : [];
+const store = useTaskStore();
+
+async function addNewTask() {
+    const tags = Array.isArray(newTask.value.tags) ? newTask.value.tags : [];
 
     if (Array.isArray(newTask.value.stories)) {
         tags.push(...newTask.value.stories.map((s) => `${s}`));
@@ -131,7 +132,7 @@ function addNewTask() {
 
     newTask.value.tags = tags;
 
-    cudTaskViaStore(this.$store, newTask.value);
+    await store.cloudUpdateSingle(newTask.value as Task);
     newTask.value = { ...props.initialTaskData };
     // this.$refs.messageInput.focus();
 }

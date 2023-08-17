@@ -1,7 +1,8 @@
 <template>
+    <div>HELLO WORLD</div>
   <div
     class="row items-center"
-    :key="`task-options-${task.id}-${taskRenderIndex}`"
+    :key="`task-options-${taskId}-${taskRenderIndex}`"
   >
     <q-btn
         v-if="showSingleTaskButton"
@@ -37,7 +38,7 @@
     />
     <TaskEditButton
         v-if="showAllOptions || showEditButton"
-        :editing="isEditing"
+        :editing="isEditing || false"
         :size="size"
         :dense="dense"
         :flat="flat"
@@ -94,117 +95,51 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {
-  queueTaskRefresh,
-  goToActivityPageForTask
-} from 'src/utils';
-import { getTask } from 'src/storeHelpers';
-
-export default {
-  components: {
-    TaskSubtaskButton: () => import('src/components/TaskSubtaskButton.vue'),
-    TaskActivityLog: () => import('src/components/TaskActivityLog.vue'),
-    TaskAlertButton: () => import('src/components/TaskAlertButton.vue'),
-    TaskDeleteButton: () => import('src/components/TaskDeleteButton.vue'),
-    TaskArchiveButton: () => import('src/components/TaskArchiveButton.vue'),
-    TaskEditButton: () => import('src/components/TaskEditButton.vue'),
-    TaskDoneButton: () => import('src/components/TaskDoneButton.vue'),
-    TaskActiveButton: () => import('src/components/TaskActiveButton.vue'),
-  },
-  props: {
-    isEditing: {
-      type: Boolean,
-      default: false,
-    },
-    showArchiveButton: {
-      type: Boolean,
-      default: false,
-    },
-    showSingleTaskButton: {
-      type: Boolean,
-      default: false,
-    },
-    showActiveButton: {
-      type: Boolean,
-      default: false,
-    },
-    showActivityLogButton: {
-      type: Boolean,
-      default: false,
-    },
-    showDoneButton: {
-      type: Boolean,
-      default: false,
-    },
-    showEditButton: {
-      type: Boolean,
-      default: false,
-    },
-    showAlertButton: {
-      type: Boolean,
-      default: false,
-    },
-    showSubtaskButton: {
-      type: Boolean,
-      default: false,
-    },
-    showDeleteButton: {
-      type: Boolean,
-      default: false,
-    },
-    hideMenuButton: {
-      type: Boolean,
-      default: false,
-    },
-    taskId: {
-      type: String,
-      default: undefined,
-    },
-    size: {
-      type: String,
-      default: undefined
-    },
-    icon: {
-      type: String,
-      default: undefined
-    },
-    color: {
-      type: String,
-      default: undefined
-    },
-    flat: {
-      type: Boolean,
-      default: false
-    },
-    dense: {
-      type: Boolean,
-      default: false
-    },
-  },
-  data() {
-    return {
-      taskRenderIndex: 0,
-      isViewingActivity: false,
-      showAllOptions: false,
-    };
-  },
-  computed: {
-    task() {
-      return getTask(this.$store, this.taskId);
-    },
-  },
-  watch: {
-    task: {
-      handler() {
-        this.taskRenderIndex += 1;
-      },
-      deep: true,
-    },
-  },
-  methods: {
     queueTaskRefresh,
     goToActivityPageForTask
-  }
-}
+} from 'src/utils';
+import { ref, computed, defineAsyncComponent, watch } from 'vue';
+import useTaskStore from 'src/pinia/taskStore';
+
+const props = defineProps<{
+    taskId: string;
+    isEditing?: boolean;
+    showArchiveButton?: boolean;
+    showSingleTaskButton?: boolean;
+    showActiveButton?: boolean;
+    showActivityLogButton?: boolean;
+    showDoneButton?: boolean;
+    showEditButton?: boolean;
+    showAlertButton?: boolean;
+    showSubtaskButton?: boolean;
+    showDeleteButton?: boolean;
+    hideMenuButton?: boolean;
+    size?: string;
+    icon?: string;
+    color?: string;
+    flat?: boolean;
+    dense?: boolean;
+}>();
+
+const store = useTaskStore();
+const task = computed(() => store.getTask(props.taskId));
+const taskRenderIndex = ref(0);
+const isViewingActivity = ref(false);
+const showAllOptions = ref(false);
+
+const TaskSubtaskButton = defineAsyncComponent(() => import('src/components/TaskSubtaskButton.vue'));
+const TaskActivityLog = defineAsyncComponent(() => import('src/components/TaskActivityLog.vue'));
+const TaskAlertButton = defineAsyncComponent(() => import('src/components/TaskAlertButton.vue'));
+const TaskDeleteButton = defineAsyncComponent(() => import('src/components/TaskDeleteButton.vue'));
+const TaskArchiveButton = defineAsyncComponent(() => import('src/components/TaskArchiveButton.vue'));
+const TaskEditButton = defineAsyncComponent(() => import('src/components/TaskEditButton.vue'));
+const TaskDoneButton = defineAsyncComponent(() => import('src/components/TaskDoneButton.vue'));
+const TaskActiveButton = defineAsyncComponent(() => import('src/components/TaskActiveButton.vue'));
+
+watch(task, () =>
+{
+    taskRenderIndex.value += 1;
+});
 </script>

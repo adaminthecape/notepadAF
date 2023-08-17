@@ -1,16 +1,17 @@
 export type Task = {
-  id: string;
-  message: string;
-  created: number;
-  updated: number;
-  done?: number | boolean;
-  active?: number | boolean;
-  deleted?: number | boolean;
-  activity?: TaskActivityLog[];
-  subtasks?: TaskSubtask[];
-  archived?: number | boolean;
-  tags?: string[];
-  alerts?: TaskAlert[];
+    id: string;
+    message: string;
+    created: number;
+    updated: number;
+    done?: number | boolean;
+    active?: number | boolean;
+    deleted?: number | boolean;
+    activity?: TaskActivityLog[];
+    subtasks?: TaskSubtask[];
+    archived?: number | boolean;
+    tags?: string[];
+    alerts?: TaskAlert[];
+    messageType?: 'textarea' | 'input' | 'text' | undefined
 };
 
 export interface TaskSubtask {

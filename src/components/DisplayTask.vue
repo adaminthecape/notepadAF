@@ -1,6 +1,6 @@
 <template>
   <q-card v-if="task" class="flex q-mb-sm" :style="`flex-direction: column; background-color: #70809020`" flat bordered>
-    <q-item clickable dense @click.ctrl="editTask" @pointerdown="waitingToEdit = true" @pointerup="waitingToEdit = true">
+    <q-item clickable dense @click.ctrl="editTask">
       <q-item-section>
         <div class="row items-center">
           <!-- VIEW DONE: -->
@@ -33,9 +33,16 @@ v-for="(alert, a) in task.alerts" :key="`alert-${a}-${activeAlertsRenderKey}`" s
           <q-space />
           <!-- MENU: -->
           <div class="row items-center" style="margin-right: -14px">
-            <TaskOptions
-v-if="showOptions" show-single-task-button :task-id="task.id" :is-editing="isEditing" size="md"
-              dense flat @editTask="editTask" />
+            xx<TaskOptions
+                v-if="showOptions"
+                show-single-task-button
+                :task-id="task.id"
+                :is-editing="isEditing"
+                size="md"
+                dense
+                flat
+                @edit-task="editTask"
+            />yy
           </div>
         </div>
         <div class="row items-center">
@@ -118,194 +125,160 @@ v-for="(tag, tagIndex) in task.tags" :key="`tag-${tagIndex}`" square dense dark
   </q-card>
 </template>
 
-<script>
-import { cudTaskViaStore, timeSince, getStoriesFromTask } from '../utils';
+<script setup lang="ts">
+import { cudTaskViaStore, queueTaskRefresh, timeSince } from '../utils';
 import useTaskStore from 'src/pinia/taskStore';
+import { computed, defineAsyncComponent, ref, watch } from 'vue';
+import { Task, TaskAlert } from 'src/types';
 
-export default {
-  components: {
-    AddTag: () => import('src/components/AddTag.vue'),
-    TaskStoryDropdown: () => import('src/components/TaskStoryDropdown.vue'),
-    TaskOptions: () => import('src/components/TaskOptions.vue'),
-  },
-  props: {
-    showOptions: {
-      type: Boolean,
-      default: true,
-    },
-    taskId: {
-      type: String,
-      default: undefined,
-    },
-    clickable: {
-      type: Boolean,
-      default: true
+const AddTag = defineAsyncComponent(() => import('src/components/AddTag.vue'));
+const TaskStoryDropdown = defineAsyncComponent(() => import('src/components/TaskStoryDropdown.vue'));
+const TaskOptions = defineAsyncComponent(() => import('src/components/TaskOptions.vue'));
+
+const props = defineProps<{
+    taskId: string;
+    showOptions?: boolean;
+    clickable?: boolean;
+}>();
+
+const addingTag = ref(false);
+const alarmTimeouts = ref([]);
+const alarmTickTimeout = ref(null);
+const activeAlertsRenderKey = ref(10000);
+const isEditing = ref(false);
+
+const store = useTaskStore();
+const task = computed(() => store.getTask(props.taskId));
+const stories = computed(() =>
+{
+    const storyIds: Array<string|number> = (
+        `${(task.value.tags || []).join('|')}|${task.value.message}`
+            .match(/1\d{8}/g)
+    ) || [];
+
+    return (storyIds).reduce((agg, id: string | number) => {
+        if (!agg.some((existing: { id: string|number }) => existing.id === id)) {
+        agg.push({ id });
+        }
+
+        return agg;
+    }, [] as Array<{ id: string | number; }>);
+});
+
+watch(task, () => queueTaskRefresh(task.value.id));
+
+function editTask(force = undefined) {
+    if (typeof force === 'boolean') {
+    isEditing.value = force;
+    } else {
+    isEditing.value = !isEditing.value;
     }
-  },
-  data() {
-    return {
-      addingTag: false,
-      alarmTimeouts: [],
-      alarmTickTimeout: null,
-      activeAlertsRenderKey: 10000,
-      isEditing: false,
-    };
-  },
-  computed: {
-    store() {
-      return useTaskStore();
-    },
-    task() {
-      return this.store.getTask(this.taskId);
-      // return this.$store.getters['notes/getTask'](this.taskId);
-      // return getTask(this.$store, this.taskId);
-    },
-    stories() {
-      return ((
-        `${(this.task.tags || []).join('|')}|${this.task.message}`
-          .match(/1\d{8}/g)
-      ) || [])
-        .reduce((agg, id) => {
-          if (!agg.some((existing) => existing.id === id)) {
-            agg.push({ id });
-          }
 
-          return agg;
-        }, []);
-    },
-  },
-  // mounted()
-  // {
-  //   if(this.task)
-  //   {
-  //     this.setAlarms();
-  //     this.tickAlarms();
-  //   }
-  // },
-  watch: {
-    task: {
-      handler() {
-        this.$emit('refreshTask', { id: this.task.id });
-      },
-      deep: true,
-    },
-    waitingToEdit(n, o) {
-      if (o && !n) this.editTask();
-    },
-  },
-  methods: {
-    /** helpers */
-    timeSince,
-    editTask(force = undefined) {
-      if (typeof force === 'boolean') {
-        this.isEditing = force;
-      } else {
-        this.isEditing = !this.isEditing;
-      }
-
-      if (this.isEditing) {
-        // if now editing, focus the input
-        this.focusOnNextTick('messageInput');
-      } // otherwise, save the task
-      else {
-        cudTaskViaStore(this.$store, this.task);
-      }
-    },
-    focusOnNextTick(refName, depth = 0) {
-      if (depth > 10) {
-        return;
-      }
-
-      if (this.$refs[refName]) {
-        this.$refs[refName].focus();
-      } else {
-        this.$nextTick(() => {
-          if (this.$refs[refName]) {
-            this.$refs[refName].focus();
-          } else {
-            this.focusOnNextTick(refName, depth);
-          }
-        });
-      }
-    },
-    /** manage alarms */
-    // tickAlarms()
-    // {
-    //   if(this.alarmTickTimeout)
-    //   {
-    //     clearTimeout(this.alarmTickTimeout);
-    //   }
-    //
-    //   this.alarmTickTimeout = setInterval(() =>
-    //   {
-    //     this.activeAlertsRenderKey += 1;
-    //   }, 5000);
-    // },
-    // clearAlarms()
-    // {
-    //   this.alarmTimeouts.forEach((timeout) => clearTimeout(timeout));
-    //   this.alarmTimeouts = [];
-    //   // clearAllFlashes();
-    // },
-    // setAlarms()
-    // {
-    //   this.clearAlarms();
-    //
-    //   const now = Date.now();
-    //
-    //   (this.task.alerts || []).forEach((alert) =>
-    //   {
-    //     const diff = (alert.unix - now);
-    //
-    //     this.alarmTimeouts.push(setTimeout(
-    //         () => {
-    //           this.triggerAlarm();
-    //         },
-    //         diff || 1
-    //     ));
-    //   });
-    // },
-    // triggerAlarm()
-    // {
-    //   // const disable = flashTaskbarIcon();
-    //   //
-    //   // setTimeout(() => disable(), 2 * 60 * 1000);
-    // },
-    removeAlert(alert) {
-      if (!this.task.alerts.length) {
-        return;
-      }
-
-      const alerts = this.task.alerts.filter((a) => a.unix !== alert.unix);
-
-      cudTaskViaStore(this.$store, { ...this.task, alerts });
-    },
-    /** manage tags */
-    addTag(tag) {
-      if (!(this.task.tags || []).includes(tag)) {
-        cudTaskViaStore(this.$store, {
-          ...this.task,
-          tags: [...(this.task.tags || []), tag],
-        });
-      }
-
-      this.addingTag = false;
-    },
-    removeTag(tag) {
-      const tags = (this.task.tags || []).filter((t) => t !== tag);
-
-      cudTaskViaStore(this.$store, { ...this.task, tags });
-    },
-    /** manage task props */
-    toggleTextarea() {
-      cudTaskViaStore(this.$store, {
-        ...this.task,
-        messageType:
-          this.task.messageType === 'textarea' ? undefined : 'textarea',
-      });
-    },
-  },
+    if (isEditing.value) {
+    // if now editing, focus the input
+    // focusOnNextTick('messageInput');
+    } // otherwise, save the task
+    else {
+        store.cloudUpdateSingle(task.value as Task);
+    }
 };
+
+function removeAlert(alert: TaskAlert) {
+    if (!task.value.alerts?.length) {
+    return;
+    }
+
+    const alerts = task.value.alerts.filter((a) => a.unix !== alert.unix);
+
+    store.cloudUpdateSingle({ ...task.value, alerts });
+}
+
+function addTag(tag: string) {
+    if (!(task.value.tags || []).includes(tag))
+    {
+        store.cloudUpdateSingle({
+            ...task.value,
+            tags: [...(task.value.tags || []), tag],
+        });
+    }
+
+    addingTag.value = false;
+};
+
+function removeTag(tag: string) {
+    const tags = (task.value.tags || []).filter((t) => t !== tag);
+
+    store.cloudUpdateSingle({ ...task.value, tags });
+};
+
+function toggleTextarea() {
+    store.cloudUpdateSingle({
+        ...task.value,
+        messageType:
+        task.value.messageType === 'textarea' ? undefined : 'textarea',
+    });
+};
+
+/** manage alarms */
+// tickAlarms()
+// {
+//   if(this.alarmTickTimeout)
+//   {
+//     clearTimeout(this.alarmTickTimeout);
+//   }
+//
+//   this.alarmTickTimeout = setInterval(() =>
+//   {
+//     this.activeAlertsRenderKey += 1;
+//   }, 5000);
+// },
+// clearAlarms()
+// {
+//   this.alarmTimeouts.forEach((timeout) => clearTimeout(timeout));
+//   this.alarmTimeouts = [];
+//   // clearAllFlashes();
+// },
+// setAlarms()
+// {
+//   this.clearAlarms();
+//
+//   const now = Date.now();
+//
+//   (this.task.alerts || []).forEach((alert) =>
+//   {
+//     const diff = (alert.unix - now);
+//
+//     this.alarmTimeouts.push(setTimeout(
+//         () => {
+//           this.triggerAlarm();
+//         },
+//         diff || 1
+//     ));
+//   });
+// },
+// triggerAlarm()
+// {
+//   // const disable = flashTaskbarIcon();
+//   //
+//   // setTimeout(() => disable(), 2 * 60 * 1000);
+// },
+
+// function focusOnNextTick(refName, depth = 0) {
+//     if (depth > 10) {
+//     return;
+//     }
+//     if (this.$refs[refName]) {
+//     this.$refs[refName].focus();
+//     } else {
+//     this.$nextTick(() => {
+//         if (this.$refs[refName]) {
+//         this.$refs[refName].focus();
+//         } else {
+//         this.focusOnNextTick(refName, depth);
+//         }
+//     });
+//     }
+// };
 </script>
 
 <style scoped>

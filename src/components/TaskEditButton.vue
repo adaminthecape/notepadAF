@@ -19,13 +19,16 @@ import {
     defineEmits,
     defineProps
 } from 'vue';
-import { useQuasarProps } from 'src/components/composables/QuasarProps';
-import { useSingleTaskProps } from 'src/components/composables/SingleTaskProps';
 
-const { size, icon, color, flat, dense } = useQuasarProps();
-const { taskId, task } = useSingleTaskProps();
-
-const editing = defineProps<boolean>();
+const props = defineProps<{
+    editing: boolean;
+    size?: string;
+    icon?: string;
+    color?: string;
+    flat?: boolean;
+    dense?: boolean;
+    taskId?: string;
+}>();
 
 const emit = defineEmits<{
     (event: 'toggle', isEditing: boolean): void;
@@ -33,7 +36,7 @@ const emit = defineEmits<{
 
 function toggle()
 {
-    console.log('Edit toggle:', editing);
-    emit('toggle', !editing);
+    console.log('Edit toggle:', props.editing);
+    emit('toggle', !props.editing);
 }
 </script>
