@@ -319,7 +319,7 @@ export default {
         return;
       }
 
-      const tasks = getTasks(this.$store);
+      const tasks = this.$store.getters['notes/getTasks'];
 
       if (!tasks) {
         return;

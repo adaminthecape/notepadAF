@@ -270,10 +270,10 @@ export default {
     },
     /** manage tags */
     addTag(tag) {
-      if (!this.task.tags.includes(tag)) {
+      if (!(this.task.tags || []).includes(tag)) {
         cudTaskViaStore(this.$store, {
           ...this.task,
-          tags: [...this.task.tags, tag],
+          tags: [...(this.task.tags || []), tag],
         });
       }
 

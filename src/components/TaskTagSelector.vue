@@ -97,7 +97,7 @@ export default {
   computed: {
     tasksList()
     {
-      return getTasks(this.$store);
+      return this.$store.getters['notes/getTasks'];
     },
     allTags()
     {

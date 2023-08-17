@@ -39,21 +39,59 @@
   </SimpleModal>
 </template>
 
-<script>
-import { getTasks } from "src/storeHelpers";
+<script setup lang="ts">
+import { Task } from "src/types";
+import {
+  ref,
+  defineAsyncComponent,
+computed
+} from 'vue';
+import { useVuexStore } from 'src/store';
 
+const store = useVuexStore();
+
+const SimpleModal = defineAsyncComponent(() => import("src/components/SimpleModal.vue"));
+
+const value = ref<string>('');
+
+const tasksList = computed(() => {
+  return Object.values(store.getters['notes/getTasks']);
+});
+
+const allTags = computed(() => {
+  if (!tasksList.value || !tasksList.value.length) {
+    return [];
+  }
+
+  return tasksList.value.reduce((agg, task: Task) => {
+    const tags = [...(task.tags || [])].filter(
+      (tag) => !agg.includes(tag)
+    );
+
+    if (tags.length) {
+      return agg.concat(tags);
+    }
+
+    return agg;
+  }, []);
+});
+
+const filteredList = computed(() => {
+  if (!value.value) {
+    return allTags.value;
+  } else {
+    return allTags.value.filter(
+      (v) => v.toLowerCase().indexOf(value.value.toLowerCase()) > -1
+    );
+  }
+});
+</script>
+
+<script lang="ts">
 export default {
-  components: {
-    SimpleModal: () => import("src/components/SimpleModal.vue"),
-  },
-  data() {
-    return {
-      value: "",
-    };
-  },
   computed: {
     tasksList() {
-      return getTasks(this.$store);
+      return Object.values(this.$store.getters['notes/getTasks']);
     },
     allTags() {
       if (!this.tasksList || !this.tasksList.length) {
@@ -64,7 +102,7 @@ export default {
         const tags = [...(task.tags || [])].filter((tag) => !agg.includes(tag));
 
         if (tags.length) {
-          return [...agg, ...tags];
+          return agg.concat(tags);
         }
 
         return agg;
