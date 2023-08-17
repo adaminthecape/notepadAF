@@ -167,7 +167,7 @@ const stories = computed(() =>
 
 watch(task, () => queueTaskRefresh(task.value.id));
 
-function editTask(force = undefined) {
+function editTask(force: boolean) {
     if (typeof force === 'boolean') {
     isEditing.value = force;
     } else {

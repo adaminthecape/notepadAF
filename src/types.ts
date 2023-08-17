@@ -3,7 +3,7 @@ export type Task = {
     message: string;
     created: number;
     updated: number;
-    done?: number | boolean;
+    done?: number;
     active?: number | boolean;
     deleted?: number | boolean;
     activity?: TaskActivityLog[];
