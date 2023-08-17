@@ -1,5 +1,5 @@
-import useTaskStore from '@/pinia/taskStore';
-import { Task } from '@/types';
+import useTaskStore from 'src/pinia/taskStore';
+import { Task } from 'src/types';
 import { defineProps, computed } from 'vue';
 
 export function useSingleTaskProps()

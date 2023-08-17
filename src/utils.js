@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { getTasks } from "src/storeHelpers";
+import { getTasks } from 'src/storeHelpers';
 
 export const localStorageNames = {
     /** user prefs */
@@ -9,6 +9,7 @@ export const localStorageNames = {
     zoomLevel: 'zoomLevel',
     /** state */
     currentTab: 'currentTab',
+    taskLimit: 'taskFilters',
     taskFilters: 'taskFilters',
     desiredTaskId: 'desiredTaskId',
     currentTabQueue: 'currentTabQueue',

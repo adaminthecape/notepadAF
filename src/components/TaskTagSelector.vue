@@ -62,7 +62,7 @@
 </template>
 
 <script>
-import useTaskStore from '@/pinia/taskStore';
+import useTaskStore from 'src/pinia/taskStore';
 export default {
   props: {
     inputValue: {

@@ -56,3 +56,11 @@ export type TaskToggleableBooleans = {
   label: string;
   value: keyof TaskFilterBooleans;
 };
+
+export enum FilterTypes {
+    keyword = 'keyword',
+    tags = 'tags',
+    active = 'active',
+    archived = 'archived',
+    done = 'done',
+};

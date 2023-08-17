@@ -36,7 +36,7 @@ import {
   defineAsyncComponent,
   computed
 } from 'vue';
-import useTaskStore from '@/pinia/taskStore';
+import useTaskStore from 'src/pinia/taskStore';
 
 const store = useTaskStore();
 

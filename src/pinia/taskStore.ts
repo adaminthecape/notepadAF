@@ -9,7 +9,7 @@ type TaskBucketExtras = {
     tags?: string[];
 };
 
-type TaskBucket = {
+export type TaskBucket = {
     title: string;
     active: boolean;
     operator: 'or' | 'and';

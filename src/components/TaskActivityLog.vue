@@ -89,7 +89,7 @@ import {
 } from 'src/utils';
 import { getTask } from 'src/storeHelpers';
 import TaskActiveButton from 'components/TaskActiveButton';
-import useTaskStore from '@/pinia/taskStore';
+import useTaskStore from 'src/pinia/taskStore';
 
 export default {
   name: 'TaskActivityLog',

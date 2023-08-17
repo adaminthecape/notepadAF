@@ -28,8 +28,8 @@
 <script setup lang="ts">
 import { cudTaskViaStore, queueTaskRefresh } from 'src/utils';
 import { ref, computed, defineAsyncComponent } from 'vue';
-import useTaskStore from '@/pinia/taskStore';
-import { Task, TaskAlert } from '@/types';
+import useTaskStore from 'src/pinia/taskStore';
+import { Task, TaskAlert } from 'src/types';
 
 const store = useTaskStore();
 const props = defineProps<{

@@ -31,13 +31,7 @@ class="q-ml-xs" :icon="applyFilters ? 'lock' : 'lock_open'" size="sm" dense flat
           </q-item>
           <q-item>
             <q-item-section>
-              <q-btn
-@click="
-  saveToLocalStorageArray(
-    localStorageNames.currentTab,
-    'settings'
-  )
-  ">Go to Settings</q-btn>
+              <q-btn @click="goToSettings">Go to Settings</q-btn>
             </q-item-section>
           </q-item>
         </q-card>
@@ -63,11 +57,20 @@ v-if="filters.keyword" icon="close" round dense flat size="xs"
             </template>
           </q-input>
           <TaskTagSelector
-:input-value="filters.tags || []" label="Filter by tags" style="flex-grow: 1; max-width: 60%"
-            multiple @input="setFilter(filterTypes.tags, $event)" @cancel="setFilter(filterTypes.tags, [])" />
+              :input-value="filters.tags || []"
+              label="Filter by tags"
+              style="flex-grow: 1; max-width: 60%"
+              multiple
+              @input="setFilter(filterTypes.tags, $event)"
+              @cancel="setFilter(filterTypes.tags, [])"
+          />
           <LocalStorageList
-v-model="categoriesMutable" title="Categories" list-key="taskCategories"
-            @updated="filterTasks" />
+              :value="categoriesMutable"
+              title="Categories"
+              list-key="taskCategories"
+              @updated="filterTasks"
+              @input="categoriesMutable = $event"
+          />
         </div>
         <div class="row items-center q-mb-xs">
           <q-btn-group class="row items-center q-mb-xs" flat>
@@ -107,320 +110,312 @@ v-if="task" :key="taskRenderIndex[task.id]" note-id="tasks" :task-id="task.id" c
   </SimpleLayout>
 </template>
 
-<script>
-import DisplayTask from 'src/components/DisplayTask';
-import SimpleLayout from 'src/components/SimpleLayout';
-import TaskTagSelector from 'src/components/TaskTagSelector';
-import TaskSortDropdown from 'src/components/TaskSortDropdown';
-import LocalStorageList from 'src/components/LocalStorageList';
+<script setup lang="ts">
 import {
-  cudTaskViaStore,
-  filterTaskList,
-  sortTaskList,
-  applyFiltersToTask,
-  getFromLocalStorage,
-  saveToLocalStorage,
-  localStorageIntervalCheck,
-  localStorageNames,
+    applyFiltersToTask,
+    filterTaskList,
+    getFromLocalStorage,
+    localStorageIntervalCheck,
+    localStorageNames,
+    saveToLocalStorage,
+    saveToLocalStorageArray,
+    sortTaskList
 } from 'src/utils';
-import { getTasksByBuckets } from 'src/storeHelpers';
-import useTaskStore from 'src/pinia/taskStore';
+import { FilterTypes, Task, TaskSortType } from 'src/types';
+import useTaskStore, { TaskBucket } from 'src/pinia/taskStore';
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
 
-export default {
-  name: 'TasksContainer',
-  components: {
-    DisplayTask,
-    TaskTagSelector,
-    TaskSortDropdown,
-    SimpleLayout,
-    LocalStorageList,
-  },
-  data() {
-    const defaults = {
-      pagination: {
+
+const DisplayTask = defineAsyncComponent(() =>
+    import('src/components/DisplayTask.vue'));
+const TaskTagSelector = defineAsyncComponent(() =>
+    import('src/components/TaskTagSelector.vue'));
+const TaskSortDropdown = defineAsyncComponent(() =>
+    import('src/components/TaskSortDropdown.vue'));
+const SimpleLayout = defineAsyncComponent(() =>
+    import('src/components/SimpleLayout.vue'));
+const LocalStorageList = defineAsyncComponent(() =>
+    import('src/components/LocalStorageList.vue'));
+
+// prompt going to firebase settings if there is no config
+const isFirebaseConfigDialogOpen = ref(!getFromLocalStorage(localStorageNames.firebase_config, true));
+
+const defaults = {
+    pagination: {
         page: 1,
         max: 5,
-      },
-      limit: 5,
-      newTask: {
-        title: null,
-        message: null,
-      },
-    };
+    },
+    limit: 5,
+    newTask: {
+        title: '',
+        message: ''
+    },
+};
 
+const filterTypes = ref(Object.keys(FilterTypes));
+
+const filters = ref<Partial<Record<FilterTypes, any>>>({});
+const newTask = ref<Partial<Task>>(defaults.newTask);
+const taskRenderIndex = ref<Record<string, string>>({});
+const taskListRenderIndex = ref(0);
+const sortType = ref();
+const inverseSort = ref(false);
+const refreshCheckInterval = ref();
+const categoriesMutable = ref<TaskBucket[]>([]);
+
+const store = useTaskStore();
+
+const categories = computed(() => {
+    return store.getCategories;
+})
+
+const pagination = ref(defaults.pagination);
+
+const paginationComputed = computed(() => {
     return {
-      limit: getFromLocalStorage(localStorageNames.taskLimit) || defaults.limit,
-      filterTypes: {
-        keyword: 'keyword',
-        tags: 'tags',
-        active: 'active',
-        archived: 'archived',
-        done: 'done',
-      },
-      filters: {},
-      applyFilters: true,
-      filteredTasksList: [],
-      newTask: defaults.newTask,
-      tasksLoaded: false,
-      taskRenderIndex: {},
-      taskListRenderIndex: 0,
-      sortType: null,
-      inverseSort: false,
-      refreshCheckInterval: null,
-      isLoggingIn: false,
-      isSignedIn: false,
-      isFirebaseConfigDialogOpen: false,
-      pagination: defaults.pagination,
-      tmpInterval: undefined,
-      categoriesMutable: [],
+        max: (filteredTasksList.value || []).length / limit.value + 1,
     };
-  },
-  computed: {
-    store() {
-      return useTaskStore();
-    },
-    categories() {
-      return this.store.getCategories;
-      // return this.$store.getters['notes/getCategories'];
-    },
-    limitedTasks() {
-      const page = this.pagination.page - 1;
-      const offset = this.limit * page;
+});
 
-      return (this.filteredTasksList || []).slice(
+const limit = ref(getFromLocalStorage(localStorageNames.taskLimit) || defaults.limit);
+const filteredTasksList = ref([]);
+const limitedTasks = computed(() => {
+    const page = pagination.value.page - 1;
+    const offset = limit.value * page;
+
+    return (filteredTasksList.value || []).slice(
         offset,
-        (this.limit || 20) + offset
-      );
-    },
-    toggleableBooleans() {
-      return [
+        (limit.value || 20) + offset
+    );
+})
+
+const toggleableBooleans = computed(() => {
+    return [
         {
-          label: 'Done',
-          value: 'done',
-          icon_true: 'check_circle',
-          icon_false: 'check_circle_outline',
+            label: 'Done',
+            value: 'done',
+            icon_true: 'check_circle',
+            icon_false: 'check_circle_outline',
         },
         {
-          label: 'Active',
-          value: 'active',
-          icon_true: 'assignment_ind',
-          icon_false: 'content_paste_go',
+            label: 'Active',
+            value: 'active',
+            icon_true: 'assignment_ind',
+            icon_false: 'content_paste_go',
         },
         {
-          label: 'Archived',
-          value: 'archived',
-          icon_true: 'unarchive',
-          icon_false: 'move_to_inbox',
+            label: 'Archived',
+            value: 'archived',
+            icon_true: 'unarchive',
+            icon_false: 'move_to_inbox',
         },
         // { label: 'Alarm', value: 'hasAlarm' },
         // { label: 'Due', value: 'isDue' }
-      ];
-    },
-    tasksList() {
-      const catsToKeep = this.categories
+    ];
+})
+
+const tasksList = computed(() => {
+    const catsToKeep = categories.value
         .filter((c) => c.active)
         .map((c) => c.title)
         .concat('other');
-      let tasksToKeep = {};
+    let tasksToKeep = {};
 
-      const allTasks = getTasksByBuckets(this.$store);
+    const allTasks = store.getTasksByBuckets(categories.value);
 
-      Object.entries(allTasks).forEach(
+    Object.entries(allTasks).forEach(
         ([bucketName, tasksInBucket]) => {
-          if (catsToKeep.includes(bucketName)) {
-            tasksToKeep = { ...tasksToKeep, ...tasksInBucket };
-          }
+            if (catsToKeep.includes(bucketName)) {
+                tasksToKeep = { ...tasksToKeep, ...tasksInBucket };
+            }
         }
-      );
+    );
 
-      return tasksToKeep;
-    },
-    // filteredTasksList()
-    // {
-    //   return this.filterAndSortTasksList(
-    //     Object.values(this.tasksList)
-    //   );
-    // },
-    isCloudLoading() {
-      return this.store.isCloudLoading;
-      // return this.$store.getters['notes/isCloudLoading'];
-    },
-    lastCloudUpdate() {
-      return this.store.getLastCloudUpdate;
-      // return this.$store.getters['notes/getLastCloudUpdate'];
-    },
-    paginationComputed() {
-      return {
-        max: (this.filteredTasksList || []).length / this.limit + 1,
-      };
-    },
-  },
-  watch: {
-    pagination: {
-      handler() {
-        this.saveFilters();
-      },
-      deep: true,
-    },
-  },
-  created() {
-    if (!getFromLocalStorage(localStorageNames.firebase_config, true)) {
-      this.isFirebaseConfigDialogOpen = true;
-    }
-  },
-  mounted() {
-    this.loadTasks();
+    return tasksToKeep;
+})
+
+const isCloudLoading = computed(() => {
+    return store.isCloudLoading;
+})
+
+const lastCloudUpdate = computed(() => {
+    return store.getLastCloudUpdate;
+})
+
+onMounted(() =>
+{
+    loadTasks();
 
     const storedFilters = getFromLocalStorage(
-      localStorageNames.taskFilters,
-      true
+        localStorageNames.taskFilters,
+        true
     );
 
     if (storedFilters) {
-      this.sortType = storedFilters.sortType;
-      this.inverseSort = storedFilters.inverseSort;
-      this.filters = storedFilters;
+        sortType.value = storedFilters.sortType;
+        inverseSort.value = storedFilters.inverseSort;
+        filters.value = storedFilters;
 
-      if (storedFilters.pagination) {
-        this.pagination = {
-          ...this.pagination,
-          ...storedFilters.pagination,
-        };
-      }
+        if (storedFilters.pagination) {
+            pagination.value = {
+                ...pagination.value,
+                ...storedFilters.pagination,
+            };
+        }
     }
 
-    if (this.refreshCheckInterval) {
-      clearInterval(this.refreshCheckInterval);
+    if (refreshCheckInterval.value) {
+        clearInterval(refreshCheckInterval.value);
     }
 
-    this.refreshCheckInterval = localStorageIntervalCheck(
-      'taskRefreshQueue',
-      (queue) =>
-        queue.forEach((id) => {
-          this.refreshTask({ id });
-        })
+    refreshCheckInterval.value = localStorageIntervalCheck(
+        'taskRefreshQueue',
+        (queue: string[]) =>
+            queue.forEach((id) => {
+                refreshTask({ id });
+            })
     );
 
-    this.categoriesMutable = [...this.categories];
+    categoriesMutable.value = [...categories.value];
 
-    this.filterTasks();
-  },
-  methods: {
-    /****** Loading/fetching tasks */
-    async loadTasks() {
-      this.store.setCategoriesFromLocalStorage();
-      this.store.watchCloudDb();
-      // this.$store.dispatch('notes/setCategoriesFromLocalStorage');
-      // this.$store.dispatch('notes/watchCloudDb');
+    filterTasks();
+});
 
-      this.tmpInterval = setInterval(() => {
+
+const tmpInterval = ref();
+
+/****** Loading/fetching tasks */
+async function loadTasks() {
+    store.setCategoriesFromLocalStorage();
+    store.watchCloudDb();
+
+    tmpInterval.value = setInterval(() => {
         const check =
-          this.lastCloudUpdate &&
-          this.tasksList &&
-          Object.keys(this.tasksList).length;
+            lastCloudUpdate.value &&
+            tasksList.value &&
+            Object.keys(tasksList.value).length;
 
         if (check) {
-          this.filterTasks();
-          clearInterval(this.tmpInterval);
+            filterTasks();
+            clearInterval(tmpInterval.value);
         }
-      }, 100);
-    },
+    }, 100);
+}
 
-    /** Actual filtering logic. Sorts after filtering. Saves filters to localStorage. */
-    filterTasks() {
-      this.saveFilters();
+/** Actual filtering logic. Sorts after filtering. Saves filters to localStorage. */
+function filterTasks() {
+    saveFilters();
 
-      this.filteredTasksList =
-        this.filterAndSortTasksList(Object.values(this.tasksList)) || [];
-    },
-    filterAndSortTasksList(list) {
-      return sortTaskList(
-        filterTaskList(list, this.filters),
-        this.sortType,
-        this.inverseSort
-      );
-    },
+    filteredTasksList.value =
+        filterAndSortTasksList(Object.values(tasksList.value)) || [];
+}
 
-    setSortType(type) {
-      if (type === this.sortType) {
+function filterAndSortTasksList(list: Task[]) {
+    return sortTaskList(
+        filterTaskList(list, filters.value),
+        sortType.value,
+        inverseSort.value
+    );
+}
+
+function setSortType(type: TaskSortType) {
+    if (type === sortType.value) {
         // invert it
-        this.inverseSort = !this.inverseSort;
-      } else {
-        this.sortType = type;
-      }
+        inverseSort.value = !inverseSort.value;
+    } else {
+        sortType.value = type;
+    }
 
-      this.filterTasks();
-    },
+    filterTasks();
+}
 
-    refreshTask(task) {
-      this.taskRenderIndex[task.id] = `render-${task.id}-${Date.now()}`;
-    },
+function refreshTask(task: Task) {
+    taskRenderIndex.value[task.id] = `render-${task.id}-${Date.now()}`;
+}
 
-    clearFilters() {
-      this.filters = {};
-      this.filterTasks();
-    },
-    /**
-     * Add OR remove given tag to current filters & filter again.
-     * @param tag - Tag to add or remove, if already in filters.
-     */
-    addTagToFilters(tag) {
-      if (tag) {
-        this.setFilter(
-          'tags',
-          (this.filters.tags || []).includes(tag)
-            ? (this.filters.tags || []).filter((t) => t !== tag)
-            : (this.filters.tags || []).concat(tag)
+function clearFilters() {
+    filters.value = {};
+    filterTasks();
+}
+
+/**
+ * Add OR remove given tag to current filters & filter again.
+ * @param tag - Tag to add or remove, if already in filters.
+ */
+function addTagToFilters(tag: string) {
+    if (tag) {
+        setFilter(
+            FilterTypes.tags,
+            (filters.value.tags || []).includes(tag)
+                ? (filters.value.tags || []).filter((t: string) => t !== tag)
+                : (filters.value.tags || []).concat(tag)
         );
-      }
-    },
-    setFilter(type, value) {
-      this.filters[type] = value;
-      this.filterTasks();
-    },
-    saveFilters() {
-      saveToLocalStorage(localStorageNames.taskFilters, {
-        ...this.filters,
-        sortType: this.sortType,
-        inverseSort: this.inverseSort,
-        pagination: this.pagination,
-      });
-    },
+    }
+}
 
-    /****** Filtering tasks - booleans */
-    getFilterBoolColor(prop) {
-      return (
-        (this.filters[prop] === true && 'green-6') ||
-        (this.filters[prop] === false && 'red-6') ||
+function setFilter(type: FilterTypes, value: any) {
+    (filters.value as any)[type] = value;
+    filterTasks();
+}
+
+function saveFilters() {
+    saveToLocalStorage(localStorageNames.taskFilters, {
+        ...filters.value,
+        sortType: sortType.value,
+        inverseSort: inverseSort.value,
+        pagination: pagination.value,
+    });
+}
+
+/****** Filtering tasks - booleans */
+function getFilterBoolColor(prop: string) {
+    return (
+        ((filters.value as any)[prop] === true && 'green-6') ||
+        ((filters.value as any)[prop] === false && 'red-6') ||
         'grey-6'
-      );
-    },
-    toggleFilterBool(prop) {
-      if (this.filters[prop] === true) {
-        this.filters[prop] = false;
-      } else if (this.filters[prop] === false) {
-        this.filters[prop] = null;
-      } else {
-        this.filters[prop] = true;
-      }
+    );
+}
 
-      this.filterTasks();
-    },
+function toggleFilterBool(prop: string) {
+    if ((filters.value as any)[prop] === true) {
+        (filters.value as any)[prop] = false;
+    } else if ((filters.value as any)[prop] === false) {
+        (filters.value as any)[prop] = null;
+    } else {
+        (filters.value as any)[prop] = true;
+    }
 
-    createTask() {
-      cudTaskViaStore(
-        this.$store,
-        this.applyFilters
-          ? applyFiltersToTask(this.newTask, this.filters)
-          : this.newTask
-      ).then(() => {
-        this.newTask = { message: null };
-      });
+    filterTasks();
+}
 
-      this.filterTasks();
-    },
-  },
-};
+const applyFilters = ref(true);
+
+async function createTask() {
+    store.cloudUpdateSingle(
+        applyFilters.value ?
+            applyFiltersToTask(newTask.value, filters.value) :
+            newTask.value
+    ).then(() =>
+    {
+        newTask.value = { message: '' };
+        filterTasks();
+    });
+}
+
+function goToSettings()
+{
+    saveToLocalStorageArray(
+        localStorageNames.currentTabQueue,
+        'settings'
+    );
+
+    console.log('goToSettings', getFromLocalStorage(localStorageNames.currentTabQueue));
+}
+
+watch(pagination, () =>
+{
+    saveFilters();
+});
 </script>
 
 <style>

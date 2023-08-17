@@ -120,7 +120,7 @@ v-for="(tag, tagIndex) in task.tags" :key="`tag-${tagIndex}`" square dense dark
 
 <script>
 import { cudTaskViaStore, timeSince, getStoriesFromTask } from '../utils';
-import useTaskStore from '@/pinia/taskStore';
+import useTaskStore from 'src/pinia/taskStore';
 
 export default {
   components: {

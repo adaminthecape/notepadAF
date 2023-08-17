@@ -68,76 +68,64 @@
   </SimpleModal>
 </template>
 
-<script>
+<script setup lang="ts">
 import { getFromLocalStorage, saveToLocalStorage } from 'src/utils';
+import { ref, onMounted, watch, defineEmits, defineAsyncComponent } from 'vue';
 
-export default {
-  props: {
-    value: {
-      type: Array,
-      required: true
-    },
-    listKey: {
-      type: String,
-      default: undefined
-    },
-    title: {
-      type: String,
-      default: 'List'
-    }
-  },
-  components: {
-    SimpleModal: () => import('src/components/SimpleModal.vue'),
-    TaskTagSelector: () => import('src/components/TaskTagSelector.vue')
-  },
-  data() {
-    return {
-      items: [],
-      extrasId: undefined,
-      extrasTitle: undefined
-    };
-  },
-  mounted() {
-    if (this.listKey) {
-      const storedItems = getFromLocalStorage(this.listKey, true);
+const SimpleModal = defineAsyncComponent(() => import('src/components/SimpleModal.vue'));
+const TaskTagSelector = defineAsyncComponent(() => import('src/components/TaskTagSelector.vue'));
 
-      if (storedItems) {
-        this.items = storedItems;
-      }
-    }
+const items = ref<Record<string, any>[]>([]);
+const extrasId = ref<number>();
+const extrasTitle = ref<string>();
 
-    this.items = [...this.value];
-  },
-  watch: {
-    value: {
-      handler(newVal) {
-        this.$emit('input', newVal);
-        this.items = newVal;
-      },
-      deep: true
-    }
-  },
-  methods: {
-    toggleItem(num) {
-      if (this.items[num]) {
-        this.items[num].active = !this.items[num].active;
+const emit = defineEmits<{
+    (event: 'input', value: any): void;
+    (event: 'updated'): void;
+}>();
 
-        if (this.listKey) {
-          saveToLocalStorage(this.listKey, this.items);
-          this.$emit('updated');
+const props = defineProps<{
+    value: Record<string, any>[];
+    listKey: string;
+    title: string;
+}>();
+
+function toggleItem(num: number) {
+    if (items.value[num]) {
+        items.value[num].active = !items.value[num].active;
+
+        if (props.listKey) {
+            saveToLocalStorage(props.listKey, items.value);
+            emit('updated');
         }
-      }
-    },
-    openExtras(i) {
-      this.extrasId = i;
-      this.extrasTitle = this.items[i].title;
-    },
-    closeExtras() {
-      this.extrasId = undefined;
-      this.extrasTitle = undefined;
     }
-  }
-};
+}
+function openExtras(i: number) {
+    extrasId.value = i;
+    extrasTitle.value = items.value[i].title;
+}
+function closeExtras() {
+    extrasId.value = undefined;
+    extrasTitle.value = undefined;
+}
+
+onMounted(() => {
+    if (props.listKey) {
+        const storedItems = getFromLocalStorage(props.listKey, true);
+
+        if (storedItems) {
+            items.value = storedItems;
+        }
+    }
+
+    items.value = [...props.value || []];
+});
+
+watch(props.value, (newVal) =>
+{
+    emit('input', newVal);
+    items.value = newVal;
+});
 </script>
 
 <style scoped>
