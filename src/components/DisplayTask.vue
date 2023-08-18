@@ -41,7 +41,7 @@ v-for="(alert, a) in task.alerts" :key="`alert-${a}-${activeAlertsRenderKey}`" s
                 size="md"
                 dense
                 flat
-                @edit-task="editTask"
+                @edit-task="editTask()"
             />yy
           </div>
         </div>
@@ -126,7 +126,7 @@ v-for="(tag, tagIndex) in task.tags" :key="`tag-${tagIndex}`" square dense dark
 </template>
 
 <script setup lang="ts">
-import { cudTaskViaStore, queueTaskRefresh, timeSince } from '../utils';
+import { queueTaskRefresh, timeSince } from '../utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, ref, watch } from 'vue';
 import { Task, TaskAlert } from 'src/types';
@@ -167,7 +167,7 @@ const stories = computed(() =>
 
 watch(task, () => queueTaskRefresh(task.value.id));
 
-function editTask(force: boolean) {
+function editTask(force?: boolean) {
     if (typeof force === 'boolean') {
     isEditing.value = force;
     } else {

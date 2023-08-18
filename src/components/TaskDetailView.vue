@@ -68,57 +68,39 @@
   </SimpleLayout>
 </template>
 
-<script>
+<script setup lang="ts">
 import { getFromLocalStorage, localStorageNames } from 'src/utils.js';
-import { getTask } from 'src/storeHelpers.js';
-import SimpleLayout from 'src/components/SimpleLayout.vue';
-import TaskOptions from 'src/components/TaskOptions.vue';
-import TaskActivityLog from 'src/components/TaskActivityLog.vue';
-import DisplayTask from 'components/DisplayTask';
-import SubtaskList from 'components/TaskSubtaskList';
-// import TaskActiveButton from "components/TaskActiveButton";
+import { computed, defineAsyncComponent, ref, watch } from 'vue';
+import useTaskStore from 'src/pinia/taskStore';
 
-export default {
-  components: {
-    SubtaskList,
-    DisplayTask,
-    // TaskActiveButton,
-    TaskActivityLog,
-    TaskOptions,
-    SimpleLayout
-  },
-  props: {
-    taskId: {
-      type: String,
-      required: true
-    }
-  },
-  data() {
-    return {
-      localStorageData: {},
-      // newLogMessage: '',
-      logRenderKey: 0
-    };
-  },
-  watch: {
-    'task.active'() {
-      this.logRenderKey += 1;
-    }
-  },
-  computed: {
-    task() {
-      return getTask(this.$store, this.taskIdToUse);
-    },
-    taskIdToUse() {
-      return this.taskId || getFromLocalStorage(localStorageNames.desiredTaskId);
-    }
-  },
-  methods: {
-    editTask() {
-      this.$refs.displayTask.editTask();
-    }
-  }
-};
+const SubtaskList = defineAsyncComponent(() => import('src/components/TaskSubtaskList.vue'));
+const DisplayTask = defineAsyncComponent(() => import('src/components/DisplayTask.vue'));
+const TaskActivityLog = defineAsyncComponent(() => import('src/components/TaskActivityLog.vue'));
+const TaskOptions = defineAsyncComponent(() => import('src/components/TaskOptions.vue'));
+const SimpleLayout = defineAsyncComponent(() => import('src/components/SimpleLayout.vue'));
+
+const props = defineProps<{
+    taskId: string;
+}>();
+
+const store = useTaskStore();
+const task = computed(() => store.getTask(props.taskId));
+const isTaskActive = computed(() => !!task?.value?.active);
+const taskIdToUse = computed(() =>
+{
+    return props.taskId || getFromLocalStorage(localStorageNames.desiredTaskId);
+});
+
+const logRenderKey = ref<number>(0);
+
+watch(isTaskActive, () =>
+{
+    logRenderKey.value += 1;
+});
+
+function editTask() {
+    // this.$refs.displayTask.editTask();
+}
 </script>
 
 <style>

@@ -22,23 +22,16 @@
   </div>
 </template>
 
-<script>
-import StoryCard from 'src/components/StoryCard';
+<script setup lang="ts">
+import { computed, defineAsyncComponent } from 'vue';
 
-export default {
-  components: {
-    StoryCard
-  },
-  props: {
-    stories: {
-      type: Array,
-      required: true
-    }
-  },
-  computed: {
-    storyIds() {
-      return this.stories.map((s) => s.id).join(', ');
-    }
-  }
-};
+const StoryCard = defineAsyncComponent(() => import('src/components/StoryCard.vue'));
+
+const props = defineProps<{
+    stories: Array<{ id: string|number }>;
+}>();
+
+const storyIds = computed(() => {
+    return props.stories.map((s: { id: string|number }) => s.id).join(', ');
+});
 </script>

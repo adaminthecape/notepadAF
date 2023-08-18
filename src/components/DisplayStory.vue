@@ -2,7 +2,8 @@
   <div>
     <SimpleLayout :header="false" style="max-height: 70vh">
       <template #body>
-        <q-markdown
+        <QMarkdown
+            v-if="story"
             class="q-pa-sm"
             :src="story.description"
             style="max-width: 64em"
@@ -12,38 +13,35 @@
   </div>
 </template>
 
-<script>
-import { QMarkdown } from '@quasar/quasar-ui-qmarkdown';
-import SimpleLayout from 'src/SimpleLayout';
-import { getStory, loadStory } from 'src/storeHelpers.js';
+<script setup lang="ts">
+import usePivotalStore, { PivotalStoryId } from 'src/pinia/pivotalStore';
+import { computed, defineAsyncComponent, onMounted } from 'vue';
 
-export default {
-  name: 'DisplayStory',
-  components: {
-    QMarkdown,
-    SimpleLayout
-  },
-  props: {
-    storyId: {
-      type: [String, Number],
-      required: true
-    }
-  },
-  computed: {
-    storyIdAsNumber() {
-      return typeof this.storyId === 'string' ? parseInt(this.storyId, 10) : this.storyId;
-    },
-    story() {
-      return getStory(this.$store, this.storyIdAsNumber);
-    },
-    description() {
-      return !this.story ? null : this.story.description;
-    }
-  },
-  async mounted() {
-    await loadStory(this.$store, this.storyIdAsNumber);
-  }
-};
+const SimpleLayout = defineAsyncComponent(() => import('src/components/SimpleLayout.vue'));
+const QMarkdown = defineAsyncComponent(() => import('@quasar/quasar-ui-qmarkdown'));
+
+const props = defineProps<{
+    storyId: PivotalStoryId;
+}>();
+
+const store = usePivotalStore();
+
+const story = computed(() => {
+
+    return store.get(props.storyId);
+})
+
+const description = computed(() =>
+{
+    return !story.value ? undefined : story.value.description;
+});
+
+onMounted(async () =>
+{
+    await store.load({
+        id: parseInt(`${props.storyId}`, 10)
+    });
+});
 </script>
 
 <style>

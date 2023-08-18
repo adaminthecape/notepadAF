@@ -1,5 +1,4 @@
 <template>
-    <div>HELLO WORLD</div>
   <div
     class="row items-center"
     :key="`task-options-${taskId}-${taskRenderIndex}`"
@@ -10,7 +9,7 @@
         :size="size"
         :dense="dense"
         :flat="flat"
-        @click="goToActivityPageForTask(task.id)"
+        @click="goToActivity()"
     >
       <q-tooltip>View activity</q-tooltip>
     </q-btn>
@@ -42,7 +41,7 @@
         :size="size"
         :dense="dense"
         :flat="flat"
-        @toggle="$emit('editTask')"
+        @toggle="editTask()"
     />
     <TaskDoneButton
         v-if="showAllOptions || (showDoneButton || task.done)"
@@ -82,7 +81,7 @@
         :size="size"
         :dense="dense"
         :flat="flat"
-        @removed="queueTaskRefresh(task.id)"
+        @removed="refreshTask()"
     />
     <q-btn
         v-if="!hideMenuButton"
@@ -137,6 +136,25 @@ const TaskArchiveButton = defineAsyncComponent(() => import('src/components/Task
 const TaskEditButton = defineAsyncComponent(() => import('src/components/TaskEditButton.vue'));
 const TaskDoneButton = defineAsyncComponent(() => import('src/components/TaskDoneButton.vue'));
 const TaskActiveButton = defineAsyncComponent(() => import('src/components/TaskActiveButton.vue'));
+
+function refreshTask()
+{
+    queueTaskRefresh(props.taskId);
+}
+
+function goToActivity()
+{
+    goToActivityPageForTask(props.taskId);
+}
+
+const emit = defineEmits<{
+    (event: 'editTask'): void;
+}>();
+
+function editTask()
+{
+    emit('editTask');
+}
 
 watch(task, () =>
 {

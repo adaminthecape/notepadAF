@@ -77,7 +77,7 @@ const hasAccount = ref(!!getFromLocalStorage(
 ));
 const currentTab = ref('tasks');
 const ticketCache = ref();
-const desiredTaskId = ref(getFromLocalStorage(localStorageNames.desiredTaskId));
+const desiredTaskId = ref(getFromLocalStorage(localStorageNames.desiredTaskId) || undefined);
 const appTabs = ref(appTabsToUse);
 
 const activeAppTabs = computed(() => {

@@ -8,12 +8,14 @@
       <div class="col full-width" @click="open">
         <div class="items-center q-my-sm full-width">
           <q-badge :label="story.estimate === 0 ? 0 : story.estimate || '?'" class="q-mr-xs" />
-          <q-icon :name="story.story_type === 'feature' ? 'star' : 'bug_report'"
+          <q-icon
+:name="story.story_type === 'feature' ? 'star' : 'bug_report'"
             :color="story.story_type === 'feature' ? 'warning' : 'negative'" />
           {{ story.name }}
         </div>
         <div class="items-center q-my-xs full-width">
-          <q-chip v-for="label in story.labels" :label="label.name" :key="label.name"
+          <q-chip
+v-for="label in story.labels" :label="label.name" :key="label.name"
             :color="label.name.includes('(') ? 'primary' : 'secondary'" class="q-ma-none q-mr-xs" style="color: #ddd"
             :size="dense ? 'sm' : 'md'" />
         </div>
@@ -22,18 +24,22 @@
             {{ new Date(story.created_at).toDateString() }}
           </q-chip>
           <q-btn-group>
-            <q-btn label="View" color="primary" :dense="dense" flat class="q-mr-xs"
-              @click.stop.prevent="openInBrowser(story.url)" />
-            <q-btn label="Git C/O" color="negative" :dense="dense" flat @click.stop.prevent="
-              copyToClipboard(`git checkout PT_${story.id}`)
+            <q-btn
+label="View" color="primary" :dense="dense" flat class="q-mr-xs"
+              @click.stop.prevent="openLink(story.url)" />
+            <q-btn
+label="Git C/O" color="negative" :dense="dense" flat @click.stop.prevent="
+              copy(`git checkout PT_${story.id}`)
               " />
-            <q-btn :label="story.id" color="secondary" :dense="dense" flat
-              @click.stop.prevent="copyToClipboard(story.id)">
+            <q-btn
+:label="story.id" color="secondary" :dense="dense" flat
+              @click.stop.prevent="copy(story.id)">
               <q-tooltip>Copy story ID</q-tooltip>
             </q-btn>
           </q-btn-group>
           <q-btn-group class="q-ml-xs">
-            <q-btn v-if="allowAddTasks" label="Tasks" color="primary" :dense="dense" flat
+            <q-btn
+v-if="allowAddTasks" label="Tasks" color="primary" :dense="dense" flat
               @click.stop.prevent="openTasksForStory">
               <q-tooltip>View tasks for {{ storyId }}</q-tooltip>
             </q-btn>
@@ -46,7 +52,8 @@
       <div class="col">
         <h5 class="q-mb-sm">{{ story.name }}</h5>
         <div>
-          <q-chip v-for="label in story.labels" :label="label.name" :key="label.name"
+          <q-chip
+v-for="label in story.labels" :label="label.name" :key="label.name"
             :color="label.name.includes('(') ? 'primary' : 'secondary'" class="q-ma-none q-mr-xs" style="color: #ddd"
             :size="dense ? 'sm' : 'md'" />
         </div>
@@ -56,14 +63,20 @@
       <DisplayStory :story-id="story.id" />
     </template>
     <template #actions>
-      <q-btn label="View" color="primary" :dense="dense" flat class="q-mr-xs"
-        @click.stop.prevent="openInBrowser(story.url)" />
-      <q-btn label="Git C/O" color="negative" :dense="dense" flat @click.stop.prevent="$emit('checkoutBoth', story.id)" />
+      <q-btn
+        label="View"
+        color="primary"
+        :dense="dense"
+        flat
+        class="q-mr-xs"
+        @click.stop.prevent="openLink(story.url)"
+    />
+      <q-btn label="Git C/O" color="negative" :dense="dense" flat />
     </template>
   </SimpleModal>
 </template>
 
-<script>
+<script setup lang="ts">
 import {
   getFromLocalStorage,
   saveToLocalStorage,
@@ -72,55 +85,54 @@ import {
   localStorageNames,
   saveToLocalStorageArray,
 } from 'src/utils';
-import { getStory, loadStory } from 'src/storeHelpers';
+import { computed, defineAsyncComponent, onMounted } from 'vue';
+import usePivotalStore from 'src/pinia/pivotalStore';
 
-export default {
-  name: 'StoryCard',
-  components: {
-    AddTask: () => import('src/components/AddTask.vue'),
-    DisplayStory: () => import('src/components/DisplayStory.vue'),
-    SimpleModal: () => import('src/components/SimpleModal.vue'),
-  },
-  props: {
-    noteId: {
-      type: String,
-      default: null,
-    },
-    storyId: {
-      type: [String, Number],
-      required: true,
-    },
-    dense: {
-      type: Boolean,
-      default: true,
-    },
-    allowAddTasks: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  computed: {
-    story() {
-      return getStory(this.$store, parseInt(this.storyId, 10));
-    },
-  },
-  async mounted() {
-    await loadStory(this.$store, parseInt(this.storyId, 10));
-  },
-  methods: {
-    openInBrowser,
-    copyToClipboard,
-    openTasksForStory() {
+const AddTask = defineAsyncComponent(() => import('src/components/AddTask.vue'));
+const DisplayStory = defineAsyncComponent(() => import('src/components/DisplayStory.vue'));
+const SimpleModal = defineAsyncComponent(() => import('src/components/SimpleModal.vue'));
+
+const props = defineProps < {
+    storyId: string | number;
+    dense?: boolean;
+    allowAddTasks?: boolean;
+}>();
+
+const store = usePivotalStore();
+
+const story = computed(() =>
+{
+    return store.get(parseInt(`${props.storyId}`, 10));
+});
+
+function openLink(url: string)
+{
+    openInBrowser(url);
+}
+
+function copy(val: string)
+{
+    copyToClipboard(val);
+}
+
+onMounted(async () =>
+{
+    await store.load({ id: parseInt(`${props.storyId}`, 10) });
+});
+
+function openTasksForStory() {
       const existingFilters = getFromLocalStorage(
         localStorageNames.taskFilters,
         true
       );
       saveToLocalStorage(localStorageNames.taskFilters, {
         ...existingFilters,
-        keyword: `${this.storyId}`,
+        keyword: `${props.storyId}`,
       });
       saveToLocalStorageArray(localStorageNames.currentTab, 'tasks');
-    },
-  },
 };
+
+const emit = defineEmits<{
+    // (event: 'checkoutBoth', isEditing: boolean): void;
+}>();
 </script>

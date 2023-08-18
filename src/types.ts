@@ -11,7 +11,9 @@ export type Task = {
     archived?: number | boolean;
     tags?: string[];
     alerts?: TaskAlert[];
-    messageType?: 'textarea' | 'input' | 'text' | undefined
+    messageType?: 'textarea' | 'input' | 'text' | undefined;
+    /** Not really part of the task, just used for some components. To be deprecated! */
+    stories?: any[];
 };
 
 export interface TaskSubtask {
