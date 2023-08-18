@@ -7,61 +7,64 @@
     :icon="done ? 'check_circle' : 'check_circle_outline'"
     @click="toggle">
     <q-tooltip>
-      <span v-if="done">Finished {{ timeSince(done) }}</span>
+      <span v-if="done">Finished {{ timeSinceDone }}</span>
       <span v-else>Finish task</span>
     </q-tooltip>
   </q-btn>
 </template>
 
-<script>
-import { timeSince, cudTaskPropertyViaStore } from 'src/utils';
+<script setup lang="ts">
+import { timeSince } from 'src/utils';
+import { computed } from 'vue';
+import useTaskStore from '@/pinia/taskStore';
 
-export default {
-  props: {
-    taskId: {
-      type: String,
-      default: undefined,
-    },
-    size: {
-      type: String,
-      default: undefined
-    },
-    icon: {
-      type: String,
-      default: undefined
-    },
-    color: {
-      type: String,
-      default: undefined
-    },
-    flat: {
-      type: Boolean,
-      default: false
-    },
-    dense: {
-      type: Boolean,
-      default: false
-    },
-    done: {
-      type: Number,
-      default: 0
-    }
+const props = defineProps({
+  taskId: {
+    type: String,
+    required: true,
   },
-  methods: {
-    timeSince,
-    toggle() {
-      const newVal = this.done ? 0 : Date.now();
+  size: {
+    type: String,
+    default: undefined
+  },
+  icon: {
+    type: String,
+    default: undefined
+  },
+  color: {
+    type: String,
+    default: undefined
+  },
+  flat: {
+    type: Boolean,
+    default: false
+  },
+  dense: {
+    type: Boolean,
+    default: false
+  }
+});
 
-      if (this.taskId) {
-        cudTaskPropertyViaStore(this.$store, {
-          taskId: this.taskId,
-          prop: 'done',
-          data: newVal,
-        });
-      } else {
-        this.$emit('toggle', newVal);
-      }
-    },
-  },
-};
+const store = useTaskStore();
+
+const done = computed(() => store.getTaskProperty(props.taskId, 'done'));
+const timeSinceDone = computed(() => timeSince(done.value));
+
+const emit = defineEmits<{
+  (event: 'toggle', done: number): void
+}>();
+
+function toggle() {
+  const newVal = done.value ? 0 : Date.now();
+
+  if (props.taskId) {
+    store.cloudUpdateSingleProperty({
+      taskId: props.taskId,
+      prop: 'done',
+      data: newVal,
+    });
+  } else {
+    emit('toggle', newVal);
+  }
+}
 </script>

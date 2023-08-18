@@ -15,28 +15,22 @@
 </template>
 
 <script setup lang="ts">
-import {
-    defineEmits,
-    defineProps
-} from 'vue';
-
 const props = defineProps<{
-    editing: boolean;
-    size?: string;
-    icon?: string;
-    color?: string;
-    flat?: boolean;
-    dense?: boolean;
-    taskId?: string;
+  editing: boolean;
+  size?: string;
+  icon?: string;
+  color?: string;
+  flat?: boolean;
+  dense?: boolean;
+  taskId?: string;
 }>();
 
 const emit = defineEmits<{
-    (event: 'toggle', isEditing: boolean): void;
+  (event: 'toggle', isEditing: boolean): void;
 }>();
 
-function toggle()
-{
-    console.log('Edit toggle:', props.editing);
-    emit('toggle', !props.editing);
+function toggle() {
+  console.log('Edit toggle:', props.editing);
+  emit('toggle', !props.editing);
 }
 </script>

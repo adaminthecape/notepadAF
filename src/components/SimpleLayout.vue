@@ -1,3 +1,5 @@
+import { computed } from "vue";
+
 <template>
   <q-layout
       view="lHh lpr lFf"
@@ -47,38 +49,31 @@
   </q-layout>
 </template>
 
-<script>
-export default {
-  props: {
-    header: {
-      type: Boolean,
-      default: true
-    },
-    footer: {
-      type: Boolean,
-      default: false
-    },
-    page: {
-      type: Boolean,
-      default: true
-    },
-    pageOffset: {
-      type: Number,
-      default: 120
-    },
-    pageStyle: {
-      type: String,
-      default: ''
-    },
-    pageClasses: {
-      type: Array,
-      default: undefined
-    }
+<script setup lang="ts">
+defineProps({
+  header: {
+    type: Boolean,
+    default: true
   },
-  computed: {
-    screenWidth() {
-      return this.$q.screen.width;
-    }
+  footer: {
+    type: Boolean,
+    default: false
+  },
+  page: {
+    type: Boolean,
+    default: true
+  },
+  pageOffset: {
+    type: Number,
+    default: 120
+  },
+  pageStyle: {
+    type: String,
+    default: ''
+  },
+  pageClasses: {
+    type: Array,
+    default: undefined
   }
-};
+});
 </script>

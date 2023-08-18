@@ -46,57 +46,52 @@
   </div>
 </template>
 
-<script>
-import { cudTaskViaStore } from 'src/utils';
-import { getTask } from 'src/storeHelpers';
+<script setup lang="ts">
+import { computed, ref } from 'vue';
+import useTaskStore from '@/pinia/taskStore';
 
-export default {
-  props: {
-    taskId: {
-      type: String,
-      default: undefined,
-    },
-    size: {
-      type: String,
-      default: undefined
-    },
-    icon: {
-      type: String,
-      default: undefined
-    },
-    color: {
-      type: String,
-      default: undefined
-    },
-    flat: {
-      type: Boolean,
-      default: false
-    },
-    dense: {
-      type: Boolean,
-      default: false
-    },
+const props = defineProps({
+  taskId: {
+    type: String,
+    default: undefined,
   },
-  data() {
-    return {
-      isConfirmingDeletion: false,
-    };
+  size: {
+    type: String,
+    default: undefined
   },
-  computed: {
-    task() {
-      return getTask(this.$store, this.taskId);
-    }
+  icon: {
+    type: String,
+    default: undefined
   },
-  methods: {
-    reallyRemoveTask() {
-      cudTaskViaStore(
-        this.$store,
-        { ...this.task, deleted: Date.now() },
-        true
-      ).then(() => {
-        this.isConfirmingDeletion = false;
-      });
-    },
+  color: {
+    type: String,
+    default: undefined
   },
-};
+  flat: {
+    type: Boolean,
+    default: false
+  },
+  dense: {
+    type: Boolean,
+    default: false
+  },
+});
+
+const isConfirmingDeletion = ref<boolean>(false);
+
+const store = useTaskStore();
+
+const task = computed(() => (
+  props.taskId ? store.getTask(props.taskId) : undefined
+));
+
+function reallyRemoveTask() {
+  if (!task.value) return;
+
+  store.cloudUpdateSingle(
+    { ...task.value, deleted: Date.now() }
+  ).then(() => {
+    isConfirmingDeletion.value = false;
+  });
+}
 </script>

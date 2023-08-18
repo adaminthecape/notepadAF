@@ -11,10 +11,11 @@ class="row items-center full-width justify-start" style="align-content: start" f
               <div class="row items-center justify-start full-width">
                 <q-chip square dense class="text-bold" style="min-width: 12em">{{ log.startDate }}</q-chip>
                 <TaskActiveButton
-v-if="!log.end" :task-id="taskId" mode="save" @click.stop.prevent="
-                                    {
-}
-  " />
+                  v-if="taskId && !log.end"
+                  :task-id="taskId"
+                  mode="save"
+                  @click.stop.prevent="{ }"
+                />
                 <q-chip v-else class="text-bold" style="min-width: 4em" square dense>{{ !log.end ? "..." : log.duration
                 }}</q-chip>
                 <q-chip style="flex-grow: 1" class="full-width" square dense>
@@ -81,169 +82,168 @@ v-model="log.note" dense filled @click.stop.prevent="
   </q-list>
 </template>
 
-<script>
+<script setup lang="ts">
 import {
   filterTaskList,
-  secondsToHumanReadable,
-  cudTaskPropertyViaStore
+  secondsToHumanReadable
 } from 'src/utils';
-import { getTask } from 'src/storeHelpers';
-import TaskActiveButton from 'components/TaskActiveButton';
 import useTaskStore from 'src/pinia/taskStore';
+import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
+import { Task, TaskActivityLog } from '@/types';
 
-export default {
-  name: 'TaskActivityLog',
-  components: { TaskActiveButton },
-  props: {
-    taskId: {
-      type: String,
-      default: undefined,
-    },
-    addNew: {
-      type: Boolean,
-      default: false,
-    },
-    filters: {
-      type: Object,
-      default: undefined,
-    },
-    showMessage: {
-      type: Boolean,
-      default: false,
-    },
+const TaskActiveButton = defineAsyncComponent(() => import('src/components/TaskActiveButton.vue'));
+const props = defineProps({
+  taskId: {
+    type: String,
+    default: undefined,
   },
-  data() {
-    return {
-      allActivity: [],
-      listRenderIndex: 0,
-      newLogMessage: '',
-      isIncrementDialogOpen: {},
-    };
+  addNew: {
+    type: Boolean,
+    default: false,
   },
-  computed: {
-    taskList() {
-      if (this.taskId) {
-        return [getTask(this.$store, this.taskId)];
-      }
+  filters: {
+    type: Object,
+    default: undefined,
+  },
+  showMessage: {
+    type: Boolean,
+    default: false,
+  },
+});
 
-      return this.allActivity;
-    },
-    taskActivity() {
-      return this.taskList
-        .reduce((agg, task) => {
-          if (!task.activity) return agg;
-          if (!task.activity.length) return agg;
+const store = useTaskStore();
 
-          task.activity.forEach((log) => {
-            agg.push({
-              ...log,
-              duration:
-                log.end && log.start
-                  ? secondsToHumanReadable(
-                    Math.floor((log.end - log.start) / 1000),
-                    true
-                  )
-                  : 0,
-              startDate: new Date(log.start)
-                .toLocaleString()
-                .split(':')
-                .slice(0, 2)
-                .join(':'),
-              id: task.id,
-              message: this.showMessage
-                ? task.message && task.message.length > 50
-                  ? `${task.message.slice(0, 50)}...`
-                  : task.message || ''
-                : undefined,
-            });
-          });
+const allActivity = ref([]);
+const listRenderIndex = ref(0);
+const newLogMessage = ref('');
 
-          return agg;
-        }, [])
-        .sort((a, b) => a.start - b.start);
-    },
-  },
-  watch: {
-    filters: {
-      handler() {
-        this.setActivity();
-      },
-      deep: true,
-    },
-  },
-  mounted() {
-    this.setActivity();
-  },
-  methods: {
-    updateLog(data) {
-      cudTaskPropertyViaStore(
-        this.$store,
-        {
-          taskId: this.taskId,
-          prop: 'activity',
-          data: data.map((item) => {
-            delete item.isEditing;
+const taskList = computed(() => {
+  if (props.taskId) {
+    return [store.getTask(props.taskId)];
+  }
 
-            return item;
-          }),
-        })
-        .then(() => {
-          // this.listRenderIndex += 1;
+  return allActivity.value;
+});
+
+const taskActivity = computed(() => {
+  return taskList.value
+    .reduce((agg: TaskActivityLog[], task: Task) => {
+      if (!task.activity) return agg;
+      if (!task.activity.length) return agg;
+
+      task.activity.forEach((log) => {
+        agg.push({
+          ...log,
+          duration:
+            log.end && log.start
+              ? secondsToHumanReadable(
+                Math.floor((log.end - log.start) / 1000),
+                true
+              )
+              : 0,
+          startDate: new Date(log.start)
+            .toLocaleString()
+            .split(':')
+            .slice(0, 2)
+            .join(':'),
+          id: task.id,
+          message: props.showMessage
+            ? task.message && task.message.length > 50
+              ? `${task.message.slice(0, 50)}...`
+              : task.message || ''
+            : undefined,
         });
-    },
-    removeActivityLog(log) {
-      this.updateLog(
-        this.taskActivity.filter(
-          (l) => l.start !== log.start && l.end !== log.end
-        )
-      );
-    },
-    updateTime(index, newTime, startOrEnd) {
-      const data = [...this.taskActivity].map((log, l) => {
-        if (l === index) {
-          return {
-            ...log,
-            [startOrEnd]: newTime,
-          };
-        }
-
-        return log;
       });
 
-      this.updateLog(data);
-    },
-    incrementBy(startOrEnd, log, amount) {
-      if (!startOrEnd || !amount || !log) {
-        return;
-      }
+      return agg;
+    }, [])
+    .sort((a, b) => a.start - b.start);
+});
 
-      const index = this.taskActivity.findIndex(
-        (l) => l.start === log.start && l.end === log.end
-      );
+watch(() => props.filters, () => setActivity());
+onMounted(() => setActivity());
 
-      const newTime = this.taskActivity[index][startOrEnd] + amount;
+function updateLog(data: TaskActivityLog) {
+  if (!props.taskId) {
+    return;
+  }
 
-      this.updateTime(index, newTime, startOrEnd);
-    },
-    setActivity() {
-      if (this.taskId) {
-        return;
-      }
+  store.cloudUpdateSingleProperty({
+    taskId: props.taskId,
+    prop: 'activity',
+    data: data.map((item: TaskActivityLog) => {
+      delete item.isEditing;
 
-      const tasks = useTaskStore().getTasks;
-      // const tasks = this.$store.getters['notes/getTasks'];
+      return item;
+    }),
+  })
+    .then(() => {
+      // this.listRenderIndex += 1;
+    });
+}
 
-      if (!tasks) {
-        return;
-      }
+function removeActivityLog(log: TaskActivityLog) {
+  updateLog(
+    taskActivity.value.filter(
+      (l) => l.start !== log.start && l.end !== log.end
+    )
+  );
+}
 
-      const tasksList =
-        (Object.keys(this.filters || {}).length
-          ? filterTaskList(tasks, this.filters)
-          : tasks) || [];
+function updateTime(
+  index: number,
+  newTime: number,
+  startOrEnd: 'start' | 'end'
+) {
+  const data = [...taskActivity.value].map((log, l) => {
+    if (l === index) {
+      return {
+        ...log,
+        [startOrEnd]: newTime,
+      };
+    }
 
-      this.allActivity = tasksList;
-    },
-  },
-};
+    return log;
+  });
+
+  updateLog(data);
+}
+
+function incrementBy(
+  startOrEnd: 'start' | 'end',
+  log: TaskActivityLog,
+  amount: number
+) {
+  if (!startOrEnd || !amount || !log) {
+    return;
+  }
+
+  const index = taskActivity.value.findIndex(
+    (l: TaskActivityLog) => l.start === log.start && l.end === log.end
+  );
+
+  const newTime = taskActivity.value[index][startOrEnd] + amount;
+
+  updateTime(index, newTime, startOrEnd);
+}
+
+function setActivity() {
+  if (props.taskId) {
+    return;
+  }
+
+  const tasks = useTaskStore().getTasks;
+  // const tasks = this.$store.getters['notes/getTasks'];
+
+  if (!tasks) {
+    return;
+  }
+
+  const tasksList =
+    (Object.keys(props.filters || {}).length
+      ? filterTaskList(tasks, props.filters)
+      : tasks) || [];
+
+  allActivity.value = tasksList;
+}
 </script>

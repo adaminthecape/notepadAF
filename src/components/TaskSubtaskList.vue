@@ -23,98 +23,87 @@ color="negative" icon="delete" size="sm" dense flat
   </q-list>
 </template>
 
-<script>
+<script setup lang="ts">
 import {
-  qNotify,
   queueTaskRefresh,
-  cudTaskViaStore,
-  cudTaskPropertyViaStore,
 } from 'src/utils';
-import { getTask, getTaskProperty } from 'src/storeHelpers';
+import { computed, ref } from 'vue';
+import useTaskStore from '@/pinia/taskStore';
+import { TaskSubtask } from '@/types';
 
-export default {
-  name: 'SubtaskList',
-  props: {
-    taskId: {
-      type: String,
-      default: undefined,
-    },
-    addNew: {
-      type: Boolean,
-      default: true,
-    },
+const props = defineProps({
+  taskId: {
+    type: String,
+    required: true,
   },
-  data() {
-    return {
-      listRenderIndex: 0,
-      newLogMessage: '',
-    };
+  addNew: {
+    type: Boolean,
+    default: true,
   },
-  computed: {
-    task() {
-      return getTask(this.$store, this.taskId);
-    },
-    subtasks() {
-      return getTaskProperty(this.$store, this.taskId, 'next') || [];
-    },
-    isActive() {
-      return !!getTaskProperty(this.$store, this.taskId, 'active');
-    },
-  },
-  methods: {
-    startSubtask(index) {
-      // is the task active? then quit
-      if (this.isActive) {
-        qNotify(this.$q, 'You must finish the current activity first');
+});
 
-        return;
-      }
+const listRenderIndex = ref<number>(0);
+const newLogMessage = ref<string>('');
 
-      // start a new activity log with this message
-      const activity = (this.task.activity || []).concat({
-        start: Date.now(),
-        end: 0,
-        note: this.subtasks[index].note || '',
-      });
+const store = useTaskStore();
+const task = computed(() => store.getTask(props.taskId));
+const subtasks = computed(() => store.getTaskProperty(props.taskId, 'next'));
+const isActive = computed(() => !!store.getTaskProperty(props.taskId, 'active'));
 
-      cudTaskViaStore(this.$store, {
-        ...this.task,
-        activity: activity,
-        active: Date.now(),
-      }).then(() => {
-        this.removeSubtask(index);
-        setTimeout(() => {
-          queueTaskRefresh(this.taskId);
-        }, 250);
-      });
-    },
-    removeSubtask(index) {
-      const data = this.subtasks.filter((s, i) => i !== index);
+function startSubtask(index: number) {
+  // is the task active? then quit
+  if (isActive.value) {
+    // qNotify(this.$q, 'You must finish the current activity first');
 
-      cudTaskPropertyViaStore(this.$store, {
-        taskId: this.taskId,
-        prop: 'next',
-        data,
-      }).then(() => {
-        this.listRenderIndex += 1;
-      });
-    },
-    saveNew(newItem) {
-      if (!this.taskId || !newItem) {
-        return;
-      }
+    return;
+  }
 
-      const data = this.subtasks.concat(newItem);
-      this.newLogMessage = '';
+  // start a new activity log with this message
+  const activity = (task.value.activity || []).concat({
+    start: Date.now(),
+    end: 0,
+    note: subtasks.value[index].note || '',
+  });
 
-      cudTaskPropertyViaStore(this.$store, {
-        taskId: this.taskId,
-        prop: 'next',
-        data,
-      }).then(() => {
-        this.listRenderIndex += 1;
-      });
-    },
-  },
-};
+  store.cloudUpdateSingle({
+    ...task.value,
+    activity: activity,
+    active: Date.now()
+  }).then(() => {
+    removeSubtask(index);
+    setTimeout(() => {
+      queueTaskRefresh(props.taskId);
+    }, 250);
+  });
+}
+
+function removeSubtask(index: number) {
+  const data = subtasks.value
+    .filter((s: TaskSubtask, i: number) => i !== index);
+
+  store.cloudUpdateSingleProperty({
+    taskId: props.taskId,
+    prop: 'next',
+    data,
+  }).then(() => {
+    listRenderIndex.value += 1;
+  });
+}
+
+function saveNew(newItem: TaskSubtask) {
+  if (!props.taskId || !newItem) {
+    return;
+  }
+
+  const data = subtasks.value.concat(newItem);
+  newLogMessage.value = '';
+
+  store.cloudUpdateSingleProperty({
+    taskId: props.taskId,
+    prop: 'next',
+    data,
+  }).then(() => {
+    listRenderIndex.value += 1;
+  });
+}
 </script>

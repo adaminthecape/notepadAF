@@ -44,8 +44,7 @@
                         </q-input>
                         <q-input
                             v-model="firebaseConfig.projectId"
-                            :type="visibilityToggles.projectId ? 'text' : 'password'" label="Project ID" filled
-                            @input="computeFirebaseVars">
+                            :type="visibilityToggles.projectId ? 'text' : 'password'" label="Project ID" filled>
                             <template #append>
                                 <q-icon
                                     :name="visibilityToggles.projectId ? 'visibility_off' : 'visibility'"
@@ -65,52 +64,51 @@ import { ref, computed, defineAsyncComponent } from 'vue';
 import { getFromLocalStorage, localStorageNames, saveToLocalStorage } from 'src/utils';
 
 const SimpleModal = defineAsyncComponent(() =>
-    import('src/components/SimpleModal.vue'));
+  import('src/components/SimpleModal.vue'));
 
 const firebaseConfig = ref<Record<string, any>>(getFromLocalStorage(
-    localStorageNames.firebase_config,
-    true
+  localStorageNames.firebase_config,
+  true
 ) || {
-    appId: '',
-    apiKey: '',
-    messagingSenderId: '',
-    projectId: '',
-    // computed from 'projectId':
-    authDomain: '',
-    databaseURL: '',
-    storageBucket: '',
+  appId: '',
+  apiKey: '',
+  messagingSenderId: '',
+  projectId: '',
+  // computed from 'projectId':
+  authDomain: '',
+  databaseURL: '',
+  storageBucket: '',
 });
 const visibilityToggles = ref<Record<string, boolean>>({
-    appId: false,
-    apiKey: false,
-    projectId: false,
-    messagingSenderId: false,
+  appId: false,
+  apiKey: false,
+  projectId: false,
+  messagingSenderId: false,
 });
 
-function setFirebaseConfig()
-{
-    let config = firebaseConfig.value;
+function setFirebaseConfig() {
+  let config = firebaseConfig.value;
 
-    if (!config) {
-        return;
+  if (!config) {
+    return;
+  }
+
+  firebaseConfig.value.authDomain = `${config.projectId}.firebaseapp.com`;
+  firebaseConfig.value.databaseURL = `${config.projectId}.firebaseio.com`;
+  firebaseConfig.value.storageBucket = `${config.projectId}.appspot.com`;
+
+  try {
+    if (typeof config === 'string') {
+      config = JSON.parse(config);
     }
+  } catch (e) {
+    console.warn(e);
+  }
 
-    firebaseConfig.value.authDomain = `${config.projectId}.firebaseapp.com`;
-    firebaseConfig.value.databaseURL = `${config.projectId}.firebaseio.com`;
-    firebaseConfig.value.storageBucket = `${config.projectId}.appspot.com`;
+  if (!config || typeof config !== 'object') {
+    return;
+  }
 
-    try {
-        if (typeof config === 'string') {
-            config = JSON.parse(config);
-        }
-    } catch (e) {
-        console.warn(e);
-    }
-
-    if (!config || typeof config !== 'object') {
-        return;
-    }
-
-    saveToLocalStorage(localStorageNames.firebase_config, config);
+  saveToLocalStorage(localStorageNames.firebase_config, config);
 }
 </script>

@@ -27,75 +27,73 @@
   </div>
 </template>
 
-<script>
-import { cudTaskPropertyViaStore } from 'src/utils';
-import { getTask } from 'src/storeHelpers';
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue';
+import useTaskStore from '@/pinia/taskStore';
 
-export default {
-  props: {
-    taskId: {
-      type: String,
-      default: undefined,
-    },
-    size: {
-      type: String,
-      default: undefined
-    },
-    icon: {
-      type: String,
-      default: undefined
-    },
-    color: {
-      type: String,
-      default: undefined
-    },
-    flat: {
-      type: Boolean,
-      default: false
-    },
-    dense: {
-      type: Boolean,
-      default: false
-    },
+const props = defineProps({
+  taskId: {
+    type: String,
+    required: true,
   },
-  data() {
-    return {
-      description: undefined,
-      isAddingNote: false,
-    };
+  size: {
+    type: String,
+    default: undefined
   },
-  computed: {
-    task() {
-      return getTask(this.$store, this.taskId);
-    },
+  icon: {
+    type: String,
+    default: undefined
   },
-  mounted() {
-    if (this.mode === 'save' && !this.taskId) {
-      throw new Error('You must provide a task during save mode!');
-    }
+  color: {
+    type: String,
+    default: undefined
   },
-  methods: {
-    save() {
-      if (!this.task) {
-        return;
-      }
+  flat: {
+    type: Boolean,
+    default: false
+  },
+  dense: {
+    type: Boolean,
+    default: false
+  },
+  mode: {
+    type: String,
+    default: 'save'
+  }
+});
 
-      const task = structuredClone(this.task);
+const description = ref();
+const isAddingNote = ref(false);
 
-      if (!task.next) {
-        task.next = [];
-      }
+const store = useTaskStore();
 
-      const data = task.next.concat({ due: 0, note: this.description || '' });
+const task = computed(() => store.getTask(props.taskId));
 
-      cudTaskPropertyViaStore(this.$store, {
-        taskId: this.taskId,
-        prop: 'next',
-        data,
-      }).then(() => {
-        this.isAddingNote = false;
-      });
-    },
-  },
-};
+onMounted(() => {
+  if (props.mode === 'save' && !props.taskId) {
+    throw new Error('You must provide a task during save mode!');
+  }
+});
+
+function save() {
+  if (!task.value) {
+    return;
+  }
+
+  const taskData = structuredClone(task.value);
+
+  if (!taskData.next) {
+    taskData.next = [];
+  }
+
+  const data = taskData.next.concat({ due: 0, note: description.value || '' });
+
+  store.cloudUpdateSingleProperty({
+    taskId: props.taskId,
+    prop: 'next',
+    data,
+  }).then(() => {
+    isAddingNote.value = false;
+  });
+}
 </script>

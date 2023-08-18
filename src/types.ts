@@ -1,19 +1,22 @@
 export type Task = {
-    id: string;
-    message: string;
-    created: number;
-    updated: number;
-    done?: number;
-    active?: number | boolean;
-    deleted?: number | boolean;
-    activity?: TaskActivityLog[];
-    subtasks?: TaskSubtask[];
-    archived?: number | boolean;
-    tags?: string[];
-    alerts?: TaskAlert[];
-    messageType?: 'textarea' | 'input' | 'text' | undefined;
-    /** Not really part of the task, just used for some components. To be deprecated! */
-    stories?: any[];
+  id: string;
+  message: string;
+  created: number;
+  updated: number;
+  done?: number;
+  active?: number | boolean;
+  deleted?: number | boolean;
+  /** {Previous activity logs} */
+  activity?: TaskActivityLog[];
+  /** Subtasks */
+  next?: Record<string, any>[];
+  subtasks?: TaskSubtask[];
+  archived?: number | boolean;
+  tags?: string[];
+  alerts?: TaskAlert[];
+  messageType?: 'textarea' | 'input' | 'text' | undefined;
+  /** Not really part of the task, just used for some components. To be deprecated! */
+  stories?: any[];
 };
 
 export interface TaskSubtask {
@@ -61,9 +64,9 @@ export type TaskToggleableBooleans = {
 };
 
 export enum FilterTypes {
-    keyword = 'keyword',
-    tags = 'tags',
-    active = 'active',
-    archived = 'archived',
-    done = 'done',
-};
+  keyword = 'keyword',
+  tags = 'tags',
+  active = 'active',
+  archived = 'archived',
+  done = 'done',
+}

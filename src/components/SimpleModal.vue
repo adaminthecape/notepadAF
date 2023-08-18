@@ -31,40 +31,28 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'SimpleModal',
-  props: {
-    title: {
-      type: String,
-      default: null
-    },
-    content: {
-      type: String,
-      default: null
-    },
-    fullWidth: {
-      type: Boolean,
-      default: false
-    }
-  },
-  data() {
-    return {
-      isModalOpen: false
-    };
-  },
-  methods: {
-    close() {
-      this.isModalOpen = false;
-    },
-    open() {
-      this.isModalOpen = true;
-    },
-    toggle() {
-      this.isModalOpen = !this.isModalOpen;
-    }
-  }
-};
+<script setup lang="ts">
+import { ref } from 'vue';
+
+defineProps<{
+  title?: string;
+  content?: string;
+  fullWidth?: boolean;
+}>();
+
+const isModalOpen = ref(false);
+
+function close() {
+  isModalOpen.value = false;
+}
+
+function open() {
+  isModalOpen.value = true;
+}
+
+function toggle() {
+  isModalOpen.value = !isModalOpen.value;
+}
 </script>
 
 <style>

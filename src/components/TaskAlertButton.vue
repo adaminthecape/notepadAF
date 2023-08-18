@@ -26,7 +26,6 @@
 </template>
 
 <script setup lang="ts">
-import { cudTaskViaStore, queueTaskRefresh } from 'src/utils';
 import { ref, computed, defineAsyncComponent } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
 import { Task, TaskAlert } from 'src/types';
@@ -82,8 +81,7 @@ function addAlertToTask(alert: TaskAlert) {
     return;
   }
 
-  cudTaskViaStore(store, taskData as Task).then(() => {
-    queueTaskRefresh(taskData.id);
+  store.cloudUpdateSingle(taskData as Task).then(() => {
     isCreatingAlert.value = false;
   });
 };

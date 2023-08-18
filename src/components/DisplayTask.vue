@@ -142,8 +142,8 @@ const props = defineProps<{
 }>();
 
 const addingTag = ref(false);
-const alarmTimeouts = ref([]);
-const alarmTickTimeout = ref(null);
+// const alarmTimeouts = ref([]);
+// const alarmTickTimeout = ref(null);
 const activeAlertsRenderKey = ref(10000);
 const isEditing = ref(false);
 

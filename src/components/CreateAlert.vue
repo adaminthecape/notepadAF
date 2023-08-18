@@ -60,64 +60,64 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
+import { TaskAlert } from '@/types';
 import { padLeft } from 'src/utils';
+import { ref } from 'vue';
 
-export default {
-  props: {
-    dense: {
-      type: Boolean,
-      default: true,
-    },
-  },
-  data() {
-    const { date, time } = this.getNow();
+defineProps<{
+  dense?: boolean;
+}>();
 
-    return {
-      createAlertDate: date,
-      createAlertTime: time,
-      createAlertMessage: '',
-    };
-  },
-  computed: {},
-  methods: {
-    setNow(add = 0) {
-      const { date, time } = this.getNow(add);
+const { date, time } = getNow();
+const createAlertDate = ref(date);
+const createAlertTime = ref(time);
 
-      this.createAlertDate = date;
-      this.createAlertTime = time;
-    },
-    getNow(add = 0) {
-      const d = new Date(
-        (this.createAlertDate && this.createAlertTime
-          ? new Date(
-            `${this.createAlertDate} ${this.createAlertTime}`
-          ).getTime()
-          : Date.now()) + add
-      );
-      const time = `${padLeft(d.getHours(), '0', 2)}:${padLeft(
-        d.getMinutes(),
-        '0',
-        2
-      )}`;
-      const date = `${padLeft(d.getMonth() + 1, '0', 2)}/${padLeft(
-        d.getDate(),
-        '0',
-        2
-      )}/${padLeft(d.getFullYear(), '0', 4)}`;
+function setNow(add = 0) {
+  const { date, time } = getNow(add);
 
-      return { date, time };
-    },
-    createAlert() {
-      const alert = {
-        date: this.createAlertDate,
-        time: this.createAlertTime,
-      };
+  createAlertDate.value = date;
+  createAlertTime.value = time;
+}
 
-      alert.unix = new Date(`${alert.date} ${alert.time}`).getTime();
+function getNow(add = 0): {
+  date: string;
+  time: string;
+} {
+  const d = new Date(
+    (createAlertDate.value && createAlertTime.value
+      ? new Date(
+        `${createAlertDate.value} ${createAlertTime.value}`
+      ).getTime()
+      : Date.now()) + add
+  );
+  const time = `${padLeft(d.getHours(), '0', 2)}:${padLeft(
+    d.getMinutes(),
+    '0',
+    2
+  )}`;
+  const date = `${padLeft(d.getMonth() + 1, '0', 2)}/${padLeft(
+    d.getDate(),
+    '0',
+    2
+  )}/${padLeft(d.getFullYear(), '0', 4)}`;
 
-      this.$emit('newAlert', alert);
-    },
-  },
-};
+  return { date, time };
+}
+
+const emit = defineEmits<{
+  (event: 'newAlert', alert: TaskAlert): void
+}>()
+
+function createAlert() {
+  const alert: TaskAlert = {
+    date: createAlertDate.value,
+    time: createAlertTime.value,
+    unix: 0
+  };
+
+  alert.unix = new Date(`${alert.date} ${alert.time}`).getTime();
+
+  emit('newAlert', alert);
+}
 </script>

@@ -10,18 +10,18 @@
   >
     <q-list>
       <q-item
-          v-for="type in sortTypes"
-          :key="`sort-type-${type}`"
-          style="min-width: 10em"
-          clickable
-          @click="setSort(type)"
+        v-for="typeOfSort in (sortTypes || defaultSortTypes)"
+        :key="`sort-type-${typeOfSort}`"
+        style="min-width: 10em"
+        clickable
+        @click="setSort(typeOfSort)"
       >
         <q-item-section>
           <div class="row items-center">
-            <span>{{ type }}</span>
+            <span>{{ typeOfSort }}</span>
             <q-space />
             <q-icon
-                v-if="sortType === type"
+                v-if="sortType === typeOfSort"
                 :name="inverseSort ? 'arrow_downward' : 'arrow_upward'"
                 size="xs"
             />
@@ -55,26 +55,23 @@
   </q-btn-dropdown>
 </template>
 
-<script>
-export default {
-  props: {
-    sortType: {
-      type: String,
-      default: undefined
-    },
-    sortTypes: {
-      type: Array,
-      default: () => (['due', 'created', 'done'])
-    },
-    inverseSort: {
-      type: Boolean,
-      default: false
-    }
-  },
-  methods: {
-    setSort(type) {
-      this.$emit('setSortType', type);
-    }
-  }
-};
+<script setup lang="ts">
+import { TaskSortType } from 'src/types';
+import { ref } from 'vue';
+
+defineProps<{
+  sortType?: TaskSortType;
+  sortTypes?: TaskSortType[];
+  inverseSort?: boolean;
+}>();
+
+const defaultSortTypes = ref<TaskSortType[]>(['due', 'created', 'done']);
+
+const emit = defineEmits<{
+  (event: 'setSortType', sortType: string): void
+}>();
+
+function setSort(type: TaskSortType) {
+  emit('setSortType', type);
+}
 </script>

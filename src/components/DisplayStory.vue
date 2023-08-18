@@ -2,7 +2,7 @@
   <div>
     <SimpleLayout :header="false" style="max-height: 70vh">
       <template #body>
-        <QMarkdown
+        <q-markdown
             v-if="story"
             class="q-pa-sm"
             :src="story.description"
@@ -18,29 +18,26 @@ import usePivotalStore, { PivotalStoryId } from 'src/pinia/pivotalStore';
 import { computed, defineAsyncComponent, onMounted } from 'vue';
 
 const SimpleLayout = defineAsyncComponent(() => import('src/components/SimpleLayout.vue'));
-const QMarkdown = defineAsyncComponent(() => import('@quasar/quasar-ui-qmarkdown'));
 
 const props = defineProps<{
-    storyId: PivotalStoryId;
+  storyId: PivotalStoryId;
 }>();
 
 const store = usePivotalStore();
 
 const story = computed(() => {
 
-    return store.get(props.storyId);
+  return store.get(props.storyId);
 })
 
-const description = computed(() =>
-{
-    return !story.value ? undefined : story.value.description;
+const description = computed(() => {
+  return !story.value ? undefined : story.value.description;
 });
 
-onMounted(async () =>
-{
-    await store.load({
-        id: parseInt(`${props.storyId}`, 10)
-    });
+onMounted(async () => {
+  await store.load({
+    id: parseInt(`${props.storyId}`, 10)
+  });
 });
 </script>
 
