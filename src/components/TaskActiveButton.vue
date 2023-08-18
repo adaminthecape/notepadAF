@@ -48,8 +48,8 @@ const props = defineProps<{
     flat?: boolean;
     dense?: boolean;
     mode?: 'emit' | 'save' | undefined;
+    disableAddingNote?: boolean;
     taskId: string;
-    disableAddingNote: boolean;
 }>();
 
 const renderIndex = ref(0);

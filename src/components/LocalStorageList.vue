@@ -70,7 +70,7 @@
 
 <script setup lang="ts">
 import { getFromLocalStorage, saveToLocalStorage } from 'src/utils';
-import { ref, onMounted, watch, defineEmits, defineAsyncComponent } from 'vue';
+import { ref, onMounted, watch, defineAsyncComponent } from 'vue';
 
 const SimpleModal = defineAsyncComponent(() => import('src/components/SimpleModal.vue'));
 const TaskTagSelector = defineAsyncComponent(() => import('src/components/TaskTagSelector.vue'));

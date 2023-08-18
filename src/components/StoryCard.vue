@@ -131,8 +131,4 @@ function openTasksForStory() {
       });
       saveToLocalStorageArray(localStorageNames.currentTab, 'tasks');
 };
-
-const emit = defineEmits<{
-    // (event: 'checkoutBoth', isEditing: boolean): void;
-}>();
 </script>
