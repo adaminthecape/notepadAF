@@ -122,23 +122,33 @@ v-for="(tag, tagIndex) in task.tags" :key="`tag-${tagIndex}`" square dense dark
         </div>
       </q-item-section>
     </q-item>
+    <q-btn
+        icon="description"
+        @click="goToActivity()"
+    >
+      <q-tooltip>View activity</q-tooltip>
+    </q-btn>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { queueTaskRefresh, timeSince } from '../utils';
+import { goToActivityPageForTask, queueTaskRefresh, timeSince } from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, ref, watch } from 'vue';
 import { Task, TaskAlert } from 'src/types';
+
+function goToActivity() {
+  goToActivityPageForTask(props.taskId);
+}
 
 const AddTag = defineAsyncComponent(() => import('src/components/AddTag.vue'));
 const TaskStoryDropdown = defineAsyncComponent(() => import('src/components/TaskStoryDropdown.vue'));
 const TaskOptions = defineAsyncComponent(() => import('src/components/TaskOptions.vue'));
 
 const props = defineProps<{
-    taskId: string;
-    showOptions?: boolean;
-    clickable?: boolean;
+  taskId: string;
+  showOptions?: boolean;
+  clickable?: boolean;
 }>();
 
 const addingTag = ref(false);
@@ -149,74 +159,72 @@ const isEditing = ref(false);
 
 const store = useTaskStore();
 const task = computed(() => store.getTask(props.taskId));
-const stories = computed(() =>
-{
-    const storyIds: Array<string|number> = (
-        `${(task.value.tags || []).join('|')}|${task.value.message}`
-            .match(/1\d{8}/g)
-    ) || [];
+const stories = computed(() => {
+  const storyIds: Array<string | number> = (
+    `${(task.value.tags || []).join('|')}|${task.value.message}`
+      .match(/1\d{8}/g)
+  ) || [];
 
-    return (storyIds).reduce((agg, id: string | number) => {
-        if (!agg.some((existing: { id: string|number }) => existing.id === id)) {
-        agg.push({ id });
-        }
+  return (storyIds).reduce((agg, id: string | number) => {
+    if (!agg.some((existing: { id: string | number }) => existing.id === id)) {
+      agg.push({ id });
+    }
 
-        return agg;
-    }, [] as Array<{ id: string | number; }>);
+    return agg;
+  }, [] as Array<{ id: string | number; }>);
 });
 
 watch(task, () => queueTaskRefresh(task.value.id));
 
 function editTask(force?: boolean) {
-    if (typeof force === 'boolean') {
+  if (typeof force === 'boolean') {
     isEditing.value = force;
-    } else {
+  } else {
     isEditing.value = !isEditing.value;
-    }
+  }
 
-    if (isEditing.value) {
+  if (isEditing.value) {
     // if now editing, focus the input
     // focusOnNextTick('messageInput');
-    } // otherwise, save the task
-    else {
-        store.cloudUpdateSingle(task.value as Task);
-    }
+  } // otherwise, save the task
+  else {
+    store.cloudUpdateSingle(task.value as Task);
+  }
 };
 
 function removeAlert(alert: TaskAlert) {
-    if (!task.value.alerts?.length) {
+  if (!task.value.alerts?.length) {
     return;
-    }
+  }
 
-    const alerts = task.value.alerts.filter((a) => a.unix !== alert.unix);
+  const alerts = task.value.alerts.filter((a) => a.unix !== alert.unix);
 
-    store.cloudUpdateSingle({ ...task.value, alerts });
+  store.cloudUpdateSingle({ ...task.value, alerts });
 }
 
 function addTag(tag: string) {
-    if (!(task.value.tags || []).includes(tag))
-    {
-        store.cloudUpdateSingle({
-            ...task.value,
-            tags: [...(task.value.tags || []), tag],
-        });
-    }
+  if (!(task.value.tags || []).includes(tag)) {
+    store.cloudUpdateSingle({
+      ...task.value,
+      tags: [...(task.value.tags || []), tag],
+    });
+  }
 
-    addingTag.value = false;
+  addingTag.value = false;
 };
 
 function removeTag(tag: string) {
-    const tags = (task.value.tags || []).filter((t) => t !== tag);
+  const tags = (task.value.tags || []).filter((t) => t !== tag);
 
-    store.cloudUpdateSingle({ ...task.value, tags });
+  store.cloudUpdateSingle({ ...task.value, tags });
 };
 
 function toggleTextarea() {
-    store.cloudUpdateSingle({
-        ...task.value,
-        messageType:
-        task.value.messageType === 'textarea' ? undefined : 'textarea',
-    });
+  store.cloudUpdateSingle({
+    ...task.value,
+    messageType:
+      task.value.messageType === 'textarea' ? undefined : 'textarea',
+  });
 };
 
 /** manage alarms */

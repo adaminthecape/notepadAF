@@ -96,30 +96,30 @@
 
 <script setup lang="ts">
 import {
-    queueTaskRefresh,
-    goToActivityPageForTask
+  queueTaskRefresh,
+  goToActivityPageForTask
 } from 'src/utils';
 import { ref, computed, defineAsyncComponent, watch } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
 
 const props = defineProps<{
-    taskId: string;
-    isEditing?: boolean;
-    showArchiveButton?: boolean;
-    showSingleTaskButton?: boolean;
-    showActiveButton?: boolean;
-    showActivityLogButton?: boolean;
-    showDoneButton?: boolean;
-    showEditButton?: boolean;
-    showAlertButton?: boolean;
-    showSubtaskButton?: boolean;
-    showDeleteButton?: boolean;
-    hideMenuButton?: boolean;
-    size?: string;
-    icon?: string;
-    color?: string;
-    flat?: boolean;
-    dense?: boolean;
+  taskId: string;
+  isEditing?: boolean;
+  showArchiveButton?: boolean;
+  showSingleTaskButton?: boolean;
+  showActiveButton?: boolean;
+  showActivityLogButton?: boolean;
+  showDoneButton?: boolean;
+  showEditButton?: boolean;
+  showAlertButton?: boolean;
+  showSubtaskButton?: boolean;
+  showDeleteButton?: boolean;
+  hideMenuButton?: boolean;
+  size?: string;
+  icon?: string;
+  color?: string;
+  flat?: boolean;
+  dense?: boolean;
 }>();
 
 const store = useTaskStore();
@@ -137,27 +137,23 @@ const TaskEditButton = defineAsyncComponent(() => import('src/components/TaskEdi
 const TaskDoneButton = defineAsyncComponent(() => import('src/components/TaskDoneButton.vue'));
 const TaskActiveButton = defineAsyncComponent(() => import('src/components/TaskActiveButton.vue'));
 
-function refreshTask()
-{
-    queueTaskRefresh(props.taskId);
+function refreshTask() {
+  queueTaskRefresh(props.taskId);
 }
 
-function goToActivity()
-{
-    goToActivityPageForTask(props.taskId);
+function goToActivity() {
+  goToActivityPageForTask(props.taskId);
 }
 
 const emit = defineEmits<{
-    (event: 'editTask'): void;
+  (event: 'editTask'): void;
 }>();
 
-function editTask()
-{
-    emit('editTask');
+function editTask() {
+  emit('editTask');
 }
 
-watch(task, () =>
-{
-    taskRenderIndex.value += 1;
+watch(task, () => {
+  taskRenderIndex.value += 1;
 });
 </script>

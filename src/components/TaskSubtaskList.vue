@@ -28,8 +28,8 @@ import {
   queueTaskRefresh,
 } from 'src/utils';
 import { computed, ref } from 'vue';
-import useTaskStore from '@/pinia/taskStore';
-import { TaskSubtask } from '@/types';
+import useTaskStore from 'src/pinia/taskStore';
+import { TaskSubtask } from 'src/types';
 
 const props = defineProps({
   taskId: {

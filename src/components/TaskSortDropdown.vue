@@ -61,7 +61,7 @@ import { ref } from 'vue';
 
 defineProps<{
   sortType?: TaskSortType;
-  sortTypes?: TaskSortType[];
+  sortTypes?: any[];
   inverseSort?: boolean;
 }>();
 

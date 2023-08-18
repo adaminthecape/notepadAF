@@ -3,9 +3,9 @@
     :size="size"
     :flat="flat"
     :dense="dense"
-    :icon="icon"
+    :icon="icon || 'edit'"
     :color="editing ? 'green-9' : undefined"
-    @click="toggle"
+    @click="toggle()"
   >
     <template>
       <q-icon :name="icon || 'post_add'" />

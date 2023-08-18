@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import { timeSince } from 'src/utils';
 import { computed } from 'vue';
-import useTaskStore from '@/pinia/taskStore';
+import useTaskStore from 'src/pinia/taskStore';
 
 const props = defineProps({
   taskId: {

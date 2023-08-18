@@ -28,13 +28,22 @@
           <q-item-section>
             <q-checkbox v-if="['includedone'].includes(param)" v-model="queryParams[param]" class="q-pa-sm" />
             <q-select
-v-else-if="queryParamOptions[param]" v-model="queryParams[param]"
-              :options="queryParamOptions[param]" class="q-pa-sm" stack-label filled
-              :multiple="queryParamMultiples[param] || false">
+              v-else-if="queryParamOptions[param]"
+              v-model="queryParams[param]"
+              :options="queryParamOptions[param]"
+              class="q-pa-sm"
+              stack-label
+              filled
+              :multiple="queryParamMultiples[param] || false"
+            >
               <template #append>
                 <q-btn
-v-if="queryParams[param]" icon="clear" dense flat
-                  @click.stop.prevent="queryParams[param] = null" />
+                  v-if="queryParams[param]"
+                  icon="clear"
+                  dense
+                  flat
+                  @click.stop.prevent="queryParams[param] = null"
+                />
               </template>
             </q-select>
             <q-input
@@ -70,8 +79,11 @@ v-if="resultTotals.hits > 0" color="primary" style="font-size: 1.2em; user-selec
                   <q-space />
                   <div>
                     <TaskSortDropdown
-:sort-type="sortType" :sort-types="sortTypes" :inverse-sort="inverseSort"
-                      @setSortType="setSortType" />
+                      :sort-type="sortType"
+                      :sort-types="sortTypes"
+                      :inverse-sort="inverseSort"
+                      @set-sort-type="setSortType"
+                    />
                   </div>
                 </div>
               </q-badge>
@@ -109,7 +121,7 @@ import {
   getFromLocalStorage,
 } from 'src/utils.js';
 import { ref, defineAsyncComponent, computed, onMounted, watch } from 'vue';
-import { TaskSortType } from '@/types';
+import { TaskSortType } from 'src/types';
 
 const TaskSortDropdown = defineAsyncComponent(() => import('src/components/TaskSortDropdown.vue'));
 const StoryCard = defineAsyncComponent(() => import('src/components/StoryCard.vue'));
@@ -123,10 +135,7 @@ const props = defineProps({
 });
 
 const isLoadingActivity = ref(false);
-const isGitStatusDropdownOpen = ref(false);
 const results = ref(props.cachedTickets || []);
-const projectId = ref(getFromLocalStorage(localStorageNames.pivotalProjectId));
-const params = ref({});
 const queryParamMultiples = ref({
   epic: true,
 });
@@ -152,8 +161,6 @@ const queryParamOptions = ref({
   has: ['attachment'],
   state: ['unstarted', 'started'],
 });
-const areAllSelected = ref({});
-const queryParamNegations = ref({});
 const savedQueryParams =
   getFromLocalStorage(localStorageNames.ticketQueryParams) || {};
 const queryParams = ref({
@@ -165,28 +172,26 @@ const queryParams = ref({
   includedone: false,
   ...(savedQueryParams && { ...savedQueryParams }),
 });
-const queryParamToAdd = ref();
-const resultTotals = ref({});
+const resultTotals = ref<Record<string, any>>({});
+const storyResults = ref<Record<string, any>>([]);
 const resultsRenderIndex = ref(0);
 const sortType = ref();
 const inverseSort = ref(false);
 const sortTypes = ref(['created', 'name', 'updated', 'points']);
-const sortingResults = ref(false);
 const listRenderKey = ref(0);
-const storyResults = ref([]);
 
 const queryParamNames = computed(() => {
   return Object.keys(queryParams.value);
 });
 
-onMounted(() => {
-  if (!this.cachedTickets) {
-    await this.getTickets();
+onMounted(async () => {
+  if (!props.cachedTickets) {
+    await getTickets();
   } else {
-    this.storyResults = this.cachedTickets;
-    this.resultTotals.hits = this.cachedTickets.length;
-    this.resultTotals.points = this.cachedTickets.reduce(
-      (acc, t) => acc + t.estimate,
+    storyResults.value = props.cachedTickets;
+    resultTotals.value.hits = props.cachedTickets.length;
+    resultTotals.value.points = props.cachedTickets.reduce(
+      (acc, t: any) => acc + t.estimate,
       0
     );
   }
@@ -194,10 +199,10 @@ onMounted(() => {
 
 watch(sortType.value, () => sortResults(results.value));
 
-function setSortType(type: TaskSortType) {
+function setSortType(type: TaskSortType | string) {
   if (type === sortType.value) {
     // invert it
-    this.inverseSort = !this.inverseSort;
+    inverseSort.value = !inverseSort.value;
   } else {
     sortType.value = type;
   }

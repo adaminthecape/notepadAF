@@ -22,7 +22,7 @@
             class="q-mb-sm"
             add-new
             flat
-            @editTask="editTask"
+            @edit-task="editTask"
         />
         <q-space />
       </div>
@@ -80,26 +80,24 @@ const TaskOptions = defineAsyncComponent(() => import('src/components/TaskOption
 const SimpleLayout = defineAsyncComponent(() => import('src/components/SimpleLayout.vue'));
 
 const props = defineProps<{
-    taskId: string;
+  taskId: string;
 }>();
 
 const store = useTaskStore();
 const task = computed(() => store.getTask(props.taskId));
 const isTaskActive = computed(() => !!task?.value?.active);
-const taskIdToUse = computed(() =>
-{
-    return props.taskId || getFromLocalStorage(localStorageNames.desiredTaskId);
+const taskIdToUse = computed(() => {
+  return props.taskId || getFromLocalStorage(localStorageNames.desiredTaskId);
 });
 
 const logRenderKey = ref<number>(0);
 
-watch(isTaskActive, () =>
-{
-    logRenderKey.value += 1;
+watch(isTaskActive, () => {
+  logRenderKey.value += 1;
 });
 
 function editTask() {
-    // this.$refs.displayTask.editTask();
+  // this.$refs.displayTask.editTask();
 }
 </script>
 

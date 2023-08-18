@@ -84,7 +84,7 @@ v-if="filters.keyword" icon="close" round dense flat size="xs"
               @click="toggleFilterBool('done')"
             />
             <q-btn
-              :icon="filters.done ? 'assignment_ind' : 'content_paste_go'"
+              :icon="filters.active ? 'assignment_ind' : 'content_paste_go'"
               :color="getFilterBoolColor('active')"
               no-caps
               dense
@@ -92,7 +92,7 @@ v-if="filters.keyword" icon="close" round dense flat size="xs"
               @click="toggleFilterBool('active')"
             />
             <q-btn
-              :icon="filters.done ? 'unarchive' : 'move_to_inbox'"
+              :icon="filters.archived ? 'unarchive' : 'move_to_inbox'"
               :color="getFilterBoolColor('archived')"
               no-caps
               dense
@@ -141,7 +141,7 @@ import {
   saveToLocalStorageArray,
   sortTaskList
 } from 'src/utils';
-import { FilterType, FilterTypes, Task, TaskSortType } from 'src/types';
+import { FilterType, FilterTypes, Task } from 'src/types';
 import useTaskStore, { TaskBucket } from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
 

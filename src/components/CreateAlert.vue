@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { TaskAlert } from '@/types';
+import { TaskAlert } from 'src/types';
 import { padLeft } from 'src/utils';
 import { ref } from 'vue';
 

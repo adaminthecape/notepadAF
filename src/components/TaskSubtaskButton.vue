@@ -29,7 +29,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
-import useTaskStore from '@/pinia/taskStore';
+import useTaskStore from 'src/pinia/taskStore';
 
 const props = defineProps({
   taskId: {

@@ -89,7 +89,7 @@ import {
 } from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
-import { Task, TaskActivityLog } from '@/types';
+import { Task, TaskActivityLog } from 'src/types';
 
 const TaskActiveButton = defineAsyncComponent(() => import('src/components/TaskActiveButton.vue'));
 const props = defineProps({
