@@ -70,3 +70,5 @@ export enum FilterTypes {
   archived = 'archived',
   done = 'done',
 }
+
+export type FilterType = 'keyword' | 'tags' | 'active' | 'archived' | 'done';

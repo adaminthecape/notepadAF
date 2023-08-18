@@ -58,7 +58,7 @@ const TasksActivity = defineAsyncComponent(() =>
 const MyTickets = defineAsyncComponent(() =>
   import('src/components/MyTickets.vue'));
 const Settings = defineAsyncComponent(() =>
-  import('src/components/Settings.vue'));
+  import('src/components/SettingsHandler.vue'));
 
 const storedTabs = getFromLocalStorage(localStorageNames.appTabs, true);
 const appTabsToUse = [];
@@ -126,7 +126,7 @@ onMounted(() => {
 });
 </script>
 
-<style>
+<style lang="postcss">
 .bordered {
   border: 1px solid #bbb;
   border-radius: 4px;

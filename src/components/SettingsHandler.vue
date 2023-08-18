@@ -136,9 +136,9 @@ v-model="pivotalProjectId" :type="visibilityToggles.pivotalProjectId ? 'text' : 
           </q-item-section>
           <q-item-section>
             <q-btn-group class="row full-width">
-              <q-btn :disable="!$q.dark.isActive" label="Light mode" style="flex-grow: 1" @click="toggleDarkMode" />
+              <q-btn :disable="!Dark.isActive" label="Light mode" style="flex-grow: 1" @click="toggleDarkMode" />
               <q-btn
-:disable="$q.dark.isActive" label="Dark mode" style="flex-grow: 1" :dark="true"
+:disable="Dark.isActive" label="Dark mode" style="flex-grow: 1" :dark="true"
                 @click="toggleDarkMode" />
             </q-btn-group>
           </q-item-section>
@@ -205,117 +205,88 @@ color="primary" icon="add" size="md" class="full-width" dense flat
   </SimpleLayout>
 </template>
 
-<script>
-import SimpleLayout from 'src/components/SimpleLayout.vue';
-import SimpleModal from 'src/components/SimpleModal.vue';
-import FirebaseConfigModal from 'src/components/FirebaseConfigModal.vue';
+<script setup lang="ts">
 import { getFromLocalStorage, localStorageNames, saveToLocalStorage } from 'src/utils';
-import { useThemeStore } from 'src/pinia/themeStore';
+import { defineAsyncComponent, ref } from 'vue';
+import useThemeStore from 'src/pinia/themeStore';
+import { Dark } from 'quasar';
 
-export default {
-  name: 'SettingsManager',
-  components: {
-    SimpleModal,
-    SimpleLayout,
-    FirebaseConfigModal
-  },
-  data() {
-    const settings = {
-      tokens: {
-        gitlab: getFromLocalStorage(localStorageNames.gitlabToken),
-        pivotal: getFromLocalStorage(localStorageNames.pivotalToken),
-      },
-      pivotalProjectId: getFromLocalStorage(localStorageNames.pivotalProjectId),
-      gitModuleBasePath: getFromLocalStorage(
-        localStorageNames.gitModuleBasePath
-      ),
-      firebaseConfig: getFromLocalStorage(
-        localStorageNames.firebase_config,
-        true
-      ) || {
-        appId: '',
-        apiKey: '',
-        messagingSenderId: '',
-        projectId: '',
-        // computed from 'projectId':
-        authDomain: '',
-        databaseURL: '',
-        storageBucket: '',
-      },
-    };
-    const appTabs = getFromLocalStorage(localStorageNames.appTabs, true);
+const SimpleModal = defineAsyncComponent(() => import('src/components/SimpleModal.vue'));
+const SimpleLayout = defineAsyncComponent(() => import('src/components/SimpleLayout.vue'));
+const FirebaseConfigModal = defineAsyncComponent(() => import('src/components/FirebaseConfigModal.vue'));
+const themeStore = useThemeStore();
 
-    return {
-        settings,
-        appTabs,
-        customSetting: {
-            label: '',
-            value: '',
-        },
-        currentZoomLevel:
-        document.getElementsByTagName('body')[0].style.zoom || '100%',
-        isConfirmingUserDeletion: false,
-        visibilityToggles: {
-        pivotalProjectId: false,
-        pivotalToken: false,
-        appId: false,
-        apiKey: false,
-        projectId: false,
-        messagingSenderId: false,
-      },
-    };
-  },
-  methods: {
-    addZoom(amount) {
-      const current = parseInt(this.currentZoomLevel.split('%')[0], 10);
-      const zoomLevel = `${current + amount}%`;
+const tokens = ref({
+  gitlab: getFromLocalStorage(localStorageNames.gitlabToken),
+  pivotal: getFromLocalStorage(localStorageNames.pivotalToken),
+});
+const pivotalProjectId = ref(getFromLocalStorage(localStorageNames.pivotalProjectId));
+const gitModuleBasePath = ref(getFromLocalStorage(
+  localStorageNames.gitModuleBasePath
+));
+const appTabs = ref(getFromLocalStorage(localStorageNames.appTabs, true));
+const customSetting = ref({
+  label: '',
+  value: '',
+});
+const currentZoomLevel = ref((document.getElementsByTagName('body')[0].style as any).zoom || '100%');
+const isConfirmingUserDeletion = ref(false);
+const visibilityToggles = ref({
+  pivotalProjectId: false,
+  pivotalToken: false,
+  appId: false,
+  apiKey: false,
+  projectId: false,
+  messagingSenderId: false,
+});
 
-      document.getElementsByTagName('body')[0].style.zoom = zoomLevel;
-      this.currentZoomLevel = zoomLevel;
-      saveToLocalStorage(localStorageNames.zoomLevel, zoomLevel);
-    },
-    toggleDarkMode() {
-      const themes = useThemeStore();
-      if (this.$q.dark.isActive) {
-        themes.setLightMode();
-        this.$q.dark.set(false);
-      } else {
-        themes.setDarkMode();
-        this.$q.dark.set(true);
-      }
-    },
-    setCustomValue() {
-      if (!this.customSetting.label || !this.customSetting.value) {
-        return;
-      }
+function addZoom(amount: number) {
+  const current = parseInt(currentZoomLevel.value.split('%')[0], 10);
+  const zoomLevel = `${current + amount}%`;
 
-      saveToLocalStorage(this.customSetting.label, this.customSetting.value);
-    },
-    forgetUser() {
-      saveToLocalStorage(localStorageNames.user_account, '');
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-    },
-    saveAppTabs() {
-      if (Object.keys(this.appTabs || {}).length) {
-        saveToLocalStorage(localStorageNames.appTabs, this.appTabs);
-      }
-    },
-    setToken(service) {
-      saveToLocalStorage(`${service}Token`, this.tokens[service]);
-    },
-    revertToken(service) {
-      saveToLocalStorage(`${service}Token`, this.cache.tokens[service]);
-    },
-    setSetting(setting) {
-      saveToLocalStorage(setting, this[setting]);
-      this.cache[setting] = this[setting];
-    },
-    revertSetting(setting) {
-      saveToLocalStorage(setting, this.cache[setting]);
-      this[setting] = this.cache[setting];
-    },
-  },
-};
+  (document.getElementsByTagName('body')[0].style as any).zoom = zoomLevel;
+  currentZoomLevel.value = zoomLevel;
+  saveToLocalStorage(localStorageNames.zoomLevel, zoomLevel);
+}
+function toggleDarkMode() {
+  if (Dark.isActive) {
+    themeStore.setLightMode();
+    Dark.set(false);
+  } else {
+    themeStore.setDarkMode();
+    Dark.set(true);
+  }
+}
+function setCustomValue() {
+  if (!customSetting.value.label || !customSetting.value.value) {
+    return;
+  }
+
+  saveToLocalStorage(customSetting.value.label, customSetting.value.value);
+}
+function forgetUser() {
+  saveToLocalStorage(localStorageNames.user_account, '');
+  setTimeout(() => {
+    window.location.reload();
+  }, 500);
+}
+function saveAppTabs() {
+  if (Object.keys(appTabs.value || {}).length) {
+    saveToLocalStorage(localStorageNames.appTabs, appTabs.value);
+  }
+}
+function setToken(service: 'gitlab' | 'pivotal') {
+  saveToLocalStorage(`${service}Token`, tokens.value[service]);
+}
+function setSetting(name: string) {
+  switch (name) {
+    case 'pivotalProjectId':
+      saveToLocalStorage(localStorageNames.pivotalProjectId, pivotalProjectId.value);
+      break;
+    case 'gitModuleBasePath':
+      saveToLocalStorage(localStorageNames.gitModuleBasePath, gitModuleBasePath.value);
+    default:
+      break;
+  }
+}
 </script>

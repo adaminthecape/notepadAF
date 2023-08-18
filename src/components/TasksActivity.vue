@@ -10,12 +10,12 @@
         <span v-if="!tasksList || !filteredTasksList">No tasks to show</span>
         <span v-else-if="filteredTasksList.length === Object.keys(tasksList).length">All tasks</span>
         <span v-else>{{ filteredTasksList.length }} / {{ Object.keys(tasksList).length
-        }}{{ $q.screen.lt.sm ? "" : " tasks" }}</span>
+        }}</span>
         <q-space />
         <q-btn icon="tune" size="sm" dense round flat @click="clearFilters">
           <q-tooltip>Clear filters</q-tooltip>
         </q-btn>
-        <TaskSortDropdown :sort-type="sortType" :inverse-sort="inverseSort" @setSortType="setSortType" />
+        <TaskSortDropdown :sort-type="sortType" :inverse-sort="inverseSort" @set-sort-type="setSortType($event)" />
         <q-btn
 class="q-ml-xs" :icon="applyFilters ? 'lock' : 'lock_open'" size="sm" dense flat dark
           @click="applyFilters = !applyFilters">
@@ -76,10 +76,29 @@ v-if="filters.keyword" icon="close" round dense flat size="xs"
         <div class="row items-center q-mb-xs">
           <q-btn-group class="row items-center q-mb-xs" flat>
             <q-btn
-v-for="bool in toggleableBooleans" :key="`bool-toggle-${bool.value}`"
-              :label="$q.screen.lt.md ? undefined : bool.label"
-              :icon="filters[bool.value] ? bool.icon_true : bool.icon_false" no-caps dense flat
-              :color="getFilterBoolColor(bool.value)" @click="toggleFilterBool(bool.value)" />
+              :icon="filters.done ? 'check_circle' : 'check_circle_outline'"
+              :color="getFilterBoolColor('done')"
+              no-caps
+              dense
+              flat
+              @click="toggleFilterBool('done')"
+            />
+            <q-btn
+              :icon="filters.done ? 'assignment_ind' : 'content_paste_go'"
+              :color="getFilterBoolColor('active')"
+              no-caps
+              dense
+              flat
+              @click="toggleFilterBool('active')"
+            />
+            <q-btn
+              :icon="filters.done ? 'unarchive' : 'move_to_inbox'"
+              :color="getFilterBoolColor('archived')"
+              no-caps
+              dense
+              flat
+              @click="toggleFilterBool('archived')"
+            />
           </q-btn-group>
           <q-space />
           <q-pagination
@@ -113,49 +132,49 @@ v-if="task" :key="taskRenderIndex[task.id]" note-id="tasks" :task-id="task.id" c
 
 <script setup lang="ts">
 import {
-    applyFiltersToTask,
-    filterTaskList,
-    getFromLocalStorage,
-    localStorageIntervalCheck,
-    localStorageNames,
-    saveToLocalStorage,
-    saveToLocalStorageArray,
-    sortTaskList
+  applyFiltersToTask,
+  filterTaskList,
+  getFromLocalStorage,
+  localStorageIntervalCheck,
+  localStorageNames,
+  saveToLocalStorage,
+  saveToLocalStorageArray,
+  sortTaskList
 } from 'src/utils';
-import { FilterTypes, Task, TaskSortType } from 'src/types';
+import { FilterType, FilterTypes, Task, TaskSortType } from 'src/types';
 import useTaskStore, { TaskBucket } from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
 
 
 const DisplayTask = defineAsyncComponent(() =>
-    import('src/components/DisplayTask.vue'));
+  import('src/components/DisplayTask.vue'));
 const TaskTagSelector = defineAsyncComponent(() =>
-    import('src/components/TaskTagSelector.vue'));
+  import('src/components/TaskTagSelector.vue'));
 const TaskSortDropdown = defineAsyncComponent(() =>
-    import('src/components/TaskSortDropdown.vue'));
+  import('src/components/TaskSortDropdown.vue'));
 const SimpleLayout = defineAsyncComponent(() =>
-    import('src/components/SimpleLayout.vue'));
+  import('src/components/SimpleLayout.vue'));
 const LocalStorageList = defineAsyncComponent(() =>
-    import('src/components/LocalStorageList.vue'));
+  import('src/components/LocalStorageList.vue'));
 const FirebaseConfigModal = defineAsyncComponent(() =>
-    import('src/components/FirebaseConfigModal.vue'));
+  import('src/components/FirebaseConfigModal.vue'));
 
 // prompt going to firebase settings if there is no config
 const isFirebaseConfigDialogOpen = ref(!getFromLocalStorage(localStorageNames.firebase_config, true));
 
 const defaults = {
-    pagination: {
-        page: 1,
-        max: 5,
-    },
-    limit: 5,
-    newTask: {
-        title: '',
-        message: ''
-    },
+  pagination: {
+    page: 1,
+    max: 5,
+  },
+  limit: 5,
+  newTask: {
+    title: '',
+    message: ''
+  },
 };
 
-const filterTypes = ref(Object.keys(FilterTypes));
+const filterTypes = ref({ ...FilterTypes });
 
 const filters = ref<Partial<Record<FilterTypes, any>>>({});
 const newTask = ref<Partial<Task>>(defaults.newTask);
@@ -169,119 +188,118 @@ const categoriesMutable = ref<TaskBucket[]>([]);
 const store = useTaskStore();
 
 const categories = computed(() => {
-    return store.getCategories;
+  return store.getCategories;
 })
 
 const pagination = ref(defaults.pagination);
 
 const paginationComputed = computed(() => {
-    return {
-        max: (filteredTasksList.value || []).length / limit.value + 1,
-    };
+  return {
+    max: (filteredTasksList.value || []).length / limit.value + 1,
+  };
 });
 
 const limit = ref(getFromLocalStorage(localStorageNames.taskLimit) || defaults.limit);
 const filteredTasksList = ref([]);
-const limitedTasks = computed(() => {
-    const page = pagination.value.page - 1;
-    const offset = limit.value * page;
+const limitedTasks = computed<Task[]>(() => {
+  const page = pagination.value.page - 1;
+  const offset = limit.value * page;
 
-    return (filteredTasksList.value || []).slice(
-        offset,
-        (limit.value || 20) + offset
-    );
+  return (filteredTasksList.value || []).slice(
+    offset,
+    (limit.value || 20) + offset
+  );
 })
 
 const toggleableBooleans = computed(() => {
-    return [
-        {
-            label: 'Done',
-            value: 'done',
-            icon_true: 'check_circle',
-            icon_false: 'check_circle_outline',
-        },
-        {
-            label: 'Active',
-            value: 'active',
-            icon_true: 'assignment_ind',
-            icon_false: 'content_paste_go',
-        },
-        {
-            label: 'Archived',
-            value: 'archived',
-            icon_true: 'unarchive',
-            icon_false: 'move_to_inbox',
-        },
-        // { label: 'Alarm', value: 'hasAlarm' },
-        // { label: 'Due', value: 'isDue' }
-    ];
+  return [
+    {
+      label: 'Done',
+      value: 'done',
+      icon_true: 'check_circle',
+      icon_false: 'check_circle_outline',
+    },
+    {
+      label: 'Active',
+      value: 'active',
+      icon_true: 'assignment_ind',
+      icon_false: 'content_paste_go',
+    },
+    {
+      label: 'Archived',
+      value: 'archived',
+      icon_true: 'unarchive',
+      icon_false: 'move_to_inbox',
+    },
+    // { label: 'Alarm', value: 'hasAlarm' },
+    // { label: 'Due', value: 'isDue' }
+  ];
 })
 
 const tasksList = computed(() => {
-    const catsToKeep = categories.value
-        .filter((c) => c.active)
-        .map((c) => c.title)
-        .concat('other');
-    let tasksToKeep = {};
+  const catsToKeep = categories.value
+    .filter((c) => c.active)
+    .map((c) => c.title)
+    .concat('other');
+  let tasksToKeep = {};
 
-    const allTasks = store.getTasksByBuckets(categories.value);
+  const allTasks = store.getTasksByBuckets(categories.value);
 
-    Object.entries(allTasks).forEach(
-        ([bucketName, tasksInBucket]) => {
-            if (catsToKeep.includes(bucketName)) {
-                tasksToKeep = { ...tasksToKeep, ...tasksInBucket };
-            }
-        }
-    );
+  Object.entries(allTasks).forEach(
+    ([bucketName, tasksInBucket]) => {
+      if (catsToKeep.includes(bucketName)) {
+        tasksToKeep = { ...tasksToKeep, ...tasksInBucket };
+      }
+    }
+  );
 
-    return tasksToKeep;
+  return tasksToKeep;
 })
 
 const isCloudLoading = computed(() => {
-    return store.isCloudLoading;
+  return store.isCloudLoading;
 })
 
 const lastCloudUpdate = computed(() => {
-    return store.getLastCloudUpdate;
+  return store.getLastCloudUpdate;
 })
 
-onMounted(() =>
-{
-    loadTasks();
+onMounted(() => {
+  loadTasks();
 
-    const storedFilters = getFromLocalStorage(
-        localStorageNames.taskFilters,
-        true
-    );
+  const storedFilters = getFromLocalStorage(
+    localStorageNames.taskFilters,
+    true
+  );
 
-    if (storedFilters) {
-        sortType.value = storedFilters.sortType;
-        inverseSort.value = storedFilters.inverseSort;
-        filters.value = storedFilters;
+  if (storedFilters) {
+    sortType.value = storedFilters.sortType;
+    inverseSort.value = storedFilters.inverseSort;
+    filters.value = storedFilters;
 
-        if (storedFilters.pagination) {
-            pagination.value = {
-                ...pagination.value,
-                ...storedFilters.pagination,
-            };
-        }
+    if (storedFilters.pagination) {
+      pagination.value = {
+        ...pagination.value,
+        ...storedFilters.pagination,
+      };
     }
+  }
 
-    if (refreshCheckInterval.value) {
-        clearInterval(refreshCheckInterval.value);
-    }
+  if (refreshCheckInterval.value) {
+    clearInterval(refreshCheckInterval.value);
+  }
 
-    refreshCheckInterval.value = localStorageIntervalCheck(
-        'taskRefreshQueue',
-        (queue: string[]) =>
-            queue.forEach((id) => {
-                refreshTask({ id });
-            })
-    );
+  refreshCheckInterval.value = localStorageIntervalCheck(
+    'taskRefreshQueue',
+    (queue: string[]) =>
+      queue.forEach((id) => {
+        refreshTask({ id });
+      })
+  );
 
-    categoriesMutable.value = [...categories.value];
+  categoriesMutable.value = [...categories.value];
 
-    filterTasks();
+  filterTasks();
 });
 
 
@@ -289,56 +307,56 @@ const tmpInterval = ref();
 
 /****** Loading/fetching tasks */
 async function loadTasks() {
-    store.setCategoriesFromLocalStorage();
-    store.watchCloudDb();
+  store.setCategoriesFromLocalStorage();
+  store.watchCloudDb();
 
-    tmpInterval.value = setInterval(() => {
-        const check =
-            lastCloudUpdate.value &&
-            tasksList.value &&
-            Object.keys(tasksList.value).length;
+  tmpInterval.value = setInterval(() => {
+    const check =
+      lastCloudUpdate.value &&
+      tasksList.value &&
+      Object.keys(tasksList.value).length;
 
-        if (check) {
-            filterTasks();
-            clearInterval(tmpInterval.value);
-        }
-    }, 100);
+    if (check) {
+      filterTasks();
+      clearInterval(tmpInterval.value);
+    }
+  }, 100);
 }
 
 /** Actual filtering logic. Sorts after filtering. Saves filters to localStorage. */
 function filterTasks() {
-    saveFilters();
+  saveFilters();
 
-    filteredTasksList.value =
-        filterAndSortTasksList(Object.values(tasksList.value)) || [];
+  filteredTasksList.value =
+    filterAndSortTasksList(Object.values(tasksList.value)) || [];
 }
 
 function filterAndSortTasksList(list: Task[]) {
-    return sortTaskList(
-        filterTaskList(list, filters.value),
-        sortType.value,
-        inverseSort.value
-    );
+  return sortTaskList(
+    filterTaskList(list, filters.value),
+    sortType.value,
+    inverseSort.value
+  );
 }
 
-function setSortType(type: TaskSortType) {
-    if (type === sortType.value) {
-        // invert it
-        inverseSort.value = !inverseSort.value;
-    } else {
-        sortType.value = type;
-    }
+function setSortType(type: string) {
+  if (type === sortType.value) {
+    // invert it
+    inverseSort.value = !inverseSort.value;
+  } else {
+    sortType.value = type;
+  }
 
-    filterTasks();
+  filterTasks();
 }
 
-function refreshTask(task: Task) {
-    taskRenderIndex.value[task.id] = `render-${task.id}-${Date.now()}`;
+function refreshTask(task: Record<string, any>) {
+  taskRenderIndex.value[task.id] = `render-${task.id}-${Date.now()}`;
 }
 
 function clearFilters() {
-    filters.value = {};
-    filterTasks();
+  filters.value = {};
+  filterTasks();
 }
 
 /**
@@ -346,78 +364,75 @@ function clearFilters() {
  * @param tag - Tag to add or remove, if already in filters.
  */
 function addTagToFilters(tag: string) {
-    if (tag) {
-        setFilter(
-            FilterTypes.tags,
-            (filters.value.tags || []).includes(tag)
-                ? (filters.value.tags || []).filter((t: string) => t !== tag)
-                : (filters.value.tags || []).concat(tag)
-        );
-    }
+  if (tag) {
+    setFilter(
+      FilterTypes.tags,
+      (filters.value.tags || []).includes(tag)
+        ? (filters.value.tags || []).filter((t: string) => t !== tag)
+        : (filters.value.tags || []).concat(tag)
+    );
+  }
 }
 
-function setFilter(type: FilterTypes, value: any) {
-    (filters.value as any)[type] = value;
-    filterTasks();
+function setFilter(type: FilterType, value: any) {
+  (filters.value as any)[type] = value;
+  filterTasks();
 }
 
 function saveFilters() {
-    saveToLocalStorage(localStorageNames.taskFilters, {
-        ...filters.value,
-        sortType: sortType.value,
-        inverseSort: inverseSort.value,
-        pagination: pagination.value,
-    });
+  saveToLocalStorage(localStorageNames.taskFilters, {
+    ...filters.value,
+    sortType: sortType.value,
+    inverseSort: inverseSort.value,
+    pagination: pagination.value,
+  });
 }
 
 /****** Filtering tasks - booleans */
 function getFilterBoolColor(prop: string) {
-    return (
-        ((filters.value as any)[prop] === true && 'green-6') ||
-        ((filters.value as any)[prop] === false && 'red-6') ||
-        'grey-6'
-    );
+  return (
+    ((filters.value as any)[prop] === true && 'green-6') ||
+    ((filters.value as any)[prop] === false && 'red-6') ||
+    'grey-6'
+  );
 }
 
 function toggleFilterBool(prop: string) {
-    if ((filters.value as any)[prop] === true) {
-        (filters.value as any)[prop] = false;
-    } else if ((filters.value as any)[prop] === false) {
-        (filters.value as any)[prop] = null;
-    } else {
-        (filters.value as any)[prop] = true;
-    }
+  if ((filters.value as any)[prop] === true) {
+    (filters.value as any)[prop] = false;
+  } else if ((filters.value as any)[prop] === false) {
+    (filters.value as any)[prop] = null;
+  } else {
+    (filters.value as any)[prop] = true;
+  }
 
-    filterTasks();
+  filterTasks();
 }
 
 const applyFilters = ref(true);
 
 async function createTask() {
-    store.cloudUpdateSingle(
-        applyFilters.value ?
-            applyFiltersToTask(newTask.value, filters.value) :
-            newTask.value
-    ).then(() =>
-    {
-        newTask.value = { message: '' };
-        filterTasks();
-    });
+  store.cloudUpdateSingle(
+    applyFilters.value ?
+      applyFiltersToTask(newTask.value, filters.value) :
+      newTask.value
+  ).then(() => {
+    newTask.value = { message: '' };
+    filterTasks();
+  });
 }
 
-function goToSettings()
-{
-    saveToLocalStorageArray(
-        localStorageNames.currentTabQueue,
-        'settings'
-    );
+function goToSettings() {
+  saveToLocalStorageArray(
+    localStorageNames.currentTabQueue,
+    'settings'
+  );
 
-    console.log('goToSettings', getFromLocalStorage(localStorageNames.currentTabQueue));
+  console.log('goToSettings', getFromLocalStorage(localStorageNames.currentTabQueue));
 }
 
-watch(pagination, () =>
-{
-    saveFilters();
+watch(pagination, () => {
+  saveFilters();
 });
 </script>
 

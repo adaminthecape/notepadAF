@@ -98,7 +98,7 @@ v-else color="primary" style="font-size: 1.2em; user-select: none"
   </SimpleLayout>
 </template>
 
-<script>
+<script setup lang="ts">
 import { getPivotalEndpoint } from '../mixins/Pivotal';
 import { pivotalData } from 'src/constants';
 import {
@@ -108,199 +108,197 @@ import {
   localStorageNames,
   getFromLocalStorage,
 } from 'src/utils.js';
+import { ref, defineAsyncComponent, computed, onMounted, watch } from 'vue';
+import { TaskSortType } from '@/types';
 
-export default {
-  name: 'PivotalTickets',
-  components: {
-    TaskSortDropdown: () => import('src/components/TaskSortDropdown.vue'),
-    StoryCard: () => import('src/components/StoryCard.vue'),
-    SimpleLayout: () => import('src/components/SimpleLayout.vue'),
-  },
-  props: {
-    cachedTickets: {
-      type: Array,
-      default: null,
-    },
-  },
-  data() {
-    const savedQueryParams =
-      getFromLocalStorage(localStorageNames.ticketQueryParams) || {};
+const TaskSortDropdown = defineAsyncComponent(() => import('src/components/TaskSortDropdown.vue'));
+const StoryCard = defineAsyncComponent(() => import('src/components/StoryCard.vue'));
+const SimpleLayout = defineAsyncComponent(() => import('src/components/SimpleLayout.vue'));
 
-    return {
-      isLoadingActivity: false,
-      isGitStatusDropdownOpen: false,
-      results: this.cachedTickets || [],
-      projectId: getFromLocalStorage(localStorageNames.pivotalProjectId),
-      params: {},
-      queryParamMultiples: {
-        epic: true,
-      },
-      queryParamMasks: {
-        created: '##/##/20##',
-      },
-      queryParamOptions: {
-        epic: [
-          'dev (spec)',
-          'dev (ready)',
-          'dev (active)',
-          'dev (pr + docs)',
-          'dev (pr complete)',
-          'qa (ready)',
-          'qa (active)',
-          'dev (rehab)',
-          'dev (qa pass)',
-          'dev (qa fail)',
-          'dev (merge)',
-          'cst (live actions)',
-          'priorities (internal)',
-        ],
-        has: ['attachment'],
-        state: ['unstarted', 'started'],
-      },
-      areAllSelected: {},
-      queryParamNegations: {},
-      queryParams: {
-        // this should be filled from endpoint queryParams
-        text: '',
-        owner: 'AF',
-        // requester: null,
-        epic: ['dev (active)', 'dev (pr + docs)'],
-        includedone: false,
-        ...(savedQueryParams && { ...savedQueryParams }),
-      },
-      queryParamToAdd: null,
-      resultTotals: {},
-      resultsRenderIndex: 0,
-      sortType: undefined,
-      inverseSort: false,
-      sortTypes: ['created', 'name', 'updated', 'points'],
-      sortingResults: false,
-      listRenderKey: 0,
-      storyResults: [],
+const props = defineProps({
+  cachedTickets: {
+    type: Array,
+    default: null,
+  }
+});
+
+const isLoadingActivity = ref(false);
+const isGitStatusDropdownOpen = ref(false);
+const results = ref(props.cachedTickets || []);
+const projectId = ref(getFromLocalStorage(localStorageNames.pivotalProjectId));
+const params = ref({});
+const queryParamMultiples = ref({
+  epic: true,
+});
+const queryParamMasks = ref({
+  created: '##/##/20##',
+});
+const queryParamOptions = ref({
+  epic: [
+    'dev (spec)',
+    'dev (ready)',
+    'dev (active)',
+    'dev (pr + docs)',
+    'dev (pr complete)',
+    'qa (ready)',
+    'qa (active)',
+    'dev (rehab)',
+    'dev (qa pass)',
+    'dev (qa fail)',
+    'dev (merge)',
+    'cst (live actions)',
+    'priorities (internal)',
+  ],
+  has: ['attachment'],
+  state: ['unstarted', 'started'],
+});
+const areAllSelected = ref({});
+const queryParamNegations = ref({});
+const savedQueryParams =
+  getFromLocalStorage(localStorageNames.ticketQueryParams) || {};
+const queryParams = ref({
+  // this should be filled from endpoint queryParams
+  text: '',
+  owner: 'AF',
+  // requester: null,
+  epic: ['dev (active)', 'dev (pr + docs)'],
+  includedone: false,
+  ...(savedQueryParams && { ...savedQueryParams }),
+});
+const queryParamToAdd = ref();
+const resultTotals = ref({});
+const resultsRenderIndex = ref(0);
+const sortType = ref();
+const inverseSort = ref(false);
+const sortTypes = ref(['created', 'name', 'updated', 'points']);
+const sortingResults = ref(false);
+const listRenderKey = ref(0);
+const storyResults = ref([]);
+
+const queryParamNames = computed(() => {
+  return Object.keys(queryParams.value);
+});
+
+onMounted(() => {
+  if (!this.cachedTickets) {
+    await this.getTickets();
+  } else {
+    this.storyResults = this.cachedTickets;
+    this.resultTotals.hits = this.cachedTickets.length;
+    this.resultTotals.points = this.cachedTickets.reduce(
+      (acc, t) => acc + t.estimate,
+      0
+    );
+  }
+});
+
+watch(sortType.value, () => sortResults(results.value));
+
+function setSortType(type: TaskSortType) {
+  if (type === sortType.value) {
+    // invert it
+    this.inverseSort = !this.inverseSort;
+  } else {
+    sortType.value = type;
+  }
+
+  sortResults(results.value);
+}
+
+function sortResults(results: any) {
+  if (!results || !results.length) {
+    return [];
+  }
+
+  if (sortType.value === 'created') {
+    dateSort(results.value, 'created_at', inverseSort.value);
+  }
+
+  if (sortType.value === 'name') {
+    stringSort(results.value, 'name', inverseSort.value);
+  }
+
+  if (sortType.value === 'updated') {
+    dateSort(results.value, 'updated_at', inverseSort.value);
+  }
+
+  if (sortType.value === 'points') {
+    intSort(results.value, 'estimate', inverseSort.value);
+  }
+
+  storyResults.value = results.value;
+}
+
+function saveParams(params: Record<string, any>) {
+  localStorage.setItem(
+    localStorageNames.ticketQueryParams,
+    JSON.stringify(params)
+  );
+}
+
+const emit = defineEmits<{
+  (event: 'updatedTickets', value: any[]): void
+}>();
+
+async function getTickets() {
+  isLoadingActivity.value = true;
+
+  const { path: uri, queryParams: queryParamInfo } =
+    pivotalData.endpoints.search.all;
+  let queryParamsCopy: Record<string, any>;
+
+  if (queryParamInfo) {
+    queryParamsCopy = {};
+
+    Object.keys(queryParamInfo).forEach((paramName) => {
+      if (queryParams.value[paramName]) {
+        queryParamsCopy[paramName] = queryParams.value[paramName];
+      }
+    });
+
+    saveParams(queryParamsCopy);
+  }
+
+  resultTotals.value = {};
+
+  const res = await getPivotalEndpoint(uri, {}, queryParams);
+
+  isLoadingActivity.value = false;
+
+  if (res && res.stories && res.stories.stories) {
+    results.value = res.stories.stories;
+    resultTotals.value = {
+      hits: res.stories.total_hits,
+      points: res.stories.total_points,
+      completedPoints: res.stories.total_points_completed,
     };
-  },
-  computed: {
-    queryParamNames() {
-      return Object.keys(this.queryParams);
-    },
-  },
-  async mounted() {
-    if (!this.cachedTickets) {
-      await this.getTickets();
+    sortResults(results.value);
+  } else {
+    console.warn('Results are in an unexpected format!');
+  }
+
+  resultsRenderIndex.value += 1;
+
+  try {
+    emit('updatedTickets', res.stories.stories);
+  } catch (e) {
+    //
+  }
+
+  return res;
+}
+
+function toggleSelectAll(param: any, containing: any) {
+  if ((queryParamOptions.value as any)[param]) {
+    if (containing) {
+      queryParams.value[param] = [
+        ...(queryParamOptions.value as any)[param].filter((opt: any[]) =>
+          opt.includes(containing)
+        ),
+      ];
     } else {
-      this.storyResults = this.cachedTickets;
-      this.resultTotals.hits = this.cachedTickets.length;
-      this.resultTotals.points = this.cachedTickets.reduce(
-        (acc, t) => acc + t.estimate,
-        0
-      );
+      queryParams.value[param] = [...(queryParamOptions.value as any)[param]];
     }
-  },
-  watch: {
-    sortType() {
-      this.sortResults();
-    },
-  },
-  methods: {
-    setSortType(type) {
-      if (type === this.sortType) {
-        // invert it
-        this.inverseSort = !this.inverseSort;
-      } else {
-        this.sortType = type;
-      }
-
-      this.sortResults(this.results);
-    },
-    sortResults(results) {
-      if (!results || !results.length) {
-        return [];
-      }
-
-      if (this.sortType === 'created') {
-        dateSort(this.results, 'created_at', this.inverseSort);
-      }
-
-      if (this.sortType === 'name') {
-        stringSort(this.results, 'name', this.inverseSort);
-      }
-
-      if (this.sortType === 'updated') {
-        dateSort(this.results, 'updated_at', this.inverseSort);
-      }
-
-      if (this.sortType === 'points') {
-        intSort(this.results, 'estimate', this.inverseSort);
-      }
-
-      this.$set(this, 'storyResults', this.results);
-    },
-    saveParams(params) {
-      localStorage.setItem(
-        localStorageNames.ticketQueryParams,
-        JSON.stringify(params)
-      );
-    },
-    async getTickets() {
-      this.isLoadingActivity = true;
-
-      const { path: uri, queryParams: queryParamInfo } =
-        pivotalData.endpoints.search.all;
-      let queryParams;
-
-      if (queryParamInfo) {
-        queryParams = {};
-
-        Object.keys(queryParamInfo).forEach((paramName) => {
-          if (this.queryParams[paramName]) {
-            queryParams[paramName] = this.queryParams[paramName];
-          }
-        });
-
-        this.saveParams(queryParams);
-      }
-
-      this.resultTotals = {};
-
-      const res = await getPivotalEndpoint(uri, {}, queryParams);
-
-      this.isLoadingActivity = false;
-
-      if (res && res.stories && res.stories.stories) {
-        this.results = res.stories.stories;
-        this.resultTotals = {
-          hits: res.stories.total_hits,
-          points: res.stories.total_points,
-          completedPoints: res.stories.total_points_completed,
-        };
-        this.sortResults(this.results);
-      } else {
-        console.warn('Results are in an unexpected format!');
-      }
-
-      this.resultsRenderIndex += 1;
-
-      try {
-        this.$emit('updatedTickets', res.stories.stories);
-      } catch (e) {
-        //
-      }
-
-      return res;
-    },
-    toggleSelectAll(param, containing) {
-      if (this.queryParamOptions[param]) {
-        if (containing) {
-          this.queryParams[param] = [
-            ...this.queryParamOptions[param].filter((opt) =>
-              opt.includes(containing)
-            ),
-          ];
-        } else {
-          this.queryParams[param] = [...this.queryParamOptions[param]];
-        }
-      }
-    },
-  },
-};
+  }
+}
 </script>
