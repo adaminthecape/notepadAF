@@ -61,48 +61,32 @@
   </q-select>
 </template>
 
-<script>
+<script setup lang="ts">
 import useTaskStore from 'src/pinia/taskStore';
-export default {
-  props: {
-    inputValue: {
-      type: Array,
-      default: undefined
-    },
-    label: {
-      type: String,
-      default: 'new tag...'
-    },
-    multiple: {
-      type: Boolean,
-      default: false
-    },
-    dark: {
-      type: Boolean,
-      default: false
-    },
-    newValueMode: {
-      type: Boolean,
-      default: false
-    }
-  },
-  data() {
-    return {
-      tagsToShow: [],
-      value: null
-    };
-  },
-  computed: {
-    tasksList() {
-      return useTaskStore().getTasks;
-      // return this.$store.getters['notes/getTasks'];
-    },
-    allTags() {
-      if (!this.tasksList || !this.tasksList.length) {
+import { computed, ref, watch } from 'vue';
+import { Task } from 'src/types';
+
+const props = defineProps<{
+  inputValue?: string|string[];
+  label?: string;
+  multiple?: boolean;
+  dark?: boolean;
+  newValueMode?: boolean;
+}>();
+
+const store = useTaskStore();
+
+const tagsToShow = ref<string[]>([]);
+const value = ref<string[]>([]);
+
+const tasksList = computed(() => store.all);
+
+const allTags = computed(() => {
+      if (!tasksList.value || !tasksList.value.length) {
         return [];
       }
 
-      return this.tasksList.reduce((agg, task) => {
+      return tasksList.value.reduce((agg: string[], task: Task) => {
         const tags = [...task.tags || []]
           .filter((tag) => !agg.includes(tag));
 
@@ -112,52 +96,69 @@ export default {
 
         return agg;
       }, []);
-    }
-  },
-  created() {
-    this.value = this.inputValue || [];
-  },
-  watch: {
-    inputValue(newVal) {
-      this.value = newVal;
-    }
-  },
-  methods: {
-    addValue() {
-      const v = this.$refs.selector.$refs.target.value;
+});
 
-      if (v) {
-        this.$emit('input', v);
-      }
-    },
-    copyTags() {
-      navigator.clipboard.writeText(this.value.join(', '));
-    },
-    filterFn(val, update/*, abort*/) {
+const emit = defineEmits<{
+    (event: 'input', tags: string[]): void;
+    (event: 'cancel'): void;
+}>();
+
+function addValue() {
+    // const v = this.$refs.selector.$refs.target.value;
+    const v = '';
+
+    if (v) {
+        emit('input', v);
+    }
+}
+
+function copyTags() {
+      navigator.clipboard.writeText(value.value.join(', '));
+}
+
+function filterFn(val: string, update: (cb: () => void) => void/*, abort*/) {
       update(() => {
         if (val === '') {
-          this.tagsToShow = this.allTags;
+          tagsToShow.value = allTags.value;
         }
         else {
-          this.tagsToShow = this.allTags.filter(v => v.toLowerCase().indexOf(val.toLowerCase()) > -1);
+          tagsToShow.value = allTags.value.filter(v => v.toLowerCase().indexOf(val.toLowerCase()) > -1);
         }
       })
-    },
-    emitInput(value, tab = false) {
-      if (tab && this.multiple) {
+}
+
+function emitInput(value: string[], tab = false) {
+      if (tab && props.multiple) {
         return;
       }
 
-      if (!tab && !this.multiple) {
+      if (!tab && !props.multiple) {
         return;
       }
 
-      this.$emit('input', value);
-    },
-    clearInput() {
-      this.value = null;
-      this.$emit('cancel');
+      emit('input', value);
+}
+
+function clearInput() {
+      value.value = [];
+      emit('cancel');
+}
+
+function syncInputValues()
+{
+    if (props.inputValue)
+    {
+        value.value = typeof props.inputValue === 'string' ? [props.inputValue] : props.inputValue;
     }
-  }
-};
+}
+
+if (props.inputValue)
+{
+    syncInputValues();
+}
+
+watch(() => props.inputValue, () =>
+{
+    syncInputValues();
+});
 </script>
