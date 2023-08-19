@@ -289,6 +289,7 @@ const useTaskStore = defineStore('taskStore', {
       this.taskUpdateTimeout = timeout;
     },
     SET_CATEGORIES() {
+      console.log('SET_CATEGORIES', this.defaultCategories);
       const storedCategories = getFromLocalStorage(
         LocalStorageName.taskCategories,
         true
@@ -314,6 +315,8 @@ const useTaskStore = defineStore('taskStore', {
       } else {
         categories.push(...this.defaultCategories);
       }
+
+      console.log('set cats:', categories);
 
       this.categories = categories;
     },

@@ -28,10 +28,6 @@ const store = usePivotalStore();
 const story = computed(() => {
 
   return store.get(props.storyId);
-})
-
-const description = computed(() => {
-  return !story.value ? undefined : story.value.description;
 });
 
 onMounted(async () => {

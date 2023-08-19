@@ -64,6 +64,10 @@
           </q-item-section>
         </q-item>
       </q-list>
+      {{ {
+        value,
+        listKey
+      } }}
     </template>
   </SimpleModal>
 </template>

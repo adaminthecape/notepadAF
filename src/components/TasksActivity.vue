@@ -298,6 +298,7 @@ onMounted(() => {
       })
   );
 
+  console.log({ categories: categories.value, categoriesMutable: categoriesMutable.value });
   categoriesMutable.value = [...categories.value];
 
   filterTasks();
@@ -432,7 +433,7 @@ function goToSettings() {
   console.log('goToSettings', getFromLocalStorage(LocalStorageName.currentTabQueue));
 }
 
-watch(pagination, () => {
+watch(pagination.value, () => {
   saveFilters();
 });
 </script>

@@ -1,29 +1,9 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import notes from '../store/notes/index';
-import themes from '../store/themes/index';
-import pivotal from '../store/pivotal/index';
 
 // import example from './module-example'
 
-Vue.use(Vuex)
-
-export function useVuexStore()
-{
-  const Store = new Vuex.Store({
-    modules: {
-        notes,
-        themes,
-        pivotal
-    },
-
-    // enable strict mode (adds overhead!)
-    // for dev mode only
-    strict: process.env.DEBUGGING
-  })
-
-  return Store
-}
+Vue.use(Vuex);
 
 /*
  * If not building with SSR mode, you can
@@ -36,16 +16,12 @@ export function useVuexStore()
 
 export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
-    modules: {
-        notes,
-        themes,
-        pivotal
-    },
+    modules: {},
 
     // enable strict mode (adds overhead!)
     // for dev mode only
-    strict: process.env.DEBUGGING
-  })
+    strict: process.env.DEBUGGING,
+  });
 
-  return Store
+  return Store;
 }
