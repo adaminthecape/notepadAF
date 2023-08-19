@@ -16,7 +16,7 @@
                 {{ param }}
               </h5>
               <q-space />
-              <div v-if="queryParamMultiples[param]">
+              <div v-if="queryParamMultiples.epic">
                 <div class="row items-center">
                   <q-btn label="All" class="q-pa-sm" dense flat @click="toggleSelectAll(param)" />
                   <q-btn label="Dev" class="q-pa-sm" dense flat @click="toggleSelectAll(param, 'dev')" />
@@ -34,7 +34,7 @@
               class="q-pa-sm"
               stack-label
               filled
-              :multiple="queryParamMultiples[param] || false"
+              :multiple="queryParamMultiples.epic || false"
             >
               <template #append>
                 <q-btn
@@ -48,7 +48,7 @@
             </q-select>
             <q-input
 v-else v-model="queryParams[param]" class="q-pa-sm" bottom-slots stack-label filled
-              :mask="queryParamMasks[param] || undefined">
+              :mask="queryParamMasks.created || undefined">
               <template #append>
                 <q-btn
 v-if="queryParams[param]" icon="clear" dense flat
@@ -142,7 +142,7 @@ const queryParamMultiples = ref({
 const queryParamMasks = ref({
   created: '##/##/20##',
 });
-const queryParamOptions = ref({
+const queryParamOptions = ref<any>({
   epic: [
     'dev (spec)',
     'dev (ready)',
@@ -293,7 +293,7 @@ async function getTickets() {
   return res;
 }
 
-function toggleSelectAll(param: any, containing: any) {
+function toggleSelectAll(param: any, containing?: any) {
   if ((queryParamOptions.value as any)[param]) {
     if (containing) {
       queryParams.value[param] = [

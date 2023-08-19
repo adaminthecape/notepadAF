@@ -19,7 +19,7 @@
             show-subtask-button
             hide-menu-button
             show
-            class="q-mb-sm"
+            class="q-my-sm"
             add-new
             flat
             @edit-task="editTask"
