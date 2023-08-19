@@ -174,7 +174,6 @@ color="primary" icon="add" size="md" class="full-width" dense flat
               </template>
               <template #activator="{ open }">
                 <q-btn label="Adjust tabs" @click="open" />
-                <q-btn label="Adjust tabs" @click="open" />
               </template>
               <template #content>
                 <q-item v-for="tab in appTabs" :key="tab.name">

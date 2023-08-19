@@ -38,7 +38,7 @@
             class="q-mr-xs"
             color="yellow"
             flat
-            @click.stop.prevent="setSort(undefined)"
+            @click.stop.prevent="setSort('')"
         />
         <div v-if="!sortType" style="margin-right: -10px;">
           Sort
@@ -60,8 +60,8 @@ import { TaskSortType } from 'src/types';
 import { ref } from 'vue';
 
 defineProps<{
-  sortType?: TaskSortType;
-  sortTypes?: any[];
+  sortType?: string;
+  sortTypes?: string[];
   inverseSort?: boolean;
 }>();
 
@@ -71,7 +71,7 @@ const emit = defineEmits<{
   (event: 'setSortType', sortType: string): void
 }>();
 
-function setSort(type: TaskSortType) {
+function setSort(type: string) {
   emit('setSortType', type);
 }
 </script>

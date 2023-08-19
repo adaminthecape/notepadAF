@@ -33,7 +33,7 @@ v-for="(alert, a) in task.alerts" :key="`alert-${a}-${activeAlertsRenderKey}`" s
           <q-space />
           <!-- MENU: -->
           <div class="row items-center" style="margin-right: -14px">
-            xx<TaskOptions
+            <TaskOptions
                 v-if="showOptions"
                 show-single-task-button
                 :task-id="task.id"
@@ -42,7 +42,7 @@ v-for="(alert, a) in task.alerts" :key="`alert-${a}-${activeAlertsRenderKey}`" s
                 dense
                 flat
                 @edit-task="editTask()"
-            />yy
+            />
           </div>
         </div>
         <div class="row items-center">
@@ -111,7 +111,7 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
 v-for="(tag, tagIndex) in task.tags" :key="`tag-${tagIndex}`" square dense dark
             style="margin-right: -2px" removable @remove="removeTag(tag)">
             <div class="row items-center">
-              <span style="margin-top: -2px" @click="$emit('filterByTag', tag)">{{ tag }}</span>
+              <span style="margin-top: -2px" @click="emit('filterByTag', tag)">{{ tag }}</span>
             </div>
           </q-chip>
           <q-space />
@@ -122,34 +122,37 @@ v-for="(tag, tagIndex) in task.tags" :key="`tag-${tagIndex}`" square dense dark
         </div>
       </q-item-section>
     </q-item>
-    <q-btn
-        icon="description"
-        @click="goToActivity()"
-    >
-      <q-tooltip>View activity</q-tooltip>
-    </q-btn>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import { goToActivityPageForTask, queueTaskRefresh, timeSince } from 'src/utils';
+import { queueTaskRefresh, timeSince } from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, ref, watch } from 'vue';
 import { Task, TaskAlert } from 'src/types';
 
-function goToActivity() {
-  goToActivityPageForTask(props.taskId);
-}
+const emit = defineEmits<{
+  (event: 'filterByTag', tag: string): void
+}>();
 
 const AddTag = defineAsyncComponent(() => import('src/components/AddTag.vue'));
 const TaskStoryDropdown = defineAsyncComponent(() => import('src/components/TaskStoryDropdown.vue'));
 const TaskOptions = defineAsyncComponent(() => import('src/components/TaskOptions.vue'));
 
-const props = defineProps<{
-  taskId: string;
-  showOptions?: boolean;
-  clickable?: boolean;
-}>();
+const props = defineProps({
+  taskId: {
+    type: String,
+    required: true
+  },
+  showOptions: {
+    type: Boolean,
+    default: true
+  },
+  clickable: {
+    type: Boolean,
+    default: false
+  }
+});
 
 const addingTag = ref(false);
 // const alarmTimeouts = ref([]);

@@ -65,13 +65,17 @@ import { TaskAlert } from 'src/types';
 import { padLeft } from 'src/utils';
 import { ref } from 'vue';
 
-defineProps<{
-  dense?: boolean;
-}>();
+defineProps({
+  dense: {
+    type: Boolean,
+    default: true
+  }
+});
 
-const { date, time } = getNow();
-const createAlertDate = ref(date);
-const createAlertTime = ref(time);
+const createAlertDate = ref<string>();
+const createAlertTime = ref<string>();
+
+setNow();
 
 function setNow(add = 0) {
   const { date, time } = getNow(add);
@@ -111,8 +115,8 @@ const emit = defineEmits<{
 
 function createAlert() {
   const alert: TaskAlert = {
-    date: createAlertDate.value,
-    time: createAlertTime.value,
+    date: createAlertDate.value || '',
+    time: createAlertTime.value || '',
     unix: 0
   };
 

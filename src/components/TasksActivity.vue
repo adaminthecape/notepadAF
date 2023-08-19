@@ -112,7 +112,8 @@ v-model="pagination.page" :max="paginationComputed.max" color="grey" active-colo
         <div v-for="task in limitedTasks" :key="task.id">
           <DisplayTask
 v-if="task" :key="taskRenderIndex[task.id]" note-id="tasks" :task-id="task.id" class="full-width"
-            editable @refreshTask="refreshTask" @filterByTag="addTagToFilters" />
+show-options
+            editable @refresh-task="refreshTask" @filter-by-tag="addTagToFilters" />
         </div>
       </div>
       <!--<q-space />-->
@@ -211,30 +212,30 @@ const limitedTasks = computed<Task[]>(() => {
   );
 })
 
-const toggleableBooleans = computed(() => {
-  return [
-    {
-      label: 'Done',
-      value: 'done',
-      icon_true: 'check_circle',
-      icon_false: 'check_circle_outline',
-    },
-    {
-      label: 'Active',
-      value: 'active',
-      icon_true: 'assignment_ind',
-      icon_false: 'content_paste_go',
-    },
-    {
-      label: 'Archived',
-      value: 'archived',
-      icon_true: 'unarchive',
-      icon_false: 'move_to_inbox',
-    },
-    // { label: 'Alarm', value: 'hasAlarm' },
-    // { label: 'Due', value: 'isDue' }
-  ];
-})
+// const toggleableBooleans = computed(() => {
+//   return [
+//     {
+//       label: 'Done',
+//       value: 'done',
+//       icon_true: 'check_circle',
+//       icon_false: 'check_circle_outline',
+//     },
+//     {
+//       label: 'Active',
+//       value: 'active',
+//       icon_true: 'assignment_ind',
+//       icon_false: 'content_paste_go',
+//     },
+//     {
+//       label: 'Archived',
+//       value: 'archived',
+//       icon_true: 'unarchive',
+//       icon_false: 'move_to_inbox',
+//     },
+//     // { label: 'Alarm', value: 'hasAlarm' },
+//     // { label: 'Due', value: 'isDue' }
+//   ];
+// })
 
 const tasksList = computed(() => {
   const catsToKeep = categories.value
@@ -375,7 +376,7 @@ function addTagToFilters(tag: string) {
 }
 
 function setFilter(type: FilterType, value: any) {
-  (filters.value as any)[type] = value;
+  filters.value[type] = value;
   filterTasks();
 }
 
@@ -389,21 +390,21 @@ function saveFilters() {
 }
 
 /****** Filtering tasks - booleans */
-function getFilterBoolColor(prop: string) {
+function getFilterBoolColor(prop: FilterType) {
   return (
-    ((filters.value as any)[prop] === true && 'green-6') ||
-    ((filters.value as any)[prop] === false && 'red-6') ||
+    (filters.value[prop] === true && 'green-6') ||
+    (filters.value[prop] === false && 'red-6') ||
     'grey-6'
   );
 }
 
-function toggleFilterBool(prop: string) {
-  if ((filters.value as any)[prop] === true) {
-    (filters.value as any)[prop] = false;
-  } else if ((filters.value as any)[prop] === false) {
-    (filters.value as any)[prop] = null;
+function toggleFilterBool(prop: keyof typeof FilterTypes) {
+  if (filters.value[prop] === true) {
+    filters.value[prop] = false;
+  } else if (filters.value[prop] === false) {
+    filters.value[prop] = null;
   } else {
-    (filters.value as any)[prop] = true;
+    filters.value[prop] = true;
   }
 
   filterTasks();

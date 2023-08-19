@@ -53,7 +53,7 @@ function getTaskDataWithNewAlert(alert: TaskAlert) {
     return undefined;
   }
 
-  const taskData = structuredClone(task.value);
+  const taskData = { ...task.value };
 
   if (!taskData.alerts) {
     taskData.alerts = [];

@@ -42,14 +42,14 @@ import useTaskStore from 'src/pinia/taskStore';
 import { computed, onMounted, ref, watch } from 'vue';
 
 const props = defineProps<{
-    size?: string;
-    icon?: string;
-    color?: string;
-    flat?: boolean;
-    dense?: boolean;
-    mode?: 'emit' | 'save' | undefined;
-    disableAddingNote?: boolean;
-    taskId: string;
+  size?: string;
+  icon?: string;
+  color?: string;
+  flat?: boolean;
+  dense?: boolean;
+  mode?: 'emit' | 'save' | undefined;
+  disableAddingNote?: boolean;
+  taskId: string;
 }>();
 
 const renderIndex = ref(0);
@@ -59,98 +59,95 @@ const isAddingNote = ref(false);
 const store = useTaskStore();
 const task = computed(() => store.getTask(props.taskId));
 
-const active = computed(() =>
-{
-    return store.getTaskProperty(props.taskId, 'active');
+const active = computed(() => {
+  return store.getTaskProperty(props.taskId, 'active');
 });
 
 const timeSinceActive = computed(() => timeSince(active.value));
 
 const lastActivity = computed(() => {
-    const activity = store.getTaskProperty(props.taskId, 'activity');
+  const activity = store.getTaskProperty(props.taskId, 'activity');
 
-    if (activity && activity.length) {
-        return activity[activity.length - 1];
-    }
+  if (activity && activity.length) {
+    return activity[activity.length - 1];
+  }
 
-    return undefined;
+  return undefined;
 });
 
 function save() {
-    if (!task.value) {
+  if (!task.value) {
     return;
-    }
+  }
 
-    const taskData = structuredClone(task.value);
+  const taskData = { ...task.value };
 
-    if (!taskData.activity) {
+  if (!taskData.activity) {
     taskData.activity = [];
-    }
+  }
 
-    taskData.active = active.value ? 0 : Date.now();
+  taskData.active = active.value ? 0 : Date.now();
 
-    if (!active.value) {
-        // task is now active; start a new log
-        taskData.activity.push({
-            start: Date.now(),
-            end: 0,
-            note: logNote.value || '',
-        });
-    } // task is no longer active; end the last log
-    else {
-        const lastLog = taskData.activity.length
-            ? taskData.activity[taskData.activity.length - 1]
-            : undefined;
-
-        if (!lastLog) {
-            // create first log
-            taskData.activity.push({
-            start: active.value,
-            end: Date.now(),
-            note: logNote.value || '',
-            });
-        } else {
-            const noteToAdd =
-            logNote.value || taskData.activity[taskData.activity.length - 1].note || '';
-            taskData.activity[taskData.activity.length - 1].end = Date.now();
-            taskData.activity[taskData.activity.length - 1].note = noteToAdd;
-        }
-    }
-
-    store.cloudUpdateSingle(taskData).then(() => {
-        isAddingNote.value = false;
+  if (!active.value) {
+    // task is now active; start a new log
+    taskData.activity.push({
+      start: Date.now(),
+      end: 0,
+      note: logNote.value || '',
     });
+  } // task is no longer active; end the last log
+  else {
+    const lastLog = taskData.activity.length
+      ? taskData.activity[taskData.activity.length - 1]
+      : undefined;
+
+    if (!lastLog) {
+      // create first log
+      taskData.activity.push({
+        start: active.value,
+        end: Date.now(),
+        note: logNote.value || '',
+      });
+    } else {
+      const noteToAdd =
+        logNote.value || taskData.activity[taskData.activity.length - 1].note || '';
+      taskData.activity[taskData.activity.length - 1].end = Date.now();
+      taskData.activity[taskData.activity.length - 1].note = noteToAdd;
+    }
+  }
+
+  store.cloudUpdateSingle(taskData).then(() => {
+    isAddingNote.value = false;
+  });
 }
 
 const emit = defineEmits<{
-    (event: 'toggle', active: number): void;
+  (event: 'toggle', active: number): void;
 }>();
 
 function toggle() {
-    if (props.mode === 'save') {
+  if (props.mode === 'save') {
     if (active.value) {
-        isAddingNote.value = true;
+      isAddingNote.value = true;
     } else {
-        save();
+      save();
     }
-    } else {
-        emit('toggle', active.value ? 0 : Date.now());
-    }
+  } else {
+    emit('toggle', active.value ? 0 : Date.now());
+  }
 }
 
-onMounted(() =>
-{
-    if (props.mode === 'save' && !props.taskId) {
-      throw new Error('You must provide a task during save mode!');
-    }
+onMounted(() => {
+  if (props.mode === 'save' && !props.taskId) {
+    throw new Error('You must provide a task during save mode!');
+  }
 
-    if (lastActivity.value && !lastActivity.value.end && lastActivity.value.note) {
-      logNote.value = lastActivity.value.note;
-    }
+  if (lastActivity.value && !lastActivity.value.end && lastActivity.value.note) {
+    logNote.value = lastActivity.value.note;
+  }
 });
 
-watch(lastActivity, (newVal) =>
-{
-    logNote.value = newVal.note || undefined;
+watch(lastActivity, (newVal) => {
+  logNote.value = newVal?.note || undefined;
 });
 </script>

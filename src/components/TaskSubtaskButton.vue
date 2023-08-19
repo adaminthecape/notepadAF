@@ -80,7 +80,7 @@ function save() {
     return;
   }
 
-  const taskData = structuredClone(task.value);
+  const taskData = { ...task.value };
 
   if (!taskData.next) {
     taskData.next = [];
