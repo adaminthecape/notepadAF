@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { getFromLocalStorage, saveToLocalStorage } from 'src/utils';
+import { getFromLocalStorage, LocalStorageName, saveToLocalStorage } from 'src/utils';
 import { ref, onMounted, watch, defineAsyncComponent } from 'vue';
 
 const SimpleModal = defineAsyncComponent(() => import('src/components/SimpleModal.vue'));
@@ -80,51 +80,50 @@ const extrasId = ref<number>();
 const extrasTitle = ref<string>();
 
 const emit = defineEmits<{
-    (event: 'input', value: any): void;
-    (event: 'updated'): void;
+  (event: 'input', value: any): void;
+  (event: 'updated'): void;
 }>();
 
 const props = defineProps<{
-    value: Record<string, any>[];
-    listKey: string;
-    title: string;
+  value: Record<string, any>[];
+  listKey: string;
+  title: string;
 }>();
 
 function toggleItem(num: number) {
-    if (items.value[num]) {
-        items.value[num].active = !items.value[num].active;
+  if (items.value[num]) {
+    items.value[num].active = !items.value[num].active;
 
-        if (props.listKey) {
-            saveToLocalStorage(props.listKey, items.value);
-            emit('updated');
-        }
+    if (props.listKey) {
+      saveToLocalStorage(props.listKey as LocalStorageName, items.value);
+      emit('updated');
     }
+  }
 }
 function openExtras(i: number) {
-    extrasId.value = i;
-    extrasTitle.value = items.value[i].title;
+  extrasId.value = i;
+  extrasTitle.value = items.value[i].title;
 }
 function closeExtras() {
-    extrasId.value = undefined;
-    extrasTitle.value = undefined;
+  extrasId.value = undefined;
+  extrasTitle.value = undefined;
 }
 
 onMounted(() => {
-    if (props.listKey) {
-        const storedItems = getFromLocalStorage(props.listKey, true);
+  if (props.listKey) {
+    const storedItems = getFromLocalStorage(props.listKey as LocalStorageName, true);
 
-        if (storedItems) {
-            items.value = storedItems;
-        }
+    if (storedItems) {
+      items.value = storedItems;
     }
+  }
 
-    items.value = [...props.value || []];
+  items.value = [...props.value || []];
 });
 
-watch(props.value, (newVal) =>
-{
-    emit('input', newVal);
-    items.value = newVal;
+watch(props.value, (newVal) => {
+  emit('input', newVal);
+  items.value = newVal;
 });
 </script>
 

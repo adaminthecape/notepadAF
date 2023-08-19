@@ -86,10 +86,10 @@ v-model="log.note" dense filled @click.stop.prevent="
 import {
   filterTaskList,
   secondsToHumanReadable
-} from 'src/utils';
+} from '../utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
-import { Task, TaskActivityLog } from 'src/types';
+import { Task, TaskActivityLog, TaskFilters } from 'src/types';
 
 const TaskActiveButton = defineAsyncComponent(() => import('src/components/TaskActiveButton.vue'));
 const props = defineProps({
@@ -113,7 +113,7 @@ const props = defineProps({
 
 const store = useTaskStore();
 
-const allActivity = ref([]);
+const allActivity = ref<TaskActivityLog[]>([]);
 const listRenderIndex = ref(0);
 const newLogMessage = ref('');
 
@@ -126,7 +126,7 @@ const taskList = computed(() => {
 });
 
 const taskActivity = computed(() => {
-  return taskList.value
+  return (taskList.value as any)
     .reduce((agg: TaskActivityLog[], task: Task) => {
       if (!task.activity) return agg;
       if (!task.activity.length) return agg;
@@ -157,7 +157,7 @@ const taskActivity = computed(() => {
 
       return agg;
     }, [])
-    .sort((a, b) => a.start - b.start);
+    .sort((a: TaskActivityLog, b: TaskActivityLog) => a.start - b.start);
 });
 
 watch(() => props.filters, () => setActivity());
@@ -185,7 +185,7 @@ function updateLog(data: TaskActivityLog) {
 function removeActivityLog(log: TaskActivityLog) {
   updateLog(
     taskActivity.value.filter(
-      (l) => l.start !== log.start && l.end !== log.end
+      (l: TaskActivityLog) => l.start !== log.start && l.end !== log.end
     )
   );
 }
@@ -232,7 +232,7 @@ function setActivity() {
     return;
   }
 
-  const tasks = useTaskStore().getTasks;
+  const tasks = useTaskStore().all;
   // const tasks = this.$store.getters['notes/getTasks'];
 
   if (!tasks) {
@@ -241,9 +241,9 @@ function setActivity() {
 
   const tasksList =
     (Object.keys(props.filters || {}).length
-      ? filterTaskList(tasks, props.filters)
+      ? filterTaskList(tasks, props.filters as Partial<TaskFilters>)
       : tasks) || [];
 
-  allActivity.value = tasksList;
+  // allActivity.value = tasksList;
 }
 </script>

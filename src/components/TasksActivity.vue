@@ -137,11 +137,11 @@ import {
   filterTaskList,
   getFromLocalStorage,
   localStorageIntervalCheck,
-  localStorageNames,
+  LocalStorageName,
   saveToLocalStorage,
   saveToLocalStorageArray,
   sortTaskList
-} from 'src/utils';
+} from '../utils';
 import { FilterType, FilterTypes, Task } from 'src/types';
 import useTaskStore, { TaskBucket } from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
@@ -161,7 +161,7 @@ const FirebaseConfigModal = defineAsyncComponent(() =>
   import('src/components/FirebaseConfigModal.vue'));
 
 // prompt going to firebase settings if there is no config
-const isFirebaseConfigDialogOpen = ref(!getFromLocalStorage(localStorageNames.firebase_config, true));
+const isFirebaseConfigDialogOpen = ref(!getFromLocalStorage(LocalStorageName.firebase_config, true));
 
 const defaults = {
   pagination: {
@@ -200,8 +200,8 @@ const paginationComputed = computed(() => {
   };
 });
 
-const limit = ref(getFromLocalStorage(localStorageNames.taskLimit) || defaults.limit);
-const filteredTasksList = ref([]);
+const limit = ref(getFromLocalStorage(LocalStorageName.taskLimit) || defaults.limit);
+const filteredTasksList = ref<Task[]>([]);
 const limitedTasks = computed<Task[]>(() => {
   const page = pagination.value.page - 1;
   const offset = limit.value * page;
@@ -269,7 +269,7 @@ onMounted(() => {
   loadTasks();
 
   const storedFilters = getFromLocalStorage(
-    localStorageNames.taskFilters,
+    LocalStorageName.taskFilters,
     true
   );
 
@@ -291,8 +291,8 @@ onMounted(() => {
   }
 
   refreshCheckInterval.value = localStorageIntervalCheck(
-    'taskRefreshQueue',
-    (queue: string[]) =>
+    LocalStorageName.taskRefreshQueue,
+    (queue: Array<string | number>) =>
       queue.forEach((id) => {
         refreshTask({ id });
       })
@@ -381,7 +381,7 @@ function setFilter(type: FilterType, value: any) {
 }
 
 function saveFilters() {
-  saveToLocalStorage(localStorageNames.taskFilters, {
+  saveToLocalStorage(LocalStorageName.taskFilters, {
     ...filters.value,
     sortType: sortType.value,
     inverseSort: inverseSort.value,
@@ -410,13 +410,13 @@ function toggleFilterBool(prop: keyof typeof FilterTypes) {
   filterTasks();
 }
 
-const applyFilters = ref(true);
+const applyFilters = ref<boolean>(true);
 
 async function createTask() {
   store.cloudUpdateSingle(
     applyFilters.value ?
-      applyFiltersToTask(newTask.value, filters.value) :
-      newTask.value
+      applyFiltersToTask(newTask.value as Task, filters.value) :
+      newTask.value as Task
   ).then(() => {
     newTask.value = { message: '' };
     filterTasks();
@@ -425,11 +425,11 @@ async function createTask() {
 
 function goToSettings() {
   saveToLocalStorageArray(
-    localStorageNames.currentTabQueue,
+    LocalStorageName.currentTabQueue,
     'settings'
   );
 
-  console.log('goToSettings', getFromLocalStorage(localStorageNames.currentTabQueue));
+  console.log('goToSettings', getFromLocalStorage(LocalStorageName.currentTabQueue));
 }
 
 watch(pagination, () => {

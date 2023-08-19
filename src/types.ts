@@ -36,6 +36,7 @@ export interface TaskAlert {
 
 export type TaskFilters = {
   tags?: Task['tags'];
+  id?: string;
   keyword?: string;
   done?: boolean;
   active?: boolean;

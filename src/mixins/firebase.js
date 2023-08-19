@@ -4,7 +4,7 @@ import { initializeApp } from '@firebase/app';
 import { getDatabase, ref, onValue, set } from '@firebase/database';
 import {
   getFromLocalStorage,
-  localStorageNames,
+  LocalStorageName,
   saveToLocalStorage,
 } from 'src/utils';
 import {
@@ -54,13 +54,13 @@ export async function getDb() {
 
 export function getConfig() {
   return (
-    getFromLocalStorage(localStorageNames.firebase_config, true) || undefined
+    getFromLocalStorage(LocalStorageName.firebase_config, true) || undefined
   );
 }
 
 export function getAdmin() {
   return (
-    getFromLocalStorage(localStorageNames.firebase_service_account) || undefined
+    getFromLocalStorage(LocalStorageName.firebase_service_account) || undefined
   );
 }
 
@@ -87,20 +87,20 @@ function validateCredentials(credentials) {
 }
 
 function getCredentials() {
-  return getFromLocalStorage(localStorageNames.authed_user, true);
+  return getFromLocalStorage(LocalStorageName.authed_user, true);
 }
 
 function setCredentials(user) {
   try {
     saveToLocalStorage(
-      localStorageNames.authed_user,
+      LocalStorageName.authed_user,
       JSON.stringify({
         accessToken: user.accessToken,
         expires: user.expires || Date.now() + 60 * 60 * 1000,
       })
     );
   } catch (e) {
-    saveToLocalStorage(localStorageNames.authed_user, '');
+    saveToLocalStorage(LocalStorageName.authed_user, '');
   }
 }
 
@@ -222,7 +222,7 @@ export async function authenticateViaEmailAndPassword(user) {
 }
 
 export async function authenticateMe() {
-  const me = getFromLocalStorage(localStorageNames.user_account, true);
+  const me = getFromLocalStorage(LocalStorageName.user_account, true);
 
   return authenticateViaEmailAndPassword(me);
 }

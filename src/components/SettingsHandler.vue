@@ -205,7 +205,7 @@ color="primary" icon="add" size="md" class="full-width" dense flat
 </template>
 
 <script setup lang="ts">
-import { getFromLocalStorage, localStorageNames, saveToLocalStorage } from 'src/utils';
+import { getFromLocalStorage, LocalStorageName, saveToLocalStorage } from 'src/utils';
 import { defineAsyncComponent, ref } from 'vue';
 import useThemeStore from 'src/pinia/themeStore';
 import { Dark } from 'quasar';
@@ -216,14 +216,14 @@ const FirebaseConfigModal = defineAsyncComponent(() => import('src/components/Fi
 const themeStore = useThemeStore();
 
 const tokens = ref({
-  gitlab: getFromLocalStorage(localStorageNames.gitlabToken),
-  pivotal: getFromLocalStorage(localStorageNames.pivotalToken),
+  gitlab: getFromLocalStorage(LocalStorageName.gitlabToken),
+  pivotal: getFromLocalStorage(LocalStorageName.pivotalToken),
 });
-const pivotalProjectId = ref(getFromLocalStorage(localStorageNames.pivotalProjectId));
+const pivotalProjectId = ref(getFromLocalStorage(LocalStorageName.pivotalProjectId));
 const gitModuleBasePath = ref(getFromLocalStorage(
-  localStorageNames.gitModuleBasePath
+  LocalStorageName.gitModuleBasePath
 ));
-const appTabs = ref(getFromLocalStorage(localStorageNames.appTabs, true));
+const appTabs = ref(getFromLocalStorage(LocalStorageName.appTabs, true));
 const customSetting = ref({
   label: '',
   value: '',
@@ -245,7 +245,7 @@ function addZoom(amount: number) {
 
   (document.getElementsByTagName('body')[0].style as any).zoom = zoomLevel;
   currentZoomLevel.value = zoomLevel;
-  saveToLocalStorage(localStorageNames.zoomLevel, zoomLevel);
+  saveToLocalStorage(LocalStorageName.zoomLevel, zoomLevel);
 }
 function toggleDarkMode() {
   if (Dark.isActive) {
@@ -261,29 +261,37 @@ function setCustomValue() {
     return;
   }
 
-  saveToLocalStorage(customSetting.value.label, customSetting.value.value);
+  if (LocalStorageName[customSetting.value.label as LocalStorageName]) {
+    saveToLocalStorage(
+      customSetting.value.label as LocalStorageName,
+      customSetting.value.value
+    );
+  }
 }
 function forgetUser() {
-  saveToLocalStorage(localStorageNames.user_account, '');
+  saveToLocalStorage(LocalStorageName.user_account, '');
   setTimeout(() => {
     window.location.reload();
   }, 500);
 }
 function saveAppTabs() {
   if (Object.keys(appTabs.value || {}).length) {
-    saveToLocalStorage(localStorageNames.appTabs, appTabs.value);
+    saveToLocalStorage(LocalStorageName.appTabs, appTabs.value);
   }
 }
 function setToken(service: 'gitlab' | 'pivotal') {
-  saveToLocalStorage(`${service}Token`, tokens.value[service]);
+  saveToLocalStorage(
+    `${service}Token` as LocalStorageName,
+    tokens.value[service]
+  );
 }
 function setSetting(name: string) {
   switch (name) {
     case 'pivotalProjectId':
-      saveToLocalStorage(localStorageNames.pivotalProjectId, pivotalProjectId.value);
+      saveToLocalStorage(LocalStorageName.pivotalProjectId, pivotalProjectId.value);
       break;
     case 'gitModuleBasePath':
-      saveToLocalStorage(localStorageNames.gitModuleBasePath, gitModuleBasePath.value);
+      saveToLocalStorage(LocalStorageName.gitModuleBasePath, gitModuleBasePath.value);
     default:
       break;
   }

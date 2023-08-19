@@ -69,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { getFromLocalStorage, localStorageNames } from 'src/utils.js';
+import { getFromLocalStorage, LocalStorageName } from 'src/utils';
 import { computed, defineAsyncComponent, ref, watch } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
 
@@ -87,7 +87,7 @@ const store = useTaskStore();
 const task = computed(() => store.getTask(props.taskId));
 const isTaskActive = computed(() => !!task?.value?.active);
 const taskIdToUse = computed(() => {
-  return props.taskId || getFromLocalStorage(localStorageNames.desiredTaskId);
+  return props.taskId || getFromLocalStorage(LocalStorageName.desiredTaskId);
 });
 
 const logRenderKey = ref<number>(0);

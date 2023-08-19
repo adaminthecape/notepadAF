@@ -29,7 +29,7 @@
             >
               <div class="row items-center">
                 <q-icon name="notification_important" />
-                <span>{{ timeSince(new Date(alert.unix)) }}</span>
+                <span>{{ timeSince(new Date(alert.unix).getTime()) }}</span>
                 <q-icon name="close" size="xs" dense flat @dblclick.stop.prevent="removeAlert(alert)" />
               </div>
               <q-tooltip>Due {{ alert.date }} at {{ alert.time }}</q-tooltip>

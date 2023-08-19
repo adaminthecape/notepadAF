@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import {
   getFromLocalStorage,
-  localStorageNames,
+  LocalStorageName,
   saveToLocalStorage,
 } from 'src/utils';
 
@@ -12,8 +12,7 @@ type RootState = {
 const useThemeStore = defineStore('themeStore', {
   state: () =>
     ({
-      activeTheme:
-        getFromLocalStorage(localStorageNames.activeTheme) || 'light',
+      activeTheme: getFromLocalStorage(LocalStorageName.activeTheme) || 'light',
     } as RootState),
   getters: {
     getActiveTheme: (state) => state.activeTheme,
@@ -27,7 +26,7 @@ const useThemeStore = defineStore('themeStore', {
     },
     SET_ACTIVE_THEME(themeName: string) {
       this.activeTheme = themeName;
-      saveToLocalStorage(localStorageNames.activeTheme, themeName);
+      saveToLocalStorage(LocalStorageName.activeTheme, themeName);
     },
   },
 });

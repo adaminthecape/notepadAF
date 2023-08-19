@@ -1,0 +1,133 @@
+import axios from 'axios';
+import { getFromLocalStorage, LocalStorageName } from 'src/utils';
+
+function getPivotalToken() {
+  return getFromLocalStorage(LocalStorageName.pivotalToken);
+}
+
+function getPivotalProjectId() {
+  return getFromLocalStorage(LocalStorageName.pivotalProjectId);
+}
+
+export function getPivotalProjectIdAlt() {
+  return getFromLocalStorage(LocalStorageName.pivotalProjectIdAlt);
+}
+
+function htmlEncode(str: string) {
+  // let i = str.length,
+  //     aRet = [];
+  //
+  // while (i--) {
+  //     const iC = str[i].charCodeAt();
+  //     if (iC < 65 || iC > 127 || (iC>90 && iC<97)) {
+  //         // aRet[i] = '&#'+iC+';';
+  //         aRet[i] = '%'+iC;
+  //     } else {
+  //         aRet[i] = str[i];
+  //     }
+  // }
+  // return aRet.join('');
+
+  return encodeURI(str).replace('+', '%2B');
+}
+
+export async function getPivotalEndpoint(
+  endpoint: string,
+  params: Record<string, any>,
+  queryParams: Record<string, any>
+) {
+  const projectId = getPivotalProjectId();
+  const baseUri = 'https://www.pivotaltracker.com/services/v5/';
+
+  if (!endpoint) {
+    endpoint = `${baseUri}/projects/${projectId}/stories`;
+  } else {
+    endpoint = endpoint.replace('{projectId}', projectId);
+
+    endpoint = `${baseUri}${endpoint}`;
+  }
+
+  const headers = {
+    'X-TrackerToken': getPivotalToken(),
+  };
+
+  try {
+    if (queryParams) {
+      // const queryString = qs.stringify(queryParams);
+      let queryString = '';
+
+      Object.entries(queryParams).forEach(([label, value]) => {
+        let result = '';
+
+        if (label === 'text') {
+          // ignore until the end
+        } else if (
+          typeof value === 'boolean' ||
+          value === 'true' ||
+          value === 'false'
+        ) {
+          result = `${htmlEncode(label)}:${value}`;
+        } else if (Array.isArray(value)) {
+          result = `(${value
+            .map((v) => `${htmlEncode(label)}:"${htmlEncode(v)}"`)
+            .join(' OR ')})`;
+        } else {
+          result = `${htmlEncode(label)}:"${htmlEncode(value)}"`;
+        }
+
+        queryString = `${queryString} ${result}`;
+      });
+
+      queryString = `${queryParams.text || ''} ${queryString}`;
+
+      endpoint = `${endpoint}?query=${queryString}`;
+    }
+
+    const { data } = await axios.get(endpoint, {
+      headers,
+      params,
+    });
+
+    return data;
+  } catch (e) {
+    console.error(e);
+
+    return null;
+  }
+}
+
+export async function getPivotalStory(
+  storyId: string | number,
+  endpoint: string,
+  projectIdOverride: number
+) {
+  const projectId = projectIdOverride || getPivotalProjectId();
+  const baseUri = 'https://www.pivotaltracker.com/services/v5/';
+
+  if (!endpoint) {
+    if (!storyId) {
+      return {};
+    }
+
+    endpoint = `${baseUri}/projects/${projectId}/stories/${storyId}`;
+  } else {
+    endpoint = endpoint.replace('{projectId}', projectId);
+
+    endpoint = `${baseUri}${endpoint}`;
+  }
+
+  const headers = {
+    // 'PRIVATE-TOKEN': getGitlabToken() // gitlab
+    'X-TrackerToken': getPivotalToken(), // pivotal
+  };
+
+  try {
+    const { data } = await axios.get(endpoint, { headers });
+
+    return data;
+  } catch (e) {
+    console.error(e);
+
+    return null;
+  }
+}

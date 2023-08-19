@@ -61,13 +61,13 @@
 
 <script setup lang="ts">
 import { ref, computed, defineAsyncComponent } from 'vue';
-import { getFromLocalStorage, localStorageNames, saveToLocalStorage } from 'src/utils';
+import { getFromLocalStorage, LocalStorageName, saveToLocalStorage } from 'src/utils';
 
 const SimpleModal = defineAsyncComponent(() =>
   import('src/components/SimpleModal.vue'));
 
 const firebaseConfig = ref<Record<string, any>>(getFromLocalStorage(
-  localStorageNames.firebase_config,
+  LocalStorageName.firebase_config,
   true
 ) || {
   appId: '',
@@ -109,6 +109,6 @@ function setFirebaseConfig() {
     return;
   }
 
-  saveToLocalStorage(localStorageNames.firebase_config, config);
+  saveToLocalStorage(LocalStorageName.firebase_config, config);
 }
 </script>

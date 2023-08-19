@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { defineAsyncComponent, ref } from 'vue';
-import { localStorageNames, saveToLocalStorage } from 'src/utils.js';
+import { LocalStorageName, saveToLocalStorage } from 'src/utils';
 
 const FirebaseConfigModal = defineAsyncComponent(() =>
   import('src/components/FirebaseConfigModal.vue'));
@@ -33,7 +33,7 @@ const email = ref('');
 const password = ref('');
 
 function setCredentials() {
-  saveToLocalStorage(localStorageNames.user_account, {
+  saveToLocalStorage(LocalStorageName.user_account, {
     email: email.value,
     password: password.value
   });

@@ -41,9 +41,9 @@
 import {
   getFromLocalStorage,
   localStorageIntervalCheck,
-  localStorageNames,
+  LocalStorageName,
   saveToLocalStorage,
-} from 'src/utils.js';
+} from './utils';
 import { defaultTabs } from 'src/constants.js';
 import useThemeStore from 'src/pinia/themeStore';
 import { ref, computed, defineAsyncComponent, onMounted, watch } from 'vue';
@@ -60,7 +60,7 @@ const MyTickets = defineAsyncComponent(() =>
 const Settings = defineAsyncComponent(() =>
   import('src/components/SettingsHandler.vue'));
 
-const storedTabs = getFromLocalStorage(localStorageNames.appTabs, true);
+const storedTabs = getFromLocalStorage(LocalStorageName.appTabs, true);
 const appTabsToUse = [];
 
 if (storedTabs) {
@@ -72,12 +72,12 @@ if (storedTabs) {
 }
 
 const hasAccount = ref(!!getFromLocalStorage(
-  localStorageNames.user_account,
+  LocalStorageName.user_account,
   true
 ));
 const currentTab = ref('tasks');
 const ticketCache = ref();
-const desiredTaskId = ref(getFromLocalStorage(localStorageNames.desiredTaskId) || undefined);
+const desiredTaskId = ref(getFromLocalStorage(LocalStorageName.desiredTaskId) || undefined);
 const appTabs = ref(appTabsToUse);
 
 const activeAppTabs = computed(() => {
@@ -85,14 +85,14 @@ const activeAppTabs = computed(() => {
 });
 
 function setTabs() {
-  const appTabsFromStorage = getFromLocalStorage(localStorageNames.appTabs, true);
+  const appTabsFromStorage = getFromLocalStorage(LocalStorageName.appTabs, true);
 
   if (!Object.keys(appTabsFromStorage || {}).length) {
-    saveToLocalStorage(localStorageNames.appTabs, appTabs.value);
+    saveToLocalStorage(LocalStorageName.appTabs, appTabs.value);
   }
 };
 function setZoom() {
-  const zoom = getFromLocalStorage(localStorageNames.zoomLevel);
+  const zoom = getFromLocalStorage(LocalStorageName.zoomLevel);
 
   if (zoom) {
     // document.getElementsByTagName('body')[0].style.zoom = zoom;
@@ -106,16 +106,16 @@ function setTheme() {
   Dark.set(isDark);
 };
 function watchTabChanges() {
-  saveToLocalStorage(localStorageNames.currentTabQueue, []);
+  saveToLocalStorage(LocalStorageName.currentTabQueue, []);
 
-  localStorageIntervalCheck(localStorageNames.currentTabQueue, (queue: any[]) => {
+  localStorageIntervalCheck(LocalStorageName.currentTabQueue, (queue: any[]) => {
     currentTab.value = queue[0];
   });
 };
 
 watch(currentTab, (n, o) => {
-  desiredTaskId.value = getFromLocalStorage(localStorageNames.desiredTaskId);
-  saveToLocalStorage(localStorageNames.currentTab, n);
+  desiredTaskId.value = getFromLocalStorage(LocalStorageName.desiredTaskId);
+  saveToLocalStorage(LocalStorageName.currentTab, n);
 });
 
 onMounted(() => {

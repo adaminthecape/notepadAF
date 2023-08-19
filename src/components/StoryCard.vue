@@ -29,8 +29,8 @@ label="View" color="primary" :dense="dense" flat class="q-mr-xs"
               @click.stop.prevent="openLink(story.url)" />
             <q-btn
 label="Git C/O" color="negative" :dense="dense" flat @click.stop.prevent="
-              copy(`git checkout PT_${story.id}`)
-              " />
+  copy(`git checkout PT_${story.id}`)
+  " />
             <q-btn
 :label="story.id" color="secondary" :dense="dense" flat
               @click.stop.prevent="copy(story.id)">
@@ -82,9 +82,9 @@ import {
   saveToLocalStorage,
   copyToClipboard,
   openInBrowser,
-  localStorageNames,
+  LocalStorageName,
   saveToLocalStorageArray,
-} from 'src/utils';
+} from '../utils';
 import { computed, defineAsyncComponent, onMounted } from 'vue';
 import usePivotalStore from 'src/pinia/pivotalStore';
 
@@ -92,43 +92,39 @@ const AddTask = defineAsyncComponent(() => import('src/components/AddTask.vue'))
 const DisplayStory = defineAsyncComponent(() => import('src/components/DisplayStory.vue'));
 const SimpleModal = defineAsyncComponent(() => import('src/components/SimpleModal.vue'));
 
-const props = defineProps < {
-    storyId: string | number;
-    dense?: boolean;
-    allowAddTasks?: boolean;
+const props = defineProps<{
+  storyId: string | number;
+  dense?: boolean;
+  allowAddTasks?: boolean;
 }>();
 
 const store = usePivotalStore();
 
-const story = computed(() =>
-{
-    return store.get(parseInt(`${props.storyId}`, 10));
+const story = computed(() => {
+  return store.get(parseInt(`${props.storyId}`, 10));
 });
 
-function openLink(url: string)
-{
-    openInBrowser(url);
+function openLink(url: string) {
+  openInBrowser(url);
 }
 
-function copy(val: string)
-{
-    copyToClipboard(val);
+function copy(val: string) {
+  copyToClipboard(val);
 }
 
-onMounted(async () =>
-{
-    await store.load({ id: parseInt(`${props.storyId}`, 10) });
+onMounted(async () => {
+  await store.load({ id: parseInt(`${props.storyId}`, 10) });
 });
 
 function openTasksForStory() {
-      const existingFilters = getFromLocalStorage(
-        localStorageNames.taskFilters,
-        true
-      );
-      saveToLocalStorage(localStorageNames.taskFilters, {
-        ...existingFilters,
-        keyword: `${props.storyId}`,
-      });
-      saveToLocalStorageArray(localStorageNames.currentTab, 'tasks');
+  const existingFilters = getFromLocalStorage(
+    LocalStorageName.taskFilters,
+    true
+  );
+  saveToLocalStorage(LocalStorageName.taskFilters, {
+    ...existingFilters,
+    keyword: `${props.storyId}`,
+  });
+  saveToLocalStorageArray(LocalStorageName.currentTab, 'tasks');
 };
 </script>

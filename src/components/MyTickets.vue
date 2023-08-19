@@ -117,9 +117,9 @@ import {
   intSort,
   dateSort,
   stringSort,
-  localStorageNames,
+  LocalStorageName,
   getFromLocalStorage,
-} from 'src/utils.js';
+} from 'src/utils';
 import { ref, defineAsyncComponent, computed, onMounted, watch } from 'vue';
 import { TaskSortType } from 'src/types';
 
@@ -162,7 +162,7 @@ const queryParamOptions = ref({
   state: ['unstarted', 'started'],
 });
 const savedQueryParams =
-  getFromLocalStorage(localStorageNames.ticketQueryParams) || {};
+  getFromLocalStorage(LocalStorageName.ticketQueryParams) || {};
 const queryParams = ref({
   // this should be filled from endpoint queryParams
   text: '',
@@ -236,7 +236,7 @@ function sortResults(results: any) {
 
 function saveParams(params: Record<string, any>) {
   localStorage.setItem(
-    localStorageNames.ticketQueryParams,
+    LocalStorageName.ticketQueryParams,
     JSON.stringify(params)
   );
 }
