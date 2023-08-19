@@ -154,7 +154,7 @@ const useTaskStore = defineStore('taskStore', {
   },
   actions: {
     setCategoriesFromLocalStorage() {
-      this.SET_CATEGORIES;
+      this.SET_CATEGORIES();
     },
     async cloudUpdateSingle(task: Task) {
       if (!task || typeof task !== 'object') {

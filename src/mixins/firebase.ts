@@ -148,7 +148,7 @@ export async function pipeStream(stream: ReadableStream) {
   return set.join('');
 }
 
-export async function writeTasksToFirebaseDb(tasks: Task[]) {
+export async function writeTasksToFirebaseDb(tasks: Record<string, Task>) {
   const db = await getDb();
 
   await set(ref(db, dbName), {
