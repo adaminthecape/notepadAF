@@ -19,9 +19,14 @@
             v-else-if="task.alerts && task.alerts.length"
             style="margin-left: -10px">
             <q-btn
-v-for="(alert, a) in task.alerts" :key="`alert-${a}-${activeAlertsRenderKey}`" size="sm"
-              class="text-bold" :class="{ 'q-ml-xs': !!a }" unelevated outline dense
-              :color="alert.unix < Date.now() - 600000 ? 'negative' : 'primary'">
+              v-for="(alert, a) in task.alerts"
+              :key="`alert-${a}-${activeAlertsRenderKey}`"
+              size="sm"
+              class="text-bold"
+              :class="{ 'q-ml-xs': !!a }"
+              unelevated outline dense
+              :color="alert.unix < Date.now() - 600000 ? 'negative' : 'primary'"
+            >
               <div class="row items-center">
                 <q-icon name="notification_important" />
                 <span>{{ timeSince(new Date(alert.unix)) }}</span>

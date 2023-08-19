@@ -114,6 +114,7 @@ const emit = defineEmits<{
 }>()
 
 function createAlert() {
+  console.log('createAlert:', createAlertDate.value, createAlertTime.value);
   const alert: TaskAlert = {
     date: createAlertDate.value || '',
     time: createAlertTime.value || '',
