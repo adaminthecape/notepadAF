@@ -12,9 +12,10 @@ import {
   // createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from '@firebase/auth';
+import { Task } from '@/types';
 
 const dbName = 'notes';
-let db,
+let db: any,
   intialised = false;
 
 async function initApp() {
@@ -64,7 +65,9 @@ export function getAdmin() {
   );
 }
 
-function validateCredentials(credentials) {
+type UserCredentials = Record<string, any>;
+
+function validateCredentials(credentials: UserCredentials) {
   try {
     if (!credentials) {
       throw new Error('No credentials found.');
@@ -90,7 +93,7 @@ function getCredentials() {
   return getFromLocalStorage(LocalStorageName.authed_user, true);
 }
 
-function setCredentials(user) {
+function setCredentials(user: UserCredentials) {
   try {
     saveToLocalStorage(
       LocalStorageName.authed_user,
@@ -114,7 +117,7 @@ export async function getToken() {
       const user = await authenticateMe();
 
       // set the credentials; if wrong, they won't work anyway
-      setCredentials(user);
+      setCredentials(user as UserCredentials);
     }
 
     credentials = getCredentials();
@@ -132,7 +135,7 @@ export async function getToken() {
   }
 }
 
-export async function pipeStream(stream) {
+export async function pipeStream(stream: ReadableStream) {
   const set = [];
   const reader = stream.pipeThrough(new TextDecoderStream()).getReader();
 
@@ -145,7 +148,7 @@ export async function pipeStream(stream) {
   return set.join('');
 }
 
-export async function writeTasksToFirebaseDb(tasks) {
+export async function writeTasksToFirebaseDb(tasks: Task[]) {
   const db = await getDb();
 
   await set(ref(db, dbName), {
@@ -154,7 +157,7 @@ export async function writeTasksToFirebaseDb(tasks) {
   });
 }
 
-export function removeUndefined(inputData, depth = 0) {
+export function removeUndefined(inputData: any, depth = 0): any {
   if (depth > 100) {
     return null;
   }
@@ -177,9 +180,9 @@ export function removeUndefined(inputData, depth = 0) {
 }
 
 export async function updateTaskDataByPath(
-  /** @type {string} */ taskId,
-  /** @type {string} */ path,
-  /** @type {*} */ data
+  taskId: string,
+  path: string,
+  data: any
 ) {
   const db = await getDb();
   const fullPath = `${dbName}/tasks/${taskId}/${path.split('.').join('/')}`;
@@ -187,7 +190,9 @@ export async function updateTaskDataByPath(
   await set(ref(db, fullPath), removeUndefined(data));
 }
 
-export async function readTasksFromFirebaseDb(withResult) {
+export async function readTasksFromFirebaseDb(
+  withResult: (result: any) => any
+) {
   console.warn('readTasksFromFirebaseDb: start');
   if (typeof withResult !== 'function') {
     console.warn('readTasksFromFirebaseDb: Change handler required!');
@@ -205,12 +210,13 @@ export async function readTasksFromFirebaseDb(withResult) {
   });
 }
 
-export async function authenticateViaEmailAndPassword(user) {
+export async function authenticateViaEmailAndPassword(user: UserCredentials) {
   const auth = getAuth();
 
   return new Promise((resolve, reject) => {
     signInWithEmailAndPassword(auth, user.email, user.password)
       .then((userCredential) => {
+        console.log('user:', userCredential.user);
         // Signed in
         resolve(userCredential.user);
       })

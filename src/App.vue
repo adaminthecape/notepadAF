@@ -44,7 +44,7 @@ import {
   LocalStorageName,
   saveToLocalStorage,
 } from './utils';
-import { defaultTabs } from 'src/constants.js';
+import { defaultTabs } from 'src/constants';
 import useThemeStore from 'src/pinia/themeStore';
 import { ref, computed, defineAsyncComponent, onMounted, watch } from 'vue';
 import { Dark } from 'quasar';
