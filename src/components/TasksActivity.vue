@@ -12,7 +12,7 @@
         <span v-else>{{ filteredTasksList.length }} / {{ Object.keys(tasksList).length
         }}</span>
         <q-space />
-        <q-btn icon="tune" size="sm" dense round flat @click="clearFilters">
+        <q-btn icon="tune" size="sm" dense flat @click="clearFilters">
           <q-tooltip>Clear filters</q-tooltip>
         </q-btn>
         <TaskSortDropdown :sort-type="sortType" :inverse-sort="inverseSort" @set-sort-type="setSortType($event)" />
@@ -136,7 +136,6 @@ import {
   applyFiltersToTask,
   filterTaskList,
   getFromLocalStorage,
-  localStorageIntervalCheck,
   LocalStorageName,
   saveToLocalStorage,
   saveToLocalStorageArray,
@@ -177,13 +176,17 @@ const defaults = {
 
 const filterTypes = ref({ ...FilterTypes });
 
-const filters = ref<Partial<Record<FilterTypes, any>>>({});
-const newTask = ref<Partial<Task>>(defaults.newTask);
+const filters = ref<Partial<Record<FilterTypes, any>>>({
+  done: false,
+  active: false,
+  archived: false,
+  keyword: '',
+  tags: []
+});
 const taskRenderIndex = ref<Record<string, string>>({});
 const taskListRenderIndex = ref(0);
 const sortType = ref();
 const inverseSort = ref(false);
-const refreshCheckInterval = ref();
 const categoriesMutable = ref<TaskBucket[]>([]);
 
 const store = useTaskStore();
@@ -196,7 +199,7 @@ const pagination = ref(defaults.pagination);
 
 const paginationComputed = computed(() => {
   return {
-    max: (filteredTasksList.value || []).length / limit.value + 1,
+    max: Math.floor((filteredTasksList.value || []).length / limit.value) + 1,
   };
 });
 
@@ -210,7 +213,7 @@ const limitedTasks = computed<Task[]>(() => {
     offset,
     (limit.value || 20) + offset
   );
-})
+});
 
 // const toggleableBooleans = computed(() => {
 //   return [
@@ -265,14 +268,20 @@ const lastCloudUpdate = computed(() => {
   return store.getLastCloudUpdate;
 })
 
-onMounted(() => {
-  loadTasks();
+function loadCategories() {
+  // get saved buckets
+  store.setCategoriesFromLocalStorage();
+  categoriesMutable.value = [...categories.value];
+}
 
+function loadFilters() {
+  // get saved filters
   const storedFilters = getFromLocalStorage(
     LocalStorageName.taskFilters,
     true
   );
 
+  // set filters from storage
   if (storedFilters) {
     sortType.value = storedFilters.sortType;
     inverseSort.value = storedFilters.inverseSort;
@@ -285,23 +294,27 @@ onMounted(() => {
       };
     }
   }
+}
 
-  if (refreshCheckInterval.value) {
-    clearInterval(refreshCheckInterval.value);
-  }
+// const refreshCheckInterval = ref();
 
-  refreshCheckInterval.value = localStorageIntervalCheck(
-    LocalStorageName.taskRefreshQueue,
-    (queue: Array<string | number>) =>
-      queue.forEach((id) => {
-        refreshTask({ id });
-      })
-  );
-
-  console.log({ categories: categories.value, categoriesMutable: categoriesMutable.value });
-  categoriesMutable.value = [...categories.value];
-
+onMounted(() => {
+  loadCategories();
+  loadFilters();
+  loadTasks();
   filterTasks();
+
+  // if (refreshCheckInterval.value) {
+  //   clearInterval(refreshCheckInterval.value);
+  // }
+
+  // refreshCheckInterval.value = localStorageIntervalCheck(
+  //   LocalStorageName.taskRefreshQueue,
+  //   (queue: Array<string | number>) =>
+  //     queue.forEach((id) => {
+  //       refreshTask({ id });
+  //     })
+  // );
 });
 
 
@@ -309,7 +322,6 @@ const tmpInterval = ref();
 
 /****** Loading/fetching tasks */
 async function loadTasks() {
-  store.setCategoriesFromLocalStorage();
   store.watchCloudDb();
 
   tmpInterval.value = setInterval(() => {
@@ -327,6 +339,7 @@ async function loadTasks() {
 
 /** Actual filtering logic. Sorts after filtering. Saves filters to localStorage. */
 function filterTasks() {
+  console.log('filterTasks');
   saveFilters();
 
   filteredTasksList.value =
@@ -352,8 +365,9 @@ function setSortType(type: string) {
   filterTasks();
 }
 
-function refreshTask(task: Record<string, any>) {
-  taskRenderIndex.value[task.id] = `render-${task.id}-${Date.now()}`;
+/** @deprecated */
+function refreshTask(/* task: Record<string, any> */) {
+  // taskRenderIndex.value[task.id] = `render-${task.id}-${Date.now()}`;
 }
 
 function clearFilters() {
@@ -412,7 +426,7 @@ function toggleFilterBool(prop: keyof typeof FilterTypes) {
 }
 
 const applyFilters = ref<boolean>(true);
-
+const newTask = ref<Partial<Task>>(defaults.newTask);
 async function createTask() {
   store.cloudUpdateSingle(
     applyFilters.value ?

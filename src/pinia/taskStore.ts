@@ -157,6 +157,7 @@ const useTaskStore = defineStore('taskStore', {
       this.SET_CATEGORIES();
     },
     async cloudUpdateSingle(task: Task) {
+      console.log('single:', task);
       if (!task || typeof task !== 'object') {
         return;
       }
@@ -166,7 +167,7 @@ const useTaskStore = defineStore('taskStore', {
         ...task,
         updated: now,
         created: task.created || now,
-        id: task.id || uuidv4(),
+        id: !task.id || task.id === 'new' ? uuidv4() : task.id,
       };
 
       this.SET_TASK(taskDataToAdd);
@@ -183,6 +184,7 @@ const useTaskStore = defineStore('taskStore', {
       prop: string;
       data: any;
     }) {
+      console.log('single property:', { taskId, prop, data });
       if (!taskId || !prop || typeof data === 'undefined') {
         return;
       }

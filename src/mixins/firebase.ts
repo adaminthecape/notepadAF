@@ -12,7 +12,7 @@ import {
   // createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from '@firebase/auth';
-import { Task } from '@/types';
+import { Task } from 'src/types';
 
 const dbName = 'notes';
 let db: any,
@@ -158,8 +158,12 @@ export async function writeTasksToFirebaseDb(tasks: Record<string, Task>) {
 }
 
 export function removeUndefined(inputData: any, depth = 0): any {
-  if (depth > 100) {
+  if (depth > 100 || typeof inputData === 'undefined') {
     return null;
+  }
+
+  if (inputData !== null && typeof inputData !== 'object') {
+    return inputData;
   }
 
   const data = { ...inputData };
@@ -186,6 +190,8 @@ export async function updateTaskDataByPath(
 ) {
   const db = await getDb();
   const fullPath = `${dbName}/tasks/${taskId}/${path.split('.').join('/')}`;
+
+  console.log('update:', fullPath, removeUndefined(data));
 
   await set(ref(db, fullPath), removeUndefined(data));
 }

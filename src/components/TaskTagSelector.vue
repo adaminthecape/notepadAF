@@ -67,7 +67,7 @@ import { computed, ref, watch } from 'vue';
 import { Task } from 'src/types';
 
 const props = defineProps<{
-  inputValue?: string|string[];
+  inputValue?: string | string[];
   label?: string;
   multiple?: boolean;
   dark?: boolean;
@@ -82,83 +82,80 @@ const value = ref<string[]>([]);
 const tasksList = computed(() => store.all);
 
 const allTags = computed(() => {
-      if (!tasksList.value || !tasksList.value.length) {
-        return [];
-      }
+  if (!tasksList.value || !tasksList.value.length) {
+    return [];
+  }
 
-      return tasksList.value.reduce((agg: string[], task: Task) => {
-        const tags = [...task.tags || []]
-          .filter((tag) => !agg.includes(tag));
+  return tasksList.value.reduce((agg: string[], task: Task) => {
+    const tags = [...task.tags || []]
+      .filter((tag) => !agg.includes(tag));
 
-        if (tags.length) {
-          return agg.concat(tags);
-        }
+    if (tags.length) {
+      return agg.concat(tags);
+    }
 
-        return agg;
-      }, []);
+    return agg;
+  }, []);
 });
 
 const emit = defineEmits<{
-    (event: 'input', tags: string[]): void;
-    (event: 'cancel'): void;
+  (event: 'input', tags: string[]): void;
+  (event: 'cancel'): void;
 }>();
 
 function addValue() {
-    // const v = this.$refs.selector.$refs.target.value;
-    const v = '';
+  // const v = this.$refs.selector.$refs.target.value;
+  const v = '';
 
-    if (v) {
-        emit('input', v);
-    }
+  if (v) {
+    emit('input', v);
+  }
 }
 
 function copyTags() {
-      navigator.clipboard.writeText(value.value.join(', '));
+  navigator.clipboard.writeText(value.value.join(', '));
 }
 
 function filterFn(val: string, update: (cb: () => void) => void/*, abort*/) {
-      update(() => {
-        if (val === '') {
-          tagsToShow.value = allTags.value;
-        }
-        else {
-          tagsToShow.value = allTags.value.filter(v => v.toLowerCase().indexOf(val.toLowerCase()) > -1);
-        }
-      })
+  update(() => {
+    if (val === '') {
+      tagsToShow.value = allTags.value;
+    }
+    else {
+      tagsToShow.value = allTags.value.filter(v => v.toLowerCase().indexOf(val.toLowerCase()) > -1);
+    }
+  })
 }
 
 function emitInput(value: string[], tab = false) {
-      if (tab && props.multiple) {
-        return;
-      }
+  console.log('emitInput:', JSON.stringify(value), tab);
+  if (tab && props.multiple) {
+    return;
+  }
 
-      if (!tab && !props.multiple) {
-        return;
-      }
+  if (!tab && !props.multiple) {
+    return;
+  }
 
-      emit('input', value);
+  emit('input', value);
 }
 
 function clearInput() {
-      value.value = [];
-      emit('cancel');
+  value.value = [];
+  emit('cancel');
 }
 
-function syncInputValues()
-{
-    if (props.inputValue)
-    {
-        value.value = typeof props.inputValue === 'string' ? [props.inputValue] : props.inputValue;
-    }
+function syncInputValues() {
+  if (props.inputValue) {
+    value.value = typeof props.inputValue === 'string' ? [props.inputValue] : props.inputValue;
+  }
 }
 
-if (props.inputValue)
-{
-    syncInputValues();
+if (props.inputValue) {
+  syncInputValues();
 }
 
-watch(() => props.inputValue, () =>
-{
-    syncInputValues();
+watch(() => props.inputValue, () => {
+  syncInputValues();
 });
 </script>

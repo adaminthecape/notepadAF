@@ -16,7 +16,7 @@
                 {{ param }}
               </h5>
               <q-space />
-              <div v-if="queryParamMultiples.epic">
+              <div v-if="param === 'epic'">
                 <div class="row items-center">
                   <q-btn label="All" class="q-pa-sm" dense flat @click="toggleSelectAll(param)" />
                   <q-btn label="Dev" class="q-pa-sm" dense flat @click="toggleSelectAll(param, 'dev')" />

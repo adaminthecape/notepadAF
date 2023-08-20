@@ -21,11 +21,10 @@
             v-if="items[extrasId].extra.tags"
         >
           <TaskTagSelector
-              :input-value="items[extrasId].extra.tags"
+              v-model="items[extrasId].extra.tags"
               class="full-width"
               label="Select tags"
               multiple
-              @input="items[extrasId].extra.tags = $event"
           />
         </q-card>
         <q-btn
@@ -124,6 +123,10 @@ onMounted(() => {
 watch(props.value, (newVal) => {
   emit('input', newVal);
   items.value = newVal;
+  if (props.listKey) {
+    saveToLocalStorage(props.listKey as LocalStorageName, newVal);
+    emit('updated');
+  }
 });
 </script>
 

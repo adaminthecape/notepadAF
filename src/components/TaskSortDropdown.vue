@@ -37,6 +37,7 @@
             size="xs"
             class="q-mr-xs"
             color="yellow"
+            dense
             flat
             @click.stop.prevent="setSort('')"
         />
