@@ -152,7 +152,7 @@ export function checkFilterBool(
 }
 
 function keywordCheck(task: Task, filters: TaskFilters) {
-  if (!task || !filters || !filters.keyword) {
+  if (!task || !filters || !filters.keyword || filters.keyword === '') {
     return true;
   }
 

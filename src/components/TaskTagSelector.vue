@@ -27,17 +27,6 @@
     </template>
     <template #append>
       <q-btn
-          v-if="newValueMode"
-          icon="add"
-          round
-          dense
-          flat
-          size="xs"
-          @click.stop.prevent="addValue"
-      >
-        <q-tooltip>Add</q-tooltip>
-      </q-btn>
-      <q-btn
           v-if="value && value.length && !newValueMode"
           icon="content_copy"
           round
@@ -99,18 +88,9 @@ const allTags = computed(() => {
 });
 
 const emit = defineEmits<{
-  (event: 'input', tags: string[]): void;
+  (event: 'update:modelValue', tags: string[]): void;
   (event: 'cancel'): void;
 }>();
-
-function addValue() {
-  // const v = this.$refs.selector.$refs.target.value;
-  const v = '';
-
-  if (v) {
-    emit('input', v);
-  }
-}
 
 function copyTags() {
   navigator.clipboard.writeText(value.value.join(', '));
@@ -137,7 +117,7 @@ function emitInput(value: string[], tab = false) {
     return;
   }
 
-  emit('input', value);
+  emit('update:modelValue', value);
 }
 
 function clearInput() {
@@ -155,7 +135,7 @@ if (props.inputValue) {
   syncInputValues();
 }
 
-watch(() => props.inputValue, () => {
-  syncInputValues();
-});
+// watch(() => props.inputValue, () => {
+//   syncInputValues();
+// });
 </script>

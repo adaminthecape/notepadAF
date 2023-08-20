@@ -16,11 +16,6 @@
           <q-tooltip>Clear filters</q-tooltip>
         </q-btn>
         <TaskSortDropdown :sort-type="sortType" :inverse-sort="inverseSort" @set-sort-type="setSortType($event)" />
-        <q-btn
-class="q-ml-xs" :icon="applyFilters ? 'lock' : 'lock_open'" size="sm" dense flat dark
-          @click="applyFilters = !applyFilters">
-          <q-tooltip>Apply filters to new task</q-tooltip>
-        </q-btn>
       </div>
     </template>
     <template #page-content>
@@ -39,40 +34,16 @@ class="q-ml-xs" :icon="applyFilters ? 'lock' : 'lock_open'" size="sm" dense flat
       </q-dialog>
       <!-- NEW TASK / FILTERS: -->
       <div style="display: flex; flex-direction: column">
-        <q-input
-ref="newTaskInput" v-model="newTask.message" placeholder="Add a task" class="full-width q-mb-xs" filled
-          dense style="background: #ffff0020">
-          <template #append>
-            <q-btn icon="add_task" dense flat @click="createTask()" />
-          </template>
-        </q-input>
-        <div class="row items-center q-mb-xs">
-          <q-input
-v-model="filters.keyword" placeholder="Filter by keyword" class="q-mr-xs"
-            style="flex-grow: 1; max-width: 40%" debounce="250" filled dense debounce-input="500"
-            @input="setFilter('keyword', filters.keyword)">
-            <template #append>
-              <q-btn
-v-if="filters.keyword" icon="close" round dense flat size="xs"
-                @click.stop.prevent="setFilter(filterTypes.keyword, undefined)" />
-            </template>
-          </q-input>
-          <TaskTagSelector
-              :input-value="filters.tags || []"
+        <!-- <div class="row items-center q-mb-xs"> -->
+          <!-- <TaskTagSelector
+              v-model:value="filters.tags"
               label="Filter by tags"
               style="flex-grow: 1; max-width: 60%"
               multiple
-              @input="setFilter(filterTypes.tags, $event)"
+              @input="doThing('zz')"
               @cancel="setFilter(filterTypes.tags, [])"
-          />
-          <LocalStorageList
-              :value="categoriesMutable"
-              title="Categories"
-              list-key="taskCategories"
-              @updated="filterTasks"
-              @input="categoriesMutable = $event"
-          />
-        </div>
+          /> -->
+        <!-- </div> -->
         <div class="row items-center q-mb-xs">
           <q-btn-group class="row items-center q-mb-xs" flat>
             <q-btn
@@ -101,9 +72,129 @@ v-if="filters.keyword" icon="close" round dense flat size="xs"
             />
           </q-btn-group>
           <q-space />
+          <SimpleModal>
+            <template #activator="{ open: openKeywordModal }">
+              <q-btn
+                icon="search"
+                color="primary"
+                dense
+                flat
+                @click="openKeywordModal"
+              ><q-tooltip>Search by keyword</q-tooltip></q-btn>
+            </template>
+            <template #content>
+              <q-input
+                v-model="filters.keyword"
+                placeholder="Filter by keyword"
+                class="q-mr-xs"
+                style="flex-grow: 1;"
+                filled
+                dense
+                @keydown="setFilter(filterTypes.keyword, filters.keyword)"
+              >
+                <template #append>
+                  <q-btn
+                    v-if="filters.keyword" icon="close"
+                    round
+                    dense
+                    flat
+                    size="xs"
+                    @click.stop.prevent="setFilter(filterTypes.keyword, undefined)"
+                  />
+                </template>
+              </q-input>
+            </template>
+          </SimpleModal>
+          <AddTag
+            multiple
+            :selected-tags="filters.tags"
+            @input="addTagToFilters"
+          >
+            <template #activator="{ open }">
+              <q-btn icon="sell" color="secondary" size="md" dense flat @click="open" />
+            </template>
+          </AddTag>
+          <LocalStorageList
+              :value="categoriesMutable"
+              title="Categories"
+              list-key="taskCategories"
+              @updated="filterTasks"
+              @input="categoriesMutable = $event"
+          />
+          <SimpleModal>
+            <template #activator="{ open: openKeywordModal }">
+              <q-btn
+                icon="add_circle"
+                color="secondary"
+                dense
+                flat
+                @click="openKeywordModal"
+              ><q-tooltip>Search by keyword</q-tooltip></q-btn>
+            </template>
+            <template #content>
+              <div class="row items-center">
+                <q-input
+                  ref="newTaskInput"
+                  v-model="newTask.message"
+                  placeholder="Add a task"
+                  class="full-width q-mb-xs"
+                  filled
+                  dense
+                >
+                  <template #append>
+                    <q-btn icon="add_task" dense flat @click="createTask()" />
+                  </template>
+                </q-input>
+              </div>
+            </template>
+            <template #actions>
+                <q-btn
+                  class="q-ml-xs"
+                  :icon="applyFilters ? 'lock' : 'lock_open'"
+                  size="sm"
+                  dense
+                  flat
+                  dark
+                  @click="applyFilters = !applyFilters"
+                >
+                  <q-tooltip>Apply filters to new task</q-tooltip>
+                </q-btn>
+              </template>
+          </SimpleModal>
+          <q-space />
           <q-pagination
 v-model="pagination.page" :max="paginationComputed.max" color="grey" active-color="primary"
             direction-links input />
+        </div>
+        <!-- show active keyword/tags: -->
+        <div class="row items-center">
+          <q-chip
+            v-if="filters.keyword"
+            color="primary"
+            clickable
+            square
+            dense
+            dark
+            @click="filters.keyword = ''; filterTasks()"
+          >
+            <q-icon name="search" />
+            <span class="q-mb-xs">{{ filters.keyword }}</span>
+          </q-chip>
+          <div v-if="filters.tags && filters.tags.length">
+            <q-chip
+              v-for="(selectedTag, st) in filters.tags"
+              :key="`selected-tag-${st}`"
+              color="primary"
+              clickable
+              square
+              dense
+              dark
+              @click="addTagToFilters(selectedTag)"
+            >
+              <q-icon name="sell" />
+              <span>{{ selectedTag }}</span>
+            </q-chip>
+          </div>
         </div>
       </div>
       <q-separator class="q-mb-sm" />
@@ -146,10 +237,14 @@ import useTaskStore, { TaskBucket } from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
 
 
+const SimpleModal = defineAsyncComponent(() =>
+  import('src/components/SimpleModal.vue'));
+const AddTag = defineAsyncComponent(() =>
+  import('src/components/AddTag.vue'));
 const DisplayTask = defineAsyncComponent(() =>
   import('src/components/DisplayTask.vue'));
-const TaskTagSelector = defineAsyncComponent(() =>
-  import('src/components/TaskTagSelector.vue'));
+// const TaskTagSelector = defineAsyncComponent(() =>
+//   import('src/components/TaskTagSelector.vue'));
 const TaskSortDropdown = defineAsyncComponent(() =>
   import('src/components/TaskSortDropdown.vue'));
 const SimpleLayout = defineAsyncComponent(() =>
@@ -348,7 +443,7 @@ function filterTasks() {
 
 function filterAndSortTasksList(list: Task[]) {
   return sortTaskList(
-    filterTaskList(list, filters.value),
+    filterTaskList(list.filter((x) => !x.deleted), filters.value),
     sortType.value,
     inverseSort.value
   );
@@ -390,8 +485,22 @@ function addTagToFilters(tag: string) {
   }
 }
 
-function setFilter(type: FilterType, value: any) {
-  filters.value[type] = value;
+function doThing(...args: any) {
+  console.log('thing!', ...args);
+}
+
+function setFilter(type: string, value: any) {
+  console.log('setFilter:', type, value);
+  switch (type) {
+    case 'tags': filters.value.tags = value; break;
+    case 'keyword': filters.value.keyword = value; break;
+    case 'done': filters.value.done = value; break;
+    case 'active': filters.value.active = value; break;
+    case 'archived': filters.value.archived = value; break;
+    default:
+      break;
+  }
+
   filterTasks();
 }
 
@@ -447,7 +556,7 @@ function goToSettings() {
   console.log('goToSettings', getFromLocalStorage(LocalStorageName.currentTabQueue));
 }
 
-watch(pagination.value, () => {
+watch(pagination, () => {
   saveFilters();
 });
 </script>

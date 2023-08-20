@@ -5,6 +5,16 @@
     </template>
     <template #content>
       <div style="display: flex; flex-direction: column">
+        <q-chip
+          v-if="selectedTags && selectedTags.length"
+          color="primary"
+          square
+          dense
+          dark
+        >
+          <q-icon name="sell" />
+          <span class="q-mb-xs q-ml-xs">{{ selectedTags.join(', ') }}</span>
+        </q-chip>
         <q-input
             v-model="value"
             placeholder="Add a tag..."
@@ -14,8 +24,11 @@
         <q-list style="max-height: 50vh; overflow-y: scroll">
           <q-item
               v-for="(tag, t) in filteredList"
-              :key="`list-tag-${t}`" clickable v-close-popup
-              @click="pickTag(tag)">
+              :v-close-popup="!multiple"
+              :key="`list-tag-${t}`"
+              clickable
+              @click="pickTag(tag)"
+            >
             <q-item-section>
               {{ tag }}
             </q-item-section>
@@ -37,6 +50,13 @@ import {
   computed
 } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
+
+defineProps<{
+  selectedTags?: string[];
+  multiple?: boolean;
+}>();
+
+const selected = ref(['personal', 'shopping']);
 
 const store = useTaskStore();
 

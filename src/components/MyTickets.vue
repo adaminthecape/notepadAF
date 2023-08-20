@@ -8,29 +8,55 @@
       <q-btn icon="refresh" dense @click="getTickets" />
     </template>
     <template #page-header>
-      <q-expansion-item label="Options" class="q-my-sm bordered" default-opened>
-        <q-item v-for="param in queryParamNames" :key="`param-${param}`" clickable>
+      <q-expansion-item label="Search filters" class="q-my-sm bordered" default-opened>
+        <q-item>
+          <q-item-section caption>
+            <h5>Keyword</h5>
+          </q-item-section>
+          <q-item-section>
+            <q-input
+              v-model="queryParams.text"
+              class="q-pa-sm"
+              bottom-slots
+              stack-label
+              clearable
+              filled
+            />
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section caption>
+            <h5>Owner</h5>
+          </q-item-section>
+          <q-item-section>
+            <q-input
+              v-model="queryParams.owner"
+              class="q-pa-sm"
+              bottom-slots
+              stack-label
+              clearable
+              filled
+            />
+          </q-item-section>
+        </q-item>
+        <q-item>
           <q-item-section caption>
             <div class="row items-center">
               <h5>
-                {{ param }}
+                Epic
               </h5>
               <q-space />
-              <div v-if="param === 'epic'">
-                <div class="row items-center">
-                  <q-btn label="All" class="q-pa-sm" dense flat @click="toggleSelectAll(param)" />
-                  <q-btn label="Dev" class="q-pa-sm" dense flat @click="toggleSelectAll(param, 'dev')" />
-                  <q-btn label="QA" class="q-pa-sm" dense flat @click="toggleSelectAll(param, 'qa')" />
-                </div>
+              <div class="row items-center">
+                <q-btn label="All" class="q-pa-sm" dense flat @click="toggleSelectAll('epic')" />
+                <q-btn label="Dev" class="q-pa-sm" dense flat @click="toggleSelectAll('epic', 'dev')" />
+                <q-btn label="QA" class="q-pa-sm" dense flat @click="toggleSelectAll('epic', 'qa')" />
               </div>
             </div>
           </q-item-section>
           <q-item-section>
-            <q-checkbox v-if="['includedone'].includes(param)" v-model="queryParams[param]" class="q-pa-sm" />
             <q-select
-              v-else-if="queryParamOptions[param]"
-              v-model="queryParams[param]"
-              :options="queryParamOptions[param]"
+              v-model="queryParams.epic"
+              :options="queryParamOptions.epic"
               class="q-pa-sm"
               stack-label
               filled
@@ -38,23 +64,27 @@
             >
               <template #append>
                 <q-btn
-                  v-if="queryParams[param]"
+                  v-if="queryParams.epic"
                   icon="clear"
                   dense
                   flat
-                  @click.stop.prevent="queryParams[param] = null"
+                  @click.stop.prevent="queryParams.epic = undefined"
                 />
               </template>
             </q-select>
-            <q-input
-v-else v-model="queryParams[param]" class="q-pa-sm" bottom-slots stack-label filled
-              :mask="queryParamMasks.created || undefined">
-              <template #append>
-                <q-btn
-v-if="queryParams[param]" icon="clear" dense flat
-                  @click.stop.prevent="queryParams[param] = null" />
-              </template>
-            </q-input>
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section caption>
+            <h5>
+              Include done
+            </h5>
+          </q-item-section>
+          <q-item-section>
+            <q-checkbox
+              v-model="queryParams.includedone"
+              class="q-pa-sm"
+            />
           </q-item-section>
         </q-item>
         <div class="row">
@@ -99,9 +129,9 @@ v-else color="primary" style="font-size: 1.2em; user-select: none"
           <div v-if="isLoadingActivity" class="full-width">
             <q-spinner size="lg" style="margin: 0 auto" />
           </div>
-          <div v-for="story in storyResults" :key="`${story.id}-${listRenderKey}`" class="bordered q-mb-xs">
+          <div v-for="story in results" :key="`${story.id}-${listRenderKey}`" class="bordered q-mb-xs">
             <q-item clickable class="q-pa-sm">
-              <StoryCard :story-id="story.id" allow-add-tasks />
+              <StoryCard :story-id="story.id" allow-add-tasks dense />
             </q-item>
           </div>
         </div>
@@ -122,6 +152,7 @@ import {
 } from 'src/utils';
 import { ref, defineAsyncComponent, computed, onMounted, watch } from 'vue';
 import { TaskSortType } from 'src/types';
+import { PivotalStory } from '@/pinia/pivotalStore';
 
 const TaskSortDropdown = defineAsyncComponent(() => import('src/components/TaskSortDropdown.vue'));
 const StoryCard = defineAsyncComponent(() => import('src/components/StoryCard.vue'));
@@ -135,7 +166,9 @@ const props = defineProps({
 });
 
 const isLoadingActivity = ref(false);
-const results = ref(props.cachedTickets || []);
+const results = ref<PivotalStory[]>(
+  props.cachedTickets as PivotalStory[] || []
+);
 const queryParamMultiples = ref({
   epic: true,
 });
@@ -188,7 +221,7 @@ onMounted(async () => {
   if (!props.cachedTickets) {
     await getTickets();
   } else {
-    storyResults.value = props.cachedTickets;
+    results.value = props.cachedTickets as PivotalStory[];
     resultTotals.value.hits = props.cachedTickets.length;
     resultTotals.value.points = props.cachedTickets.reduce(
       (acc, t: any) => acc + t.estimate,
@@ -211,7 +244,7 @@ function setSortType(type: TaskSortType | string) {
 }
 
 function sortResults(results: any) {
-  if (!results || !results.length) {
+  if (!results.value || !results.value.length) {
     return [];
   }
 
@@ -230,8 +263,6 @@ function sortResults(results: any) {
   if (sortType.value === 'points') {
     intSort(results.value, 'estimate', inverseSort.value);
   }
-
-  storyResults.value = results.value;
 }
 
 function saveParams(params: Record<string, any>) {
@@ -252,9 +283,9 @@ async function getTickets() {
     pivotalData.endpoints.search.all;
   let queryParamsCopy: Record<string, any>;
 
-  if (queryParamInfo) {
-    queryParamsCopy = {};
+  queryParamsCopy = {};
 
+  if (queryParamInfo) {
     Object.keys(queryParamInfo).forEach((paramName) => {
       if (queryParams.value[paramName]) {
         queryParamsCopy[paramName] = queryParams.value[paramName];
@@ -266,7 +297,13 @@ async function getTickets() {
 
   resultTotals.value = {};
 
-  const res = await getPivotalEndpoint(uri, {}, queryParams);
+  console.log({ uri, queryParams });
+
+  const res = await getPivotalEndpoint(
+    uri,
+    {},
+    JSON.parse(JSON.stringify(queryParamsCopy))
+  );
 
   isLoadingActivity.value = false;
 
@@ -277,7 +314,7 @@ async function getTickets() {
       points: res.stories.total_points,
       completedPoints: res.stories.total_points_completed,
     };
-    sortResults(results.value);
+    sortResults(res.stories.stories);
   } else {
     console.warn('Results are in an unexpected format!');
   }

@@ -15,6 +15,7 @@
               v-for="story in stories"
               :key="story.id"
               :story-id="story.id"
+              dense
           />
         </q-item-section>
       </q-item>
@@ -28,10 +29,10 @@ import { computed, defineAsyncComponent } from 'vue';
 const StoryCard = defineAsyncComponent(() => import('src/components/StoryCard.vue'));
 
 const props = defineProps<{
-    stories: Array<{ id: string|number }>;
+  stories: Array<{ id: string | number }>;
 }>();
 
 const storyIds = computed(() => {
-    return props.stories.map((s: { id: string|number }) => s.id).join(', ');
+  return props.stories.map((s: { id: string | number }) => s.id).join(', ');
 });
 </script>
