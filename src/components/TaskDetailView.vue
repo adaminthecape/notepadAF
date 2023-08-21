@@ -22,6 +22,7 @@
             class="q-my-sm"
             add-new
             flat
+            dense
             @edit-task="editTask"
         />
         <q-space />

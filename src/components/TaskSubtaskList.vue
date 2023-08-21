@@ -95,7 +95,7 @@ function saveNew(newItem: TaskSubtask) {
     return;
   }
 
-  const data = subtasks.value.concat(newItem);
+  const data = (subtasks.value || []).concat(newItem);
   newLogMessage.value = '';
 
   store.cloudUpdateSingleProperty({

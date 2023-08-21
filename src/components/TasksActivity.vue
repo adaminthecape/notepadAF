@@ -72,6 +72,7 @@
             />
           </q-btn-group>
           <q-space />
+          <q-btn-group>
           <SimpleModal>
             <template #activator="{ open: openKeywordModal }">
               <q-btn
@@ -162,9 +163,7 @@
               </template>
           </SimpleModal>
           <q-space />
-          <q-pagination
-v-model="pagination.page" :max="paginationComputed.max" color="grey" active-color="primary"
-            direction-links input />
+          </q-btn-group>
         </div>
         <!-- show active keyword/tags: -->
         <div class="row items-center">
@@ -178,7 +177,7 @@ v-model="pagination.page" :max="paginationComputed.max" color="grey" active-colo
             @click="filters.keyword = ''; filterTasks()"
           >
             <q-icon name="search" />
-            <span class="q-mb-xs">{{ filters.keyword }}</span>
+            <span>{{ filters.keyword }}</span>
           </q-chip>
           <div v-if="filters.tags && filters.tags.length">
             <q-chip
@@ -207,17 +206,17 @@ show-options
             editable @refresh-task="refreshTask" @filter-by-tag="addTagToFilters" />
         </div>
       </div>
-      <!--<q-space />-->
-      <!--<div class="pagination-container flex flex-center">-->
-      <!--  <q-pagination-->
-      <!--      v-model="pagination.page"-->
-      <!--      :max="paginationComputed.max"-->
-      <!--      color="grey"-->
-      <!--      active-color="primary"-->
-      <!--      direction-links-->
-      <!--      input-->
-      <!--  />-->
-      <!--</div>-->
+      <q-space />
+      <div class="pagination-container flex flex-center">
+       <q-pagination
+           v-model="pagination.page"
+           :max="paginationComputed.max"
+           color="grey"
+           active-color="primary"
+           direction-links
+           input
+       />
+      </div>
     </template>
   </SimpleLayout>
 </template>

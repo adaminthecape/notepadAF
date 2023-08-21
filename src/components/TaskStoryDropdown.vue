@@ -9,7 +9,7 @@
       <template #label>
         <span style="margin-right: -10px">{{ storyIds }}</span>
       </template>
-      <q-item clickable style="min-width: 90%;">
+      <q-item style="min-width: 90%;">
         <q-item-section>
           <StoryCard
               v-for="story in stories"
@@ -33,6 +33,6 @@ const props = defineProps<{
 }>();
 
 const storyIds = computed(() => {
-  return props.stories.map((s: { id: string | number }) => s.id).join(', ');
+  return `${props.stories[0]}${props.stories.length > 1 ? ` and ${props.stories.length} more...` : ''}`;
 });
 </script>
