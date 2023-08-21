@@ -2,6 +2,7 @@
   <div
     class="row items-center"
     :key="`task-options-${taskId}-${taskRenderIndex}`"
+    :class="{ column: !!column }"
   >
     <q-btn
         v-if="showSingleTaskButton"
@@ -120,6 +121,8 @@ const props = defineProps<{
   color?: string;
   flat?: boolean;
   dense?: boolean;
+  column?: boolean;
+  showLabels?: boolean;
 }>();
 
 const store = useTaskStore();

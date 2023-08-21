@@ -1,6 +1,7 @@
 <template>
   <div>
     <q-btn
+      :label="label"
       :size="size"
       :flat="flat"
       :dense="dense"
@@ -35,6 +36,10 @@ const props = defineProps({
   taskId: {
     type: String,
     required: true,
+  },
+  label: {
+    type: String,
+    default: undefined
   },
   size: {
     type: String,

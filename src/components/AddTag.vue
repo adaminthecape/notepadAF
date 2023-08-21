@@ -16,6 +16,7 @@
           <span class="q-mb-xs q-ml-xs">{{ selectedTags.join(', ') }}</span>
         </q-chip>
         <q-input
+            v-if="!disableAdd"
             v-model="value"
             placeholder="Add a tag..."
             class="q-mb-xs"
@@ -51,9 +52,11 @@ import {
 } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
 
-defineProps<{
+const props = defineProps<{
   selectedTags?: string[];
   multiple?: boolean;
+  tags?: string[];
+  disableAdd?: boolean;
 }>();
 
 const selected = ref(['personal', 'shopping']);
@@ -73,8 +76,12 @@ const allTags = computed(() => {
     return [];
   }
 
+  if (props.tags?.length) {
+    return props.tags;
+  }
+
   return tasksList.value.reduce(
-    (agg, task: Task) => {
+    (agg: string[], task: Task) => {
       const tags = [...(task.tags || [])].filter(
         (tag) => !agg.includes(tag)
       );
@@ -86,11 +93,16 @@ const allTags = computed(() => {
       return agg;
     },
     [] as string[]
-  );
+  ).sort();
 });
 
 const filteredList = computed(() => {
-  if (!value.value) {
+  if (props.tags?.length) {
+    return props.tags.filter(
+      (v) => v.toLowerCase().indexOf(value.value.toLowerCase()) > -1
+    );
+  }
+  else if (!value.value) {
     return allTags.value;
   } else {
     return allTags.value.filter(
@@ -101,7 +113,7 @@ const filteredList = computed(() => {
 
 const emit = defineEmits<{
   (event: 'input', tag: string): void
-}>()
+}>();
 
 function pickTag(tag: string) {
   emit('input', tag);

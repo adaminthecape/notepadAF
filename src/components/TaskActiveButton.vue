@@ -1,6 +1,7 @@
 <template>
   <div>
     <q-btn
+      :label="label"
       :size="size"
       :flat="flat"
       :dense="dense"
@@ -42,6 +43,7 @@ import useTaskStore from 'src/pinia/taskStore';
 import { computed, onMounted, ref, watch } from 'vue';
 
 const props = defineProps<{
+  label?: string;
   size?: string;
   icon?: string;
   color?: string;

@@ -7,6 +7,7 @@ import {
   TaskSortType,
 } from './types';
 import { TaskBucket } from './pinia/taskStore';
+import usePivotalStore from './pinia/pivotalStore';
 
 export enum LocalStorageName {
   /** user prefs */
@@ -547,4 +548,14 @@ export function padLeft(
   }
 
   return str;
+}
+
+export function getStoryHint(storyId: string | number) {
+  const storyName = usePivotalStore().get(storyId)?.title;
+
+  if (!storyName) {
+    return `${storyId}`;
+  }
+
+  return `<span>${storyId}<q-tooltip>${storyName}</q-tooltip></span>`;
 }

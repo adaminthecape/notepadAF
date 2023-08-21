@@ -1,43 +1,20 @@
 <template>
-  <q-card v-if="task" class="flex q-mb-sm" :style="`flex-direction: column; background-color: #70809020`" flat bordered>
+  <q-card
+    v-if="task"
+    class="flex q-mb-sm"
+    :class="{ 'q-mt-md': !!task.done }"
+    :style="`flex-direction: column; background-color: #70809020`"
+    flat
+    bordered
+  >
     <q-item clickable dense @click.ctrl="editTask">
       <q-item-section>
         <div class="row items-center">
-          <!-- VIEW DONE: -->
-          <div v-if="task.done" style="margin-left: -14px" class="row items-center">
-            <q-chip class="row items-center" style="background: #00ff0020" square dense>
-              <q-icon name="task_alt" size="xs" class="q-mr-xs" />
-              <span>{{ new Date(task.done).toDateString() }}</span>
-              <q-icon name="schedule" size="xs" class="q-mx-xs" />
-              <span>{{
-                new Date(task.done).toLocaleTimeString().slice(0, -3)
-              }}</span>
-            </q-chip>
-          </div>
-          <!-- VIEW ALERTS: -->
-          <div
-            v-else-if="task.alerts && task.alerts.length"
-            style="margin-left: -10px">
-            <q-btn
-              v-for="(alert, a) in task.alerts"
-              :key="`alert-${a}-${activeAlertsRenderKey}`"
-              size="sm"
-              class="text-bold"
-              :class="{ 'q-ml-xs': !!a }"
-              unelevated outline dense
-              :color="alert.unix < Date.now() - 600000 ? 'negative' : 'primary'"
-            >
-              <div class="row items-center">
-                <q-icon name="notification_important" />
-                <span>{{ timeSince(new Date(alert.unix).getTime()) }}</span>
-                <q-icon name="close" size="xs" dense flat @dblclick.stop.prevent="removeAlert(alert)" />
-              </div>
-              <q-tooltip>Due {{ alert.date }} at {{ alert.time }}</q-tooltip>
-            </q-btn>
-          </div>
+          <TaskDoneTime :task-id="task.id" />
+          <TaskAlertDisplay :task-id="task.id" />
           <q-space />
           <!-- MENU: -->
-          <div class="row items-center" style="margin-right: -14px">
+          <!-- <div class="row items-center" style="margin-right: -14px">
             <TaskOptions
                 v-if="showOptions"
                 show-single-task-button
@@ -48,9 +25,26 @@
                 flat
                 @edit-task="editTask()"
             />
-          </div>
+          </div> -->
         </div>
-        <div class="row items-center">
+        <div class="row items-center" style="margin-left: -12px">
+          <TaskOptionsModal
+            :task-id="task.id"
+            show-active-button
+            show-activity-log-button
+            show-alert-button
+            show-archive-button
+            show-delete-button
+            show-done-button
+            show-edit-button
+            show-labels
+            show-single-task-button
+            show-subtask-button
+            dense
+            flat
+            size="md"
+            activator-size="sm"
+          />
           <!-- MESSAGE: -->
           <div v-if="!isEditing">
             <span class="q-mt-sm task-message-display">{{ task.message }}</span>
@@ -86,7 +80,14 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
           <!-- ADD TAGS: -->
           <AddTag @input="addTag">
             <template #activator="{ open }">
-              <q-btn icon="add" size="sm" dense round flat @click="open" />
+              <q-btn
+                icon="add_comment"
+                color="primary"
+                size="sm"
+                dense
+                flat
+                @click="open"
+              />
             </template>
           </AddTag>
           <!--<q-btn-->
@@ -113,12 +114,32 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
           <!--</q-chip>-->
           <!-- VIEW TAGS: -->
           <q-chip
-v-for="(tag, tagIndex) in task.tags" :key="`tag-${tagIndex}`" square dense dark
-            style="margin-right: -2px" removable @remove="removeTag(tag)">
+            v-for="(tag, tagIndex) in (task.tags || []).slice(0, 1)"
+            :key="`tag-${tagIndex}`"
+            color="primary"
+            square
+            dense
+            dark
+            style="margin-right: -2px"
+            removable
+            @remove="removeTag(tag)"
+          >
             <div class="row items-center">
               <span style="margin-top: -2px" @click="emit('filterByTag', tag)">{{ tag }}</span>
             </div>
           </q-chip>
+          <AddTag :tags="task.tags" disable-add @input="removeTag">
+            <template #activator="{ open }">
+              <q-chip
+                color="primary"
+                clickable
+                square
+                dense
+                dark
+                @click="open"
+              ><q-icon name="more_horiz" /></q-chip>
+            </template>
+          </AddTag>
           <q-space />
           <!-- VIEW STORIES: -->
           <div v-if="stories && stories.length">
@@ -131,18 +152,25 @@ v-for="(tag, tagIndex) in task.tags" :key="`tag-${tagIndex}`" square dense dark
 </template>
 
 <script setup lang="ts">
-import { queueTaskRefresh, timeSince } from 'src/utils';
+import { queueTaskRefresh } from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, ref, watch } from 'vue';
-import { Task, TaskAlert } from 'src/types';
+import { Task } from 'src/types';
 
 const emit = defineEmits<{
   (event: 'filterByTag', tag: string): void
 }>();
 
+const TaskOptionsModal = defineAsyncComponent(() => import('src/components/TaskOptionsModal.vue'));
+const TaskDoneTime = defineAsyncComponent(() => import('src/components/TaskDoneTime.vue'));
+const TaskAlertDisplay = defineAsyncComponent(() => import('src/components/TaskAlertDisplay.vue'));
 const AddTag = defineAsyncComponent(() => import('src/components/AddTag.vue'));
 const TaskStoryDropdown = defineAsyncComponent(() => import('src/components/TaskStoryDropdown.vue'));
 const TaskOptions = defineAsyncComponent(() => import('src/components/TaskOptions.vue'));
+
+function test(arg: any) {
+  console.log('test:', arg);
+}
 
 const props = defineProps({
   taskId: {
@@ -199,16 +227,6 @@ function editTask(force?: boolean) {
     store.cloudUpdateSingle(task.value as Task);
   }
 };
-
-function removeAlert(alert: TaskAlert) {
-  if (!task.value.alerts?.length) {
-    return;
-  }
-
-  const alerts = task.value.alerts.filter((a) => a.unix !== alert.unix);
-
-  store.cloudUpdateSingle({ ...task.value, alerts });
-}
 
 function addTag(tag: string) {
   if (!(task.value.tags || []).includes(tag)) {
@@ -300,7 +318,7 @@ function toggleTextarea() {
 <style scoped>
 .task-message-display {
   white-space: pre-line;
-  border-left: 2px solid #1976d2;
+  border-left: 0px solid #1976d2;
   padding: 0 4px;
 }
 </style>

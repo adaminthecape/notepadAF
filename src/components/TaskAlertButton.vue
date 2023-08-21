@@ -1,6 +1,7 @@
 <template>
   <div>
     <q-btn
+      :label="label"
       :size="size"
       :flat="flat"
       :dense="dense"
@@ -33,6 +34,7 @@ import { Task, TaskAlert } from 'src/types';
 const store = useTaskStore();
 const props = defineProps<{
   taskId: string;
+  label?: string;
   size?: string;
   icon?: string;
   color?: string;

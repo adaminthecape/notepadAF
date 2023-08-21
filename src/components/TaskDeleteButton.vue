@@ -1,6 +1,7 @@
 <template>
   <div v-if="task">
     <q-btn
+      :label="label"
       :size="size"
       :flat="flat"
       :dense="dense"
@@ -54,6 +55,10 @@ const props = defineProps({
   taskId: {
     type: String,
     default: undefined,
+  },
+  label: {
+    type: String,
+    default: undefined
   },
   size: {
     type: String,
