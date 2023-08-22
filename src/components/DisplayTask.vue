@@ -10,7 +10,10 @@
     <q-item clickable dense @click.ctrl="editTask">
       <q-item-section>
         <div class="row items-center">
-          <TaskDoneTime :task-id="task.id" style="margin-top: -16px" />
+          <div style="margin-top: -16px;" class="row full-width">
+            <q-space />
+            <TaskDoneTime :task-id="task.id" />
+          </div>
           <TaskAlertDisplay :task-id="task.id" />
           <q-space />
           <!-- MENU: -->
@@ -81,21 +84,14 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
             <!-- ADD TAGS: -->
             <AddTag @input="addTag">
               <template #activator="{ open }">
-                <q-chip
-                    size="md"
-                    dark
-                    color="primary"
-                    square
+                  <q-btn
+                    icon="add_box"
+                    color="info"
+                    size="sm"
                     dense
-                  >
-                  <q-icon
-                    name="add_comment"
-                    color="white"
-                    size="xs"
-                    style="margin-top: 2px;margin-left: -4px;margin-right: -4px;"
+                    flat
                     @click="open"
-                  />
-                </q-chip>
+                  ><q-tooltip>Add tags</q-tooltip></q-btn>
               </template>
             </AddTag>
             <!--<q-btn-->
@@ -126,7 +122,7 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
                 (task.tags || []) :
                 (task.tags || []).slice(0, 1)"
               :key="`tag-${tagIndex}`"
-              color="primary"
+              color="info"
               square
               dense
               dark
@@ -140,7 +136,7 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
             </q-chip>
             <q-chip
               v-if="(task.tags || []).length > 1"
-              color="primary"
+              color="info"
               clickable
               square
               dense

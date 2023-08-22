@@ -213,8 +213,13 @@
       <div class="task-list" :key="`taskList-${taskListRenderIndex}`">
         <div v-for="task in limitedTasks" :key="task.id">
           <DisplayTask
-v-if="task" :key="taskRenderIndex[task.id]" note-id="tasks" :task-id="task.id" class="full-width"
-show-options
+            v-if="task"
+            :style="task.done ? 'margin-top: 8px' : ''"
+            :key="taskRenderIndex[task.id]"
+            note-id="tasks"
+            :task-id="task.id"
+            class="full-width"
+            show-options
             editable @refresh-task="refreshTask" @filter-by-tag="addTagToFilters" />
         </div>
       </div>

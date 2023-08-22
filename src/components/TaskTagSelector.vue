@@ -2,7 +2,7 @@
 <!--  :options="allTags.map((t) => ({ label: t, value: t }))"-->
   <q-select
       ref="selector"
-      v-model="value"
+      :model-value="value"
       :options="tagsToShow"
       :label="label"
       :multiple="multiple"
@@ -15,8 +15,7 @@
       :new-value-mode="newValueMode ? 'add-unique' : undefined"
       style="width: 12em"
       @filter="filterFn"
-      @keydown.tab="emitInput(value, true)"
-      @input="emitInput(value, false)"
+      @update:model-value="emitInput($event, undefined)"
   >
     <template #no-option>
       <q-item :clickable="newValueMode">
@@ -52,7 +51,7 @@
 
 <script setup lang="ts">
 import useTaskStore from 'src/pinia/taskStore';
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { Task } from 'src/types';
 
 const props = defineProps<{
@@ -88,6 +87,7 @@ const allTags = computed(() => {
 });
 
 const emit = defineEmits<{
+  (event: 'pick', tags: string[]): void;
   (event: 'update:modelValue', tags: string[]): void;
   (event: 'cancel'): void;
 }>();
@@ -118,6 +118,7 @@ function emitInput(value: string[], tab = false) {
   }
 
   emit('update:modelValue', value);
+  emit('pick', value);
 }
 
 function clearInput() {

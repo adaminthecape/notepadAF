@@ -1,5 +1,5 @@
 <template>
-  <SimpleModal>
+  <SimpleModal full-width>
     <template #activator="{ open }">
       <q-btn
           icon="category"
@@ -16,15 +16,16 @@
       {{ extrasTitle || title }}
     </template>
     <template #content>
-      <div v-if="extrasId || extrasId === 0">
+      <div v-if="extrasId > -1">
+        <h6 class="q-my-sm">Select tags</h6>
         <q-card
             v-if="items[extrasId].extra.tags"
         >
           <TaskTagSelector
-              v-model="items[extrasId].extra.tags"
+              v-model:value="items[extrasId].extra.tags"
               class="full-width"
-              label="Select tags"
               multiple
+              @update:model-value="addValue"
           />
         </q-card>
         <q-btn
@@ -71,11 +72,15 @@
 import { getFromLocalStorage, LocalStorageName, saveToLocalStorage } from 'src/utils';
 import { ref, onMounted, watch, defineAsyncComponent } from 'vue';
 
+function test(...args: any) {
+  console.log('test:', ...args);
+}
+
 const SimpleModal = defineAsyncComponent(() => import('src/components/SimpleModal.vue'));
 const TaskTagSelector = defineAsyncComponent(() => import('src/components/TaskTagSelector.vue'));
 
 const items = ref<Record<string, any>[]>([]);
-const extrasId = ref<number>();
+const extrasId = ref<number>(-1);
 const extrasTitle = ref<string>();
 
 const emit = defineEmits<{
@@ -104,7 +109,7 @@ function openExtras(i: number) {
   extrasTitle.value = items.value[i].title;
 }
 function closeExtras() {
-  extrasId.value = undefined;
+  extrasId.value = -1;
   extrasTitle.value = undefined;
 }
 
@@ -117,17 +122,50 @@ onMounted(() => {
     }
   }
 
-  items.value = [...props.value || []];
+  setTimeout(() => {
+    items.value = [...props.value || []];
+  }, 500);
 });
 
-watch(props.value, (newVal) => {
+function addValue(val: string[]) {
+  if (extrasId.value < 0) {
+    return;
+  }
+
+  if (!items.value[extrasId.value].extra.tags) {
+    items.value[extrasId.value].extra.tags = val?.length ? [...val] : [];
+
+    return;
+  }
+
+  (val || []).forEach((v) => {
+    if (!items.value[extrasId.value].extra.tags.includes(v)) {
+      items.value[extrasId.value].extra.tags.push(v);
+    }
+    else {
+      items.value[extrasId.value].extra.tags = items.value[extrasId.value].extra.tags.filter((x: string) => x !== v);
+    }
+  });
+}
+
+function save(newVal: Record<string, any>[]) {
+  console.log('save:', props.value, items.value);
   emit('input', newVal);
   items.value = newVal;
   if (props.listKey) {
     saveToLocalStorage(props.listKey as LocalStorageName, newVal);
     emit('updated');
   }
+}
+
+watch(props.value, (newVal) => {
+  save(newVal);
 });
+
+console.log('init:', props.value, items.value);
+if (props.value?.length && !items.value?.length) {
+  save(props.value);
+}
 </script>
 
 <style scoped>
