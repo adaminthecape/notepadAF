@@ -1,6 +1,8 @@
 <template>
   <q-btn-dropdown
-      icon="menu"
+    dropdown-icon="menu"
+      auto-close
+      square
       :size="activatorSize || size || 'md'"
       :dense="dense"
       :flat="flat"

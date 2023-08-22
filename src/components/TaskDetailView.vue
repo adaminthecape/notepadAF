@@ -1,6 +1,5 @@
 <template>
   <SimpleLayout
-      v-if="task"
       :key="`layout-${logRenderKey}`"
       :page-classes="['q-pa-sm']"
   >
@@ -26,6 +25,7 @@
             @edit-task="editTask"
         />
         <q-space />
+        <AppTabSelector />
       </div>
     </template>
     <template #page-header>
@@ -38,33 +38,64 @@
       />
     </template>
     <template #page-content>
-      <!-- Task activity: add new -->
-      <!--<div class="row items-center">-->
-      <!--  <q-input-->
-      <!--      v-model="newLogMessage"-->
-      <!--      placeholder="New subtask..."-->
-      <!--      class="full-width"-->
-      <!--      filled-->
-      <!--      dense-->
-      <!--  >-->
-      <!--    <template #append>-->
-      <!--      <TaskActiveButton-->
-      <!--          :task-id="taskIdToUse"-->
-      <!--          mode="save"-->
-      <!--          disable-adding-note-->
-      <!--          dense-->
-      <!--      />-->
-      <!--    </template>-->
-      <!--  </q-input>-->
-      <!--</div>-->
-      <!-- Task activity: show list -->
-      <TaskActivityLog
-          :key="`activity-log-${logRenderKey}`"
-          :task-id="taskIdToUse"
-      />
-      <SubtaskList
-          :task-id="taskIdToUse"
-      />
+      <div v-if="!task">
+        <q-card flat>
+          <q-item>
+            <q-item-section avatar>
+              <q-skeleton type="QAvatar" />
+            </q-item-section>
+
+            <q-item-section>
+              <q-item-label>
+                <q-skeleton type="text" />
+              </q-item-label>
+              <q-item-label caption>
+                <q-skeleton type="text" />
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-skeleton height="30px" square class="q-my-xl" />
+          <q-skeleton height="30px" square class="q-my-xl" />
+          <q-skeleton height="30px" square class="q-my-xl" />
+          <q-skeleton height="30px" square class="q-my-xl" />
+
+          <q-card-actions align="right" class="q-gutter-md">
+            <q-skeleton type="item" style="flex-grow:1" />
+            <q-skeleton type="QBtn" />
+            <q-skeleton type="QBtn" />
+          </q-card-actions>
+        </q-card>
+      </div>
+      <div v-if="task">
+        <!-- Task activity: add new -->
+        <!--<div class="row items-center">-->
+        <!--  <q-input-->
+        <!--      v-model="newLogMessage"-->
+        <!--      placeholder="New subtask..."-->
+        <!--      class="full-width"-->
+        <!--      filled-->
+        <!--      dense-->
+        <!--  >-->
+        <!--    <template #append>-->
+        <!--      <TaskActiveButton-->
+        <!--          :task-id="taskIdToUse"-->
+        <!--          mode="save"-->
+        <!--          disable-adding-note-->
+        <!--          dense-->
+        <!--      />-->
+        <!--    </template>-->
+        <!--  </q-input>-->
+        <!--</div>-->
+        <!-- Task activity: show list -->
+        <TaskActivityLog
+            :key="`activity-log-${logRenderKey}`"
+            :task-id="taskIdToUse"
+        />
+        <SubtaskList
+            :task-id="taskIdToUse"
+        />
+      </div>
     </template>
   </SimpleLayout>
 </template>
@@ -74,6 +105,7 @@ import { getFromLocalStorage, LocalStorageName } from 'src/utils';
 import { computed, ref, watch } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
 
+import AppTabSelector from 'src/components/AppTabSelector.vue';
 import SimpleLayout from 'src/components/SimpleLayout.vue';
 import SubtaskList from 'src/components/TaskSubtaskList.vue';
 import DisplayTask from 'src/components/DisplayTask.vue';

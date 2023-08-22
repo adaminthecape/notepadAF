@@ -5,7 +5,8 @@
     </template>
     <template #header-title> Tickets </template>
     <template #header-right>
-      <q-btn icon="refresh" dense @click="getTickets" />
+      <q-btn icon="refresh" dense class="q-mr-sm" @click="getTickets" />
+      <AppTabSelector />
     </template>
     <template #page-header>
       <q-expansion-item label="Search filters" class="q-my-sm bordered" default-opened>
@@ -156,6 +157,7 @@ import { PivotalStory } from '@/pinia/pivotalStore';
 import TaskSortDropdown from 'src/components/TaskSortDropdown.vue';
 import StoryCard from 'src/components/StoryCard.vue';
 import SimpleLayout from 'src/components/SimpleLayout.vue';
+import AppTabSelector from 'src/components/AppTabSelector.vue';
 
 const props = defineProps({
   cachedTickets: {

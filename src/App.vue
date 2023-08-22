@@ -3,7 +3,7 @@
     <SetAccountDetails />
   </div>
   <div v-else id="q-app">
-    <div class="row items-center">
+    <!-- <div class="row items-center">
       <q-tabs
         v-model="currentTab"
         class="shadow-5 full-width"
@@ -20,7 +20,7 @@
           :label="tab.label"
         />
       </q-tabs>
-    </div>
+    </div> -->
 
     <div v-if="currentTab === 'tasks'">
       <TasksActivity />
@@ -46,7 +46,7 @@ import {
 } from './utils';
 import { defaultTabs } from 'src/constants';
 import useThemeStore from 'src/pinia/themeStore';
-import { ref, computed, defineAsyncComponent, onMounted, watch } from 'vue';
+import { ref, computed, defineAsyncComponent, onMounted, watch, provide } from 'vue';
 import { Dark } from 'quasar';
 
 const SetAccountDetails = defineAsyncComponent(() =>
@@ -82,6 +82,18 @@ const appTabs = ref(appTabsToUse);
 
 const activeAppTabs = computed(() => {
   return appTabs.value.filter((t) => t.active);
+});
+
+provide('helpers', {
+  activeTabs: () => ({
+    tasks: currentTab.value === 'tasks',
+    activity: currentTab.value === 'activity',
+    tickets: currentTab.value === 'tickets',
+    settings: currentTab.value === 'settings'
+  }),
+  openTab: (name: string) => {
+    currentTab.value = name;
+  }
 });
 
 function setTabs() {

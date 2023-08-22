@@ -7,7 +7,7 @@
       <div style="display: flex; flex-direction: column">
         <q-chip
           v-if="selectedTags && selectedTags.length"
-          color="primary"
+          color="info"
           square
           dense
           dark

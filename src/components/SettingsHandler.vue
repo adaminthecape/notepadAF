@@ -2,7 +2,7 @@
   <SimpleLayout :page-offset="100" :page-classes="['q-mx-sm']" header>
     <template #header-left> </template>
     <template #header-title> Settings </template>
-    <template #header-right> </template>
+    <template #header-right><AppTabSelector /></template>
     <template #page-content>
       <q-card class="q-mb-sm">
         <q-item>
@@ -210,8 +210,9 @@ import { defineAsyncComponent, ref } from 'vue';
 import useThemeStore from 'src/pinia/themeStore';
 import { Dark } from 'quasar';
 
+import AppTabSelector from 'src/components/AppTabSelector.vue';
+import SimpleLayout from 'src/components/SimpleLayout.vue';
 const SimpleModal = defineAsyncComponent(() => import('src/components/SimpleModal.vue'));
-const SimpleLayout = defineAsyncComponent(() => import('src/components/SimpleLayout.vue'));
 const FirebaseConfigModal = defineAsyncComponent(() => import('src/components/FirebaseConfigModal.vue'));
 const themeStore = useThemeStore();
 

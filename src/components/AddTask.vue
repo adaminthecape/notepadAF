@@ -72,7 +72,7 @@
                         <q-btn
                             label="Save"
                             icon="save"
-                            color="primary"
+                            color="info"
                             dense
                             @click="addNewTask"
                         />

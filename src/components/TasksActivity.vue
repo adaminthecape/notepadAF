@@ -16,6 +16,7 @@
           <q-tooltip>Clear filters</q-tooltip>
         </q-btn>
         <TaskSortDropdown :sort-type="sortType" :inverse-sort="inverseSort" @set-sort-type="setSortType($event)" />
+        <AppTabSelector />
       </div>
     </template>
     <template #page-content>
@@ -84,7 +85,7 @@
             />
           </div>
           <q-space />
-          <q-btn-group>
+          <q-btn-group flat>
           <SimpleModal>
             <template #activator="{ open: openKeywordModal }">
               <q-btn
@@ -124,7 +125,14 @@
             @input="addTagToFilters"
           >
             <template #activator="{ open }">
-              <q-btn icon="sell" color="secondary" size="md" dense flat @click="open" />
+              <q-btn
+                icon="sell"
+                color="secondary"
+                size="md"
+                dense
+                flat
+                @click="open"
+              ><q-tooltip>Filter by tag</q-tooltip></q-btn>
             </template>
           </AddTag>
           <LocalStorageList
@@ -142,7 +150,7 @@
                 dense
                 flat
                 @click="openKeywordModal"
-              ><q-tooltip>Search by keyword</q-tooltip></q-btn>
+              ><q-tooltip>Add task</q-tooltip></q-btn>
             </template>
             <template #content>
               <div class="row items-center">
@@ -181,7 +189,7 @@
         <div class="row items-center">
           <q-chip
             v-if="filters.keyword"
-            color="primary"
+            color="info"
             clickable
             square
             dense
@@ -195,14 +203,15 @@
             <q-chip
               v-for="(selectedTag, st) in filters.tags"
               :key="`selected-tag-${st}`"
-              color="primary"
+              color="info"
+              class="q-mr-none"
               clickable
               square
               dense
               dark
               @click="addTagToFilters(selectedTag)"
             >
-              <q-icon name="sell" />
+              <q-icon name="sell" class="q-mr-xs" />
               <span>{{ selectedTag }}</span>
             </q-chip>
           </div>
@@ -241,6 +250,7 @@ import { FilterType, FilterTypes, Task } from 'src/types';
 import useTaskStore, { TaskBucket } from 'src/pinia/taskStore';
 import { computed, onMounted, ref, watch } from 'vue';
 
+import AppTabSelector from 'src/components/AppTabSelector.vue';
 import SimpleLayout from 'src/components/SimpleLayout.vue';
 import AddTag from 'src/components/AddTag.vue';
 import DisplayTask from 'src/components/DisplayTask.vue';
