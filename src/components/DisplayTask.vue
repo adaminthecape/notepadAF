@@ -156,15 +156,6 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
               </template>
             </AddTag> -->
           <q-space />
-          <TimeChip
-            v-if="task.done"
-            :task-id="task.id"
-            date-format="{M}/{d}/{y}"
-            time-format="{h}:{m}:{s}"
-            show-date
-            dense
-            style="display: inline"
-          />
           <TaskOptions
             :task-id="taskId"
             hide-menu-button
@@ -173,6 +164,7 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
             flat
             size="sm"
             class="q-mr-xs"
+            done-chip
           />
           <!-- VIEW STORIES: -->
           <div v-if="stories && stories.length">

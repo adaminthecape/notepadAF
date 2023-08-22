@@ -12,8 +12,8 @@ class="row items-center full-width justify-start" style="align-content: start" f
                 <!-- <q-chip square dense class="text-bold" style="min-width: 12em">{{ log.startDate }}</q-chip> -->
                 <TimeChip
                   :custom-done-value="log.unix"
-                  date-format="{M}/{d}/{y}"
-                  time-format="{h}:{m}:{s}"
+                  date-format="M/d"
+                  time-format="h:m"
                   show-date
                   show-time
                   dense

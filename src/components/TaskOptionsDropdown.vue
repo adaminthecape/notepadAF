@@ -2,7 +2,6 @@
   <q-btn-dropdown
     dropdown-icon="menu"
       auto-close
-      square
       :size="activatorSize || size || 'md'"
       :dense="dense"
       :flat="flat"
@@ -26,8 +25,8 @@
           v-if="showActivityLogButton && task.activity && task.activity.length"
           label="Activity log"
           icon="list"
-          :size="size"
           :dense="dense"
+          :size="size"
           :flat="flat"
           @click="isViewingActivity = !isViewingActivity"
       >

@@ -186,7 +186,7 @@
           </q-btn-group>
         </div>
         <!-- show active keyword/tags: -->
-        <div class="row items-center">
+        <div class="row items-center" style="margin-top: -8px">
           <q-chip
             v-if="filters.keyword"
             color="info"

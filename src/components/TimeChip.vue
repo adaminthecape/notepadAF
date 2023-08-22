@@ -3,14 +3,26 @@
   <div v-if="done" class="row items-center">
     <q-chip
       class="row items-center"
-      style="background: #002200"
+      :style="color ? '' : 'background: #002200'"
+      :color="color"
       dark
       square
       dense
     >
-      <q-icon v-if="showDate" name="task_alt" size="xs" class="q-mr-xs" />
+      <q-icon
+        v-if="showDate"
+        style="margin-top:2px"
+        name="event_available"
+        class="q-mr-xs"
+      />
       <span v-if="showDate">{{ date }}</span>
-      <q-icon v-if="showTime" name="schedule" size="xs" class="q-mr-xs" :class="{ 'q-ml-xs': showDate }" />
+      <q-icon
+        v-if="showTime"
+        style="margin-top:1px"
+        name="schedule"
+        class="q-mr-xs"
+        :class="{ 'q-ml-xs': showDate }"
+      />
       <span v-if="showTime">{{ time.slice(0, -3) }}</span>
     </q-chip>
   </div>
@@ -38,6 +50,10 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
+  color: {
+    type: String,
+    default: undefined
+  },
   dateFormat: {
     type: String,
     default: undefined
@@ -58,7 +74,7 @@ const done = computed(() => !props.taskId ? props.customDoneValue || 0 : store.g
 const date = computed<string>(() => (
   props.dateFormat ?
     toFormat(props.dateFormat) :
-    new Date(done.value).toLocaleTimeString()
+    new Date(done.value).toLocaleDateString()
 ));
 const time = computed<string>(() => (
   props.timeFormat ?
@@ -94,18 +110,19 @@ function toFormat(format: string) {
 
   return format
     // date:
-    .replaceAll('{d}', `${date}`)
-    .replaceAll('{D}', `${dayShort}`)
-    .replaceAll('{DD}', `${dayLong}`)
-    .replaceAll('{M}', `${month}`)
-    .replaceAll('{y}', `${yearShort}`)
-    .replaceAll('{Y}', `${yearShort}`)
-    .replaceAll('{yy}', `${yearLong}`)
-    .replaceAll('{YY}', `${yearLong}`)
+    .replaceAll('d', `${date}`)
+    .replaceAll('D', `${dayShort}`)
+    .replaceAll('DD', `${dayLong}`)
+    .replaceAll('M', `${month}`)
+    .replaceAll('MM', padLeft(`${month}`, '0', 2))
+    .replaceAll('y', `${yearShort}`)
+    .replaceAll('Y', `${yearShort}`)
+    .replaceAll('yy', `${yearLong}`)
+    .replaceAll('YY', `${yearLong}`)
     // time:
-    .replaceAll('{h}', `${hour}`)
-    .replaceAll('{m}', padLeft(`${minute}`, '0', 2))
-    .replaceAll('{s}', padLeft(`${second}`, '0', 2))
+    .replaceAll('h', `${hour}`)
+    .replaceAll('m', padLeft(`${minute}`, '0', 2))
+    .replaceAll('s', padLeft(`${second}`, '0', 2))
 }
 
 const dateValues = ref(getDateValues());

@@ -51,6 +51,7 @@
         :size="size"
         :dense="dense"
         :flat="flat"
+        :chip="doneChip"
     />
     <TaskActiveButton
         v-if="showAllOptions || (showActiveButton || task.active)"
@@ -132,6 +133,7 @@ const props = defineProps<{
   dense?: boolean;
   column?: boolean;
   showLabels?: boolean;
+  doneChip?: boolean;
 }>();
 
 const store = useTaskStore();
