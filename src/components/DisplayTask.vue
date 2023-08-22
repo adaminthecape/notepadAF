@@ -31,7 +31,7 @@
           </div> -->
         </div>
         <div class="row items-center" style="margin-left: -12px">
-          <TaskOptionsModal
+          <TaskOptionsDropdown
             :task-id="task.id"
             show-active-button
             show-activity-log-button
@@ -180,7 +180,8 @@ import { queueTaskRefresh } from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, ref, watch } from 'vue';
 import { Task } from 'src/types';
-import TaskOptionsModal from 'src/components/TaskOptionsModal.vue';
+// import TaskOptionsModal from 'src/components/TaskOptionsModal.vue';
+import TaskOptionsDropdown from 'src/components/TaskOptionsDropdown.vue';
 import TaskDoneTime from 'src/components/TaskDoneTime.vue';
 import TaskAlertDisplay from 'src/components/TaskAlertDisplay.vue';
 import AddTag from 'src/components/AddTag.vue';
