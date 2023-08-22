@@ -85,12 +85,11 @@ import {
   LocalStorageName,
   saveToLocalStorageArray,
 } from '../utils';
-import { computed, defineAsyncComponent, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import usePivotalStore from 'src/pinia/pivotalStore';
-
-const AddTask = defineAsyncComponent(() => import('src/components/AddTask.vue'));
-const DisplayStory = defineAsyncComponent(() => import('src/components/DisplayStory.vue'));
-const SimpleModal = defineAsyncComponent(() => import('src/components/SimpleModal.vue'));
+import DisplayStory from 'src/components/DisplayStory.vue';
+import AddTask from 'src/components/AddTask.vue';
+import SimpleModal from 'src/components/SimpleModal.vue';
 
 const props = defineProps<{
   storyId: string | number;

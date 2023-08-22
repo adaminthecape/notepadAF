@@ -30,7 +30,7 @@
       </q-card>
     </q-dialog>
     <TaskAlertButton
-        v-if="showAllOptions || (showAlertButton || (task.alerts && task.alerts.length))"
+        v-if="showAllOptions || (showAlertButton && (task.alerts && task.alerts.length))"
         :task-id="task.id"
         :size="size"
         :dense="dense"
@@ -100,8 +100,17 @@ import {
   queueTaskRefresh,
   goToActivityPageForTask
 } from 'src/utils';
-import { ref, computed, defineAsyncComponent, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
+
+import TaskSubtaskButton from 'src/components/TaskSubtaskButton.vue';
+import TaskActivityLog from 'src/components/TaskActivityLog.vue';
+import TaskAlertButton from 'src/components/TaskAlertButton.vue';
+import TaskDeleteButton from 'src/components/TaskDeleteButton.vue';
+import TaskArchiveButton from 'src/components/TaskArchiveButton.vue';
+import TaskEditButton from 'src/components/TaskEditButton.vue';
+import TaskDoneButton from 'src/components/TaskDoneButton.vue';
+import TaskActiveButton from 'src/components/TaskActiveButton.vue';
 
 const props = defineProps<{
   taskId: string;
@@ -130,15 +139,6 @@ const task = computed(() => store.getTask(props.taskId));
 const taskRenderIndex = ref(0);
 const isViewingActivity = ref(false);
 const showAllOptions = ref(false);
-
-const TaskSubtaskButton = defineAsyncComponent(() => import('src/components/TaskSubtaskButton.vue'));
-const TaskActivityLog = defineAsyncComponent(() => import('src/components/TaskActivityLog.vue'));
-const TaskAlertButton = defineAsyncComponent(() => import('src/components/TaskAlertButton.vue'));
-const TaskDeleteButton = defineAsyncComponent(() => import('src/components/TaskDeleteButton.vue'));
-const TaskArchiveButton = defineAsyncComponent(() => import('src/components/TaskArchiveButton.vue'));
-const TaskEditButton = defineAsyncComponent(() => import('src/components/TaskEditButton.vue'));
-const TaskDoneButton = defineAsyncComponent(() => import('src/components/TaskDoneButton.vue'));
-const TaskActiveButton = defineAsyncComponent(() => import('src/components/TaskActiveButton.vue'));
 
 function refreshTask() {
   queueTaskRefresh(props.taskId);

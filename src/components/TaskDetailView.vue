@@ -71,14 +71,14 @@
 
 <script setup lang="ts">
 import { getFromLocalStorage, LocalStorageName } from 'src/utils';
-import { computed, defineAsyncComponent, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
 
-const SubtaskList = defineAsyncComponent(() => import('src/components/TaskSubtaskList.vue'));
-const DisplayTask = defineAsyncComponent(() => import('src/components/DisplayTask.vue'));
-const TaskActivityLog = defineAsyncComponent(() => import('src/components/TaskActivityLog.vue'));
-const TaskOptions = defineAsyncComponent(() => import('src/components/TaskOptions.vue'));
-const SimpleLayout = defineAsyncComponent(() => import('src/components/SimpleLayout.vue'));
+import SimpleLayout from 'src/components/SimpleLayout.vue';
+import SubtaskList from 'src/components/TaskSubtaskList.vue';
+import DisplayTask from 'src/components/DisplayTask.vue';
+import TaskActivityLog from 'src/components/TaskActivityLog.vue';
+import TaskOptions from 'src/components/TaskOptions.vue';
 
 const props = defineProps<{
   taskId: string;

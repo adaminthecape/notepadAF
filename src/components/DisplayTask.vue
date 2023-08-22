@@ -10,7 +10,7 @@
     <q-item clickable dense @click.ctrl="editTask">
       <q-item-section>
         <div class="row items-center">
-          <TaskDoneTime :task-id="task.id" />
+          <TaskDoneTime :task-id="task.id" style="margin-top: -16px" />
           <TaskAlertDisplay :task-id="task.id" />
           <q-space />
           <!-- MENU: -->
@@ -44,6 +44,7 @@
             flat
             size="md"
             activator-size="sm"
+            @edit-task="editTask()"
           />
           <!-- MESSAGE: -->
           <div v-if="!isEditing">
@@ -77,70 +78,97 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
           </q-input>
         </div>
         <div class="row items-center" style="margin: 0 -12px">
-          <!-- ADD TAGS: -->
-          <AddTag @input="addTag">
-            <template #activator="{ open }">
-              <q-btn
-                icon="add_comment"
-                color="primary"
-                size="sm"
-                dense
-                flat
-                @click="open"
-              />
-            </template>
-          </AddTag>
-          <!--<q-btn-->
-          <!--    icon="add"-->
-          <!--    size="sm"-->
-          <!--    dense-->
-          <!--    round-->
-          <!--    flat-->
-          <!--    @click="addingTag = !addingTag"-->
-          <!--/>-->
-          <!--<q-chip-->
-          <!--    v-show="addingTag"-->
-          <!--    style="overflow-y: hidden"-->
-          <!--    square-->
-          <!--    dense-->
-          <!--    dark-->
-          <!--&gt;-->
-          <!--  <TaskTagSelector-->
-          <!--      dark-->
-          <!--      new-value-mode-->
-          <!--      @cancel="addingTag = false"-->
-          <!--      @input="addTag"-->
-          <!--  />-->
-          <!--</q-chip>-->
-          <!-- VIEW TAGS: -->
-          <q-chip
-            v-for="(tag, tagIndex) in (task.tags || []).slice(0, 1)"
-            :key="`tag-${tagIndex}`"
-            color="primary"
-            square
-            dense
-            dark
-            style="margin-right: -2px"
-            removable
-            @remove="removeTag(tag)"
-          >
-            <div class="row items-center">
-              <span style="margin-top: -2px" @click="emit('filterByTag', tag)">{{ tag }}</span>
-            </div>
-          </q-chip>
-          <AddTag :tags="task.tags" disable-add @input="removeTag">
-            <template #activator="{ open }">
-              <q-chip
-                color="primary"
-                clickable
-                square
-                dense
-                dark
-                @click="open"
-              ><q-icon name="more_horiz" /></q-chip>
-            </template>
-          </AddTag>
+            <!-- ADD TAGS: -->
+            <AddTag @input="addTag">
+              <template #activator="{ open }">
+                <q-chip
+                    size="md"
+                    dark
+                    color="primary"
+                    square
+                    dense
+                  >
+                  <q-icon
+                    name="add_comment"
+                    color="white"
+                    size="xs"
+                    style="margin-top: 2px;margin-left: -4px;margin-right: -4px;"
+                    @click="open"
+                  />
+                </q-chip>
+              </template>
+            </AddTag>
+            <!--<q-btn-->
+            <!--    icon="add"-->
+            <!--    size="sm"-->
+            <!--    dense-->
+            <!--    round-->
+            <!--    flat-->
+            <!--    @click="addingTag = !addingTag"-->
+            <!--/>-->
+            <!--<q-chip-->
+            <!--    v-show="addingTag"-->
+            <!--    style="overflow-y: hidden"-->
+            <!--    square-->
+            <!--    dense-->
+            <!--    dark-->
+            <!--&gt;-->
+            <!--  <TaskTagSelector-->
+            <!--      dark-->
+            <!--      new-value-mode-->
+            <!--      @cancel="addingTag = false"-->
+            <!--      @input="addTag"-->
+            <!--  />-->
+            <!--</q-chip>-->
+            <!-- VIEW TAGS: -->
+            <q-chip
+              v-for="(tag, tagIndex) in areTagsExpanded ?
+                (task.tags || []) :
+                (task.tags || []).slice(0, 1)"
+              :key="`tag-${tagIndex}`"
+              color="primary"
+              square
+              dense
+              dark
+              style="margin-right: -2px"
+              removable
+              @remove="removeTag(tag)"
+            >
+              <div class="row items-center">
+                <span style="margin-top: -2px" @click="emit('filterByTag', tag)">{{ tag }}</span>
+              </div>
+            </q-chip>
+            <q-chip
+              v-if="(task.tags || []).length > 1"
+              color="primary"
+              clickable
+              square
+              dense
+              dark
+              @click="areTagsExpanded = !areTagsExpanded"
+            ><q-icon :name="areTagsExpanded ? 'keyboard_arrow_left' : 'keyboard_arrow_right'" /></q-chip>
+            <!-- <AddTag :tags="task.tags" disable-add @input="removeTag">
+              <template #activator="{ open }">
+                <q-chip
+                  color="primary"
+                  clickable
+                  square
+                  dense
+                  dark
+                  @click="open"
+                ><q-icon name="more_horiz" /></q-chip>
+              </template>
+            </AddTag> -->
           <q-space />
+          <TaskOptions
+            :task-id="taskId"
+            hide-menu-button
+            :show-alert-button="false"
+            dense
+            flat
+            size="sm"
+            class="q-mr-xs"
+          />
           <!-- VIEW STORIES: -->
           <div v-if="stories && stories.length">
             <TaskStoryDropdown :stories="stories" />
@@ -154,23 +182,19 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
 <script setup lang="ts">
 import { queueTaskRefresh } from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
-import { computed, defineAsyncComponent, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Task } from 'src/types';
+import TaskOptionsModal from 'src/components/TaskOptionsModal.vue';
+import TaskDoneTime from 'src/components/TaskDoneTime.vue';
+import TaskAlertDisplay from 'src/components/TaskAlertDisplay.vue';
+import AddTag from 'src/components/AddTag.vue';
+import TaskStoryDropdown from 'src/components/TaskStoryDropdown.vue';
+import TaskOptions from 'src/components/TaskOptions.vue';
 
 const emit = defineEmits<{
   (event: 'filterByTag', tag: string): void
 }>();
 
-const TaskOptionsModal = defineAsyncComponent(() => import('src/components/TaskOptionsModal.vue'));
-const TaskDoneTime = defineAsyncComponent(() => import('src/components/TaskDoneTime.vue'));
-const TaskAlertDisplay = defineAsyncComponent(() => import('src/components/TaskAlertDisplay.vue'));
-const AddTag = defineAsyncComponent(() => import('src/components/AddTag.vue'));
-const TaskStoryDropdown = defineAsyncComponent(() => import('src/components/TaskStoryDropdown.vue'));
-const TaskOptions = defineAsyncComponent(() => import('src/components/TaskOptions.vue'));
-
-function test(arg: any) {
-  console.log('test:', arg);
-}
 
 const props = defineProps({
   taskId: {
@@ -187,6 +211,7 @@ const props = defineProps({
   }
 });
 
+const areTagsExpanded = ref(false);
 const addingTag = ref(false);
 // const alarmTimeouts = ref([]);
 // const alarmTickTimeout = ref(null);

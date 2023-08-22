@@ -72,6 +72,18 @@
             />
           </q-btn-group>
           <q-space />
+          <div class="pagination-container flex flex-center">
+            <q-pagination
+                v-model="pagination.page"
+                :max="paginationComputed.max"
+                :boundary-links="false"
+                color="grey"
+                active-color="primary"
+                direction-links
+                input
+            />
+          </div>
+          <q-space />
           <q-btn-group>
           <SimpleModal>
             <template #activator="{ open: openKeywordModal }">
@@ -206,17 +218,6 @@ show-options
             editable @refresh-task="refreshTask" @filter-by-tag="addTagToFilters" />
         </div>
       </div>
-      <q-space />
-      <div class="pagination-container flex flex-center">
-       <q-pagination
-           v-model="pagination.page"
-           :max="paginationComputed.max"
-           color="grey"
-           active-color="primary"
-           direction-links
-           input
-       />
-      </div>
     </template>
   </SimpleLayout>
 </template>
@@ -233,25 +234,15 @@ import {
 } from '../utils';
 import { FilterType, FilterTypes, Task } from 'src/types';
 import useTaskStore, { TaskBucket } from 'src/pinia/taskStore';
-import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
-
-const SimpleModal = defineAsyncComponent(() =>
-  import('src/components/SimpleModal.vue'));
-const AddTag = defineAsyncComponent(() =>
-  import('src/components/AddTag.vue'));
-const DisplayTask = defineAsyncComponent(() =>
-  import('src/components/DisplayTask.vue'));
-// const TaskTagSelector = defineAsyncComponent(() =>
-//   import('src/components/TaskTagSelector.vue'));
-const TaskSortDropdown = defineAsyncComponent(() =>
-  import('src/components/TaskSortDropdown.vue'));
-const SimpleLayout = defineAsyncComponent(() =>
-  import('src/components/SimpleLayout.vue'));
-const LocalStorageList = defineAsyncComponent(() =>
-  import('src/components/LocalStorageList.vue'));
-const FirebaseConfigModal = defineAsyncComponent(() =>
-  import('src/components/FirebaseConfigModal.vue'));
+import SimpleLayout from 'src/components/SimpleLayout.vue';
+import AddTag from 'src/components/AddTag.vue';
+import DisplayTask from 'src/components/DisplayTask.vue';
+import SimpleModal from 'src/components/SimpleModal.vue';
+import TaskSortDropdown from 'src/components/TaskSortDropdown.vue';
+import LocalStorageList from 'src/components/LocalStorageList.vue';
+import FirebaseConfigModal from 'src/components/FirebaseConfigModal.vue';
 
 // prompt going to firebase settings if there is no config
 const isFirebaseConfigDialogOpen = ref(!getFromLocalStorage(LocalStorageName.firebase_config, true));
@@ -597,7 +588,7 @@ watch(pagination, () => {
 }
 
 .task-list {
-  max-height: calc(100vh - 260px);
+  max-height: calc(100vh - 200px);
   overflow-y: scroll;
   display: flex;
   flex-direction: column;

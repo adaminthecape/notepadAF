@@ -71,6 +71,10 @@ const tasksList = computed<Task[]>(() => {
   return Object.values(store.getTasks);
 });
 
+function isStoryId(x: string | number) {
+  return `${x}` === `${parseInt(String(x), 10)}`;
+}
+
 const allTags = computed(() => {
   if (!tasksList.value || !tasksList.value.length) {
     return [];
@@ -80,7 +84,7 @@ const allTags = computed(() => {
     return props.tags;
   }
 
-  return tasksList.value.reduce(
+  const { other, stories } = tasksList.value.reduce(
     (agg: string[], task: Task) => {
       const tags = [...(task.tags || [])].filter(
         (tag) => !agg.includes(tag)
@@ -93,7 +97,21 @@ const allTags = computed(() => {
       return agg;
     },
     [] as string[]
-  ).sort();
+  ).sort()
+    .reduce((agg: { stories: string[], other: string[] }, item: string) => {
+      if (isStoryId(item)) {
+        agg.stories.push(item);
+      }
+      else {
+        agg.other.push(item);
+      }
+      return agg;
+    }, {
+      stories: [],
+      other: []
+    });
+
+  return [...other, ...stories];
 });
 
 const filteredList = computed(() => {

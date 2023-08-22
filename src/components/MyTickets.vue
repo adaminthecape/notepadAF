@@ -150,13 +150,12 @@ import {
   LocalStorageName,
   getFromLocalStorage,
 } from 'src/utils';
-import { ref, defineAsyncComponent, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { TaskSortType } from 'src/types';
 import { PivotalStory } from '@/pinia/pivotalStore';
-
-const TaskSortDropdown = defineAsyncComponent(() => import('src/components/TaskSortDropdown.vue'));
-const StoryCard = defineAsyncComponent(() => import('src/components/StoryCard.vue'));
-const SimpleLayout = defineAsyncComponent(() => import('src/components/SimpleLayout.vue'));
+import TaskSortDropdown from 'src/components/TaskSortDropdown.vue';
+import StoryCard from 'src/components/StoryCard.vue';
+import SimpleLayout from 'src/components/SimpleLayout.vue';
 
 const props = defineProps({
   cachedTickets: {
