@@ -72,10 +72,6 @@
 import { getFromLocalStorage, LocalStorageName, saveToLocalStorage } from 'src/utils';
 import { ref, onMounted, watch, defineAsyncComponent } from 'vue';
 
-function test(...args: any) {
-  console.log('test:', ...args);
-}
-
 const SimpleModal = defineAsyncComponent(() => import('src/components/SimpleModal.vue'));
 const TaskTagSelector = defineAsyncComponent(() => import('src/components/TaskTagSelector.vue'));
 
@@ -149,7 +145,6 @@ function addValue(val: string[]) {
 }
 
 function save(newVal: Record<string, any>[]) {
-  console.log('save:', props.value, items.value);
   emit('input', newVal);
   items.value = newVal;
   if (props.listKey) {
@@ -162,7 +157,6 @@ watch(props.value, (newVal) => {
   save(newVal);
 });
 
-console.log('init:', props.value, items.value);
 if (props.value?.length && !items.value?.length) {
   save(props.value);
 }

@@ -221,9 +221,9 @@
       <!-- TASK LIST: -->
       <div class="task-list" :key="`taskList-${taskListRenderIndex}`">
         <div v-for="task in limitedTasks" :key="task.id">
+          <!-- :style="task.done ? 'margin-top: 8px' : ''" -->
           <DisplayTask
             v-if="task"
-            :style="task.done ? 'margin-top: 8px' : ''"
             :key="taskRenderIndex[task.id]"
             note-id="tasks"
             :task-id="task.id"
@@ -490,10 +490,6 @@ function addTagToFilters(tag: string) {
   }
 }
 
-function doThing(...args: any) {
-  console.log('thing!', ...args);
-}
-
 function setFilter(type: string, value: any) {
   console.log('setFilter:', type, value);
   switch (type) {
@@ -557,8 +553,6 @@ function goToSettings() {
     LocalStorageName.currentTabQueue,
     'settings'
   );
-
-  console.log('goToSettings', getFromLocalStorage(LocalStorageName.currentTabQueue));
 }
 
 watch(pagination, () => {

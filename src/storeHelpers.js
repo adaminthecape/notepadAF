@@ -18,13 +18,10 @@ export function getTasksByBuckets(store, buckets) {
   );
 }
 
-export function getStory(store, storyId)
-{
-  console.log('get story:', storyId, store, store.getters['pivotal/get'](storyId));
+export function getStory(store, storyId) {
   return store.getters['pivotal/get'](storyId);
 }
 
-export async function loadStory(store, storyId)
-{
+export async function loadStory(store, storyId) {
   await store.dispatch('pivotal/load', { id: storyId });
 }

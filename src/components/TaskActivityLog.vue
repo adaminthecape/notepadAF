@@ -9,12 +9,22 @@ class="row items-center full-width justify-start" style="align-content: start" f
             no-caps>
             <template #label>
               <div class="row items-center justify-start full-width">
-                <q-chip square dense class="text-bold" style="min-width: 12em">{{ log.startDate }}</q-chip>
+                <!-- <q-chip square dense class="text-bold" style="min-width: 12em">{{ log.startDate }}</q-chip> -->
+                <TimeChip
+                  :custom-done-value="log.unix"
+                  date-format="{M}/{d}/{y}"
+                  time-format="{h}:{m}:{s}"
+                  show-date
+                  show-time
+                  dense
+                  style="display: inline"
+                />
                 <TaskActiveButton
                   v-if="taskId && !log.end"
                   :task-id="taskId"
                   mode="save"
-                  @click.stop.prevent="{ }"
+                  dense
+                  flat
                 />
                 <q-chip v-else class="text-bold" style="min-width: 4em" square dense>{{ !log.end ? "..." : log.duration
                 }}</q-chip>
@@ -90,6 +100,7 @@ import {
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
 import { Task, TaskActivityLog, TaskFilters } from 'src/types';
+import TimeChip from 'src/components/TimeChip.vue';
 
 const TaskActiveButton = defineAsyncComponent(() => import('src/components/TaskActiveButton.vue'));
 const props = defineProps({
@@ -147,6 +158,7 @@ const taskActivity = computed(() => {
             .slice(0, 2)
             .join(':'),
           id: task.id,
+          unix: new Date(log.start).getTime(),
           message: props.showMessage
             ? task.message && task.message.length > 50
               ? `${task.message.slice(0, 50)}...`

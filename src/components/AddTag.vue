@@ -18,7 +18,7 @@
         <q-input
             v-if="!disableAdd"
             v-model="value"
-            placeholder="Add a tag..."
+            placeholder="Search tags..."
             class="q-mb-xs"
             filled
             dense />

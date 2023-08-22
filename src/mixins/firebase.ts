@@ -166,19 +166,17 @@ export function removeUndefined(inputData: any, depth = 0): any {
     return inputData;
   }
 
+  if (Array.isArray(inputData)) {
+    return inputData.map((item) => removeUndefined(item));
+  }
+
   const data = { ...inputData };
 
-  if (Array.isArray(data)) {
-    return data.map((item) => removeUndefined(item));
-  } else if (typeof data === 'object') {
-    Object.keys(data).forEach((key) => {
-      if (typeof data[key] === 'undefined') {
-        data[key] = null;
-      }
-    });
-  } else if (typeof data === 'undefined') {
-    return null;
-  }
+  Object.keys(data).forEach((key) => {
+    if (typeof data[key] === 'undefined') {
+      data[key] = null;
+    }
+  });
 
   return data;
 }

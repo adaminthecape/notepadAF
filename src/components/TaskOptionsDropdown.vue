@@ -63,7 +63,7 @@
     <q-item>
       <TaskDoneButton
           v-if="showAllOptions || (showDoneButton || task.done)"
-          label="Complete task"
+          :label="task.done ? 'Undo task' : 'Complete task'"
           :task-id="task.id"
           :done="task.done"
           :size="size"

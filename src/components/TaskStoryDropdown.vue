@@ -33,6 +33,6 @@ const props = defineProps<{
 }>();
 
 const storyIds = computed(() => {
-  return props.stories && `${props.stories[0]?.id}${props.stories.length > 1 ? ` and ${props.stories.length - 1} more...` : ''}`;
+  return props.stories && `${props.stories[0]?.id}${props.stories.length > 1 ? ` (+${props.stories.length - 1})` : ''}`;
 });
 </script>

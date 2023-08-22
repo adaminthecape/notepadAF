@@ -1,8 +1,8 @@
 <template>
+  <!-- :class="{ 'q-mt-md': !!task.done }" -->
   <q-card
     v-if="task"
     class="flex q-mb-sm"
-    :class="{ 'q-mt-md': !!task.done }"
     :style="`flex-direction: column; background-color: #70809020`"
     flat
     bordered
@@ -10,10 +10,10 @@
     <q-item clickable dense @click.ctrl="editTask">
       <q-item-section>
         <div class="row items-center">
-          <div style="margin-top: -16px;" class="row full-width">
+          <!-- <div style="margin-top: -16px;" class="row full-width">
             <q-space />
-            <TaskDoneTime :task-id="task.id" />
-          </div>
+            <TimeChip :task-id="task.id" />
+          </div> -->
           <TaskAlertDisplay :task-id="task.id" />
           <q-space />
           <!-- MENU: -->
@@ -156,6 +156,15 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
               </template>
             </AddTag> -->
           <q-space />
+          <TimeChip
+            v-if="task.done"
+            :task-id="task.id"
+            date-format="{M}/{d}/{y}"
+            time-format="{h}:{m}:{s}"
+            show-date
+            dense
+            style="display: inline"
+          />
           <TaskOptions
             :task-id="taskId"
             hide-menu-button
@@ -182,7 +191,7 @@ import { computed, ref, watch } from 'vue';
 import { Task } from 'src/types';
 // import TaskOptionsModal from 'src/components/TaskOptionsModal.vue';
 import TaskOptionsDropdown from 'src/components/TaskOptionsDropdown.vue';
-import TaskDoneTime from 'src/components/TaskDoneTime.vue';
+import TimeChip from 'src/components/TimeChip.vue';
 import TaskAlertDisplay from 'src/components/TaskAlertDisplay.vue';
 import AddTag from 'src/components/AddTag.vue';
 import TaskStoryDropdown from 'src/components/TaskStoryDropdown.vue';
