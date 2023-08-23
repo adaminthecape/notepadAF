@@ -15,6 +15,7 @@ export enum LocalStorageName {
   activeTheme = 'activeTheme',
   taskCategories = 'taskCategories',
   zoomLevel = 'zoomLevel',
+  qSize = 'qSize',
   /** state */
   currentTab = 'currentTab',
   taskLimit = 'taskLimit',
@@ -558,4 +559,53 @@ export function getStoryHint(storyId: string | number) {
   }
 
   return `<span>${storyId}<q-tooltip>${storyName}</q-tooltip></span>`;
+}
+
+export function transformSizeProp(
+  requestedSize: string | undefined
+): string | undefined
+{
+  if (!requestedSize)
+  {
+    return requestedSize;
+  }
+
+  const pref = getFromLocalStorage(LocalStorageName.qSize, true);
+
+  if (!pref) {
+    return requestedSize;
+  }
+
+  const upsize = (size: string): string => {
+    console.log('upsize:', size);
+    switch (size)
+    {
+      case 'xs': return 'sm';
+      case 'sm': return 'md';
+      case 'md': return 'lg';
+      case 'lg': return 'xl';
+      case 'xl': return 'xl';
+      default: return size;
+    }
+  }
+
+  const downsize = (size: string): string => {
+    switch (size)
+    {
+      case 'xs': return 'xs';
+      case 'sm': return 'xs';
+      case 'md': return 'sm';
+      case 'lg': return 'md';
+      case 'xl': return 'lg';
+      default: return size;
+    }
+  }
+
+  switch (pref.level)
+  {
+    case -1: return downsize(requestedSize);
+    case 0: return requestedSize;
+    case 1: return upsize(requestedSize);
+    default: return requestedSize;
+  }
 }

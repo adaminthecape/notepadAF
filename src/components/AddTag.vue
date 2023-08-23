@@ -8,6 +8,7 @@
         <q-chip
           v-if="selectedTags && selectedTags.length"
           color="info"
+          :size="transformSizeProp('md')"
           square
           dense
           dark
@@ -45,6 +46,7 @@
 
 <script setup lang="ts">
 import { Task } from 'src/types';
+import { transformSizeProp } from 'src/utils';
 import {
   ref,
   defineAsyncComponent,
@@ -53,7 +55,7 @@ import {
 import useTaskStore from 'src/pinia/taskStore';
 
 const props = defineProps<{
-  selectedTags?: string[];
+  selectedTags?: string[]|'';
   multiple?: boolean;
   tags?: string[];
   disableAdd?: boolean;

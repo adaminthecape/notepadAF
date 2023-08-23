@@ -5,31 +5,30 @@
       class="row items-center"
       :style="color ? '' : 'background: #002200'"
       :color="color"
+      :size="transformSizeProp(size)"
       dark
       square
       dense
     >
       <q-icon
         v-if="showDate"
-        style="margin-top:2px"
         name="event_available"
         class="q-mr-xs"
       />
-      <span v-if="showDate">{{ date }}</span>
+      <span v-if="showDate" style="font-size:1.25em">{{ date }}</span>
       <q-icon
         v-if="showTime"
-        style="margin-top:1px"
         name="schedule"
         class="q-mr-xs"
         :class="{ 'q-ml-xs': showDate }"
       />
-      <span v-if="showTime">{{ time.slice(0, -3) }}</span>
+      <span v-if="showTime" style="font-size:1.25em">{{ time.slice(0, -3) }}</span>
     </q-chip>
   </div>
 </template>
 
 <script setup lang="ts">
-import { padLeft } from 'src/utils';
+import { padLeft, transformSizeProp } from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, ref } from 'vue';
 
@@ -49,6 +48,10 @@ const props = defineProps({
   short: {
     type: Boolean,
     default: true
+  },
+  size: {
+    type: String,
+    default: undefined
   },
   color: {
     type: String,
@@ -102,27 +105,37 @@ function getDateValues() {
   };
 }
 
-function toFormat(format: string) {
+function toFormat(format: string, timeOrDate?: 'time' | 'date' | undefined) {
   const {
     date, month, yearShort, yearLong, dayShort, dayLong,
     hour, minute, second
   } = getDateValues();
 
-  return format
-    // date:
-    .replaceAll('d', `${date}`)
-    .replaceAll('D', `${dayShort}`)
-    .replaceAll('DD', `${dayLong}`)
-    .replaceAll('M', `${month}`)
-    .replaceAll('MM', padLeft(`${month}`, '0', 2))
-    .replaceAll('y', `${yearShort}`)
-    .replaceAll('Y', `${yearShort}`)
-    .replaceAll('yy', `${yearLong}`)
-    .replaceAll('YY', `${yearLong}`)
-    // time:
-    .replaceAll('h', `${hour}`)
-    .replaceAll('m', padLeft(`${minute}`, '0', 2))
-    .replaceAll('s', padLeft(`${second}`, '0', 2))
+  let res = `${format}`;
+
+  if (!timeOrDate || timeOrDate === 'date')
+  {
+    res = res
+      .replaceAll('d', `${date}`)
+      .replaceAll('D', `${dayShort}`)
+      .replaceAll('DD', `${dayLong}`)
+      .replaceAll('M', `${month}`)
+      .replaceAll('MM', padLeft(`${month}`, '0', 2))
+      .replaceAll('y', `${yearShort}`)
+      .replaceAll('Y', `${yearShort}`)
+      .replaceAll('yy', `${yearLong}`)
+      .replaceAll('YY', `${yearLong}`);
+  }
+
+  if (!timeOrDate || timeOrDate === 'time')
+  {
+    res = res
+      .replaceAll('h', `${hour}`)
+      .replaceAll('m', padLeft(`${minute}`, '0', 2))
+      .replaceAll('s', padLeft(`${second}`, '0', 2));
+  }
+
+  return res;
 }
 
 const dateValues = ref(getDateValues());

@@ -172,7 +172,7 @@
                 <q-btn
                   class="q-ml-xs"
                   :icon="applyFilters ? 'lock' : 'lock_open'"
-                  size="sm"
+                  :size="transformSizeProp('sm')"
                   dense
                   flat
                   dark
@@ -244,7 +244,8 @@ import {
   LocalStorageName,
   saveToLocalStorage,
   saveToLocalStorageArray,
-  sortTaskList
+  sortTaskList,
+  transformSizeProp
 } from '../utils';
 import { FilterType, FilterTypes, Task } from 'src/types';
 import useTaskStore, { TaskBucket } from 'src/pinia/taskStore';

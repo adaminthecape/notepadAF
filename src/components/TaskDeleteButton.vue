@@ -2,7 +2,7 @@
   <div v-if="task">
     <q-btn
       :label="label"
-      :size="size"
+      :size="transformSizeProp(size)"
       :flat="flat"
       :dense="dense"
       :icon="icon || 'close'"
@@ -50,6 +50,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
+import { transformSizeProp } from 'src/utils';
 
 const props = defineProps({
   taskId: {

@@ -2,7 +2,7 @@
   <div>
     <q-btn
       :label="label"
-      :size="size"
+      :size="transformSizeProp(size)"
       :flat="flat"
       :dense="dense"
       :color="active ? 'orange' : undefined"
@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { timeSince } from 'src/utils';
+import { timeSince, transformSizeProp } from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, onMounted, ref, watch } from 'vue';
 

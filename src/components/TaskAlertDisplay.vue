@@ -6,7 +6,7 @@
     <q-btn
       v-for="(alert, a) in task.alerts"
       :key="`alert-${a}-${activeAlertsRenderKey}`"
-      size="sm"
+      :size="transformSizeProp('sm')"
       class="text-bold"
       :class="{ 'q-ml-xs': !!a }"
       unelevated outline dense
@@ -26,7 +26,7 @@
 import { TaskAlert } from 'src/types';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, ref } from 'vue';
-import { timeSince } from 'src/utils';
+import { timeSince, transformSizeProp } from 'src/utils';
 
 const props = defineProps<{
   taskId: string;

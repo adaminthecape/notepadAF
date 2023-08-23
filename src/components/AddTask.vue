@@ -37,7 +37,7 @@
                                 <q-btn
                                     icon="list"
                                     :color="newTask.messageType === 'textarea' ? 'positive' : 'neutral'"
-                                    size="sm"
+                                    :size="transformSizeProp('sm')"
                                     class="q-ml-xs"
                                     :outline="newTask.messageType === 'textarea'"
                                     :flat="newTask.messageType !== 'textarea'"
@@ -84,6 +84,7 @@
 </template>
 
 <script setup lang="ts">
+import { transformSizeProp } from 'src/utils';
 import { Task } from 'src/types';
 import { ref, defineAsyncComponent } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';

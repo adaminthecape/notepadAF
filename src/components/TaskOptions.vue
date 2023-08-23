@@ -7,7 +7,7 @@
     <q-btn
         v-if="showSingleTaskButton"
         icon="description"
-        :size="size"
+        :size="transformSizeProp(size)"
         :dense="dense"
         :flat="flat"
         @click="goToActivity()"
@@ -17,7 +17,7 @@
     <q-btn
         v-if="showActivityLogButton && task.activity && task.activity.length"
         icon="list"
-        :size="size"
+        :size="transformSizeProp(size)"
         :dense="dense"
         :flat="flat"
         @click="isViewingActivity = !isViewingActivity"
@@ -32,14 +32,14 @@
     <TaskAlertButton
         v-if="showAllOptions || (showAlertButton && (task.alerts && task.alerts.length))"
         :task-id="task.id"
-        :size="size"
+        :size="transformSizeProp(size)"
         :dense="dense"
         :flat="flat"
     />
     <TaskEditButton
         v-if="showAllOptions || showEditButton"
         :editing="isEditing || false"
-        :size="size"
+        :size="transformSizeProp(size)"
         :dense="dense"
         :flat="flat"
         @toggle="editTask()"
@@ -48,7 +48,7 @@
         v-if="showAllOptions || (showDoneButton || task.done)"
         :task-id="task.id"
         :done="task.done"
-        :size="size"
+        :size="transformSizeProp(size)"
         :dense="dense"
         :flat="flat"
         :chip="doneChip"
@@ -56,7 +56,7 @@
     <TaskActiveButton
         v-if="showAllOptions || (showActiveButton || task.active)"
         :task-id="task.id"
-        :size="size"
+        :size="transformSizeProp(size)"
         :dense="dense"
         :flat="flat"
         mode="save"
@@ -66,21 +66,21 @@
         :task-id="task.id"
         :dense="dense"
         :flat="flat"
-        :size="size"
+        :size="transformSizeProp(size)"
         mode="save"
     />
     <TaskArchiveButton
         v-if="showAllOptions || (showArchiveButton || task.archived)"
         :archived="task.archived"
         :task-id="taskId"
-        :size="size"
+        :size="transformSizeProp(size)"
         :dense="dense"
         :flat="flat"
     />
     <TaskDeleteButton
         v-if="showAllOptions || (showDeleteButton || task.deleted)"
         :task-id="taskId"
-        :size="size"
+        :size="transformSizeProp(size)"
         :dense="dense"
         :flat="flat"
         @removed="refreshTask()"
@@ -88,7 +88,7 @@
     <q-btn
         v-if="!hideMenuButton"
         icon="menu"
-        :size="size"
+        :size="transformSizeProp(size)"
         :dense="dense"
         :flat="flat"
         @click="showAllOptions = !showAllOptions"
@@ -99,7 +99,8 @@
 <script setup lang="ts">
 import {
   queueTaskRefresh,
-  goToActivityPageForTask
+  goToActivityPageForTask,
+transformSizeProp
 } from 'src/utils';
 import { ref, computed, watch } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';

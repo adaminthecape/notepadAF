@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import usePivotalStore from '@/pinia/pivotalStore';
+import usePivotalStore from 'src/pinia/pivotalStore';
 import { computed } from 'vue';
 
 const props = defineProps({

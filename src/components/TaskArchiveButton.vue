@@ -2,7 +2,7 @@
   <div>
     <q-btn
       :label="label"
-      :size="size"
+      :size="transformSizeProp(size)"
       :flat="flat"
       :dense="dense"
       :color="archived ? 'secondary' : undefined"
@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
-import { timeSince } from 'src/utils';
+import { timeSince, transformSizeProp } from 'src/utils';
 
 const props = defineProps({
   taskId: {

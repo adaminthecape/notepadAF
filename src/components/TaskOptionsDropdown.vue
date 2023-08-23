@@ -2,7 +2,7 @@
   <q-btn-dropdown
     dropdown-icon="menu"
       auto-close
-      :size="activatorSize || size || 'md'"
+      :size="transformSizeProp(activatorSize) || transformSizeProp(size) || 'md'"
       :dense="dense"
       :flat="flat"
   >
@@ -12,7 +12,7 @@
           v-if="showSingleTaskButton"
           label="View detail"
           icon="description"
-          :size="size"
+          :size="transformSizeProp(size)"
           :dense="dense"
           :flat="flat"
           @click="goToActivity()"
@@ -26,7 +26,7 @@
           label="Activity log"
           icon="list"
           :dense="dense"
-          :size="size"
+          :size="transformSizeProp(size)"
           :flat="flat"
           @click="isViewingActivity = !isViewingActivity"
       >
@@ -43,7 +43,7 @@
           v-if="showAllOptions || (showAlertButton || (task.alerts && task.alerts.length))"
           label="Create alert"
           :task-id="task.id"
-          :size="size"
+          :size="transformSizeProp(size)"
           :dense="dense"
           :flat="flat"
       />
@@ -53,7 +53,7 @@
           v-if="showAllOptions || showEditButton"
           label="Edit task"
           :editing="isEditing || false"
-          :size="size"
+          :size="transformSizeProp(size)"
           :dense="dense"
           :flat="flat"
           @toggle="editTask()"
@@ -65,7 +65,7 @@
           :label="task.done ? 'Undo task' : 'Complete task'"
           :task-id="task.id"
           :done="task.done"
-          :size="size"
+          :size="transformSizeProp(size)"
           :dense="dense"
           :flat="flat"
       />
@@ -75,7 +75,7 @@
           v-if="showAllOptions || (showActiveButton || task.active)"
           :label="task.active ? 'Finish activity' : 'Start task'"
           :task-id="task.id"
-          :size="size"
+          :size="transformSizeProp(size)"
           :dense="dense"
           :flat="flat"
           mode="save"
@@ -88,7 +88,7 @@
           :task-id="task.id"
           :dense="dense"
           :flat="flat"
-          :size="size"
+          :size="transformSizeProp(size)"
           mode="save"
       />
     </q-item>
@@ -98,7 +98,7 @@
           label="Archive task"
           :archived="task.archived"
           :task-id="taskId"
-          :size="size"
+          :size="transformSizeProp(size)"
           :dense="dense"
           :flat="flat"
       />
@@ -108,7 +108,7 @@
           v-if="showAllOptions || (showDeleteButton || task.deleted)"
           label="Delete task"
           :task-id="taskId"
-          :size="size"
+          :size="transformSizeProp(size)"
           :dense="dense"
           :flat="flat"
           @removed="refreshTask()"
@@ -127,7 +127,8 @@
 <script setup lang="ts">
 import {
   queueTaskRefresh,
-  goToActivityPageForTask
+  goToActivityPageForTask,
+transformSizeProp
 } from 'src/utils';
 import { ref, computed, watch } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';

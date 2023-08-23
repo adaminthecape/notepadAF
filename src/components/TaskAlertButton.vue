@@ -2,7 +2,7 @@
   <div>
     <q-btn
       :label="label"
-      :size="size"
+      :size="transformSizeProp(size)"
       :flat="flat"
       :dense="dense"
       :icon="icon || 'alarm_add'"
@@ -30,6 +30,7 @@
 import { ref, computed, defineAsyncComponent } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
 import { Task, TaskAlert } from 'src/types';
+import { transformSizeProp } from 'src/utils';
 
 const store = useTaskStore();
 const props = defineProps<{

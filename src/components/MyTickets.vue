@@ -153,7 +153,7 @@ import {
 } from 'src/utils';
 import { ref, computed, onMounted, watch } from 'vue';
 import { TaskSortType } from 'src/types';
-import { PivotalStory } from '@/pinia/pivotalStore';
+import { PivotalStory } from 'src/pinia/pivotalStore';
 import TaskSortDropdown from 'src/components/TaskSortDropdown.vue';
 import StoryCard from 'src/components/StoryCard.vue';
 import SimpleLayout from 'src/components/SimpleLayout.vue';

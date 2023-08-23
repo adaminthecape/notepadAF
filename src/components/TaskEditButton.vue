@@ -1,6 +1,6 @@
 <template>
   <q-btn
-    :size="size"
+    :size="transformSizeProp(size)"
     :flat="flat"
     :dense="dense"
     :icon="icon || 'edit'"
@@ -15,6 +15,8 @@
 </template>
 
 <script setup lang="ts">
+import { transformSizeProp } from 'src/utils';
+
 const props = defineProps<{
   editing: boolean;
   size?: string;

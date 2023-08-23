@@ -6,7 +6,7 @@
     time-format="h:m:s"
     :show-date="!withinPreviousDay"
     :show-time="withinPreviousDay"
-    :size="size"
+    :size="transformSizeProp('sm')"
     :flat="flat"
     :dense="dense"
     style="display: inline"
@@ -15,7 +15,7 @@
   <q-btn
     v-else
     :label="label"
-    :size="size"
+    :size="transformSizeProp(size)"
     :flat="flat"
     :dense="dense"
     :color="done ? 'green-7' : undefined"
@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { timeSince } from 'src/utils';
+import { timeSince, transformSizeProp } from 'src/utils';
 import { computed, ref } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
 import TimeChip from 'src/components/TimeChip.vue';

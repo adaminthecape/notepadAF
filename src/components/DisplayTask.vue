@@ -45,8 +45,8 @@
             show-subtask-button
             dense
             flat
-            size="md"
-            activator-size="sm"
+            :size="transformSizeProp('sm')"
+            :activator-size="transformSizeProp('sm')"
             @edit-task="editTask()"
           />
           <!-- MESSAGE: -->
@@ -87,7 +87,7 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
                   <q-btn
                     icon="add_box"
                     color="info"
-                    size="sm"
+                    :size="transformSizeProp('sm')"
                     dense
                     flat
                     @click="open"
@@ -123,7 +123,7 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
                 (task.tags || []).slice(0, 1)"
               :key="`tag-${tagIndex}`"
               color="info"
-              size="sm"
+              :size="transformSizeProp('sm')"
               square
               dense
               dark
@@ -138,7 +138,7 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
             <q-chip
               v-if="(task.tags || []).length > 1"
               color="info"
-              size="sm"
+              :size="transformSizeProp('sm')"
               clickable
               square
               dense
@@ -164,7 +164,7 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
             :show-alert-button="false"
             dense
             flat
-            size="sm"
+            :size="transformSizeProp('sm')"
             class="q-mr-xs"
             done-chip
           />
@@ -179,7 +179,7 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
 </template>
 
 <script setup lang="ts">
-import { queueTaskRefresh } from 'src/utils';
+import { queueTaskRefresh, transformSizeProp } from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, ref, watch } from 'vue';
 import { Task } from 'src/types';

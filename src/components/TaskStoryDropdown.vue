@@ -1,7 +1,7 @@
 <template>
   <div v-if="stories && stories.length">
     <q-btn-dropdown
-        size="sm"
+        :size="transformSizeProp('sm')"
         unelevated
         dense
     >
@@ -23,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+import { transformSizeProp } from 'src/utils';
 import { computed, defineAsyncComponent } from 'vue';
 
 const StoryCard = defineAsyncComponent(() => import('src/components/StoryCard.vue'));

@@ -13,10 +13,10 @@ class="row items-center full-width justify-start" style="align-content: start" f
                 <TimeChip
                   :custom-done-value="log.unix"
                   date-format="M/d"
-                  time-format="h:m"
-                  show-date
+                  time-format="M/d h:m:s"
                   show-time
                   dense
+                  :size="transformSizeProp('sm')"
                   style="display: inline"
                 />
                 <TaskActiveButton
@@ -95,8 +95,9 @@ v-model="log.note" dense filled @click.stop.prevent="
 <script setup lang="ts">
 import {
   filterTaskList,
-  secondsToHumanReadable
-} from '../utils';
+  secondsToHumanReadable,
+transformSizeProp
+} from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
 import { Task, TaskActivityLog, TaskFilters } from 'src/types';

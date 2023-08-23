@@ -10,7 +10,8 @@
 color="primary" icon="start" size="sm" dense flat
             @click="startSubtask(s)"><q-tooltip>Start</q-tooltip></q-btn>
           <q-btn
-color="negative" icon="delete" size="sm" dense flat
+color="negative" icon="delete"
+              :size="transformSizeProp('sm')" dense flat
             @click="removeSubtask(s)"><q-tooltip>Remove</q-tooltip></q-btn>
         </div>
       </q-item-section>
@@ -26,6 +27,7 @@ color="negative" icon="delete" size="sm" dense flat
 <script setup lang="ts">
 import {
   queueTaskRefresh,
+  transformSizeProp
 } from 'src/utils';
 import { computed, ref } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';

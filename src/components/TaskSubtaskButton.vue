@@ -2,7 +2,7 @@
   <div>
     <q-btn
       :label="label"
-      :size="size"
+      :size="transformSizeProp(size)"
       :flat="flat"
       :dense="dense"
       icon="add"
@@ -31,6 +31,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
+import { transformSizeProp } from 'src/utils';
 
 const props = defineProps({
   taskId: {

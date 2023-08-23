@@ -17,7 +17,7 @@
           <q-chip
 v-for="label in story.labels" :label="label.name" :key="label.name"
             :color="label.name.includes('(') ? 'primary' : 'secondary'" class="q-ma-none q-mr-xs" style="color: #ddd"
-            :size="dense ? 'sm' : 'md'" />
+            :size="transformSizeProp(dense ? 'sm' : 'md')" />
         </div>
         <div class="row q-mt-xs">
           <q-chip :color="story.created_at_color || 'primary'" square dense dark>
@@ -55,7 +55,7 @@ v-if="allowAddTasks" label="Tasks" color="primary" :dense="dense" flat
           <q-chip
 v-for="label in story.labels" :label="label.name" :key="label.name"
             :color="label.name.includes('(') ? 'primary' : 'secondary'" class="q-ma-none q-mr-xs" style="color: #ddd"
-            :size="dense ? 'sm' : 'md'" />
+            :size="transformSizeProp(dense ? 'sm' : 'md')" />
         </div>
       </div>
     </template>
@@ -84,6 +84,7 @@ import {
   openInBrowser,
   LocalStorageName,
   saveToLocalStorageArray,
+transformSizeProp,
 } from '../utils';
 import { computed, onMounted } from 'vue';
 import usePivotalStore from 'src/pinia/pivotalStore';
