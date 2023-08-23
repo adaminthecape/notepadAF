@@ -123,6 +123,7 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
                 (task.tags || []).slice(0, 1)"
               :key="`tag-${tagIndex}`"
               color="info"
+              size="sm"
               square
               dense
               dark
@@ -131,12 +132,13 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
               @remove="removeTag(tag)"
             >
               <div class="row items-center">
-                <span style="margin-top: -2px" @click="emit('filterByTag', tag)">{{ tag }}</span>
+                <span style="font-size:1.2em" @click="emit('filterByTag', tag)">{{ tag }}</span>
               </div>
             </q-chip>
             <q-chip
               v-if="(task.tags || []).length > 1"
               color="info"
+              size="sm"
               clickable
               square
               dense

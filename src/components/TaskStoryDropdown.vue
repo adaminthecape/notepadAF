@@ -3,7 +3,6 @@
     <q-btn-dropdown
         size="sm"
         unelevated
-        outline
         dense
     >
       <template #label>

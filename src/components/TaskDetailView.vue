@@ -6,6 +6,11 @@
     <template #header-title>
       <!-- Task controls -->
       <div class="row">
+        <q-btn
+          icon="arrow_back_ios"
+          dense
+          @click="app?.openTab('tasks')"
+        />
         <q-space />
         <TaskOptions
             :task-id="taskIdToUse"
@@ -102,7 +107,7 @@
 
 <script setup lang="ts">
 import { getFromLocalStorage, LocalStorageName } from 'src/utils';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, inject } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
 
 import AppTabSelector from 'src/components/AppTabSelector.vue';
@@ -111,6 +116,11 @@ import SubtaskList from 'src/components/TaskSubtaskList.vue';
 import DisplayTask from 'src/components/DisplayTask.vue';
 import TaskActivityLog from 'src/components/TaskActivityLog.vue';
 import TaskOptions from 'src/components/TaskOptions.vue';
+
+const app: {
+  activeTabs: () => Record<string, boolean>;
+  openTab: (tab: string) => void;
+} | undefined = inject('helpers');
 
 const props = defineProps<{
   taskId: string;
