@@ -45,7 +45,7 @@
             show-subtask-button
             dense
             flat
-            :size="transformSizeProp('sm')"
+            :size="transformSizeProp('md')"
             :activator-size="transformSizeProp('sm')"
             @edit-task="editTask()"
           />

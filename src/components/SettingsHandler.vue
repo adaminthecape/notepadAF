@@ -153,11 +153,11 @@ v-model="pivotalProjectId" :type="visibilityToggles.pivotalProjectId ? 'text' : 
             <q-btn-group>
               <q-btn
 color="primary" icon="remove" size="md" class="full-width" dense flat
-                @click.stop.prevent="addZoom(-10)" />
+                @click.stop.prevent="qZoom(-1)" />
               <q-btn :label="currentZoomLevel" no-caps />
               <q-btn
 color="primary" icon="add" size="md" class="full-width" dense flat
-                @click.stop.prevent="addZoom(10)" />
+                @click.stop.prevent="qZoom(1)" />
             </q-btn-group>
           </q-item-section>
         </q-item>
@@ -229,7 +229,8 @@ const customSetting = ref({
   label: '',
   value: '',
 });
-const currentZoomLevel = ref((document.getElementsByTagName('body')[0].style as any).zoom || '100%');
+// const currentZoomLevel = ref((document.getElementsByTagName('body')[0].style as any).zoom || '100%');
+const currentZoomLevel = ref(getZoomLevelName(getFromLocalStorage(LocalStorageName.qSize, true)?.level || 0));
 const isConfirmingUserDeletion = ref(false);
 const visibilityToggles = ref({
   pivotalProjectId: false,
@@ -239,6 +240,18 @@ const visibilityToggles = ref({
   projectId: false,
   messagingSenderId: false,
 });
+
+function getZoomLevelName(level: number): string {
+  return level === 0 ? 'Default' : level === -1 ? 'Small' : 'Large';
+}
+function qZoom(add: number): void {
+  const c = getFromLocalStorage(LocalStorageName.qSize, true)?.level ?? 0;
+  const level = add ? Math.min((c + add), 1) : Math.max(c + add, -1);
+  console.log({ add, level, c });
+
+  saveToLocalStorage(LocalStorageName.qSize, { level });
+  currentZoomLevel.value = getZoomLevelName(level);
+}
 
 function addZoom(amount: number) {
   const current = parseInt(currentZoomLevel.value.split('%')[0], 10);
