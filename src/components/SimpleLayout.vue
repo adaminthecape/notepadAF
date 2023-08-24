@@ -11,7 +11,7 @@ import { computed } from "vue";
 
     <q-header
         v-if="header"
-        elevated
+        unelevated
         style="background-color: #00084080"
     >
       <q-toolbar

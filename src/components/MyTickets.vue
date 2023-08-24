@@ -5,128 +5,139 @@
     </template>
     <template #header-title> Tickets </template>
     <template #header-right>
+      <SimpleModal>
+        <template #activator="{ open }">
+          <q-btn icon="search" dense class="q-mr-sm" @click="open" />
+        </template>
+        <template #content>
+          <q-item>
+            <q-item-section caption>
+              <h5>Keyword</h5>
+            </q-item-section>
+            <q-item-section>
+              <q-input
+                v-model="queryParams.text"
+                class="q-pa-sm"
+                bottom-slots
+                stack-label
+                clearable
+                filled
+              />
+            </q-item-section>
+          </q-item>
+          <q-item>
+            <q-item-section caption>
+              <h5>Owner</h5>
+            </q-item-section>
+            <q-item-section>
+              <q-input
+                v-model="queryParams.owner"
+                class="q-pa-sm"
+                bottom-slots
+                stack-label
+                clearable
+                filled
+              />
+            </q-item-section>
+          </q-item>
+          <q-item>
+            <q-item-section caption>
+              <div class="row items-center">
+                <h5>
+                  Epic
+                </h5>
+                <q-space />
+                <div class="row items-center">
+                  <q-btn label="All" class="q-pa-sm" dense flat @click="toggleSelectAll('epic')" />
+                  <q-btn label="Dev" class="q-pa-sm" dense flat @click="toggleSelectAll('epic', 'dev')" />
+                  <q-btn label="QA" class="q-pa-sm" dense flat @click="toggleSelectAll('epic', 'qa')" />
+                </div>
+              </div>
+            </q-item-section>
+            <q-item-section>
+              <q-select
+                v-model="queryParams.epic"
+                :options="queryParamOptions.epic"
+                class="q-pa-sm"
+                stack-label
+                filled
+                :multiple="queryParamMultiples.epic || false"
+              >
+                <template #append>
+                  <q-btn
+                    v-if="queryParams.epic"
+                    icon="clear"
+                    dense
+                    flat
+                    @click.stop.prevent="queryParams.epic = undefined"
+                  />
+                </template>
+              </q-select>
+            </q-item-section>
+          </q-item>
+          <q-item>
+            <q-item-section caption>
+              <h5>
+                Include done
+              </h5>
+            </q-item-section>
+            <q-item-section>
+              <q-checkbox
+                v-model="queryParams.includedone"
+                class="q-pa-sm"
+              />
+            </q-item-section>
+          </q-item>
+        </template>
+        <template #actions>
+            <q-btn
+              v-close-popup
+              icon="search"
+              label="Search"
+              class="q-ma-sm"
+              color="primary"
+              @click="getTickets"
+            />
+          </template>
+      </SimpleModal>
       <q-btn icon="refresh" dense class="q-mr-sm" @click="getTickets" />
       <AppTabSelector />
     </template>
     <template #page-header>
-      <q-expansion-item label="Search filters" class="q-my-sm bordered" default-opened>
-        <q-item>
-          <q-item-section caption>
-            <h5>Keyword</h5>
-          </q-item-section>
-          <q-item-section>
-            <q-input
-              v-model="queryParams.text"
-              class="q-pa-sm"
-              bottom-slots
-              stack-label
-              clearable
-              filled
-            />
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section caption>
-            <h5>Owner</h5>
-          </q-item-section>
-          <q-item-section>
-            <q-input
-              v-model="queryParams.owner"
-              class="q-pa-sm"
-              bottom-slots
-              stack-label
-              clearable
-              filled
-            />
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section caption>
-            <div class="row items-center">
-              <h5>
-                Epic
-              </h5>
+      <transition name="fade" appear>
+        <div v-if="resultTotals" :key="resultsRenderIndex" class="q-mt-sm">
+          <q-badge
+v-if="resultTotals.hits > 0" color="primary" style="font-size: 1.2em; user-select: none"
+            class="q-pa-md q-mb-md full-width">
+            <div class="row items-center full-width">
+              <div>
+                {{ resultTotals.hits }} stories,
+                {{ resultTotals.points }} points
+              </div>
               <q-space />
-              <div class="row items-center">
-                <q-btn label="All" class="q-pa-sm" dense flat @click="toggleSelectAll('epic')" />
-                <q-btn label="Dev" class="q-pa-sm" dense flat @click="toggleSelectAll('epic', 'dev')" />
-                <q-btn label="QA" class="q-pa-sm" dense flat @click="toggleSelectAll('epic', 'qa')" />
+              <div>
+                <TaskSortDropdown
+                  :sort-type="sortType"
+                  :sort-types="sortTypes"
+                  :inverse-sort="inverseSort"
+                  @set-sort-type="setSortType"
+                />
               </div>
             </div>
-          </q-item-section>
-          <q-item-section>
-            <q-select
-              v-model="queryParams.epic"
-              :options="queryParamOptions.epic"
-              class="q-pa-sm"
-              stack-label
-              filled
-              :multiple="queryParamMultiples.epic || false"
-            >
-              <template #append>
-                <q-btn
-                  v-if="queryParams.epic"
-                  icon="clear"
-                  dense
-                  flat
-                  @click.stop.prevent="queryParams.epic = undefined"
-                />
-              </template>
-            </q-select>
-          </q-item-section>
-        </q-item>
-        <q-item>
-          <q-item-section caption>
-            <h5>
-              Include done
-            </h5>
-          </q-item-section>
-          <q-item-section>
-            <q-checkbox
-              v-model="queryParams.includedone"
-              class="q-pa-sm"
-            />
-          </q-item-section>
-        </q-item>
-        <div class="row">
-          <q-space />
-          <q-btn icon="save" label="Save options and reload" class="q-ma-sm" @click="getTickets" />
+          </q-badge>
+          <q-badge
+v-else color="primary" style="font-size: 1.2em; user-select: none"
+            class="q-pa-md q-mb-md full-width">
+            <div class="row items-center full-width">
+              <div>No results found.</div>
+            </div>
+          </q-badge>
         </div>
-      </q-expansion-item>
+      </transition>
     </template>
     <template #page-content>
       <q-scroll-area style="height: calc(100vh - 120px)">
         <div>
-          <transition name="fade" appear>
-            <div v-if="resultTotals" :key="resultsRenderIndex">
-              <q-badge
-v-if="resultTotals.hits > 0" color="primary" style="font-size: 1.2em; user-select: none"
-                class="q-pa-md q-mb-md full-width">
-                <div class="row items-center full-width">
-                  <div>
-                    {{ resultTotals.hits }} stories,
-                    {{ resultTotals.points }} points
-                  </div>
-                  <q-space />
-                  <div>
-                    <TaskSortDropdown
-                      :sort-type="sortType"
-                      :sort-types="sortTypes"
-                      :inverse-sort="inverseSort"
-                      @set-sort-type="setSortType"
-                    />
-                  </div>
-                </div>
-              </q-badge>
-              <q-badge
-v-else color="primary" style="font-size: 1.2em; user-select: none"
-                class="q-pa-md q-mb-md full-width">
-                <div class="row items-center full-width">
-                  <div>No results found.</div>
-                </div>
-              </q-badge>
-            </div>
-          </transition>
           <div v-if="isLoadingActivity" class="full-width">
             <q-spinner size="lg" style="margin: 0 auto" />
           </div>
@@ -157,6 +168,7 @@ import { PivotalStory } from 'src/pinia/pivotalStore';
 import TaskSortDropdown from 'src/components/TaskSortDropdown.vue';
 import StoryCard from 'src/components/StoryCard.vue';
 import SimpleLayout from 'src/components/SimpleLayout.vue';
+import SimpleModal from 'src/components/SimpleModal.vue';
 import AppTabSelector from 'src/components/AppTabSelector.vue';
 
 const props = defineProps({

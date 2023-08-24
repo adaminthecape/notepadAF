@@ -8,6 +8,7 @@ import { defineStore } from 'pinia';
 import { Task } from 'src/types';
 // import { readFromDbSync, saveAll } from 'src/mixins/jsondb.js';
 import {
+  doesTaskHaveStories,
   getFromLocalStorage,
   getStoriesFromTask,
   LocalStorageName,
@@ -48,12 +49,18 @@ const useTaskStore = defineStore('taskStore', {
           extra: {
             tags: [],
           },
-          handler: (task, extra) => {
-            return Boolean(
-              (Array.isArray(extra) &&
-                (task.tags || []).some((tag) => extra.includes(tag))) ||
-                getStoriesFromTask(task).length
-            );
+          handler: (task: Task, extra: TaskBucketExtras): boolean => {
+            const hasStories = doesTaskHaveStories(task);
+
+            if (hasStories) return true;
+
+            if (Array.isArray(extra?.tags) && Array.isArray(task.tags)) {
+              return Boolean(
+                task.tags.some((tag: string) => extra.tags?.includes(tag))
+              );
+            }
+
+            return false;
           },
         },
         // {
@@ -77,7 +84,7 @@ const useTaskStore = defineStore('taskStore', {
           extra: {
             tags: ['personal', 'shopping'],
           },
-          handler: (task, extra) => {
+          handler: (task: Task, extra: TaskBucketExtras): boolean => {
             return (
               !getStoriesFromTask(task).length &&
               (!extra || !extra.tags
@@ -87,12 +94,12 @@ const useTaskStore = defineStore('taskStore', {
                   ))
             );
           },
-        },
-        {
-          title: 'Deleted',
-          active: false,
-          operator: 'and',
-          handler: (task: Task) => Boolean(task.deleted),
+          // },
+          // {
+          //   title: 'Deleted',
+          //   active: false,
+          //   operator: 'and',
+          //   handler: (task: Task) => Boolean(task.deleted),
           // },
           // {
           //   title: 'Other',

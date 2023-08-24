@@ -171,21 +171,43 @@ function keywordCheck(task: Task, filters: TaskFilters) {
   );
 }
 
+export function doesStringHaveStories(str: string) {
+  return (str.match(/1\d{8}/g) || []).length > 0;
+}
+
+export function doesTaskHaveStories(task: Task) {
+  if (!task) return false;
+  let tagsStringified = [];
+  try {
+    tagsStringified = JSON.parse(JSON.stringify(task.tags));
+  } catch (e) {
+    //
+  }
+  return doesStringHaveStories(`${tagsStringified.join('|')}|${task.message}`);
+}
+
 export function getStoriesFromTask(task: Task) {
   if (!task || !task.stories) {
     return [];
   }
 
+  let tagsStringified = [];
+  try {
+    tagsStringified = JSON.parse(JSON.stringify(task.tags));
+  } catch (e) {
+    //
+  }
+
   return (
-    (`${(task.tags || []).join('|')}|${task.message}`.match(/1\d{8}/g) ||
+    (`${tagsStringified.join('|')}|${task.message}`.match(/1\d{8}/g) ||
       []) as any
   ).reduce((agg: Array<{ id: string | number }>, id: string) => {
-    if (!agg.some((existing: any) => existing.id === id)) {
+    if (!agg.some((existing: { id: string | number }) => existing.id === id)) {
       agg.push({ id });
     }
 
     return agg;
-  }, [] as any[]);
+  }, [] as Array<string | number>);
 }
 
 /** Filter the list of tasks based on provided filters */
@@ -563,10 +585,8 @@ export function getStoryHint(storyId: string | number) {
 
 export function transformSizeProp(
   requestedSize: string | undefined
-): string | undefined
-{
-  if (!requestedSize)
-  {
+): string | undefined {
+  if (!requestedSize) {
     return requestedSize;
   }
 
@@ -578,34 +598,47 @@ export function transformSizeProp(
 
   const upsize = (size: string): string => {
     console.log('upsize:', size);
-    switch (size)
-    {
-      case 'xs': return 'sm';
-      case 'sm': return 'md';
-      case 'md': return 'lg';
-      case 'lg': return 'xl';
-      case 'xl': return 'xl';
-      default: return size;
+    switch (size) {
+      case 'xs':
+        return 'sm';
+      case 'sm':
+        return 'md';
+      case 'md':
+        return 'lg';
+      case 'lg':
+        return 'xl';
+      case 'xl':
+        return 'xl';
+      default:
+        return size;
     }
-  }
+  };
 
   const downsize = (size: string): string => {
-    switch (size)
-    {
-      case 'xs': return 'xs';
-      case 'sm': return 'xs';
-      case 'md': return 'sm';
-      case 'lg': return 'md';
-      case 'xl': return 'lg';
-      default: return size;
+    switch (size) {
+      case 'xs':
+        return 'xs';
+      case 'sm':
+        return 'xs';
+      case 'md':
+        return 'sm';
+      case 'lg':
+        return 'md';
+      case 'xl':
+        return 'lg';
+      default:
+        return size;
     }
-  }
+  };
 
-  switch (pref.level)
-  {
-    case -1: return downsize(requestedSize);
-    case 0: return requestedSize;
-    case 1: return upsize(requestedSize);
-    default: return requestedSize;
+  switch (pref.level) {
+    case -1:
+      return downsize(requestedSize);
+    case 0:
+      return requestedSize;
+    case 1:
+      return upsize(requestedSize);
+    default:
+      return requestedSize;
   }
 }

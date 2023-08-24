@@ -1,6 +1,6 @@
 <template>
   <div>
-    <slot name="activator" v-bind="{ open, close }" />
+    <slot name="activator" v-bind="{ open, close }"></slot>
     <q-dialog
         v-model="isModalOpen"
     >
@@ -8,23 +8,26 @@
           class="q-px-lg q-pb-lg"
           :style="fullWidth ? 'min-width: 95vw' : ''"
       >
-        <h4 class="modal-title">
-          <slot name="title" />
-        </h4>
+        <slot name="title">
+          <h4 class="modal-title">
+            {{ title }}
+          </h4>
+        </slot>
         <div class="modal-content q-mb-lg">
-          <slot name="content" />
+          <slot name="content"></slot>
         </div>
         <div class="modal-actions row">
           <q-space />
-          <slot name="actions" v-bind="{ open, close, toggle }" />
           <slot name="close" v-bind="{ open, close, toggle }">
             <q-btn
                 label="Close"
                 color="negative"
+                dense
                 flat
                 @click="close"
             />
           </slot>
+          <slot name="actions" v-bind="{ open, close, toggle }"></slot>
         </div>
       </q-card>
     </q-dialog>
