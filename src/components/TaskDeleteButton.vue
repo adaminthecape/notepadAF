@@ -8,7 +8,7 @@
       :icon="icon || 'close'"
       :color="task.deleted ? 'negative' : undefined"
       v-model="isConfirmingDeletion"
-      @click="isConfirmingDeletion = !isConfirmingDeletion"
+      @click="handleClick"
     >
       <q-tooltip>Delete task</q-tooltip>
     </q-btn>
@@ -36,7 +36,7 @@
                   label="Remove"
                   dense
                   flat
-                  @click.stop.prevent="reallyRemoveTask"
+                  @click.stop.prevent="toggleDeleted"
                 />
               </div>
             </div>
@@ -91,13 +91,24 @@ const task = computed(() => (
   props.taskId ? store.getTask(props.taskId) : undefined
 ));
 
-function reallyRemoveTask() {
+function toggleDeleted() {
   if (!task.value) return;
 
   store.cloudUpdateSingle(
-    { ...task.value, deleted: Date.now() }
+    { ...task.value, deleted: task.value.deleted ? 0 : Date.now() }
   ).then(() => {
     isConfirmingDeletion.value = false;
   });
+}
+
+function handleClick(): void {
+  if (!task.value) return;
+
+  if (task.value.deleted) {
+    toggleDeleted();
+  }
+  else {
+    isConfirmingDeletion.value = !isConfirmingDeletion.value;
+  }
 }
 </script>
