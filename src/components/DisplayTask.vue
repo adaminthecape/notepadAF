@@ -82,7 +82,11 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
         </div>
         <div class="row items-center" style="margin: 0 -12px">
             <!-- ADD TAGS: -->
-            <AddTag @input="addTag">
+            <AddTag
+              :selected-tags="task.tags || []"
+              @input="addTag"
+              @remove="removeTag"
+            >
               <template #activator="{ open }">
                   <q-btn
                     icon="add_box"
@@ -94,28 +98,6 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
                   ><q-tooltip>Add tags</q-tooltip></q-btn>
               </template>
             </AddTag>
-            <!--<q-btn-->
-            <!--    icon="add"-->
-            <!--    size="sm"-->
-            <!--    dense-->
-            <!--    round-->
-            <!--    flat-->
-            <!--    @click="addingTag = !addingTag"-->
-            <!--/>-->
-            <!--<q-chip-->
-            <!--    v-show="addingTag"-->
-            <!--    style="overflow-y: hidden"-->
-            <!--    square-->
-            <!--    dense-->
-            <!--    dark-->
-            <!--&gt;-->
-            <!--  <TaskTagSelector-->
-            <!--      dark-->
-            <!--      new-value-mode-->
-            <!--      @cancel="addingTag = false"-->
-            <!--      @input="addTag"-->
-            <!--  />-->
-            <!--</q-chip>-->
             <!-- VIEW TAGS: -->
             <q-chip
               v-for="(tag, tagIndex) in areTagsExpanded ?
@@ -128,8 +110,6 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
               dense
               dark
               style="margin-right: -2px"
-              removable
-              @remove="removeTag(tag)"
             >
               <div class="row items-center">
                 <span style="font-size:1.2em" @click="emit('filterByTag', tag)">{{ tag }}</span>
@@ -145,18 +125,6 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
               dark
               @click="areTagsExpanded = !areTagsExpanded"
             ><q-icon :name="areTagsExpanded ? 'keyboard_arrow_left' : 'keyboard_arrow_right'" /></q-chip>
-            <!-- <AddTag :tags="task.tags" disable-add @input="removeTag">
-              <template #activator="{ open }">
-                <q-chip
-                  color="primary"
-                  clickable
-                  square
-                  dense
-                  dark
-                  @click="open"
-                ><q-icon name="more_horiz" /></q-chip>
-              </template>
-            </AddTag> -->
           <q-space />
           <TaskOptions
             :task-id="taskId"

@@ -16,7 +16,7 @@ class="row items-center full-width justify-start" style="align-content: start" f
                   time-format="M/d h:m:s"
                   show-time
                   dense
-                  :size="transformSizeProp('sm')"
+                  :size="transformSizeProp('xs')"
                   style="display: inline"
                 />
                 <TaskActiveButton
@@ -96,7 +96,7 @@ v-model="log.note" dense filled @click.stop.prevent="
 import {
   filterTaskList,
   secondsToHumanReadable,
-transformSizeProp
+  transformSizeProp
 } from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';

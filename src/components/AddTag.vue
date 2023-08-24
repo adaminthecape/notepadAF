@@ -5,7 +5,7 @@
     </template>
     <template #content>
       <div style="display: flex; flex-direction: column">
-        <q-chip
+        <!-- <q-chip
           v-if="selectedTags && selectedTags.length"
           color="info"
           :size="transformSizeProp('md')"
@@ -15,7 +15,7 @@
         >
           <q-icon name="sell" />
           <span class="q-mb-xs q-ml-xs">{{ selectedTags.join(', ') }}</span>
-        </q-chip>
+        </q-chip> -->
         <q-input
             v-if="!disableAdd"
             v-model="value"
@@ -24,6 +24,21 @@
             filled
             dense />
         <q-list style="max-height: 50vh; overflow-y: scroll">
+          <q-item
+              v-for="(sel, s) in props.selectedTags"
+              :key="`selected-tag-${s}`"
+              clickable
+              selected
+              @click="unpickTag(sel)"
+            >
+            <q-item-section>
+              <div class="row items-center">
+                <span>{{ sel }}</span>
+                <q-space />
+                <q-icon name="check" />
+              </div>
+            </q-item-section>
+          </q-item>
           <q-item
               v-for="(tag, t) in filteredList"
               :v-close-popup="!multiple"
@@ -55,13 +70,11 @@ import {
 import useTaskStore from 'src/pinia/taskStore';
 
 const props = defineProps<{
-  selectedTags?: string[]|'';
+  selectedTags?: string[] | '';
   multiple?: boolean;
   tags?: string[];
   disableAdd?: boolean;
 }>();
-
-const selected = ref(['personal', 'shopping']);
 
 const store = useTaskStore();
 
@@ -117,26 +130,39 @@ const allTags = computed(() => {
 });
 
 const filteredList = computed(() => {
+  let res = [];
+
   if (props.tags?.length) {
-    return props.tags.filter(
+    res = props.tags.filter(
       (v) => v.toLowerCase().indexOf(value.value.toLowerCase()) > -1
     );
   }
   else if (!value.value) {
-    return allTags.value;
+    res = allTags.value;
   } else {
-    return allTags.value.filter(
+    res = allTags.value.filter(
       (v) => v.toLowerCase().indexOf(value.value.toLowerCase()) > -1
     );
   }
+
+  if (props.selectedTags?.length) {
+    return res.filter((t) => !props.selectedTags?.includes(t));
+  }
+
+  return res;
 });
 
 const emit = defineEmits<{
   (event: 'input', tag: string): void
+  (event: 'remove', tag: string): void
 }>();
 
 function pickTag(tag: string) {
   emit('input', tag);
   value.value = '';
+}
+
+function unpickTag(tag: string) {
+  emit('remove', tag);
 }
 </script>
