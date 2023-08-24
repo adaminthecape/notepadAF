@@ -1,10 +1,12 @@
 <template>
   <q-btn-dropdown
+    v-model="dropdownState"
     dropdown-icon="menu"
     auto-close
     square
     dense
     flat
+    @mouseenter="dropdownState = true"
   >
     <q-item
       v-for="tab in ['tasks', 'activity', 'tickets', 'settings']"
@@ -19,7 +21,9 @@
 </template>
 
 <script setup lang="ts">
-import { inject } from 'vue';
+import { ref, inject } from 'vue';
+
+const dropdownState = ref<boolean>(false);
 
 const app: {
   activeTabs: () => Record<string, boolean>;

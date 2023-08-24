@@ -16,7 +16,7 @@ class="row items-center full-width justify-start" style="align-content: start" f
                   time-format="M/d h:m:s"
                   show-time
                   dense
-                  :size="transformSizeProp('xs')"
+                  :size="transformSizeProp('sm')"
                   style="display: inline"
                 />
                 <TaskActiveButton
