@@ -113,8 +113,7 @@ function toFormat(format: string, timeOrDate?: 'time' | 'date' | undefined) {
 
   let res = `${format}`;
 
-  if (!timeOrDate || timeOrDate === 'date')
-  {
+  if (!timeOrDate || timeOrDate === 'date') {
     res = res
       .replaceAll('d', `${date}`)
       .replaceAll('D', `${dayShort}`)
@@ -127,8 +126,7 @@ function toFormat(format: string, timeOrDate?: 'time' | 'date' | undefined) {
       .replaceAll('YY', `${yearLong}`);
   }
 
-  if (!timeOrDate || timeOrDate === 'time')
-  {
+  if (!timeOrDate || timeOrDate === 'time') {
     res = res
       .replaceAll('h', `${hour}`)
       .replaceAll('m', padLeft(`${minute}`, '0', 2))

@@ -26,7 +26,14 @@ class="row items-center full-width justify-start" style="align-content: start" f
                   dense
                   flat
                 />
-                <q-chip v-else class="text-bold" style="min-width: 4em" square dense>{{ !log.end ? "..." : log.duration
+                <q-chip
+                  v-else
+                  :size="transformSizeProp('sm')"
+                  class="text-bold"
+                  style="min-width: 4em;font-size:0.95em"
+                  square
+                  dense
+                >{{ !log.end ? "..." : log.duration
                 }}</q-chip>
                 <q-chip style="flex-grow: 1" class="full-width" square dense>
                   <span>{{ log.note }}</span>

@@ -13,21 +13,22 @@
       </q-btn>
     </template>
     <template #title>
-      {{ extrasTitle || title }}
+      <h4>{{ extrasTitle || title }}</h4>
     </template>
     <template #content>
       <div v-if="extrasId > -1">
-        <h6 class="q-my-sm">Select tags</h6>
-        <q-card
-            v-if="items[extrasId].extra.tags"
-        >
-          <TaskTagSelector
-              v-model:value="items[extrasId].extra.tags"
+          <AddTag
+              v-if="items[extrasId].extra.tags"
+              :selected-tags="items[extrasId].extra.tags"
               class="full-width"
               multiple
-              @update:model-value="addValue"
-          />
-        </q-card>
+              @input="addValue([$event])"
+              @remove="addValue([$event])"
+          >
+          <template #activator="{ open: openAddTag }">
+            <q-btn color="primary" @click="openAddTag">Select tags</q-btn>
+          </template>
+        </AddTag>
         <q-btn
             label="Back"
             class="q-mt-sm"
@@ -73,7 +74,7 @@ import { getFromLocalStorage, LocalStorageName, saveToLocalStorage } from 'src/u
 import { ref, onMounted, watch, defineAsyncComponent } from 'vue';
 
 const SimpleModal = defineAsyncComponent(() => import('src/components/SimpleModal.vue'));
-const TaskTagSelector = defineAsyncComponent(() => import('src/components/TaskTagSelector.vue'));
+const AddTag = defineAsyncComponent(() => import('src/components/AddTag.vue'));
 
 const items = ref<Record<string, any>[]>([]);
 const extrasId = ref<number>(-1);

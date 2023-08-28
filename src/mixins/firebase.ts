@@ -5,6 +5,7 @@ import { getDatabase, ref, onValue, set } from '@firebase/database';
 import {
   getFromLocalStorage,
   LocalStorageName,
+  reduceIntoAssociativeArray,
   saveToLocalStorage,
 } from 'src/utils';
 import {
@@ -13,10 +14,41 @@ import {
   signInWithEmailAndPassword,
 } from '@firebase/auth';
 import { Task } from 'src/types';
+import { generate as uuid } from 'src/components/composables/uuid';
+
+export function isDebug() {
+  return true;
+}
 
 const dbName = 'notes';
 let db: any,
   intialised = false;
+
+export function makeFakeTask(): Task {
+  const id = uuid();
+  const now = Date.now();
+  const pick = (a: any, b: any): any => (Math.random() * 9 < 4 ? a : b);
+
+  return {
+    id,
+    message: `Message for ${id}`,
+    created: now - Math.random() * 10000000,
+    updated: now - Math.random() * 100000,
+    done: pick(now - Math.random() * 100000, 0),
+    active: pick(now - Math.random() * 100000, 0),
+    deleted: 0,
+    tags: [],
+    alerts: [],
+    stories: [],
+    activity: [],
+    subtasks: [],
+  };
+}
+
+const mockTasks = reduceIntoAssociativeArray(
+  [...Array(10).keys()].map(() => makeFakeTask()),
+  'id'
+);
 
 async function initApp() {
   if (intialised) {
@@ -46,6 +78,10 @@ export async function getDb() {
 
   if (db) {
     return db;
+  }
+
+  if (isDebug()) {
+    return {};
   }
 
   db = getDatabase();
@@ -151,6 +187,12 @@ export async function pipeStream(stream: ReadableStream) {
 export async function writeTasksToFirebaseDb(tasks: Record<string, Task>) {
   const db = await getDb();
 
+  if (isDebug()) {
+    console.warn('writeTasksToFirebaseDb (DEBUG)', tasks);
+
+    return;
+  }
+
   await set(ref(db, dbName), {
     tasks,
     updated: Date.now(),
@@ -191,6 +233,10 @@ export async function updateTaskDataByPath(
 
   console.log('update:', fullPath, removeUndefined(data));
 
+  if (isDebug()) {
+    return;
+  }
+
   await set(ref(db, fullPath), removeUndefined(data));
 }
 
@@ -204,20 +250,30 @@ export async function readTasksFromFirebaseDb(
     return;
   }
 
-  const db = await getDb();
-  const dbRef = ref(db, dbName);
+  if (isDebug()) {
+    console.warn('readTasksFromFirebaseDb');
+    withResult({ tasks: mockTasks });
+  } else {
+    const db = await getDb();
+    const dbRef = ref(db, dbName);
 
-  onValue(dbRef, (snapshot) => {
-    const data = snapshot.val();
+    onValue(dbRef, (snapshot) => {
+      const data = snapshot.val();
 
-    withResult(data);
-  });
+      withResult(data);
+    });
+  }
 }
 
 export async function authenticateViaEmailAndPassword(user: UserCredentials) {
   const auth = getAuth();
 
   return new Promise((resolve, reject) => {
+    if (isDebug()) {
+      console.warn('Authentication (DEBUG)');
+      return resolve(true);
+    }
+
     signInWithEmailAndPassword(auth, user.email, user.password)
       .then((userCredential) => {
         console.log('user:', userCredential.user);

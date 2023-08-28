@@ -43,11 +43,12 @@ import {
   localStorageIntervalCheck,
   LocalStorageName,
   saveToLocalStorage,
-} from './utils';
+} from '@/utils';
 import { defaultTabs } from 'src/constants';
 import useThemeStore from 'src/pinia/themeStore';
 import { ref, computed, defineAsyncComponent, onMounted, watch, provide } from 'vue';
 import { Dark } from 'quasar';
+import { isDebug } from './mixins/firebase';
 
 const SetAccountDetails = defineAsyncComponent(() =>
   import('src/components/SetAccountDetails.vue'));

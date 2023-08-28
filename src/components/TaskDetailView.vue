@@ -13,6 +13,7 @@
         />
         <q-space />
         <TaskOptions
+            v-if="taskIdToUse"
             :task-id="taskIdToUse"
             show-edit-button
             show-active-button
@@ -130,7 +131,9 @@ const store = useTaskStore();
 const task = computed(() => store.getTask(props.taskId));
 const isTaskActive = computed(() => !!task?.value?.active);
 const taskIdToUse = computed(() => {
-  return props.taskId || getFromLocalStorage(LocalStorageName.desiredTaskId);
+  return props.taskId ||
+    getFromLocalStorage(LocalStorageName.desiredTaskId) ||
+    Object.values(store.getTasks)[0];
 });
 
 const logRenderKey = ref<number>(0);

@@ -123,6 +123,7 @@
             multiple
             :selected-tags="filters.tags"
             @input="addTagToFilters"
+            @remove="addTagToFilters"
           >
             <template #activator="{ open }">
               <q-btn
