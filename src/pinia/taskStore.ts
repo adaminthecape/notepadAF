@@ -31,6 +31,7 @@ type RootState = {
   defaultCategories: TaskBucket[];
   categories: TaskBucket[];
   tasks: Record<string, Task>;
+  tasksInSelectedBuckets: Record<string, Task>;
   taskUpdateQueue: number[];
   taskUpdateTimeout: number;
   cloudLoading: boolean;
@@ -110,6 +111,7 @@ const useTaskStore = defineStore('taskStore', {
       ],
       categories: [],
       tasks: {},
+      tasksInSelectedBuckets: {},
       taskUpdateQueue: [],
       taskUpdateTimeout: 0,
       cloudLoading: false,
@@ -160,6 +162,23 @@ const useTaskStore = defineStore('taskStore', {
     getCategories: (state) => state.categories,
   },
   actions: {
+    getTasksInSelectedBuckets() {
+      const catsToKeep = this.categories
+        .filter((c) => c.active)
+        .map((c) => c.title)
+        .concat('other');
+      let tasksToKeep = {};
+
+      const allTasks = this.getTasksByBuckets(this.categories);
+
+      Object.entries(allTasks).forEach(([bucketName, tasksInBucket]) => {
+        if (catsToKeep.includes(bucketName)) {
+          tasksToKeep = { ...tasksToKeep, ...tasksInBucket };
+        }
+      });
+
+      return tasksToKeep;
+    },
     setCategoriesFromLocalStorage() {
       this.SET_CATEGORIES();
     },

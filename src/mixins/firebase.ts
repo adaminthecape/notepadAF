@@ -17,7 +17,7 @@ import { Task } from 'src/types';
 import { generate as uuid } from 'src/components/composables/uuid';
 
 export function isDebug() {
-  return true;
+  return false;
 }
 
 const dbName = 'notes';

@@ -342,25 +342,7 @@ const limitedTasks = computed<Task[]>(() => {
 //   ];
 // })
 
-const tasksList = computed(() => {
-  const catsToKeep = categories.value
-    .filter((c) => c.active)
-    .map((c) => c.title)
-    .concat('other');
-  let tasksToKeep = {};
-
-  const allTasks = store.getTasksByBuckets(categories.value);
-
-  Object.entries(allTasks).forEach(
-    ([bucketName, tasksInBucket]) => {
-      if (catsToKeep.includes(bucketName)) {
-        tasksToKeep = { ...tasksToKeep, ...tasksInBucket };
-      }
-    }
-  );
-
-  return tasksToKeep;
-})
+const tasksList = computed(() => store.getTasksInSelectedBuckets());
 
 const isCloudLoading = computed(() => {
   return store.isCloudLoading;

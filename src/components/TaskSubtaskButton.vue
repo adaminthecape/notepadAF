@@ -92,7 +92,10 @@ function save() {
     taskData.next = [];
   }
 
-  const data = taskData.next.concat({ due: 0, note: description.value || '' });
+  const data = taskData.next.concat({
+    due: 0,
+    note: description.value || ''
+  });
 
   store.cloudUpdateSingleProperty({
     taskId: props.taskId,

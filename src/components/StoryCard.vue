@@ -45,6 +45,7 @@ v-if="allowAddTasks" label="Tasks" color="primary" :dense="dense" flat
             </q-btn>
             <AddTask v-if="allowAddTasks" :initial-task-data="{ stories: [story.id] }" dense />
           </q-btn-group>
+    <AddSubtaskToTask :story-id="storyId" />
         </div>
       </div>
     </template>
@@ -84,13 +85,14 @@ import {
   openInBrowser,
   LocalStorageName,
   saveToLocalStorageArray,
-transformSizeProp,
+  transformSizeProp,
 } from '../utils';
 import { computed, onMounted } from 'vue';
 import usePivotalStore from 'src/pinia/pivotalStore';
 import DisplayStory from 'src/components/DisplayStory.vue';
 import AddTask from 'src/components/AddTask.vue';
 import SimpleModal from 'src/components/SimpleModal.vue';
+import AddSubtaskToTask from './AddSubtaskToTask.vue';
 
 const props = defineProps<{
   storyId: string | number;

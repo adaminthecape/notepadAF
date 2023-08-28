@@ -9,8 +9,7 @@ export type Task = {
   /** {Previous activity logs} */
   activity?: TaskActivityLog[];
   /** Subtasks */
-  next?: Record<string, any>[];
-  subtasks?: TaskSubtask[];
+  next?: TaskSubtask[];
   archived?: number | boolean;
   tags?: string[];
   alerts?: TaskAlert[];
@@ -21,6 +20,8 @@ export type Task = {
 
 export interface TaskSubtask {
   [key: string]: any;
+  due: number;
+  note: string;
 }
 
 export interface TaskActivityLog {
