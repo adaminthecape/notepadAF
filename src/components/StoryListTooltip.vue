@@ -1,9 +1,9 @@
 <template>
-  <q-tooltip
-    v-for="tooltip in stories"
-    :key="`story-tooltip-${tooltip}`"
-  >
-    <span>{{ tooltip }}</span>
+  <q-tooltip>
+    <span
+      v-for="tooltip in stories"
+      :key="`story-tooltip-${tooltip}`"
+    >{{ tooltip }}<br /></span>
   </q-tooltip>
 </template>
 
