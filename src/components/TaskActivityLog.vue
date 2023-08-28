@@ -35,8 +35,14 @@ class="row items-center full-width justify-start" style="align-content: start" f
                   dense
                 >{{ !log.end ? "..." : log.duration
                 }}</q-chip>
-                <q-chip style="flex-grow: 1" class="full-width" square dense>
+                <q-chip
+                  style="flex-grow: 1"
+                  class="full-width"
+                  square
+                  dense
+                >
                   <span>{{ log.note }}</span>
+                  <StoryListTooltip :value="log.note" />
                 </q-chip>
                 <q-space />
               </div>
@@ -109,6 +115,7 @@ import useTaskStore from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
 import { Task, TaskActivityLog, TaskFilters } from 'src/types';
 import TimeChip from 'src/components/TimeChip.vue';
+import StoryListTooltip from 'src/components/StoryListTooltip.vue';
 
 const TaskActiveButton = defineAsyncComponent(() => import('src/components/TaskActiveButton.vue'));
 const props = defineProps({

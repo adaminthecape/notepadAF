@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="task"
     class="row items-center"
     :key="`task-options-${taskId}-${taskRenderIndex}`"
     :class="{ column: !!column }"
@@ -100,7 +101,7 @@
 import {
   queueTaskRefresh,
   goToActivityPageForTask,
-transformSizeProp
+  transformSizeProp
 } from 'src/utils';
 import { ref, computed, watch } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';

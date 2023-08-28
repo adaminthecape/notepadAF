@@ -49,6 +49,7 @@ import useThemeStore from 'src/pinia/themeStore';
 import { ref, computed, defineAsyncComponent, onMounted, watch, provide } from 'vue';
 import { Dark } from 'quasar';
 import { isDebug } from './mixins/firebase';
+import useTaskStore from './pinia/taskStore';
 
 const SetAccountDetails = defineAsyncComponent(() =>
   import('src/components/SetAccountDetails.vue'));
@@ -137,9 +138,41 @@ onMounted(() => {
   setTabs();
   watchTabChanges();
 });
+
+const taskStore = useTaskStore();
+
+taskStore.watchCloudDb();
 </script>
 
 <style lang="postcss">
+.story-hint {
+  display: inline;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+}
+
 .bordered {
   border: 1px solid #bbb;
   border-radius: 4px;

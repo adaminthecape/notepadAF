@@ -1,24 +1,55 @@
 <template>
   <q-list :key="`subtask-list-${listRenderIndex}`" class="q-px-sm">
-    <q-item v-for="(subtask, s) in subtasks" :key="`subtask-item-${s}`" clickable dense @dblclick.ctrl="removeSubtask(s)">
+    <q-item
+      v-for="(subtask, s) in subtasks"
+      :key="`subtask-item-${s}`"
+      clickable
+      dense
+    >
       <q-item-section>
         <div class="row items-center full-width">
-          <q-chip v-if="subtask.note" style="flex-grow: 1" square dense>{{
-            subtask.note
-          }}</q-chip>
+          <q-chip
+            v-if="subtask.note"
+            style="flex-grow: 1"
+            square
+            dense
+          >
+            <div>{{ subtask.note }}</div>
+            <StoryListTooltip :value="subtask.note" />
+          </q-chip>
           <q-btn
-color="primary" icon="start" size="sm" dense flat
-            @click="startSubtask(s)"><q-tooltip>Start</q-tooltip></q-btn>
+            color="primary"
+            icon="start"
+            size="sm"
+            dense
+            flat
+            @click="startSubtask(s)"
+          ><q-tooltip>Start</q-tooltip></q-btn>
           <q-btn
-color="negative" icon="delete"
-              :size="transformSizeProp('sm')" dense flat
-            @click="removeSubtask(s)"><q-tooltip>Remove</q-tooltip></q-btn>
+            color="negative"
+            icon="delete"
+            :size="transformSizeProp('sm')"
+            dense
+            flat
+            @click="removeSubtask(s)"
+          ><q-tooltip>Remove</q-tooltip></q-btn>
         </div>
       </q-item-section>
     </q-item>
-    <q-input v-if="addNew" v-model="newLogMessage" placeholder="Add subtask..." filled dense>
+    <q-input
+      v-if="addNew"
+      v-model="newLogMessage"
+      placeholder="Add subtask..."
+      filled
+      dense
+    >
       <template #append>
-        <q-btn icon="save" dense flat @click="saveNew({ due: 0, note: newLogMessage })" />
+        <q-btn
+          icon="save"
+          dense
+          flat
+          @click="saveNew({ due: 0, note: newLogMessage })"
+        />
       </template>
     </q-input>
   </q-list>
@@ -26,12 +57,15 @@ color="negative" icon="delete"
 
 <script setup lang="ts">
 import {
+  getStoriesFromTask,
   queueTaskRefresh,
   transformSizeProp
 } from 'src/utils';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
 import { TaskSubtask } from 'src/types';
+import usePivotalStore from 'src/pinia/pivotalStore';
+import StoryListTooltip from './StoryListTooltip.vue';
 
 const props = defineProps({
   taskId: {
@@ -51,6 +85,14 @@ const store = useTaskStore();
 const task = computed(() => store.getTask(props.taskId));
 const subtasks = computed(() => store.getTaskProperty(props.taskId, 'next'));
 const isActive = computed(() => !!store.getTaskProperty(props.taskId, 'active'));
+const pivotalStore = usePivotalStore();
+const taskStories = computed(() => getStoriesFromTask(task.value));
+
+watch(taskStories, (n: { id: string | number }[]) => {
+  if (n?.length) {
+    n.forEach(({ id }) => pivotalStore.load({ id }));
+  }
+});
 
 function startSubtask(index: number) {
   // is the task active? then quit
@@ -108,4 +150,13 @@ function saveNew(newItem: TaskSubtask) {
     listRenderIndex.value += 1;
   });
 }
+
+onMounted(() => {
+  if (taskStories.value?.length) {
+    taskStories.value.forEach(({ id }) => {
+      console.log('load:', id);
+      pivotalStore.load({ id });
+    });
+  }
+});
 </script>

@@ -5,6 +5,7 @@ import {
   TaskAlert,
   TaskFilters,
   TaskSortType,
+  TaskSubtask,
 } from './types';
 import { TaskBucket } from './pinia/taskStore';
 import usePivotalStore from './pinia/pivotalStore';
@@ -175,19 +176,35 @@ export function doesStringHaveStories(str: string) {
   return (str.match(/1\d{8}/g) || []).length > 0;
 }
 
+export function getStoriesFromString(str: string): number[] {
+  return (str.match(/1\d{8}/g) || []).map((storyId) =>
+    parseInt(`${storyId}`, 10)
+  );
+}
+
 export function doesTaskHaveStories(task: Task) {
   if (!task) return false;
   let tagsStringified = [];
   try {
-    tagsStringified = JSON.parse(JSON.stringify(task.tags));
+    tagsStringified = JSON.parse(JSON.stringify(task.tags || []));
   } catch (e) {
     //
   }
-  return doesStringHaveStories(`${tagsStringified.join('|')}|${task.message}`);
+  let nextStringified = [];
+  try {
+    nextStringified = JSON.parse(JSON.stringify(task.next || [])).map(
+      (s: TaskSubtask) => s.note || ''
+    );
+  } catch (e) {
+    //
+  }
+  return doesStringHaveStories(
+    `${tagsStringified.join('|')}|${nextStringified.join('|')}|${task.message}`
+  );
 }
 
-export function getStoriesFromTask(task: Task) {
-  if (!task || !task.stories) {
+export function getStoriesFromTask(task: Task): { id: string | number }[] {
+  if (!task) {
     return [];
   }
 
@@ -198,9 +215,24 @@ export function getStoriesFromTask(task: Task) {
     //
   }
 
-  return (
-    (`${tagsStringified.join('|')}|${task.message}`.match(/1\d{8}/g) ||
-      []) as any
+  let nextStringified = [];
+  try {
+    nextStringified = JSON.parse(JSON.stringify(task.next)).map(
+      (s: TaskSubtask) => s.note || ''
+    );
+  } catch (e) {
+    //
+  }
+
+  console.log(
+    'utils: message:',
+    `${tagsStringified.join('|')}|${task.message}|${nextStringified.join('|')}`
+  );
+
+  const stories = (
+    (`${tagsStringified.join('|')}|${task.message}|${nextStringified.join(
+      '|'
+    )}`.match(/1\d{8}/g) || []) as any
   ).reduce((agg: Array<{ id: string | number }>, id: string) => {
     if (!agg.some((existing: { id: string | number }) => existing.id === id)) {
       agg.push({ id });
@@ -208,6 +240,10 @@ export function getStoriesFromTask(task: Task) {
 
     return agg;
   }, [] as Array<string | number>);
+
+  console.log('utils: stories:', { stories });
+
+  return stories;
 }
 
 /** Filter the list of tasks based on provided filters */

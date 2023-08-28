@@ -153,7 +153,6 @@ import { computed, ref, watch } from 'vue';
 import { Task } from 'src/types';
 // import TaskOptionsModal from 'src/components/TaskOptionsModal.vue';
 import TaskOptionsDropdown from 'src/components/TaskOptionsDropdown.vue';
-import TimeChip from 'src/components/TimeChip.vue';
 import TaskAlertDisplay from 'src/components/TaskAlertDisplay.vue';
 import AddTag from 'src/components/AddTag.vue';
 import TaskStoryDropdown from 'src/components/TaskStoryDropdown.vue';
@@ -189,8 +188,10 @@ const isEditing = ref(false);
 const store = useTaskStore();
 const task = computed(() => store.getTask(props.taskId));
 const stories = computed(() => {
+  if (!task.value) return [];
+
   const storyIds: Array<string | number> = (
-    `${(task.value.tags || []).join('|')}|${task.value.message}`
+    `${(task.value.tags || []).join('|')}|${task.value.message}|${(task.value.next || []).map((s) => s.note || '').join('|')}`
       .match(/1\d{8}/g)
   ) || [];
 

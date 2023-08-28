@@ -41,7 +41,7 @@ export function makeFakeTask(): Task {
     alerts: [],
     stories: [],
     activity: [],
-    subtasks: [],
+    next: [],
   };
 }
 
@@ -276,7 +276,6 @@ export async function authenticateViaEmailAndPassword(user: UserCredentials) {
 
     signInWithEmailAndPassword(auth, user.email, user.password)
       .then((userCredential) => {
-        console.log('user:', userCredential.user);
         // Signed in
         resolve(userCredential.user);
       })

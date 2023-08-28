@@ -406,8 +406,6 @@ const tmpInterval = ref();
 
 /****** Loading/fetching tasks */
 async function loadTasks() {
-  store.watchCloudDb();
-
   tmpInterval.value = setInterval(() => {
     const check =
       lastCloudUpdate.value &&

@@ -2,13 +2,18 @@
   <SimpleModal>
     <template #activator="{ open }">
       <q-btn
-        label="add"
+        :icon="icon"
+        :label="label"
+        color="primary"
+        dense
+        flat
         @click.stop.prevent="open"
-      />
+      ><q-tooltip>Add subtask</q-tooltip></q-btn>
     </template>
     <template #content>
       <q-input
         v-model="subtaskMessage"
+        placeholder="Add note..."
         filled
         dense
       />
@@ -36,6 +41,7 @@
         color="primary"
         class="q-ml-sm"
         icon="add"
+        v-close-popup
         @click="addSubtaskToTask"
       >Add</q-btn>
     </template>
@@ -52,12 +58,18 @@ const props = defineProps({
   storyId: {
     type: [String, Number],
     required: true
+  },
+  label: {
+    type: String,
+    default: undefined
+  },
+  icon: {
+    type: String,
+    default: 'task'
   }
 });
 
 const store = useTaskStore();
-
-store.watchCloudDb();
 
 const tasks = computed<Task[]>(() => (
   (Object.values(store.getTasksInSelectedBuckets()) as Task[])
@@ -84,7 +96,6 @@ function addSubtaskToTask() {
     }),
   }).then(() => {
     subtaskMessage.value = '';
-    alert('subtask added');
   });
 }
 </script>
