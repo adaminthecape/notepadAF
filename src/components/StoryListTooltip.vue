@@ -1,9 +1,9 @@
 <template>
   <q-tooltip>
     <span
-      v-for="tooltip in stories"
-      :key="`story-tooltip-${tooltip}`"
-    >{{ tooltip }}<br /></span>
+      v-for="story in stories"
+      :key="`story-tooltip-${story.id}`"
+    >{{ story.tooltip }}<br /></span>
   </q-tooltip>
 </template>
 
@@ -25,12 +25,18 @@ const props = defineProps({
 // const taskStore = useTaskStore();
 const pivotalStore = usePivotalStore();
 // const task = computed(() => taskStore.getTask(props.taskId));
-const stories = computed(() => (
+const stories = computed<{
+  id: string | number;
+  tooltip: string;
+}[]>(() => (
   (getStoriesFromString(props.value) || [])
-    .map((id) => `${id}: ${pivotalStore.get(id)?.name}`)
+    .map((id) => ({
+      id,
+      tooltip: `${id}: ${pivotalStore.get(id)?.name}`
+    }))
 ));
 
 onMounted(() => {
-  stories.value.forEach((id) => pivotalStore.load({ id }))
+  stories.value.forEach((id) => pivotalStore.load({ id } as { id: any }))
 });
 </script>
