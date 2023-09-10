@@ -317,7 +317,6 @@ const useTaskStore = defineStore('taskStore', {
       this.taskUpdateTimeout = timeout;
     },
     SET_CATEGORIES() {
-      console.log('SET_CATEGORIES', this.defaultCategories);
       const storedCategories = getFromLocalStorage(
         LocalStorageName.taskCategories,
         true

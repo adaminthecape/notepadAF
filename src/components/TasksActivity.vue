@@ -421,7 +421,6 @@ async function loadTasks() {
 
 /** Actual filtering logic. Sorts after filtering. Saves filters to localStorage. */
 function filterTasks() {
-  console.log('filterTasks');
   saveFilters();
 
   filteredTasksList.value =

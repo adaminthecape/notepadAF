@@ -43,14 +43,30 @@
           <q-item>
             <q-item-section caption>
               <div class="row items-center">
-                <h5>
-                  Epic
-                </h5>
+                <h5>Epic</h5>
                 <q-space />
                 <div class="row items-center">
-                  <q-btn label="All" class="q-pa-sm" dense flat @click="toggleSelectAll('epic')" />
-                  <q-btn label="Dev" class="q-pa-sm" dense flat @click="toggleSelectAll('epic', 'dev')" />
-                  <q-btn label="QA" class="q-pa-sm" dense flat @click="toggleSelectAll('epic', 'qa')" />
+                  <q-btn
+                    label="All"
+                    class="q-pa-sm"
+                    dense
+                    flat
+                    @click="toggleSelectAll('epic')"
+                  />
+                  <q-btn
+                    label="Dev"
+                    class="q-pa-sm"
+                    dense
+                    flat
+                    @click="toggleSelectAll('epic', 'dev')"
+                  />
+                  <q-btn
+                    label="QA"
+                    class="q-pa-sm"
+                    dense
+                    flat
+                    @click="toggleSelectAll('epic', 'qa')"
+                  />
                 </div>
               </div>
             </q-item-section>
@@ -77,28 +93,23 @@
           </q-item>
           <q-item>
             <q-item-section caption>
-              <h5>
-                Include done
-              </h5>
+              <h5>Include done</h5>
             </q-item-section>
             <q-item-section>
-              <q-checkbox
-                v-model="queryParams.includedone"
-                class="q-pa-sm"
-              />
+              <q-checkbox v-model="queryParams.includedone" class="q-pa-sm" />
             </q-item-section>
           </q-item>
         </template>
         <template #actions>
-            <q-btn
-              v-close-popup
-              icon="search"
-              label="Search"
-              class="q-ma-sm"
-              color="primary"
-              @click="getTickets"
-            />
-          </template>
+          <q-btn
+            v-close-popup
+            icon="search"
+            label="Search"
+            class="q-ma-sm"
+            color="primary"
+            @click="getTickets"
+          />
+        </template>
       </SimpleModal>
       <q-btn icon="refresh" dense class="q-mr-sm" @click="getTickets" />
       <AppTabSelector />
@@ -107,8 +118,11 @@
       <transition name="fade" appear>
         <div v-if="resultTotals" :key="resultsRenderIndex" class="q-mt-sm">
           <q-badge
-v-if="resultTotals.hits > 0" color="primary" style="font-size: 1.2em; user-select: none"
-            class="q-pa-md q-mb-md full-width">
+            v-if="resultTotals.hits > 0"
+            color="primary"
+            style="font-size: 1.2em; user-select: none"
+            class="q-pa-md q-mb-md full-width"
+          >
             <div class="row items-center full-width">
               <div>
                 {{ resultTotals.hits }} stories,
@@ -126,8 +140,11 @@ v-if="resultTotals.hits > 0" color="primary" style="font-size: 1.2em; user-selec
             </div>
           </q-badge>
           <q-badge
-v-else color="primary" style="font-size: 1.2em; user-select: none"
-            class="q-pa-md q-mb-md full-width">
+            v-else
+            color="primary"
+            style="font-size: 1.2em; user-select: none"
+            class="q-pa-md q-mb-md full-width"
+          >
             <div class="row items-center full-width">
               <div>No results found.</div>
             </div>
@@ -141,7 +158,11 @@ v-else color="primary" style="font-size: 1.2em; user-select: none"
           <div v-if="isLoadingActivity" class="full-width">
             <q-spinner size="lg" style="margin: 0 auto" />
           </div>
-          <div v-for="story in results" :key="`${story.id}-${listRenderKey}`" class="bordered q-mb-xs">
+          <div
+            v-for="story in results"
+            :key="`${story.id}-${listRenderKey}`"
+            class="bordered q-mb-xs"
+          >
             <q-item clickable class="q-pa-sm">
               <StoryCard :story-id="story.id" allow-add-tasks dense />
             </q-item>
@@ -175,12 +196,12 @@ const props = defineProps({
   cachedTickets: {
     type: Array,
     default: null,
-  }
+  },
 });
 
 const isLoadingActivity = ref(false);
 const results = ref<PivotalStory[]>(
-  props.cachedTickets as PivotalStory[] || []
+  (props.cachedTickets as PivotalStory[]) || []
 );
 const queryParamMultiples = ref({
   epic: true,
@@ -243,7 +264,7 @@ onMounted(async () => {
   }
 });
 
-watch(sortType.value, () => sortResults(results.value));
+watch(sortType.value, () => sortResults());
 
 function setSortType(type: TaskSortType | string) {
   if (type === sortType.value) {
@@ -253,11 +274,12 @@ function setSortType(type: TaskSortType | string) {
     sortType.value = type;
   }
 
-  sortResults(results.value);
+  sortResults();
 }
 
-function sortResults(results: any) {
+function sortResults() {
   if (!results.value || !results.value.length) {
+    console.warn('No results to sort!')
     return [];
   }
 
@@ -286,7 +308,7 @@ function saveParams(params: Record<string, any>) {
 }
 
 const emit = defineEmits<{
-  (event: 'updatedTickets', value: any[]): void
+  (event: 'updatedTickets', value: any[]): void;
 }>();
 
 async function getTickets() {
@@ -321,13 +343,13 @@ async function getTickets() {
   isLoadingActivity.value = false;
 
   if (res && res.stories && res.stories.stories) {
-    results.value = res.stories.stories;
+    results.value = [...res.stories.stories];
     resultTotals.value = {
       hits: res.stories.total_hits,
       points: res.stories.total_points,
       completedPoints: res.stories.total_points_completed,
     };
-    sortResults(res.stories.stories);
+    sortResults();
   } else {
     console.warn('Results are in an unexpected format!');
   }

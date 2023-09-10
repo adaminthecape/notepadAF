@@ -59,6 +59,7 @@ import { timeSince, transformSizeProp } from 'src/utils';
 import { computed, ref } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
 import TimeChip from 'src/components/TimeChip.vue';
+import DirectionalButtonGroup from 'src/components/DirectionalButtonGroup.vue';
 
 const props = defineProps({
   taskId: {

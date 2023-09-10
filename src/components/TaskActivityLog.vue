@@ -1,15 +1,24 @@
 <template>
   <q-list :key="`activity-list-${listRenderIndex}`">
-    <q-item v-for="(log, l) in taskActivity" :key="`activity-item-${l}`" dense @dblclick.ctrl="removeActivityLog(log)">
+    <q-item
+      v-for="(log, l) in taskActivity"
+      :key="`activity-item-${l}`"
+      dense
+      @dblclick.ctrl="removeActivityLog(log)"
+    >
       <q-item-section>
         <div class="flex" style="flex-direction: column">
           <div v-if="showMessage">{{ log.message }}</div>
-          <q-btn-dropdown
-class="row items-center full-width justify-start" style="align-content: start" flat dense
-            no-caps>
-            <template #label>
-              <div class="row items-center justify-start full-width">
-                <!-- <q-chip square dense class="text-bold" style="min-width: 12em">{{ log.startDate }}</q-chip> -->
+          <div class="row items-center justify-start full-width">
+            <!-- <q-chip square dense class="text-bold" style="min-width: 12em">{{ log.startDate }}</q-chip> -->
+            <q-btn-dropdown
+              class="row items-center justify-start"
+              style="align-content: start"
+              flat
+              dense
+              no-caps
+            >
+              <template #label>
                 <TimeChip
                   :custom-done-value="log.unix"
                   date-format="M/d"
@@ -17,87 +26,142 @@ class="row items-center full-width justify-start" style="align-content: start" f
                   show-time
                   dense
                   :size="transformSizeProp('sm')"
-                  style="display: inline"
-                />
-                <TaskActiveButton
-                  v-if="taskId && !log.end"
-                  :task-id="taskId"
-                  mode="save"
-                  dense
-                  flat
-                />
-                <q-chip
-                  v-else
-                  :size="transformSizeProp('sm')"
-                  class="text-bold"
-                  style="min-width: 4em;font-size:0.95em"
-                  square
-                  dense
-                >{{ !log.end ? "..." : log.duration
-                }}</q-chip>
-                <q-chip
-                  style="flex-grow: 1"
-                  class="full-width"
-                  square
-                  dense
-                >
-                  <span>{{ log.note }}</span>
-                  <StoryListTooltip :value="log.note" />
-                </q-chip>
-                <q-space />
-              </div>
-            </template>
-            <template #default>
-              <div>
-                <q-item class="row items-center">
-                  <q-btn
-v-if="log.end" color="negative" icon="delete" size="md" class="q-mr-sm" dense flat
-                    @click="removeActivityLog(log)" />
-                  <q-space />
-                  <q-btn-group>
+                  style="display: inline;margin-right:-10px"
+              /></template>
+              <template #default>
+                <div>
+                  <q-item class="row items-center">
                     <q-btn
-color="primary" icon="keyboard_double_arrow_left" size="md" class="full-width" dense flat
-                      :v-close-popup="false" @click.stop.prevent="incrementBy('start', log, -3600000)" />
-                    <q-btn
-color="primary" icon="keyboard_arrow_left" size="md" class="full-width" dense flat
-                      @click.stop.prevent="incrementBy('start', log, -600000)" />
-                    <q-btn label="Start" no-caps dense />
-                    <q-btn
-color="primary" icon="keyboard_arrow_right" size="md" class="full-width" dense flat
-                      @click.stop.prevent="incrementBy('start', log, 600000)" />
-                    <q-btn
-color="primary" icon="keyboard_double_arrow_right" size="md" class="full-width" dense flat
-                      @click.stop.prevent="incrementBy('start', log, 3600000)" />
-                  </q-btn-group>
-                  <q-space />
-                  <q-btn-group v-if="log.end" class="q-ml-sm">
-                    <q-btn
-color="primary" icon="keyboard_double_arrow_left" size="md" class="full-width" dense flat
-                      @click.stop.prevent="incrementBy('end', log, -3600000)" />
-                    <q-btn
-                    color="primary" icon="keyboard_arrow_left" size="md" class="full-width" dense flat
-                      @click.stop.prevent="incrementBy('end', log, -600000)" />
-                    <q-btn label="End" no-caps dense />
-                    <q-btn
-color="primary" icon="keyboard_arrow_right" size="md" class="full-width" dense flat
-                      @click.stop.prevent="incrementBy('end', log, 600000)" />
-                    <q-btn
-color="primary" icon="keyboard_double_arrow_right" size="md" class="full-width" dense flat
-                      @click.stop.prevent="incrementBy('end', log, 3600000)" />
-                  </q-btn-group>
-                </q-item>
-              </div>
-              <q-input
-v-model="log.note" dense filled @click.stop.prevent="
-                                {
-}
-  ">
-                <template #append>
-                  <q-btn icon="save" dense flat @click.stop.prevent="updateLog(taskActivity)" />
-                </template>
-              </q-input>
-            </template>
-          </q-btn-dropdown>
+                      color="negative"
+                      icon="delete"
+                      size="md"
+                      class="q-mr-sm"
+                      dense
+                      flat
+                      @click="removeActivityLog(log)"
+                    />
+                    <q-space />
+                    <q-btn-dropdown
+                      label="Adjust start"
+                      no-caps
+                    >
+                      <q-item>
+                        <q-item-section>
+                          <DirectionalButtonGroup
+                            label="Min"
+                            @far-left="incrementBy('start', log, -600000)"
+                            @near-left="incrementBy('start', log, -60000)"
+                            @near-right="incrementBy('start', log, 60000)"
+                            @far-right="incrementBy('start', log, 600000)"
+                          />
+                        </q-item-section>
+                      </q-item>
+                      <q-item>
+                        <q-item-section>
+                          <DirectionalButtonGroup
+                            label="Hour"
+                            @far-left="incrementBy('start', log, -36000000)"
+                            @near-left="incrementBy('start', log, -3600000)"
+                            @near-right="incrementBy('start', log, 3600000)"
+                            @far-right="incrementBy('start', log, 36000000)"
+                          />
+                        </q-item-section>
+                      </q-item>
+                      <q-item>
+                        <q-item-section>
+                          <DirectionalButtonGroup
+                            label="Day"
+                            @far-left="incrementBy('start', log, -864000000)"
+                            @near-left="incrementBy('start', log, -86400000)"
+                            @near-right="incrementBy('start', log, 86400000)"
+                            @far-right="incrementBy('start', log, 864000000)"
+                          />
+                        </q-item-section>
+                      </q-item>
+                    </q-btn-dropdown>
+                    <q-btn-dropdown
+                      label="Adjust end"
+                      no-caps
+                    >
+                      <q-item>
+                        <q-item-section>
+                          <DirectionalButtonGroup
+                            label="Min"
+                            @far-left="incrementBy('end', log, -600000)"
+                            @near-left="incrementBy('end', log, -60000)"
+                            @near-right="incrementBy('end', log, 60000)"
+                            @far-right="incrementBy('end', log, 600000)"
+                          />
+                        </q-item-section>
+                      </q-item>
+                      <q-item>
+                        <q-item-section>
+                          <DirectionalButtonGroup
+                            label="Hour"
+                            @far-left="incrementBy('end', log, -36000000)"
+                            @near-left="incrementBy('end', log, -3600000)"
+                            @near-right="incrementBy('end', log, 3600000)"
+                            @far-right="incrementBy('end', log, 36000000)"
+                          />
+                        </q-item-section>
+                      </q-item>
+                      <q-item>
+                        <q-item-section>
+                          <DirectionalButtonGroup
+                            label="Day"
+                            @far-left="incrementBy('end', log, -864000000)"
+                            @near-left="incrementBy('end', log, -86400000)"
+                            @near-right="incrementBy('end', log, 86400000)"
+                            @far-right="incrementBy('end', log, 864000000)"
+                          />
+                        </q-item-section>
+                      </q-item>
+                    </q-btn-dropdown>
+                  </q-item>
+                  <q-item>
+                    <q-input
+                      v-model="log.note"
+                      class="full-width"
+                      dense
+                      filled
+                    >
+                      <template #append>
+                        <q-btn
+                          icon="save"
+                          dense
+                          flat
+                          @click.stop.prevent="updateLog(taskActivity)"
+                        />
+                      </template>
+                    </q-input>
+                  </q-item>
+                </div>
+              </template>
+            </q-btn-dropdown>
+            <TaskActiveButton
+              v-if="taskId && !log.end"
+              :task-id="taskId"
+              mode="save"
+              dense
+              flat
+            />
+            <q-chip
+              v-else
+              :size="transformSizeProp('sm')"
+              class="text-bold"
+              style="min-width: 4em; font-size: 0.95em"
+              square
+              dense
+              >{{ !log.end ? '...' : log.duration }}</q-chip
+            >
+            <div class="row items-center">
+              <q-chip style="flex-grow: 1" class="full-width" square dense>
+                <span>{{ log.note }}</span>
+                <StoryListTooltip :value="log.note" />
+              </q-chip>
+            </div>
+            <q-space />
+          </div>
         </div>
       </q-item-section>
     </q-item>
@@ -109,15 +173,18 @@ v-model="log.note" dense filled @click.stop.prevent="
 import {
   filterTaskList,
   secondsToHumanReadable,
-  transformSizeProp
+  transformSizeProp,
 } from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
 import { Task, TaskActivityLog, TaskFilters } from 'src/types';
 import TimeChip from 'src/components/TimeChip.vue';
 import StoryListTooltip from 'src/components/StoryListTooltip.vue';
+import DirectionalButtonGroup from './DirectionalButtonGroup.vue';
 
-const TaskActiveButton = defineAsyncComponent(() => import('src/components/TaskActiveButton.vue'));
+const TaskActiveButton = defineAsyncComponent(
+  () => import('src/components/TaskActiveButton.vue')
+);
 const props = defineProps({
   taskId: {
     type: String,
@@ -187,7 +254,10 @@ const taskActivity = computed(() => {
     .sort((a: TaskActivityLog, b: TaskActivityLog) => a.start - b.start);
 });
 
-watch(() => props.filters, () => setActivity());
+watch(
+  () => props.filters,
+  () => setActivity()
+);
 onMounted(() => setActivity());
 
 function updateLog(data: TaskActivityLog) {
@@ -195,15 +265,16 @@ function updateLog(data: TaskActivityLog) {
     return;
   }
 
-  store.cloudUpdateSingleProperty({
-    taskId: props.taskId,
-    prop: 'activity',
-    data: data.map((item: TaskActivityLog) => {
-      delete item.isEditing;
+  store
+    .cloudUpdateSingleProperty({
+      taskId: props.taskId,
+      prop: 'activity',
+      data: data.map((item: TaskActivityLog) => {
+        delete item.isEditing;
 
-      return item;
-    }),
-  })
+        return item;
+      }),
+    })
     .then(() => {
       // this.listRenderIndex += 1;
     });

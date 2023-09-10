@@ -25,29 +25,51 @@ v-for="label in story.labels" :label="label.name" :key="label.name"
           </q-chip>
           <q-btn-group>
             <q-btn
-label="View" color="primary" :dense="dense" flat class="q-mr-xs"
-              @click.stop.prevent="openLink(story.url)" />
-            <q-btn
-icon="content_copy" color="primary" :dense="dense" flat class="q-mr-xs" size="sm"
-              @click.stop.prevent="copy(story.url)"><q-tooltip>Copy URL</q-tooltip></q-btn>
-            <q-btn
-label="Git C/O" color="negative" :dense="dense" flat @click.stop.prevent="
-  copy(`git checkout PT_${story.id}`)
-  " />
-            <q-btn
-:label="story.id" color="secondary" :dense="dense" flat
-              @click.stop.prevent="copy(story.id)">
+              :label="story.id"
+              color="primary"
+              :dense="dense"
+              flat
+              @click.stop.prevent="copy(story.id)"
+            >
               <q-tooltip>Copy story ID</q-tooltip>
             </q-btn>
+            <q-btn
+              icon="open_in_new"
+              color="primary"
+              :dense="dense"
+              flat
+              @click.stop.prevent="copy(story.url)"
+            >
+              <q-tooltip>Copy URL</q-tooltip>
+            </q-btn>
+            <q-btn
+              icon="content_copy"
+              color="negative"
+              :dense="dense"
+              flat
+              @click.stop.prevent="copy(`git checkout PT_${story.id}`)"
+            />
           </q-btn-group>
           <q-btn-group class="q-ml-xs">
             <q-btn
-v-if="allowAddTasks" label="Tasks" color="primary" :dense="dense" flat
-              @click.stop.prevent="openTasksForStory">
+              v-if="allowAddTasks"
+              label="Tasks"
+              color="primary"
+              :dense="dense"
+              flat
+              @click.stop.prevent="openTasksForStory"
+            >
               <q-tooltip>View tasks for {{ storyId }}</q-tooltip>
             </q-btn>
-            <AddTask v-if="allowAddTasks" :initial-task-data="{ stories: [story.id] }" dense />
-    <AddSubtaskToTask :story-id="storyId" />
+            <AddTask
+              v-if="allowAddTasks"
+              :initial-task-data="{ stories: [story.id] }"
+              dense
+            />
+            <AddSubtaskToTask
+              :story-id="storyId"
+              dense
+            />
           </q-btn-group>
         </div>
       </div>
@@ -75,7 +97,9 @@ v-for="label in story.labels" :label="label.name" :key="label.name"
         class="q-mr-xs"
         @click.stop.prevent="openLink(story.url)"
     />
-      <q-btn label="Git C/O" color="negative" :dense="dense" flat />
+      <q-btn icon="content_copy" color="negative" :dense="dense" flat>
+        <q-tooltip>Checkout to branch</q-tooltip>
+      </q-btn>
     </template>
   </SimpleModal>
 </template>

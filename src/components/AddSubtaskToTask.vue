@@ -4,6 +4,7 @@
       <q-btn
         :icon="icon"
         :label="label"
+        :size="size"
         color="primary"
         dense
         flat
@@ -66,6 +67,10 @@ const props = defineProps({
   icon: {
     type: String,
     default: 'task'
+  },
+  size: {
+    type: String,
+    default: 'md'
   }
 });
 

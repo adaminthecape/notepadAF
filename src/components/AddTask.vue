@@ -5,6 +5,7 @@
                 icon="add_task"
                 color="primary"
                 :dense="dense"
+                :size="size"
                 flat
                 @click.stop.prevent="open"
             >

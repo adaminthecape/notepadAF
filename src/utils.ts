@@ -224,11 +224,6 @@ export function getStoriesFromTask(task: Task): { id: string | number }[] {
     //
   }
 
-  console.log(
-    'utils: message:',
-    `${tagsStringified.join('|')}|${task.message}|${nextStringified.join('|')}`
-  );
-
   const stories = (
     (`${tagsStringified.join('|')}|${task.message}|${nextStringified.join(
       '|'
@@ -240,8 +235,6 @@ export function getStoriesFromTask(task: Task): { id: string | number }[] {
 
     return agg;
   }, [] as Array<string | number>);
-
-  console.log('utils: stories:', { stories });
 
   return stories;
 }

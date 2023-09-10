@@ -37,6 +37,6 @@ const stories = computed<{
 ));
 
 onMounted(() => {
-  stories.value.forEach((id) => pivotalStore.load({ id } as { id: any }))
+  stories.value.forEach(({ id }) => pivotalStore.load({ id } as { id: any }))
 });
 </script>
