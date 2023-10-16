@@ -31,14 +31,30 @@
     <q-card>
       <q-item>
         <q-item-section>
-          Really undo?
+          Undo or update completed date
+        </q-item-section>
+      </q-item>
+      <div class="q-pa-none q-ma-none q-ml-lg">
+        <q-item-section>
+          <span class="text-caption">{{ taskTitle }}</span>
+        </q-item-section>
+      </div>
+      <q-item>
+        <q-item-section>
+          <CreateAlert
+            :input-value="{ unix: done }"
+            prefix="Finished"
+            icon-add="done"
+            @newAlert="setDone($event.unix)"
+          />
         </q-item-section>
       </q-item>
       <q-item>
         <q-item-section>
           <div class="row">
+            <q-space />
             <q-btn
-              class="q-mr-sm q-ml-xl"
+              class="q-mr-sm"
               dense
               flat
               v-close-popup
@@ -59,7 +75,7 @@ import { timeSince, transformSizeProp } from 'src/utils';
 import { computed, ref } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
 import TimeChip from 'src/components/TimeChip.vue';
-import DirectionalButtonGroup from 'src/components/DirectionalButtonGroup.vue';
+import CreateAlert from 'src/components/CreateAlert.vue';
 
 const props = defineProps({
   taskId: {
@@ -98,6 +114,8 @@ const props = defineProps({
 
 const store = useTaskStore();
 
+const taskTitle = computed(() => store.getTaskProperty(props.taskId, 'message'));
+
 const done = computed(() => store.getTaskProperty(props.taskId, 'done'));
 const timeSinceDone = computed(() => timeSince(done.value));
 const withinPreviousDay = computed(() => (Date.now() - done.value) < 86400000);
@@ -117,15 +135,19 @@ function preToggle() {
   }
 }
 
+function setDone(newVal: number) {
+  store.cloudUpdateSingleProperty({
+    taskId: props.taskId,
+    prop: 'done',
+    data: newVal,
+  });
+}
+
 function toggle() {
   const newVal = done.value ? 0 : Date.now();
 
   if (props.taskId) {
-    store.cloudUpdateSingleProperty({
-      taskId: props.taskId,
-      prop: 'done',
-      data: newVal,
-    });
+    setDone(newVal);
   } else {
     emit('toggle', newVal);
   }

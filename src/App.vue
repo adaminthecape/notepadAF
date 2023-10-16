@@ -43,7 +43,7 @@ import {
   localStorageIntervalCheck,
   LocalStorageName,
   saveToLocalStorage,
-} from '@/utils';
+} from 'src/utils';
 import { defaultTabs } from 'src/constants';
 import useThemeStore from 'src/pinia/themeStore';
 import { ref, computed, defineAsyncComponent, onMounted, watch, provide } from 'vue';

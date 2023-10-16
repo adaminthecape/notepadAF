@@ -31,94 +31,6 @@
               <template #default>
                 <div>
                   <q-item class="row items-center">
-                    <q-btn
-                      color="negative"
-                      icon="delete"
-                      size="md"
-                      class="q-mr-sm"
-                      dense
-                      flat
-                      @click="removeActivityLog(log)"
-                    />
-                    <q-space />
-                    <q-btn-dropdown
-                      label="Adjust start"
-                      no-caps
-                    >
-                      <q-item>
-                        <q-item-section>
-                          <DirectionalButtonGroup
-                            label="Min"
-                            @far-left="incrementBy('start', log, -600000)"
-                            @near-left="incrementBy('start', log, -60000)"
-                            @near-right="incrementBy('start', log, 60000)"
-                            @far-right="incrementBy('start', log, 600000)"
-                          />
-                        </q-item-section>
-                      </q-item>
-                      <q-item>
-                        <q-item-section>
-                          <DirectionalButtonGroup
-                            label="Hour"
-                            @far-left="incrementBy('start', log, -36000000)"
-                            @near-left="incrementBy('start', log, -3600000)"
-                            @near-right="incrementBy('start', log, 3600000)"
-                            @far-right="incrementBy('start', log, 36000000)"
-                          />
-                        </q-item-section>
-                      </q-item>
-                      <q-item>
-                        <q-item-section>
-                          <DirectionalButtonGroup
-                            label="Day"
-                            @far-left="incrementBy('start', log, -864000000)"
-                            @near-left="incrementBy('start', log, -86400000)"
-                            @near-right="incrementBy('start', log, 86400000)"
-                            @far-right="incrementBy('start', log, 864000000)"
-                          />
-                        </q-item-section>
-                      </q-item>
-                    </q-btn-dropdown>
-                    <q-btn-dropdown
-                      label="Adjust end"
-                      no-caps
-                    >
-                      <q-item>
-                        <q-item-section>
-                          <DirectionalButtonGroup
-                            label="Min"
-                            @far-left="incrementBy('end', log, -600000)"
-                            @near-left="incrementBy('end', log, -60000)"
-                            @near-right="incrementBy('end', log, 60000)"
-                            @far-right="incrementBy('end', log, 600000)"
-                          />
-                        </q-item-section>
-                      </q-item>
-                      <q-item>
-                        <q-item-section>
-                          <DirectionalButtonGroup
-                            label="Hour"
-                            @far-left="incrementBy('end', log, -36000000)"
-                            @near-left="incrementBy('end', log, -3600000)"
-                            @near-right="incrementBy('end', log, 3600000)"
-                            @far-right="incrementBy('end', log, 36000000)"
-                          />
-                        </q-item-section>
-                      </q-item>
-                      <q-item>
-                        <q-item-section>
-                          <DirectionalButtonGroup
-                            label="Day"
-                            @far-left="incrementBy('end', log, -864000000)"
-                            @near-left="incrementBy('end', log, -86400000)"
-                            @near-right="incrementBy('end', log, 86400000)"
-                            @far-right="incrementBy('end', log, 864000000)"
-                          />
-                        </q-item-section>
-                      </q-item>
-                    </q-btn-dropdown>
-                  </q-item>
-                  <q-item>
                     <q-input
                       v-model="log.note"
                       class="full-width"
@@ -134,6 +46,37 @@
                         />
                       </template>
                     </q-input>
+                    <q-btn
+                      color="negative"
+                      icon="delete"
+                      size="md"
+                      class="q-ml-sm"
+                      dense
+                      flat
+                      @click="removeActivityLog(log)"
+                    />
+                  </q-item>
+                  <q-item>
+                    <q-item-section>
+                      <CreateAlert
+                        :input-value="log.start ? { unix: log.start } : undefined"
+                        icon-add="save"
+                        cta-tooltip="Set time"
+                        prefix="Start:"
+                        @newAlert="updateTimeFromAlert('start', log, $event)"
+                      />
+                    </q-item-section>
+                  </q-item>
+                  <q-item>
+                    <q-item-section>
+                      <CreateAlert
+                        :input-value="log.end ? { unix: log.end } : undefined"
+                        icon-add="save"
+                        cta-tooltip="Set time"
+                        prefix="End:&nbsp;&nbsp;"
+                        @newAlert="updateTimeFromAlert('end', log, $event)"
+                      />
+                    </q-item-section>
                   </q-item>
                 </div>
               </template>
@@ -177,10 +120,11 @@ import {
 } from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
-import { Task, TaskActivityLog, TaskFilters } from 'src/types';
+import { Task, TaskActivityLog, TaskAlert, TaskFilters } from 'src/types';
 import TimeChip from 'src/components/TimeChip.vue';
 import StoryListTooltip from 'src/components/StoryListTooltip.vue';
 import DirectionalButtonGroup from './DirectionalButtonGroup.vue';
+import CreateAlert from 'src/components/CreateAlert.vue';
 
 const TaskActiveButton = defineAsyncComponent(
   () => import('src/components/TaskActiveButton.vue')
@@ -323,6 +267,22 @@ function incrementBy(
   const newTime = taskActivity.value[index][startOrEnd] + amount;
 
   updateTime(index, newTime, startOrEnd);
+}
+
+function updateTimeFromAlert(
+  startOrEnd: 'start' | 'end',
+  log: TaskActivityLog,
+  alert: TaskAlert
+) {
+  if (!startOrEnd || !alert?.unix || !log) {
+    return;
+  }
+
+  const index = taskActivity.value.findIndex(
+    (l: TaskActivityLog) => l.start === log.start && l.end === log.end
+  );
+
+  updateTime(index, alert.unix, startOrEnd);
 }
 
 function setActivity() {

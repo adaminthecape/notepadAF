@@ -53,7 +53,7 @@
 import useTaskStore from 'src/pinia/taskStore';
 import { ref, computed } from 'vue';
 import SimpleModal from './SimpleModal.vue';
-import { Task } from '@/types';
+import { Task } from 'src/types';
 
 const props = defineProps({
   storyId: {

@@ -19,42 +19,74 @@
       />
     </div>
     <div v-else class="row items-center">
-      Due
+      {{ prefix }}
       <q-input
         v-model="createAlertDate"
         mask="##/##/####"
-        style="width: 8em"
+        style="width: 9em"
         class="q-mx-xs"
         filled
         dense
-      />
-      at
+      ><template #prepend><span class="text-caption">D</span></template></q-input>
       <q-input
         v-model="createAlertTime"
         mask="##:##"
-        style="width: 5em"
-        class="q-mx-sm"
+        style="width: 6em"
+        class="q-mx-xs"
+        size="sm"
         filled
         dense
-      />
-      <q-btn
-        label="+15"
+        flat
+      ><template #prepend><span class="text-caption">T</span></template></q-input>
+      <q-btn-dropdown
+        dropdown-icon="watch"
         color="secondary"
-        class="q-mr-xs"
+        auto-close
         dense
         flat
-        @click="setNow(15 * 60000)"
       >
-        <q-tooltip>Add 15 minutes</q-tooltip>
-      </q-btn>
+        <q-item>
+          <q-item-section>
+            <DirectionalButtonGroup
+              label="Min"
+              @far-left="setNow(-600000)"
+              @near-left="setNow(-60000)"
+              @near-right="setNow(60000)"
+              @far-right="setNow(600000)"
+            />
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            <DirectionalButtonGroup
+              label="Hour"
+              @far-left="setNow(-36000000)"
+              @near-left="setNow(-3600000)"
+              @near-right="setNow(3600000)"
+              @far-right="setNow(36000000)"
+            />
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section>
+            <DirectionalButtonGroup
+              label="Day"
+              @far-left="setNow(-864000000)"
+              @near-left="setNow(-86400000)"
+              @near-right="setNow(86400000)"
+              @far-right="setNow(864000000)"
+            />
+          </q-item-section>
+        </q-item>
+      </q-btn-dropdown>
       <q-btn
-        icon="notification_add"
+        :icon="iconAdd"
         color="secondary"
         dense
         flat
         @click="createAlert"
       >
-        <q-tooltip>Create alert</q-tooltip>
+        <q-tooltip>{{ ctaTooltip }}</q-tooltip>
       </q-btn>
     </div>
   </div>
@@ -64,11 +96,28 @@
 import { TaskAlert } from 'src/types';
 import { padLeft } from 'src/utils';
 import { ref } from 'vue';
+import DirectionalButtonGroup from 'src/components/DirectionalButtonGroup.vue';
 
-defineProps({
+const props = defineProps({
+  inputValue: {
+    type: Object,
+    default: undefined
+  },
   dense: {
     type: Boolean,
     default: true
+  },
+  prefix: {
+    type: String,
+    default: 'Due'
+  },
+  iconAdd: {
+    type: String,
+    default: 'notification_add'
+  },
+  ctaTooltip: {
+    type: String,
+    default: 'Create alert'
   }
 });
 
@@ -78,23 +127,44 @@ const createAlertTime = ref<string>();
 setNow();
 
 function setNow(add = 0) {
+  if(!(createAlertDate.value && createAlertTime.value) && props.inputValue)
+  {
+    const { date, time, unix } = props.inputValue as TaskAlert;
+
+    if(unix)
+    {
+      const ctx = getNow(add, unix);
+
+      createAlertDate.value = ctx.date;
+      createAlertTime.value = ctx.time;
+    }
+    else if(date && time)
+    {
+      createAlertDate.value = date;
+      createAlertTime.value = time;
+    }
+
+    return;
+  }
+
   const { date, time } = getNow(add);
 
   createAlertDate.value = date;
   createAlertTime.value = time;
 }
 
-function getNow(add = 0): {
+function getNow(add = 0, customTime = 0): {
   date: string;
   time: string;
 } {
   const d = new Date(
-    (createAlertDate.value && createAlertTime.value
-      ? new Date(
-        `${createAlertDate.value} ${createAlertTime.value}`
-      ).getTime()
-      : Date.now()) + add
+    (
+      (createAlertDate.value && createAlertTime.value) ?
+        new Date(`${createAlertDate.value} ${createAlertTime.value}`).getTime() :
+        (customTime !== 0) ? customTime : Date.now()
+    ) + add
   );
+
   const time = `${padLeft(d.getHours(), '0', 2)}:${padLeft(
     d.getMinutes(),
     '0',
