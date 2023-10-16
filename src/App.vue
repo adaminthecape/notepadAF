@@ -48,7 +48,6 @@ import { defaultTabs } from 'src/constants';
 import useThemeStore from 'src/pinia/themeStore';
 import { ref, computed, defineAsyncComponent, onMounted, watch, provide } from 'vue';
 import { Dark } from 'quasar';
-import { isDebug } from './mixins/firebase';
 import useTaskStore from './pinia/taskStore';
 
 const SetAccountDetails = defineAsyncComponent(() =>

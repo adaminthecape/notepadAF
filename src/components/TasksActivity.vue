@@ -48,6 +48,15 @@
         <div class="row items-center q-mb-xs">
           <q-btn-group class="row items-center q-mb-xs" flat>
             <q-btn
+              icon="list"
+              :label="displayType"
+              color="primary"
+              no-caps
+              dense
+              flat
+              @click="changeDisplayType"
+            />
+            <q-btn
               :icon="filters.done ? 'check_circle' : 'check_circle_outline'"
               :color="getFilterBoolColor('done')"
               no-caps
@@ -220,8 +229,15 @@
       </div>
       <q-separator class="q-mb-sm" />
       <!-- TASK LIST: -->
-      <div class="task-list" :key="`taskList-${taskListRenderIndex}`">
-        <div v-for="task in limitedTasks" :key="task.id">
+      <div
+        v-if="displayType === displayTypes.taskList"
+        class="task-list"
+        :key="`taskList-${taskListRenderIndex}`"
+      >
+        <div
+          v-for="task in limitedTasks"
+          :key="task.id"
+        >
           <!-- :style="task.done ? 'margin-top: 8px' : ''" -->
           <DisplayTask
             v-if="task"
@@ -230,6 +246,27 @@
             :task-id="task.id"
             class="full-width"
             show-options
+            editable @refresh-task="refreshTask" @filter-by-tag="addTagToFilters" />
+        </div>
+      </div>
+      <div
+        v-if="displayType === displayTypes.subtaskList"
+        class="task-list"
+        :key="`taskList-${taskListRenderIndex}`"
+      >
+        <div
+          v-for="task in limitedTasks"
+          :key="task.id"
+        >
+          <!-- :style="task.done ? 'margin-top: 8px' : ''" -->
+          <TaskSubtaskList
+            v-if="task"
+            :key="taskRenderIndex[task.id]"
+            note-id="tasks"
+            :task-id="task.id"
+            class="full-width"
+            show-options
+            :add-new="false"
             editable @refresh-task="refreshTask" @filter-by-tag="addTagToFilters" />
         </div>
       </div>
@@ -246,7 +283,8 @@ import {
   saveToLocalStorage,
   saveToLocalStorageArray,
   sortTaskList,
-  transformSizeProp
+  transformSizeProp,
+  loopToNextInArray
 } from '../utils';
 import { FilterType, FilterTypes, Task } from 'src/types';
 import useTaskStore, { TaskBucket } from 'src/pinia/taskStore';
@@ -260,6 +298,21 @@ import SimpleModal from 'src/components/SimpleModal.vue';
 import TaskSortDropdown from 'src/components/TaskSortDropdown.vue';
 import LocalStorageList from 'src/components/LocalStorageList.vue';
 import FirebaseConfigModal from 'src/components/FirebaseConfigModal.vue';
+import TaskSubtaskList from './TaskSubtaskList.vue';
+
+enum displayTypes {
+  taskList = 'taskList',
+  subtaskList = 'subtaskList'
+};
+
+const displayType = ref(displayTypes.taskList);
+
+function changeDisplayType() {
+  displayType.value = loopToNextInArray<string>(
+    displayType.value,
+    Object.keys(displayTypes)
+  ) as displayTypes;
+}
 
 // prompt going to firebase settings if there is no config
 const isFirebaseConfigDialogOpen = ref(!getFromLocalStorage(LocalStorageName.firebase_config, true));

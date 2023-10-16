@@ -1,5 +1,5 @@
 <template>
-  <q-tooltip>
+  <q-tooltip v-if="stories?.length">
     <span
       v-for="story in stories"
       :key="`story-tooltip-${story.id}`"

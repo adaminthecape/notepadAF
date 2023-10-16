@@ -18,6 +18,14 @@
             <StoryListTooltip :value="subtask.note" />
           </q-chip>
           <q-btn
+            color="warning"
+            icon="done"
+            size="sm"
+            dense
+            flat
+            @click="finishSubtask(s)"
+          ><q-tooltip>Finish</q-tooltip></q-btn>
+          <q-btn
             color="primary"
             icon="start"
             size="sm"
@@ -93,6 +101,35 @@ watch(taskStories, (n: { id: string | number }[]) => {
     n.forEach(({ id }) => pivotalStore.load({ id }));
   }
 });
+
+function finishSubtask(index: number) {
+  // is the task active? then quit
+  if (isActive.value) {
+    // qNotify(this.$q, 'You must finish the current activity first');
+
+    return;
+  }
+
+  const now = Date.now();
+
+  // start a new activity log with this message
+  const activity = (task.value.activity || []).concat({
+    start: now,
+    end: now + 1000,
+    note: subtasks.value[index].note || '',
+  });
+
+  store.cloudUpdateSingle({
+    ...task.value,
+    activity: activity,
+    active: false
+  }).then(() => {
+    removeSubtask(index);
+    setTimeout(() => {
+      queueTaskRefresh(props.taskId);
+    }, 250);
+  });
+}
 
 function startSubtask(index: number) {
   // is the task active? then quit

@@ -671,3 +671,19 @@ export function transformSizeProp(
       return requestedSize;
   }
 }
+
+export function loopToNextInArray<T = any>(
+  currentVal: T,
+  arr: T[],
+  offset = 0
+) {
+  if (!arr?.length) return undefined;
+
+  const currentIndex = arr.findIndex((x) => x === currentVal);
+
+  if (currentIndex < 0) return arr[0];
+
+  const targetIndex = (currentIndex + offset + 1) % arr.length;
+
+  return arr[targetIndex];
+}

@@ -5,7 +5,7 @@ import {
   writeTasksToFirebaseDb,
 } from 'src/mixins/firebase';
 import { defineStore } from 'pinia';
-import { Task } from 'src/types';
+import { Task, TaskSubtask } from 'src/types';
 // import { readFromDbSync, saveAll } from 'src/mixins/jsondb.js';
 import {
   doesTaskHaveStories,
@@ -120,6 +120,20 @@ const useTaskStore = defineStore('taskStore', {
     } as RootState),
   getters: {
     all: (state) => Object.values(state.tasks),
+    allSubtasks: (state) => {
+      return Object.values(state.tasks).reduce(
+        (agg: { taskId: string; subtask: TaskSubtask }[], task: Task) => {
+          if (task?.next?.length) {
+            agg.push(
+              ...task.next.map((x) => ({ taskId: task.id, subtask: x }))
+            );
+          }
+
+          return agg;
+        },
+        []
+      );
+    },
     getTasks: (state) => state.tasks,
     getTasksByBuckets: (state) => (buckets: TaskBucket[]) => {
       const all: Record<TaskBucket['title'], Record<string, Task>> = {};
