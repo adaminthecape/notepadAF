@@ -123,8 +123,8 @@ import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
 import { Task, TaskActivityLog, TaskAlert, TaskFilters } from 'src/types';
 import TimeChip from 'src/components/TimeChip.vue';
 import StoryListTooltip from 'src/components/StoryListTooltip.vue';
-import DirectionalButtonGroup from './DirectionalButtonGroup.vue';
 import CreateAlert from 'src/components/CreateAlert.vue';
+import { removeUndefined } from 'src/mixins/firebase';
 
 const TaskActiveButton = defineAsyncComponent(
   () => import('src/components/TaskActiveButton.vue')
@@ -213,14 +213,13 @@ function updateLog(data: TaskActivityLog) {
     .cloudUpdateSingleProperty({
       taskId: props.taskId,
       prop: 'activity',
-      data: data.map((item: TaskActivityLog) => {
-        delete item.isEditing;
+      data: data
+        .filter((item: TaskActivityLog) => item)
+        .map((item: TaskActivityLog) => {
+          delete item.isEditing;
 
-        return item;
-      }),
-    })
-    .then(() => {
-      // this.listRenderIndex += 1;
+          return removeUndefined(item);
+        })
     });
 }
 
