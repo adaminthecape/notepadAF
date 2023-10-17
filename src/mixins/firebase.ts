@@ -209,7 +209,7 @@ export function removeUndefined(inputData: any, depth = 0): any {
   }
 
   if (Array.isArray(inputData)) {
-    return inputData.map((item) => removeUndefined(item));
+    return inputData.map((item) => removeUndefined(item, depth + 1));
   }
 
   const data = { ...inputData };
