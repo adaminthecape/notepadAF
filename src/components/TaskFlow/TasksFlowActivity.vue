@@ -150,7 +150,6 @@
             />
           </q-btn-group>
         </div>
-        {{ selectedTask?.activity }}
         <div
           v-if="selectedTask"
           class="row items-center justify-center q-my-sm"
@@ -165,7 +164,7 @@
                 style="border-bottom: 1px solid #666"
               >Activity</h5>
               <q-scroll-area
-                style="max-height: 20vh"
+                style="min-height: 4vh; max-height: 20vh"
                 class="full-width"
               >
                 <TaskActivityLog
@@ -188,7 +187,7 @@
                 style="border-bottom: 1px solid #666"
               >Next</h5>
               <q-scroll-area
-                style="max-height: 20vh"
+                style="min-height: 4vh; max-height: 20vh"
                 class="full-width"
               >
                 <TaskSubtaskList
