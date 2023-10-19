@@ -80,7 +80,7 @@ const hasAccount = ref(!!getFromLocalStorage(
   LocalStorageName.user_account,
   true
 ));
-const currentTab = ref<string>(getFromLocalStorage(LocalStorageName.currentTab) || 'flow');
+const currentTab = ref<string>(getFromLocalStorage(LocalStorageName.currentTab) || 'tasks');
 const ticketCache = ref();
 const desiredTaskId = ref(getFromLocalStorage(LocalStorageName.desiredTaskId) || undefined);
 const appTabs = ref(appTabsToUse);

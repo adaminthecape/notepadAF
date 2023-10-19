@@ -19,36 +19,38 @@
         </slot>
       </template>
     </AddTag>
-    <!-- VIEW TAGS: -->
-    <q-chip
-      v-for="(tag, tagIndex) in areTagsExpanded ?
+    <div v-if="!manageOnly">
+      <!-- VIEW TAGS: -->
+      <q-chip
+        v-for="(tag, tagIndex) in areTagsExpanded ?
               (tags || []) :
               (tags || []).slice(0, 1)"
-      :key="`tag-${tagIndex}`"
-      color="info"
-      :size="size"
-      square
-      dense
-      dark
-      style="margin-right: -2px"
-    >
-      <div class="row items-center">
+        :key="`tag-${tagIndex}`"
+        color="info"
+        :size="size"
+        square
+        dense
+        dark
+        style="margin-right: -2px"
+      >
+        <div class="row items-center">
       <span
         style="font-size:1.2em"
         @click="emit('filterByTag', tag)"
       >{{ tag }}</span>
-      </div>
-    </q-chip>
-    <q-chip
-      v-if="(tags || []).length > 1"
-      color="info"
-      :size="size"
-      clickable
-      square
-      dense
-      dark
-      @click="areTagsExpanded = !areTagsExpanded"
-    ><q-icon :name="areTagsExpanded ? 'keyboard_arrow_left' : 'keyboard_arrow_right'" /></q-chip>
+        </div>
+      </q-chip>
+      <q-chip
+        v-if="(tags || []).length > 1"
+        color="info"
+        :size="size"
+        clickable
+        square
+        dense
+        dark
+        @click="areTagsExpanded = !areTagsExpanded"
+      ><q-icon :name="areTagsExpanded ? 'keyboard_arrow_left' : 'keyboard_arrow_right'" /></q-chip>
+    </div>
   </div>
 </template>
 
@@ -65,6 +67,10 @@ const props = defineProps({
   size: {
     type: String,
     default: 'sm'
+  },
+  manageOnly: {
+    type: Boolean,
+    default: false
   }
 });
 

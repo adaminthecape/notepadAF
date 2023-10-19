@@ -5,6 +5,7 @@
     :key="`task-options-${taskId}-${taskRenderIndex}`"
     :class="{ column: !!column }"
   >
+    <slot name="left"></slot>
     <q-btn
         v-if="showSingleTaskButton"
         icon="description"
@@ -94,6 +95,7 @@
         :flat="flat"
         @click="showAllOptions = !showAllOptions"
     ><q-tooltip>More options</q-tooltip></q-btn>
+    <slot name="right"></slot>
   </div>
 </template>
 
