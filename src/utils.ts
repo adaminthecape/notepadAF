@@ -40,6 +40,8 @@ export enum LocalStorageName {
   external_backups = 'external_backups',
   gitModuleBasePath = 'gitModuleBasePath',
   ticketQueryParams = 'ticketQueryParams',
+  /** flow */
+  flowTask = 'flowTask',
 }
 
 export function openInBrowser(link: string) {

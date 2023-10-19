@@ -9,7 +9,7 @@
     @mouseenter="dropdownState = true"
   >
     <q-item
-      v-for="tab in ['tasks', 'activity', 'tickets', 'settings']"
+      v-for="tab in ['flow', 'tasks', 'activity', 'tickets', 'settings']"
       :key="`tab-selector-${tab}`"
       clickable
       :active="app?.activeTabs?.()?.[tab]"

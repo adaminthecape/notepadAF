@@ -22,6 +22,9 @@
       </q-tabs>
     </div> -->
 
+    <div v-if="currentTab === 'flow'">
+      <TasksFlowActivity />
+    </div>
     <div v-if="currentTab === 'tasks'">
       <TasksActivity />
     </div>
@@ -49,6 +52,7 @@ import useThemeStore from 'src/pinia/themeStore';
 import { ref, computed, defineAsyncComponent, onMounted, watch, provide } from 'vue';
 import { Dark } from 'quasar';
 import useTaskStore from './pinia/taskStore';
+import TasksFlowActivity from 'src/components/TaskFlow/TasksFlowActivity.vue';
 
 const SetAccountDetails = defineAsyncComponent(() =>
   import('src/components/SetAccountDetails.vue'));
@@ -76,7 +80,7 @@ const hasAccount = ref(!!getFromLocalStorage(
   LocalStorageName.user_account,
   true
 ));
-const currentTab = ref<string>(getFromLocalStorage(LocalStorageName.currentTab) || 'tasks');
+const currentTab = ref<string>(getFromLocalStorage(LocalStorageName.currentTab) || 'flow');
 const ticketCache = ref();
 const desiredTaskId = ref(getFromLocalStorage(LocalStorageName.desiredTaskId) || undefined);
 const appTabs = ref(appTabsToUse);

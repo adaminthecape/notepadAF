@@ -1,4 +1,4 @@
-<template>
+\<template>
   <SimpleLayout id="tasks_list" header :page-classes="['q-px-sm', 'q-pt-sm']">
     <template #header-title>
       <div class="row items-center" style="font-size: 0.8em">
@@ -9,13 +9,16 @@
         </q-btn>
         <span v-if="!tasksList || !filteredTasksList">No tasks to show</span>
         <span v-else-if="filteredTasksList.length === Object.keys(tasksList).length">All tasks</span>
-        <span v-else>{{ filteredTasksList.length }} / {{ Object.keys(tasksList).length
-        }}</span>
+        <span v-else>{{ filteredTasksList.length }} / {{ Object.keys(tasksList).length }}</span>
         <q-space />
         <q-btn icon="tune" size="sm" dense flat @click="clearFilters">
           <q-tooltip>Clear filters</q-tooltip>
         </q-btn>
-        <TaskSortDropdown :sort-type="sortType" :inverse-sort="inverseSort" @set-sort-type="setSortType($event)" />
+        <TaskSortDropdown
+          :sort-type="sortType"
+          :inverse-sort="inverseSort"
+          @set-sort-type="setSortType($event)"
+        />
         <AppTabSelector />
       </div>
     </template>
@@ -35,53 +38,24 @@
       </q-dialog>
       <!-- NEW TASK / FILTERS: -->
       <div style="display: flex; flex-direction: column">
-        <!-- <div class="row items-center q-mb-xs"> -->
-          <!-- <TaskTagSelector
-              v-model:value="filters.tags"
-              label="Filter by tags"
-              style="flex-grow: 1; max-width: 60%"
-              multiple
-              @input="doThing('zz')"
-              @cancel="setFilter(filterTypes.tags, [])"
-          /> -->
-        <!-- </div> -->
         <div class="row items-center q-mb-xs">
-          <q-btn-group class="row items-center q-mb-xs" flat>
-            <q-btn
-              icon="list"
-              :label="displayType"
-              color="primary"
-              no-caps
-              dense
-              flat
-              @click="changeDisplayType"
-            />
-            <q-btn
-              :icon="filters.done ? 'check_circle' : 'check_circle_outline'"
-              :color="getFilterBoolColor('done')"
-              no-caps
-              dense
-              flat
-              @click="toggleFilterBool('done')"
-            />
-            <q-btn
-              :icon="filters.active ? 'assignment_ind' : 'content_paste_go'"
-              :color="getFilterBoolColor('active')"
-              no-caps
-              dense
-              flat
-              @click="toggleFilterBool('active')"
-            />
-            <q-btn
-              :icon="filters.archived ? 'unarchive' : 'move_to_inbox'"
-              :color="getFilterBoolColor('archived')"
-              no-caps
-              dense
-              flat
-              @click="toggleFilterBool('archived')"
-            />
-          </q-btn-group>
+          <BoolToggleGroup
+            :filters="filters"
+            @input="filters = { ...filters, ...$event }; filterTasks()"
+          >
+            <template #left>
+              <q-btn
+                icon="list"
+                color="primary"
+                no-caps
+                dense
+                flat
+                @click="changeDisplayType"
+              ><q-tooltip>{{ displayType }}</q-tooltip></q-btn>
+            </template>
+          </BoolToggleGroup>
           <q-space />
+          <!-- pagination: -->
           <div class="pagination-container flex flex-center">
             <q-pagination
                 v-model="pagination.page"
@@ -95,104 +69,86 @@
           </div>
           <q-space />
           <q-btn-group flat>
-          <SimpleModal>
-            <template #activator="{ open: openKeywordModal }">
-              <q-btn
-                icon="search"
-                color="primary"
-                dense
-                flat
-                @click="openKeywordModal"
-              ><q-tooltip>Search by keyword</q-tooltip></q-btn>
-            </template>
-            <template #content>
-              <q-input
-                v-model="filters.keyword"
-                placeholder="Filter by keyword"
-                class="q-mr-xs"
-                style="flex-grow: 1;"
-                filled
-                dense
-                @keydown="setFilter(filterTypes.keyword, filters.keyword)"
-              >
-                <template #append>
-                  <q-btn
-                    v-if="filters.keyword" icon="close"
-                    round
-                    dense
-                    flat
-                    size="xs"
-                    @click.stop.prevent="setFilter(filterTypes.keyword, undefined)"
-                  />
-                </template>
-              </q-input>
-            </template>
-          </SimpleModal>
-          <AddTag
-            multiple
-            :selected-tags="filters.tags"
-            @input="addTagToFilters"
-            @remove="addTagToFilters"
-          >
-            <template #activator="{ open }">
-              <q-btn
-                icon="sell"
-                color="secondary"
-                size="md"
-                dense
-                flat
-                @click="open"
-              ><q-tooltip>Filter by tag</q-tooltip></q-btn>
-            </template>
-          </AddTag>
-          <LocalStorageList
-              :value="categoriesMutable"
-              title="Categories"
-              list-key="taskCategories"
-              @updated="filterTasks"
-              @input="categoriesMutable = $event"
-          />
-          <SimpleModal>
-            <template #activator="{ open: openKeywordModal }">
-              <q-btn
-                icon="add_circle"
-                color="secondary"
-                dense
-                flat
-                @click="openKeywordModal"
-              ><q-tooltip>Add task</q-tooltip></q-btn>
-            </template>
-            <template #content>
-              <div class="row items-center">
-                <q-input
-                  ref="newTaskInput"
-                  v-model="newTask.message"
-                  placeholder="Add a task"
-                  class="full-width q-mb-xs"
-                  filled
-                  dense
-                >
-                  <template #append>
-                    <q-btn icon="add_task" dense flat @click="createTask()" />
-                  </template>
-                </q-input>
-              </div>
-            </template>
-            <template #actions>
+            <!-- keyword modal: -->
+            <SimpleModal>
+              <template #activator="{ open: openKeywordModal }">
                 <q-btn
-                  class="q-ml-xs"
-                  :icon="applyFilters ? 'lock' : 'lock_open'"
-                  :size="transformSizeProp('sm')"
+                  icon="search"
+                  color="primary"
                   dense
                   flat
-                  dark
-                  @click="applyFilters = !applyFilters"
-                >
-                  <q-tooltip>Apply filters to new task</q-tooltip>
-                </q-btn>
+                  @click="openKeywordModal"
+                ><q-tooltip>Search by keyword</q-tooltip></q-btn>
               </template>
-          </SimpleModal>
-          <q-space />
+              <template #content>
+                <KeywordSearch
+                  :value="filters.keyword"
+                  @input="setFilter(FilterTypes.keyword, $event)"
+                />
+              </template>
+            </SimpleModal>
+            <AddTag
+              multiple
+              :selected-tags="filters.tags"
+              @input="addTagToFilters"
+              @remove="addTagToFilters"
+            >
+              <template #activator="{ open }">
+                <q-btn
+                  icon="sell"
+                  color="secondary"
+                  size="md"
+                  dense
+                  flat
+                  @click="open"
+                ><q-tooltip>Filter by tag</q-tooltip></q-btn>
+              </template>
+            </AddTag>
+            <CategoryManager
+                @updated="filterTasks"
+            />
+            <!-- add task modal: -->
+            <SimpleModal>
+              <template #activator="{ open: openKeywordModal }">
+                <q-btn
+                  icon="add_circle"
+                  color="secondary"
+                  dense
+                  flat
+                  @click="openKeywordModal"
+                ><q-tooltip>Add task</q-tooltip></q-btn>
+              </template>
+              <template #content>
+                <div class="row items-center">
+                  <q-input
+                    ref="newTaskInput"
+                    v-model="newTask.message"
+                    placeholder="Add a task"
+                    class="full-width q-mb-xs"
+                    filled
+                    dense
+                  >
+                    <template #append>
+                      <q-btn icon="add_task" dense flat @click="createTask()" />
+                    </template>
+                  </q-input>
+                </div>
+              </template>
+              <template #actions>
+                  <q-btn
+                    class="q-ml-xs"
+                    :icon="applyFilters ? 'lock' : 'lock_open'"
+                    :size="transformSizeProp('sm')"
+                    dense
+                    flat
+                    dark
+                    @click="applyFilters = !applyFilters"
+                  >
+                    <q-tooltip>Apply filters to new task</q-tooltip>
+                  </q-btn>
+                </template>
+            </SimpleModal>
+            <q-space />
           </q-btn-group>
         </div>
         <!-- show active keyword/tags: -->
@@ -246,9 +202,13 @@
             :task-id="task.id"
             class="full-width"
             show-options
-            editable @refresh-task="refreshTask" @filter-by-tag="addTagToFilters" />
+            editable
+            @refresh-task="refreshTask"
+            @filter-by-tag="addTagToFilters"
+          />
         </div>
       </div>
+      <!-- SUBTASK LIST: -->
       <div
         v-if="displayType === displayTypes.subtaskList"
         class="task-list"
@@ -287,7 +247,7 @@ import {
   loopToNextInArray
 } from '../utils';
 import { FilterType, FilterTypes, Task } from 'src/types';
-import useTaskStore, { TaskBucket } from 'src/pinia/taskStore';
+import useTaskStore from 'src/pinia/taskStore';
 import { computed, onMounted, ref, watch } from 'vue';
 
 import AppTabSelector from 'src/components/AppTabSelector.vue';
@@ -296,9 +256,11 @@ import AddTag from 'src/components/AddTag.vue';
 import DisplayTask from 'src/components/DisplayTask.vue';
 import SimpleModal from 'src/components/SimpleModal.vue';
 import TaskSortDropdown from 'src/components/TaskSortDropdown.vue';
-import LocalStorageList from 'src/components/LocalStorageList.vue';
 import FirebaseConfigModal from 'src/components/FirebaseConfigModal.vue';
 import TaskSubtaskList from './TaskSubtaskList.vue';
+import KeywordSearch from 'src/components/TaskFilters/KeywordSearch.vue';
+import BoolToggleGroup from 'src/components/TaskFilters/BoolToggleGroup.vue';
+import CategoryManager from 'src/components/TaskFilters/CategoryManager.vue';
 
 enum displayTypes {
   taskList = 'taskList',
@@ -315,7 +277,9 @@ function changeDisplayType() {
 }
 
 // prompt going to firebase settings if there is no config
-const isFirebaseConfigDialogOpen = ref(!getFromLocalStorage(LocalStorageName.firebase_config, true));
+const isFirebaseConfigDialogOpen = ref(
+  !getFromLocalStorage(LocalStorageName.firebase_config, true)
+);
 
 const defaults = {
   pagination: {
@@ -329,8 +293,6 @@ const defaults = {
   },
 };
 
-const filterTypes = ref({ ...FilterTypes });
-
 const filters = ref<Partial<Record<FilterTypes, any>>>({
   done: false,
   active: false,
@@ -342,13 +304,8 @@ const taskRenderIndex = ref<Record<string, string>>({});
 const taskListRenderIndex = ref(0);
 const sortType = ref();
 const inverseSort = ref(false);
-const categoriesMutable = ref<TaskBucket[]>([]);
 
 const store = useTaskStore();
-
-const categories = computed(() => {
-  return store.getCategories;
-})
 
 const pagination = ref(defaults.pagination);
 
@@ -370,31 +327,6 @@ const limitedTasks = computed<Task[]>(() => {
   );
 });
 
-// const toggleableBooleans = computed(() => {
-//   return [
-//     {
-//       label: 'Done',
-//       value: 'done',
-//       icon_true: 'check_circle',
-//       icon_false: 'check_circle_outline',
-//     },
-//     {
-//       label: 'Active',
-//       value: 'active',
-//       icon_true: 'assignment_ind',
-//       icon_false: 'content_paste_go',
-//     },
-//     {
-//       label: 'Archived',
-//       value: 'archived',
-//       icon_true: 'unarchive',
-//       icon_false: 'move_to_inbox',
-//     },
-//     // { label: 'Alarm', value: 'hasAlarm' },
-//     // { label: 'Due', value: 'isDue' }
-//   ];
-// })
-
 const tasksList = computed(() => store.getTasksInSelectedBuckets());
 
 const isCloudLoading = computed(() => {
@@ -404,12 +336,6 @@ const isCloudLoading = computed(() => {
 const lastCloudUpdate = computed(() => {
   return store.getLastCloudUpdate;
 })
-
-function loadCategories() {
-  // get saved buckets
-  store.setCategoriesFromLocalStorage();
-  categoriesMutable.value = [...categories.value];
-}
 
 function loadFilters() {
   // get saved filters
@@ -436,22 +362,9 @@ function loadFilters() {
 // const refreshCheckInterval = ref();
 
 onMounted(() => {
-  loadCategories();
   loadFilters();
   loadTasks();
   filterTasks();
-
-  // if (refreshCheckInterval.value) {
-  //   clearInterval(refreshCheckInterval.value);
-  // }
-
-  // refreshCheckInterval.value = localStorageIntervalCheck(
-  //   LocalStorageName.taskRefreshQueue,
-  //   (queue: Array<string | number>) =>
-  //     queue.forEach((id) => {
-  //       refreshTask({ id });
-  //     })
-  // );
 });
 
 

@@ -81,50 +81,9 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
           </q-input>
         </div>
         <div class="row items-center" style="margin: 0 -12px">
-            <!-- ADD TAGS: -->
-            <AddTag
-              :selected-tags="task.tags || []"
-              @input="addTag"
-              @remove="removeTag"
-            >
-              <template #activator="{ open }">
-                  <q-btn
-                    icon="add_box"
-                    color="info"
-                    :size="transformSizeProp('sm')"
-                    dense
-                    flat
-                    @click="open"
-                  ><q-tooltip>Add tags</q-tooltip></q-btn>
-              </template>
-            </AddTag>
-            <!-- VIEW TAGS: -->
-            <q-chip
-              v-for="(tag, tagIndex) in areTagsExpanded ?
-                (task.tags || []) :
-                (task.tags || []).slice(0, 1)"
-              :key="`tag-${tagIndex}`"
-              color="info"
-              :size="transformSizeProp('sm')"
-              square
-              dense
-              dark
-              style="margin-right: -2px"
-            >
-              <div class="row items-center">
-                <span style="font-size:1.2em" @click="emit('filterByTag', tag)">{{ tag }}</span>
-              </div>
-            </q-chip>
-            <q-chip
-              v-if="(task.tags || []).length > 1"
-              color="info"
-              :size="transformSizeProp('sm')"
-              clickable
-              square
-              dense
-              dark
-              @click="areTagsExpanded = !areTagsExpanded"
-            ><q-icon :name="areTagsExpanded ? 'keyboard_arrow_left' : 'keyboard_arrow_right'" /></q-chip>
+          <TaskTagsList
+            :task-id="taskId"
+          />
           <q-space />
           <TaskOptions
             :task-id="taskId"
@@ -157,6 +116,7 @@ import TaskAlertDisplay from 'src/components/TaskAlertDisplay.vue';
 import AddTag from 'src/components/AddTag.vue';
 import TaskStoryDropdown from 'src/components/TaskStoryDropdown.vue';
 import TaskOptions from 'src/components/TaskOptions.vue';
+import TaskTagsList from 'src/components/TaskFilters/TaskTagsList.vue';
 
 const emit = defineEmits<{
   (event: 'filterByTag', tag: string): void
