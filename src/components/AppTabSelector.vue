@@ -15,19 +15,24 @@
       :active="app?.activeTabs?.()?.[tab]"
       @click="app?.openTab?.(tab)"
     >
-      <q-item-section>{{ tab.toLocaleUpperCase() }}</q-item-section>
+      <q-item-section>{{ getTabName(tab).toLocaleUpperCase() }}</q-item-section>
     </q-item>
     <q-item>
       <q-item-section>
-        <q-btn-group>
+        <q-btn-group outline style="border: 1px solid #666">
           <q-btn
             size="sm"
             icon="light_mode"
+            color="yellow-9"
+            flat
             @click.stop.prevent="setLightMode"
           />
           <q-btn
             size="sm"
             icon="dark_mode"
+            color="blue-9"
+            style="border-left: 1px solid #666"
+            flat
             @click.stop.prevent="setDarkMode"
           />
         </q-btn-group>
@@ -57,5 +62,17 @@ function setLightMode() {
 function setDarkMode() {
   themeStore.setDarkMode();
   Dark.set(true);
+}
+
+function getTabName(tab: string) {
+  switch(tab)
+  {
+    case 'flow': return 'New UI';
+    case 'tasks': return 'Tasks';
+    case 'activity': return 'Detail';
+    case 'tickets': return 'Pivotal';
+    case 'settings': return 'Settings';
+    default: return 'Unknown';
+  }
 }
 </script>

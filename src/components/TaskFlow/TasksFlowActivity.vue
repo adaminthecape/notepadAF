@@ -6,6 +6,7 @@
         v-if="flowTaskId"
         icon="close"
         dense
+        flat
         @click="selectTask({ id: null })"
       />
       <q-space />
@@ -209,6 +210,40 @@
             v-if="activeSubtask"
             class="full-width q-ma-sm"
           >
+            <div class="row full-width justify-center q-mt-md">
+              <div
+                class="standout-2 rounded flex-col"
+                style="width: 60%; height: auto;"
+              >
+                <div class="flex-col text-center">
+                  <h4 class="q-my-md">Currently active</h4>
+                  <h6 class="q-my-none q-mb-xs">
+                    Started {{ new Date(activeSubtask.start).toDateString() }}
+                  </h6>
+                  <h6 class="q-my-none q-mb-md">
+                    ({{ timeSince(activeSubtask.start) }})
+                  </h6>
+                </div>
+                <q-space />
+                <div class="row items-center justify-center">
+                  <q-btn-group class="q-mb-sm" flat>
+                    <TaskActiveButton
+                      :task-id="flowTaskId"
+                      size="lg"
+                      flat
+                      mode="save"
+                    />
+                    <q-btn
+                      icon="delete"
+                      color="negative"
+                      size="lg"
+                      no-caps
+                      flat
+                    />
+                  </q-btn-group>
+                </div>
+              </div>
+            </div>
             <div class="q-my-sm q-pa-sm">
               <q-input
                 v-model="activeSubtaskMutations.note"
@@ -226,26 +261,6 @@
                 </template>
               </q-input>
             </div>
-            <div class="row full-width">
-              <q-space />
-              <q-btn-group class="q-mr-sm">
-                <q-btn no-caps>
-                  <span>Started {{ timeSince(activeSubtask?.start) }}</span>
-                </q-btn>
-                <TaskActiveButton
-                  :task-id="flowTaskId"
-                  size="md"
-                  flat
-                  mode="save"
-                />
-                <q-btn
-                  icon="delete"
-                  color="negative"
-                  no-caps
-                  flat
-                />
-              </q-btn-group>
-            </div>
             <div class="row full-width q-pa-sm q-ma-sm">
               <q-input
                 v-model="activeSubtaskMutations.details"
@@ -260,16 +275,26 @@
               <q-btn-group>
                 <q-btn
                   icon="alarm"
+                  size="lg"
                   dense
                   flat
                   @click="addTimestampAtEnd()"
                 ><q-tooltip>Insert timestamp</q-tooltip></q-btn>
                 <q-btn
                   icon="save"
+                  size="lg"
                   :color="activeSubtaskMutations.details === activeSubtask.details ? 'green-9' : 'warning'"
                   dense
                   flat
                   @click="updateSubtask"
+                />
+                <q-btn
+                  icon="undo"
+                  size="lg"
+                  v-if="activeSubtaskMutations.details !== activeSubtask.details"
+                  dense
+                  flat
+                  @click="activeSubtaskMutations.details = activeSubtask.details"
                 />
               </q-btn-group>
             </div>
@@ -441,10 +466,6 @@ function addTimestampAtEnd() {
 </script>
 
 <style scoped>
-.results-container {
-
-}
-
 .bordered {
   border: 1px solid #666;
   border-radius: 6px !important;
@@ -469,6 +490,13 @@ function addTimestampAtEnd() {
   overflow-y: hidden;
 }
 
+@import url('https://fonts.googleapis.com/css?family=Allerta');
+
+.content-container > div,
+.content-container > span {
+  font-family: 'Allerta', sans-serif;
+}
+
 .q-card > div:last-child {
   border-bottom: 1px;
 }
@@ -479,5 +507,10 @@ function addTimestampAtEnd() {
 
 .rounded {
   border-radius: 6px !important;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
 }
 </style>
