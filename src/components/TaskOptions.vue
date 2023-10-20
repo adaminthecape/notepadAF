@@ -47,7 +47,9 @@
         @toggle="editTask()"
     />
     <TaskDoneButton
-        v-if="showAllOptions || (showDoneButton || task.done)"
+        v-if="!hideDoneButton && (
+          showAllOptions || (showDoneButton || task.done)
+        )"
         :task-id="task.id"
         :done="task.done"
         :size="transformSizeProp(size)"
@@ -124,6 +126,7 @@ const props = defineProps<{
   showSingleTaskButton?: boolean;
   showActiveButton?: boolean;
   showActivityLogButton?: boolean;
+  hideDoneButton?: boolean;
   showDoneButton?: boolean;
   showEditButton?: boolean;
   showAlertButton?: boolean;

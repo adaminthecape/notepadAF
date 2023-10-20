@@ -1,13 +1,13 @@
 import { generate as uuidv4 } from 'src/components/composables/uuid';
 import {
   FilterType,
-  Task,
+  Task, TaskActivityLog,
   TaskAlert,
   TaskFilters,
   TaskSortType,
-  TaskSubtask,
+  TaskSubtask
 } from './types';
-import { TaskBucket } from './pinia/taskStore';
+import useTaskStore, { TaskBucket } from './pinia/taskStore';
 import usePivotalStore from './pinia/pivotalStore';
 
 export enum LocalStorageName {
@@ -688,4 +688,50 @@ export function loopToNextInArray<T = any>(
   const targetIndex = (currentIndex + offset + 1) % arr.length;
 
   return arr[targetIndex];
+}
+
+export function updateActiveActivity(
+  taskId: string,
+  mutations: Record<string, any>
+): void
+{
+  const store = useTaskStore();
+  const activity = store.getTaskProperty(taskId, 'activity');
+  let lastActivity;
+
+  if (Array.isArray(activity) && activity.length) {
+    lastActivity = activity.find((a) => a.start && !a.end);
+  }
+
+  if(!lastActivity)
+  {
+    console.warn('nothing to update!');
+
+    return;
+  }
+
+  const data = activity.map((a: TaskActivityLog) => {
+    if(a.start && !a.end)
+    {
+      return { ...a, ...mutations };
+    }
+
+    return a;
+  });
+
+  store.cloudUpdateSingleProperty({
+    taskId,
+    prop: 'activity',
+    data
+  }).then(() => {
+    if(mutations.end)
+    {
+      // subtask is becoming inactive - task should too!
+      store.cloudUpdateSingleProperty({
+        taskId,
+        prop: 'active',
+        data: 0
+      });
+    }
+  });
 }
