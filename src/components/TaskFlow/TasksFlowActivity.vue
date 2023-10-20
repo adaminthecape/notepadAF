@@ -147,7 +147,7 @@
       >
         <q-tabs
           v-model="currentTab"
-          class="shadow-2 full-width"
+          class="bordered full-width"
           active-color="primary"
           indicator-color="primary"
           narrow-indicator
@@ -224,6 +224,33 @@
                   color="negative"
                   no-caps
                   flat
+                />
+              </q-btn-group>
+            </div>
+            <div class="row full-width q-pa-sm q-ma-sm">
+              <q-input
+                v-model="activeSubtaskMutations.details"
+                type="textarea"
+                class="full-width"
+                placeholder="Add notes..."
+                filled
+              />
+            </div>
+            <div class="row full-width q-pr-md">
+              <q-space />
+              <q-btn-group>
+                <q-btn
+                  icon="alarm"
+                  dense
+                  flat
+                  @click="addTimestampAtEnd()"
+                ><q-tooltip>Insert timestamp</q-tooltip></q-btn>
+                <q-btn
+                  icon="save"
+                  :color="activeSubtaskMutations.details === activeSubtask.details ? 'green-9' : 'warning'"
+                  dense
+                  flat
+                  @click="updateSubtask"
                 />
               </q-btn-group>
             </div>
@@ -336,6 +363,7 @@ const activeSubtaskMutations = ref<Partial<TaskActivityLog>>({
   note: activeSubtask.value?.note || ''
 });
 function updateSubtask(additionalMutations: Record<string, any>) {
+  console.log('updateSubtask:', additionalMutations, activeSubtaskMutations.value);
   updateActiveActivity(
     flowTaskId.value,
     {
@@ -383,6 +411,10 @@ const availableTabs = computed(() => {
 
   return tabs;
 });
+
+function addTimestampAtEnd() {
+  activeSubtaskMutations.value.details += `\n${new Date().toDateString()} ${new Date().toTimeString().split(' ')[0]}: `;
+}
 </script>
 
 <style scoped>
