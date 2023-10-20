@@ -132,15 +132,31 @@
       <!-- Search results: -->
       <q-card v-if="!selectedTask" :class="cardClasses" flat>
         <div v-if="!results?.length" class="q-pa-sm text-center full-width">
-          <h5 class="q-ma-none q-mb-md">
-            Recent tasks
-          </h5>
-          <DisplayTask
-            v-for="task in recentTasks"
-            :key="`display-task-${task.id}`"
-            :task-id="task.id"
-            @click="selectTask(task)"
-          />
+          <div
+            v-if="taskStore.isCloudLoading"
+            class="full-width q-pa-xl"
+            style="height: 50vh"
+          >
+            <h5 class="q-ma-none q-mb-md">
+              Loading tasks ...
+            </h5>
+            <q-spinner
+              style=""
+              color="primary"
+              size="25vh"
+            />
+          </div>
+          <div v-else>
+            <h5 class="q-ma-none q-mb-md">
+              Recent tasks
+            </h5>
+            <DisplayTask
+              v-for="task in recentTasks"
+              :key="`display-task-${task.id}`"
+              :task-id="task.id"
+              @click="selectTask(task)"
+            />
+          </div>
         </div>
         <DisplayTask
           v-for="task in resultsOnPage"
@@ -361,6 +377,8 @@ const filters = ref<Partial<TaskFilters>>({
 });
 
 // RESULTS
+const tasksNotLoadedYet = computed(() => !taskStore.getLastCloudDispatch);
+
 const results = computed(() => {
   if(!filters.value.keyword)
   {
@@ -501,9 +519,11 @@ function addTimestampAtEnd() {
   border-bottom: 1px;
 }
 
-.standout-0 { background-color: #70809007; }
-.standout-1 { background-color: #70809020; }
-.standout-2 { background-color: #70809040; }
+.standout-0 { background-color: #70809010; }
+.standout-1 { background-color: #70809030; }
+.standout-2 { background-color: #70809050; }
+.standout-3 { background-color: #70809070; }
+.standout-4 { background-color: #70809090; }
 
 .rounded {
   border-radius: 6px !important;
