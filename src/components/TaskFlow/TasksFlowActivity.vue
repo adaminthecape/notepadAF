@@ -152,7 +152,7 @@
       <!-- activity/current/next panels: -->
       <div
         v-if="selectedTask"
-        class="q-my-sm standout-0"
+        class="q-my-sm"
       >
         <div
           v-if="!availableTabs.length"
