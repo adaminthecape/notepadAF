@@ -17,6 +17,22 @@
     >
       <q-item-section>{{ tab.toLocaleUpperCase() }}</q-item-section>
     </q-item>
+    <q-item>
+      <q-item-section>
+        <q-btn-group>
+          <q-btn
+            size="sm"
+            icon="light_mode"
+            @click.stop.prevent="setLightMode"
+          />
+          <q-btn
+            size="sm"
+            icon="dark_mode"
+            @click.stop.prevent="setDarkMode"
+          />
+        </q-btn-group>
+      </q-item-section>
+    </q-item>
   </q-btn-dropdown>
 </template>
 
@@ -29,4 +45,17 @@ const app: {
   activeTabs: () => Record<string, boolean>;
   openTab: (tab: string) => void;
 } | undefined = inject('helpers');
+
+import { Dark } from 'quasar';
+import useThemeStore from 'src/pinia/themeStore';
+
+const themeStore = useThemeStore();
+function setLightMode() {
+  themeStore.setLightMode();
+  Dark.set(false);
+}
+function setDarkMode() {
+  themeStore.setDarkMode();
+  Dark.set(true);
+}
 </script>

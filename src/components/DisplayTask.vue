@@ -5,7 +5,7 @@
     class="flex q-mb-sm"
     :style="`flex-direction: column; background-color: #70809020`"
     flat
-    bordered
+    :bordered="bordered"
   >
     <q-item clickable dense @click.ctrl="editTask">
       <q-item-section>
@@ -133,6 +133,10 @@ const props = defineProps({
     default: true
   },
   clickable: {
+    type: Boolean,
+    default: false
+  },
+  bordered: {
     type: Boolean,
     default: false
   }

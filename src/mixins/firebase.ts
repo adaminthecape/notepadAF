@@ -230,6 +230,7 @@ export async function updateTaskDataByPath(
 ) {
   const db = await getDb();
   const fullPath = `${dbName}/tasks/${taskId}/${path.split('.').join('/')}`;
+  const updatedPath = `${dbName}/tasks/${taskId}/updated`;
 
   console.log('update:', fullPath, removeUndefined(data));
 
@@ -238,6 +239,7 @@ export async function updateTaskDataByPath(
   }
 
   await set(ref(db, fullPath), removeUndefined(data));
+  await set(ref(db, updatedPath), Date.now());
 }
 
 export async function readTasksFromFirebaseDb(

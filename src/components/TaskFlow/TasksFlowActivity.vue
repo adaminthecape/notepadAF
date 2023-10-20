@@ -1,5 +1,5 @@
 <template>
-  <div class="q-ma-sm q-pa-sm bordered">
+  <div class="q-ma-sm q-pa-sm standout-0 rounded">
     <!-- Top bar: -->
     <div class="row items-center justify-center full-width q-mb-xs">
       <q-btn
@@ -37,9 +37,9 @@
       <q-card
         v-if="selectedTask"
         :class="cardClasses"
-        class="q-pa-md q-my-sm bordered"
+        class="q-pa-md q-my-sm standout-1 rounded"
       >
-        <div>
+        <div style="white-space: pre-wrap">
           {{ selectedTask?.message }}
         </div>
         <q-separator class="q-my-sm" />
@@ -58,42 +58,89 @@
             />
           </template>
         </TaskTagsList>
+        <!-- Task options: -->
+        <div
+          v-if="selectedTask"
+          class="row items-center justify-center standout-2 rounded q-mt-sm"
+        >
+          <TaskOptions
+            :task-id="flowTaskId"
+            show-edit-button
+            show-active-button
+            show-alert-button
+            show-delete-button
+            show-done-button
+            show-archive-button
+            show-subtask-button
+            hide-menu-button
+            show
+            add-new
+            flat
+            dense
+          >
+            <template #left>
+              <TaskTagsList
+                :task-id="flowTaskId"
+                manage-only
+                size="sm"
+              >
+                <template #activator="{ open }">
+                  <q-btn
+                    icon="sell"
+                    size="md"
+                    dense
+                    flat
+                    @click="open"
+                  ><q-tooltip>Manage tags</q-tooltip></q-btn>
+                </template>
+              </TaskTagsList>
+            </template>
+          </TaskOptions>
+        </div>
       </q-card>
       <!-- Find a task: -->
       <q-card
         v-if="!selectedTask"
         :class="cardClasses"
-        class="q-pa-md q-my-sm bordered"
+        class="q-my-sm rounded standout-1"
       >
-        <q-card :class="cardClasses" flat>
-          <KeywordSearch
-            :value="filters.keyword"
-            @input="filters.keyword = $event"
+        <KeywordSearch
+          :value="filters.keyword"
+          @input="filters.keyword = $event"
+        />
+        <div class="row items-center q-mt-sm">
+          <BoolToggleGroup
+            :filters="filters"
+            @input="filters = { ...filters, ...$event }"
           />
-          <div class="row items-center q-mt-sm">
-            <BoolToggleGroup
-              :filters="filters"
-              @input="filters = { ...filters, ...$event }"
+          <q-space />
+          <div class="pagination-container flex flex-center">
+            <q-pagination
+              :disable="!pagination.max"
+              v-model="resultPage"
+              :max="pagination.max"
+              :boundary-links="false"
+              color="grey"
+              active-color="primary"
+              direction-links
+              input
             />
-            <div class="pagination-container flex flex-center">
-              <q-pagination
-                v-model="resultPage"
-                :max="pagination.max"
-                :boundary-links="false"
-                color="grey"
-                active-color="primary"
-                direction-links
-                input
-              />
-            </div>
           </div>
-        </q-card>
+        </div>
       </q-card>
       <!-- Search results: -->
       <q-card v-if="!selectedTask" :class="cardClasses" flat>
-        <q-card v-if="!results?.length" class="q-pa-sm text-center">
-          No results
-        </q-card>
+        <div v-if="!results?.length" class="q-pa-sm text-center full-width">
+          <h5 class="q-ma-none q-mb-md">
+            Recent tasks
+          </h5>
+          <DisplayTask
+            v-for="task in recentTasks"
+            :key="`display-task-${task.id}`"
+            :task-id="task.id"
+            @click="selectTask(task)"
+          />
+        </div>
         <DisplayTask
           v-for="task in resultsOnPage"
           :key="`display-task-${task.id}`"
@@ -101,53 +148,31 @@
           @click="selectTask(task)"
         />
       </q-card>
-      <!-- Task options: -->
-      <div
-        v-if="selectedTask"
-        class="row items-center justify-center"
-      >
-        <TaskOptions
-          :task-id="flowTaskId"
-          show-edit-button
-          show-active-button
-          show-alert-button
-          show-delete-button
-          show-done-button
-          show-archive-button
-          show-subtask-button
-          hide-menu-button
-          show
-          add-new
-          flat
-          dense
-        >
-          <template #left>
-            <TaskTagsList
-              :task-id="flowTaskId"
-              manage-only
-              size="sm"
-            >
-              <template #activator="{ open }">
-                <q-btn
-                  icon="sell"
-                  size="md"
-                  dense
-                  flat
-                  @click="open"
-                ><q-tooltip>Manage tags</q-tooltip></q-btn>
-              </template>
-            </TaskTagsList>
-          </template>
-        </TaskOptions>
-      </div>
       <!-- activity/current/next panels: -->
       <div
         v-if="selectedTask"
-        class="row items-center justify-center q-my-sm bordered q-pa-sm"
+        class="q-my-sm standout-0"
       >
+        <div
+          v-if="!availableTabs.length"
+          class="full-width q-ma-sm"
+        >
+          <div class="q-my-sm q-pa-sm">
+            <q-item
+              clickable
+              class="standout-2 rounded justify-center text-center"
+              style="width: 50%; height: 150px; margin: 0 auto; display: flex; flex-direction: column"
+            >
+              <div style="margin: 0 auto;">
+                <q-icon name="add" size="xl" />
+              </div>
+              <div>No activity yet. Click above to get started.</div>
+            </q-item>
+          </div>
+        </div>
         <q-tabs
           v-model="currentTab"
-          class="bordered full-width"
+          class="standout-1 rounded full-width"
           active-color="primary"
           indicator-color="primary"
           narrow-indicator
@@ -162,10 +187,11 @@
             :label="tab.label"
           />
         </q-tabs>
+        <!-- Activity history tab: -->
         <div
           v-if="currentTab === 'activity'"
           class="full-width"
-          style="height: 54vh"
+          style="height: 57vh"
         >
           <div class="full-width scroll-container q-mt-sm">
             <TaskActivityLog
@@ -173,19 +199,12 @@
             />
           </div>
         </div>
+        <!-- Current activity tab: -->
         <div
           v-if="currentTab === 'current'"
           class="full-width"
-          style="height: 54vh"
+          style="height: 57vh"
         >
-          <div
-            v-if="!activeSubtask"
-            class="full-width q-ma-sm"
-          >
-            <div class="q-my-sm q-pa-sm">
-              No active subtask!
-            </div>
-          </div>
           <div
             v-if="activeSubtask"
             class="full-width q-ma-sm"
@@ -193,7 +212,7 @@
             <div class="q-my-sm q-pa-sm">
               <q-input
                 v-model="activeSubtaskMutations.note"
-                placeholder="Subtask..."
+                placeholder="Describe your activity..."
                 filled
                 dense
               >
@@ -213,11 +232,11 @@
                 <q-btn no-caps>
                   <span>Started {{ timeSince(activeSubtask?.start) }}</span>
                 </q-btn>
-                <TaskOptions
+                <TaskActiveButton
                   :task-id="flowTaskId"
-                  show-active-button
-                  hide-menu-button
-                  hide-done-button
+                  size="md"
+                  flat
+                  mode="save"
                 />
                 <q-btn
                   icon="delete"
@@ -232,7 +251,7 @@
                 v-model="activeSubtaskMutations.details"
                 type="textarea"
                 class="full-width"
-                placeholder="Add notes..."
+                placeholder="Add notes for this activity..."
                 filled
               />
             </div>
@@ -256,10 +275,11 @@
             </div>
           </div>
         </div>
+        <!-- Next up tab: -->
         <div
           v-if="currentTab === 'next'"
           class="full-width"
-          style="height: 54vh"
+          style="height: 57vh"
         >
           <div class="full-width q-ma-sm">
             <div class="full-width scroll-container">
@@ -334,6 +354,12 @@ const resultsOnPage = computed(() => {
   );
 });
 
+const recentTasks = computed(() => {
+  return [...allTasks.value]
+    .sort((a, b) => b.updated - a.updated)
+    .slice(0, 5);
+});
+
 // SELECT
 const flowTaskId = ref<string>(getFromLocalStorage(LocalStorageName.flowTask));
 const selectedTask = computed(() => taskStore.getTask(flowTaskId.value));
@@ -350,9 +376,6 @@ const pagination = computed(() => ({
   page: resultPage.value,
   max: results.value.length / resultsPerPage.value
 }));
-
-const viewingActivity = ref(false);
-const viewingNext = ref(false);
 
 const activeSubtask = computed(() => {
   return selectedTask.value?.activity?.find((log) => {
@@ -423,7 +446,7 @@ function addTimestampAtEnd() {
 }
 
 .bordered {
-  border: 1px dashed #666;
+  border: 1px solid #666;
   border-radius: 6px !important;
 }
 
@@ -448,5 +471,13 @@ function addTimestampAtEnd() {
 
 .q-card > div:last-child {
   border-bottom: 1px;
+}
+
+.standout-0 { background-color: #70809007; }
+.standout-1 { background-color: #70809020; }
+.standout-2 { background-color: #70809040; }
+
+.rounded {
+  border-radius: 6px !important;
 }
 </style>
