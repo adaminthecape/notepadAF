@@ -210,26 +210,41 @@ export function getStoriesFromTask(task: Task): { id: string | number }[] {
     return [];
   }
 
-  let tagsStringified = [];
+  let tagsStringified = '';
   try {
-    tagsStringified = JSON.parse(JSON.stringify(task.tags));
+    tagsStringified = JSON.parse(JSON.stringify(task.tags)).join('|');
   } catch (e) {
     //
   }
 
-  let nextStringified = [];
+  let activityStringified = '';
+  try {
+    activityStringified = JSON.parse(JSON.stringify(task.activity)).map(
+      (s: TaskActivityLog) => s.note || ''
+    ).join('|');
+  } catch (e) {
+    //
+  }
+
+  let nextStringified = '';
   try {
     nextStringified = JSON.parse(JSON.stringify(task.next)).map(
       (s: TaskSubtask) => s.note || ''
-    );
+    ).join('|');
   } catch (e) {
     //
   }
 
   const stories = (
-    (`${tagsStringified.join('|')}|${task.message}|${nextStringified.join(
-      '|'
-    )}`.match(/1\d{8}/g) || []) as any
+    (`${
+      tagsStringified
+    }|${
+      task.message || ''
+    }|${
+      nextStringified
+    }|${
+      activityStringified
+    }`.match(/1\d{8}/g) || []) as any
   ).reduce((agg: Array<{ id: string | number }>, id: string) => {
     if (!agg.some((existing: { id: string | number }) => existing.id === id)) {
       agg.push({ id });

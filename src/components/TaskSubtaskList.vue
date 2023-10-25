@@ -102,6 +102,12 @@ watch(taskStories, (n: { id: string | number }[]) => {
   }
 });
 
+const emit = defineEmits<{
+  (event: 'finished'): void;
+  (event: 'started'): void;
+  (event: 'removed'): void;
+}>();
+
 function finishSubtask(index: number) {
   // is the task active? then quit
   if (isActive.value) {
@@ -129,6 +135,8 @@ function finishSubtask(index: number) {
       queueTaskRefresh(props.taskId);
     }, 250);
   });
+
+  emit('finished');
 }
 
 function startSubtask(index: number) {
@@ -156,6 +164,8 @@ function startSubtask(index: number) {
       queueTaskRefresh(props.taskId);
     }, 250);
   });
+
+  emit('started');
 }
 
 function removeSubtask(index: number) {
@@ -169,6 +179,8 @@ function removeSubtask(index: number) {
   }).then(() => {
     listRenderIndex.value += 1;
   });
+
+  emit('removed');
 }
 
 function saveNew(newItem: TaskSubtask) {
@@ -191,7 +203,6 @@ function saveNew(newItem: TaskSubtask) {
 onMounted(() => {
   if (taskStories.value?.length) {
     taskStories.value.forEach(({ id }) => {
-      console.log('load:', id);
       pivotalStore.load({ id });
     });
   }

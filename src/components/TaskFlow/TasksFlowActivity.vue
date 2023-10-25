@@ -62,7 +62,7 @@
         <!-- Task options: -->
         <div
           v-if="selectedTask"
-          class="row items-center justify-center standout-2 rounded q-mt-sm"
+          class="row items-center justify-center standout-2 rounded q-mt-sm elevation-1"
         >
           <TaskOptions
             :task-id="flowTaskId"
@@ -141,7 +141,6 @@
               Loading tasks ...
             </h5>
             <q-spinner
-              style=""
               color="primary"
               size="25vh"
             />
@@ -170,32 +169,15 @@
         v-if="selectedTask"
         class="q-my-sm"
       >
-        <div
-          v-if="!availableTabs.length"
-          class="full-width q-ma-sm"
-        >
-          <div class="q-my-sm q-pa-sm">
-            <q-item
-              clickable
-              class="standout-2 rounded justify-center text-center"
-              style="width: 50%; height: 150px; margin: 0 auto; display: flex; flex-direction: column"
-            >
-              <div style="margin: 0 auto;">
-                <q-icon name="add" size="xl" />
-              </div>
-              <div>No activity yet. Click above to get started.</div>
-            </q-item>
-          </div>
-        </div>
         <q-tabs
           v-model="currentTab"
-          class="standout-1 rounded full-width"
-          active-color="primary"
+          class="standout-1 rounded full-width elevation-2"
           indicator-color="primary"
+          active-color="primary"
           narrow-indicator
+          no-caps
           dense
           dark
-          no-caps
         >
           <q-tab
             v-for="tab in availableTabs"
@@ -207,8 +189,7 @@
         <!-- Activity history tab: -->
         <div
           v-if="currentTab === 'activity'"
-          class="full-width"
-          style="height: 57vh"
+          class="full-width inner-tab"
         >
           <div class="full-width scroll-container q-mt-sm">
             <TaskActivityLog
@@ -219,9 +200,27 @@
         <!-- Current activity tab: -->
         <div
           v-if="currentTab === 'current'"
-          class="full-width"
-          style="height: 57vh"
+          class="full-width inner-tab"
         >
+          <!-- No tabs cta: -->
+          <div
+            v-if="!activeSubtask"
+            class="full-width q-ma-sm"
+          >
+            <div class="q-my-sm q-pa-sm">
+              <q-item
+                clickable
+                class="standout-2 rounded justify-center text-center"
+                style="width: 50%; height: 150px; margin: 0 auto; display: flex; flex-direction: column"
+              >
+                <div style="margin: 0 auto;">
+                  <q-icon name="add" size="xl" />
+                </div>
+                <div>No activity yet. Click above to get started.</div>
+              </q-item>
+            </div>
+          </div>
+          <!-- Active subtask: -->
           <div
             v-if="activeSubtask"
             class="full-width q-ma-sm"
@@ -319,14 +318,44 @@
         <!-- Next up tab: -->
         <div
           v-if="currentTab === 'next'"
-          class="full-width"
-          style="height: 57vh"
+          class="full-width inner-tab"
         >
           <div class="full-width q-ma-sm">
-            <div class="full-width scroll-container">
+            <div class="full-width">
               <TaskSubtaskList
                 :task-id="flowTaskId"
+                @started="currentTab = 'current'"
               />
+            </div>
+          </div>
+        </div>
+        <!-- Stories tab: -->
+        <div
+          v-if="currentTab === 'stories'"
+          class="full-width"
+        >
+          <div
+            v-if="taskStories"
+            class="full-width q-ma-sm"
+          >
+            <div class="full-width scroll-container inner-tab">
+              <q-card
+                v-for="story in taskStories"
+                :key="story.id"
+                class="standout-0 q-mb-xs"
+                square
+                dense
+                flat
+              >
+                <q-item clickable>
+                  <q-item-section>
+                    <StoryCard
+                      :story-id="story.id"
+                      dense
+                    />
+                  </q-item-section>
+                </q-item>
+              </q-card>
             </div>
           </div>
         </div>
@@ -341,7 +370,7 @@ import AppTabSelector from 'src/components/AppTabSelector.vue';
 import useTaskStore from 'src/pinia/taskStore';
 import {
   filterTaskList,
-  getFromLocalStorage,
+  getFromLocalStorage, getStoriesFromTask,
   LocalStorageName,
   saveToLocalStorage,
   timeSince, updateActiveActivity
@@ -355,6 +384,7 @@ import TaskTagsList from 'src/components/TaskFilters/TaskTagsList.vue';
 import TaskActivityLog from 'src/components/TaskActivityLog.vue';
 import TaskSubtaskList from 'src/components/TaskSubtaskList.vue';
 import TaskActiveButton from 'src/components/TaskActiveButton.vue';
+import StoryCard from 'src/components/StoryCard.vue';
 
 const app: {
   activeTabs: () => Record<string, boolean>;
@@ -442,6 +472,8 @@ watch(activeSubtask, (n: TaskActivityLog) => {
   activeSubtaskMutations.value = { ...n };
 });
 
+const taskStories = computed(() => !selectedTask.value ? undefined : getStoriesFromTask(selectedTask.value));
+
 const currentTab = ref<string>('current');
 const availableTabs = computed(() => {
   if(!selectedTask.value)
@@ -475,6 +507,14 @@ const availableTabs = computed(() => {
     });
   }
 
+  if(taskStories.value?.length)
+  {
+    tabs.push({
+      name: 'stories',
+      label: 'Tickets'
+    });
+  }
+
   return tabs;
 });
 
@@ -505,7 +545,6 @@ function addTimestampAtEnd() {
 .content-container {
   height: 91vh;
   overflow: hidden;
-  overflow-y: hidden;
 }
 
 @import url('https://fonts.googleapis.com/css?family=Allerta');
@@ -517,6 +556,13 @@ function addTimestampAtEnd() {
 
 .q-card > div:last-child {
   border-bottom: 1px;
+}
+
+.elevation-1 {
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2), 0 1px 10px 0 rgba(0, 0, 0, 0.19);
+}
+.elevation-2 {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.19);
 }
 
 .standout-0 { background-color: #70809010; }
@@ -532,5 +578,10 @@ function addTimestampAtEnd() {
 .flex-col {
   display: flex;
   flex-direction: column;
+}
+
+.inner-tab {
+  max-height: calc(100vh - 375px);
+  overflow-y: auto;
 }
 </style>

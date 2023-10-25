@@ -2,12 +2,10 @@
   <div>
     <SimpleLayout :header="false" style="max-height: 70vh">
       <template #body>
-        <q-markdown
-            v-if="story"
-            class="q-pa-sm"
-            :src="story.description"
-            style="max-width: 64em"
-        />
+        <div
+          v-html="parsedMarkdown"
+          class="q-pa-xs"
+        ></div>
       </template>
     </SimpleLayout>
   </div>
@@ -16,6 +14,7 @@
 <script setup lang="ts">
 import usePivotalStore, { PivotalStoryId } from 'src/pinia/pivotalStore';
 import { computed, defineAsyncComponent, onMounted } from 'vue';
+import MarkdownIt from 'markdown-it';
 
 const SimpleLayout = defineAsyncComponent(() => import('src/components/SimpleLayout.vue'));
 
@@ -28,6 +27,17 @@ const store = usePivotalStore();
 const story = computed(() => {
 
   return store.get(props.storyId);
+});
+
+const parsedMarkdown = computed(() => {
+  if(!story.value?.description)
+  {
+    return '';
+  }
+
+  const markdown = new MarkdownIt();
+
+  return markdown.render(story.value.description);
 });
 
 onMounted(async () => {
