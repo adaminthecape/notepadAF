@@ -101,6 +101,9 @@ icon="list" :color="task.messageType === 'textarea' ? 'positive' : 'neutral'
           </div>
         </div>
       </q-item-section>
+      <div v-if="useSlots?.includes('right')">
+        <slot name="right" />
+      </div>
     </q-item>
   </q-card>
 </template>
@@ -139,7 +142,11 @@ const props = defineProps({
   bordered: {
     type: Boolean,
     default: false
-  }
+  },
+  useSlots: {
+    type: Array,
+    default: undefined
+  },
 });
 
 const areTagsExpanded = ref(false);

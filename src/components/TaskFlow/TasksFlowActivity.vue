@@ -131,38 +131,73 @@
       </q-card>
       <!-- Search results: -->
       <q-card v-if="!selectedTask" :class="cardClasses" flat>
+        <div v-if="!selectedTask && filters.keyword" class="q-pa-sm text-center full-width">
+          <h5 class="q-ma-none row items-center full-width justify-center">
+            <q-icon name="search" class="q-mr-sm" color="primary" size="md" />
+            <span>{{ results.length }} tasks found</span>
+          </h5>
+          <q-separator v-if="results.length" class="q-mb-md q-mt-sm" />
+          <DisplayTask
+            v-for="task in resultsOnPage"
+            :key="`display-task-${task.id}`"
+            :task-id="task.id"
+            @click="selectTask(task)"
+          />
+        </div>
         <div v-if="!results?.length" class="q-pa-sm text-center full-width">
+          <!-- loading indicator: -->
           <div
-            v-if="taskStore.isCloudLoading"
-            class="full-width q-pa-xl"
-            style="height: 50vh"
+            v-if="!taskStore.getLastCloudUpdate"
+            class="full-width q-pa-sm"
           >
-            <h5 class="q-ma-none q-mb-md">
-              Loading tasks ...
+            <h5 class="q-ma-none q-mb-md row items-center full-width justify-center">
+              <q-spinner size="sm" class="q-mr-md" />Loading tasks ...
             </h5>
-            <q-spinner
-              color="primary"
-              size="25vh"
-            />
+            <div class="column">
+              <q-skeleton
+                v-for="num in [1, 2, 3, 4, 5]"
+                :key="`skeleton-task-${num}`"
+                type="QCard"
+                :height="`${Math.floor(Math.random() * 20) + 60}px`"
+                class="standout-0 full-width q-my-xs"
+              />
+            </div>
           </div>
+          <!-- recent tasks: -->
           <div v-else>
-            <h5 class="q-ma-none q-mb-md">
-              Recent tasks
+            <h5 class="q-ma-none row items-center full-width justify-center">
+              <q-icon name="history" class="q-mr-sm" color="primary" size="md" />
+              <span>Recent tasks</span>
             </h5>
+            <q-separator class="q-mb-md q-mt-sm" />
             <DisplayTask
               v-for="task in recentTasks"
               :key="`display-task-${task.id}`"
               :task-id="task.id"
-              @click="selectTask(task)"
-            />
+              :use-slots="['right']"
+              class="task-selector-parent"
+              @dblclick="selectTask(task)"
+            >
+              <template #right>
+                <div
+                  class="standout-2 task-selector"
+                  style="margin-right: -16px; margin-left: 16px;"
+                  @click="selectTask(task)"
+                >
+                  <q-icon
+                    name="arrow_forward"
+                    size="lg"
+                    style="height: 100%"
+                  >
+                    <q-tooltip>
+                      <span>Select task</span>
+                    </q-tooltip>
+                  </q-icon>
+                </div>
+              </template>
+            </DisplayTask>
           </div>
         </div>
-        <DisplayTask
-          v-for="task in resultsOnPage"
-          :key="`display-task-${task.id}`"
-          :task-id="task.id"
-          @click="selectTask(task)"
-        />
       </q-card>
       <!-- activity/current/next panels: -->
       <div
@@ -276,6 +311,18 @@
                 </template>
               </q-input>
             </div>
+            <div
+              v-if="doesStringHaveStories(`${activeSubtaskMutations.note} ${activeSubtaskMutations.details}`)"
+              class="row full-width q-pr-sm"
+            >
+              <q-space />
+              <TaskStoryDropdown
+                :stories="
+                  getStoriesFromString(`${activeSubtaskMutations.note} ${activeSubtaskMutations.details}`)
+                   .map((id) => ({ id }))
+                "
+              />
+            </div>
             <div class="row full-width q-pa-sm q-ma-sm">
               <q-input
                 v-model="activeSubtaskMutations.details"
@@ -343,11 +390,10 @@
                 v-for="story in taskStories"
                 :key="story.id"
                 class="standout-0 q-mb-xs"
-                square
                 dense
                 flat
               >
-                <q-item clickable>
+                <q-item clickable class="q-px-sm q-pb-xs q-pt-none">
                   <q-item-section>
                     <StoryCard
                       :story-id="story.id"
@@ -370,7 +416,10 @@ import AppTabSelector from 'src/components/AppTabSelector.vue';
 import useTaskStore from 'src/pinia/taskStore';
 import {
   filterTaskList,
-  getFromLocalStorage, getStoriesFromTask,
+  getFromLocalStorage,
+  getStoriesFromTask,
+  doesStringHaveStories,
+  getStoriesFromString,
   LocalStorageName,
   saveToLocalStorage,
   timeSince, updateActiveActivity
@@ -385,6 +434,7 @@ import TaskActivityLog from 'src/components/TaskActivityLog.vue';
 import TaskSubtaskList from 'src/components/TaskSubtaskList.vue';
 import TaskActiveButton from 'src/components/TaskActiveButton.vue';
 import StoryCard from 'src/components/StoryCard.vue';
+import TaskStoryDropdown from 'src/components/TaskStoryDropdown.vue';
 
 const app: {
   activeTabs: () => Record<string, boolean>;
@@ -428,9 +478,12 @@ const resultsOnPage = computed(() => {
 });
 
 const recentTasks = computed(() => {
-  return [...allTasks.value]
-    .sort((a, b) => b.updated - a.updated)
-    .slice(0, 5);
+  return filterTaskList(
+    [...allTasks.value]
+      .sort((a, b) => b.updated - a.updated)
+      .slice(0, 5),
+    filters.value
+  );
 });
 
 // SELECT
@@ -565,7 +618,7 @@ function addTimestampAtEnd() {
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.19);
 }
 
-.standout-0 { background-color: #70809010; }
+.standout-0 { background-color: #70809015; }
 .standout-1 { background-color: #70809030; }
 .standout-2 { background-color: #70809050; }
 .standout-3 { background-color: #70809070; }
@@ -583,5 +636,24 @@ function addTimestampAtEnd() {
 .inner-tab {
   max-height: calc(100vh - 375px);
   overflow-y: auto;
+}
+
+.task-selector-parent:hover .task-selector {
+  display: block;
+  width: 50px;
+  transition: all 500ms ease-in-out;
+}
+
+.task-selector {
+  width: 0px;
+  height: 100%;
+  border-radius: 6px;
+  transition: all 500ms ease-in-out;
+  margin-left: 2px;
+  overflow: hidden;
+}
+
+.round-corners {
+  border-radius: 6px;
 }
 </style>
