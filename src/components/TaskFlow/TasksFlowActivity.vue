@@ -275,22 +275,29 @@
                   </h6>
                 </div>
                 <q-space />
-                <div class="row items-center justify-center">
-                  <q-btn-group class="q-mb-sm" flat>
-                    <TaskActiveButton
-                      :task-id="flowTaskId"
-                      size="lg"
-                      flat
-                      mode="save"
-                    />
-                    <q-btn
-                      icon="delete"
-                      color="negative"
-                      size="lg"
-                      no-caps
-                      flat
-                    />
-                  </q-btn-group>
+                <div class="row items-center justify-center q-mb-sm">
+                  <TaskActiveButton
+                    :task-id="flowTaskId"
+                    size="lg"
+                    color="primary"
+                    flat
+                    mode="save"
+                  />
+                  <!--                    <q-btn-->
+                  <!--                      icon="delete"-->
+                  <!--                      color="negative"-->
+                  <!--                      size="lg"-->
+                  <!--                      no-caps-->
+                  <!--                      flat-->
+                  <!--                    >-->
+                  <!--                      <q-tooltip>Delete</q-tooltip>-->
+                  <!--                    </q-btn>-->
+                  <TaskPauseButton
+                    :task-id="flowTaskId"
+                    mode="save"
+                    size="lg"
+                    flat
+                  />
                 </div>
               </div>
             </div>
@@ -433,6 +440,7 @@ import TaskTagsList from 'src/components/TaskFilters/TaskTagsList.vue';
 import TaskActivityLog from 'src/components/TaskActivityLog.vue';
 import TaskSubtaskList from 'src/components/TaskSubtaskList.vue';
 import TaskActiveButton from 'src/components/TaskActiveButton.vue';
+import TaskPauseButton from 'src/components/TaskPauseButton.vue';
 import StoryCard from 'src/components/StoryCard.vue';
 import TaskStoryDropdown from 'src/components/TaskStoryDropdown.vue';
 
@@ -457,8 +465,6 @@ const filters = ref<Partial<TaskFilters>>({
 });
 
 // RESULTS
-const tasksNotLoadedYet = computed(() => !taskStore.getLastCloudDispatch);
-
 const results = computed(() => {
   if(!filters.value.keyword)
   {

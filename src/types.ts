@@ -19,8 +19,6 @@ export type Task = {
 };
 
 export interface TaskSubtask {
-  [key: string]: any;
-  due: number;
   note: string;
 }
 
