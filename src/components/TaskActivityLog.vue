@@ -29,7 +29,7 @@
                   style="display: inline;margin-right:-10px"
               /></template>
               <template #default>
-                <div>
+                <div class="q-py-sm">
                   <q-item class="row items-center">
                     <q-input
                       v-model="log.note"
@@ -76,6 +76,13 @@
                         prefix="End:&nbsp;&nbsp;"
                         @newAlert="updateTimeFromAlert('end', log, $event)"
                       />
+                    </q-item-section>
+                  </q-item>
+                  <q-item v-if="log.details">
+                    <q-item-section>
+                      <q-card class="q-pa-sm standout-1" flat>
+                        {{ log.details }}
+                      </q-card>
                     </q-item-section>
                   </q-item>
                 </div>

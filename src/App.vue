@@ -287,4 +287,27 @@ body *,
   opacity: 0;
   max-height: 0;
 }
+
+.elevation-1 {
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2), 0 1px 10px 0 rgba(0, 0, 0, 0.19);
+}
+.elevation-2 {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 2px 10px 0 rgba(0, 0, 0, 0.19);
+}
+
+.standout-0 { background-color: #70809015; }
+.standout-1 { background-color: #70809030; }
+.standout-2 { background-color: #70809050; }
+.standout-3 { background-color: #70809070; }
+.standout-4 { background-color: #70809090; }
+
+.rounded {
+  border-radius: 6px !important;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
 </style>
