@@ -283,15 +283,15 @@
                     flat
                     mode="save"
                   />
-                  <!--                    <q-btn-->
-                  <!--                      icon="delete"-->
-                  <!--                      color="negative"-->
-                  <!--                      size="lg"-->
-                  <!--                      no-caps-->
-                  <!--                      flat-->
-                  <!--                    >-->
-                  <!--                      <q-tooltip>Delete</q-tooltip>-->
-                  <!--                    </q-btn>-->
+                  <!-- <q-btn-->
+                  <!-- icon="delete"-->
+                  <!-- color="negative"-->
+                  <!-- size="lg"-->
+                  <!-- no-caps-->
+                  <!-- flat-->
+                  <!-- >-->
+                  <!-- <q-tooltip>Delete</q-tooltip>-->
+                  <!-- </q-btn>-->
                   <TaskPauseButton
                     :task-id="flowTaskId"
                     mode="save"

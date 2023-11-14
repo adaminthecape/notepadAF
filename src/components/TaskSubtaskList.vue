@@ -7,40 +7,47 @@
       dense
     >
       <q-item-section>
-        <div class="row items-center full-width">
+        <div class="row items-center full-width" style="flex-wrap: nowrap;justify-content: space-between;">
           <q-chip
             v-if="subtask.note"
-            style="flex-grow: 1"
             square
             dense
+            style="flex-grow: 1;max-width: calc(100vw - 170px)"
           >
-            <div>{{ subtask.note }}</div>
+            <div class="ellipsis">{{ subtask.note }}</div>
+            <q-tooltip
+              v-if="subtask.note.length > 40"
+              anchor="top start"
+            >{{ subtask.note }}</q-tooltip>
             <StoryListTooltip :value="subtask.note" />
           </q-chip>
-          <q-btn
-            color="warning"
-            icon="done"
-            size="sm"
-            dense
-            flat
-            @click="finishSubtask(s)"
-          ><q-tooltip>Finish</q-tooltip></q-btn>
-          <q-btn
-            color="primary"
-            icon="start"
-            size="sm"
-            dense
-            flat
-            @click="startSubtask(s)"
-          ><q-tooltip>Start</q-tooltip></q-btn>
-          <q-btn
-            color="negative"
-            icon="delete"
-            :size="transformSizeProp('sm')"
-            dense
-            flat
-            @click="removeSubtask(s)"
-          ><q-tooltip>Remove</q-tooltip></q-btn>
+          <q-space />
+          <div class="row items-center" style="flex-wrap: nowrap;">
+            <q-btn
+              color="warning"
+              icon="done"
+              size="sm"
+              dense
+              flat
+              @click="finishSubtask(s)"
+            ><q-tooltip>Finish</q-tooltip></q-btn>
+            <q-btn
+              color="primary"
+              icon="start"
+              size="sm"
+              dense
+              flat
+              @click="startSubtask(s)"
+            ><q-tooltip>Start</q-tooltip></q-btn>
+            <q-btn
+              color="negative"
+              icon="delete"
+              :size="transformSizeProp('sm')"
+              dense
+              flat
+              @click="removeSubtask(s)"
+            ><q-tooltip>Remove</q-tooltip></q-btn>
+          </div>
         </div>
       </q-item-section>
     </q-item>
