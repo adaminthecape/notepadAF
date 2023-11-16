@@ -42,13 +42,17 @@ v-for="label in story.labels" :label="label.name" :key="label.name"
             >
               <q-tooltip>Copy URL</q-tooltip>
             </q-btn>
-            <q-btn
-              icon="content_copy"
-              color="negative"
-              :dense="dense"
-              flat
-              @click.stop.prevent="copy(`git checkout PT_${story.id}`)"
-            />
+            <GitCheckout :target="storyId.toString()">
+              <template #activator="{ open }">
+                <q-btn
+                  icon="content_copy"
+                  color="negative"
+                  :dense="dense"
+                  flat
+                  @click.stop.prevent="open"
+                />
+              </template>
+            </GitCheckout>
           </q-btn-group>
           <q-btn-group class="q-ml-xs">
             <q-btn
@@ -119,7 +123,8 @@ import usePivotalStore from 'src/pinia/pivotalStore';
 import DisplayStory from 'src/components/DisplayStory.vue';
 import AddTask from 'src/components/AddTask.vue';
 import SimpleModal from 'src/components/SimpleModal.vue';
-import AddSubtaskToTask from './AddSubtaskToTask.vue';
+import AddSubtaskToTask from 'src/components/AddSubtaskToTask.vue';
+import GitCheckout from 'src/components/GitCheckout.vue';
 
 const props = defineProps<{
   storyId: string | number;

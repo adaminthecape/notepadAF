@@ -10,6 +10,7 @@
         @click="selectTask({ id: null })"
       />
       <q-space />
+      <GitCheckout target="184425511" />
       <AppTabSelector />
     </div>
     <!-- Content: -->
@@ -443,6 +444,7 @@ import TaskActiveButton from 'src/components/TaskActiveButton.vue';
 import TaskPauseButton from 'src/components/TaskPauseButton.vue';
 import StoryCard from 'src/components/StoryCard.vue';
 import TaskStoryDropdown from 'src/components/TaskStoryDropdown.vue';
+import GitCheckout from 'src/components/GitCheckout.vue';
 
 const app: {
   activeTabs: () => Record<string, boolean>;
