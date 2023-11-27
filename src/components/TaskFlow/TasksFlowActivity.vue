@@ -12,6 +12,7 @@
       <q-space />
       <GitCheckout target="184425511" />
       <AppTabSelector />
+      <q-input v-model="testUrl" />
     </div>
     <!-- Content: -->
     <q-card
@@ -228,7 +229,7 @@
           class="full-width inner-tab"
         >
           <div class="full-width scroll-container q-mt-sm">
-            <TaskActivityLog
+            <TaskActivityLogView
               :task-id="flowTaskId"
             />
           </div>
@@ -325,10 +326,9 @@
             >
               <q-space />
               <TaskStoryDropdown
-                :stories="
-                  getStoriesFromString(`${activeSubtaskMutations.note} ${activeSubtaskMutations.details}`)
-                   .map((id) => ({ id }))
-                "
+                :stories="getStoriesFromString(`${activeSubtaskMutations.note} ${activeSubtaskMutations.details}`)
+                  .map((id) => ({ id }))
+                  "
               />
             </div>
             <div class="row full-width q-pa-sm q-ma-sm">
@@ -419,7 +419,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import AppTabSelector from 'src/components/AppTabSelector.vue';
 import useTaskStore from 'src/pinia/taskStore';
 import {
@@ -430,26 +430,22 @@ import {
   getStoriesFromString,
   LocalStorageName,
   saveToLocalStorage,
-  timeSince, updateActiveActivity
+  timeSince,
+  updateActiveActivity
 } from 'src/utils';
-import { Task, TaskFilters } from 'src/types';
+import { Task, TaskFilters, TaskActivityLog } from 'src/types';
 import DisplayTask from 'src/components/DisplayTask.vue';
 import KeywordSearch from 'src/components/TaskFilters/KeywordSearch.vue';
 import BoolToggleGroup from 'src/components/TaskFilters/BoolToggleGroup.vue';
 import TaskOptions from 'src/components/TaskOptions.vue';
 import TaskTagsList from 'src/components/TaskFilters/TaskTagsList.vue';
-import TaskActivityLog from 'src/components/TaskActivityLog.vue';
+import TaskActivityLogView from 'src/components/TaskActivityLog.vue';
 import TaskSubtaskList from 'src/components/TaskSubtaskList.vue';
 import TaskActiveButton from 'src/components/TaskActiveButton.vue';
 import TaskPauseButton from 'src/components/TaskPauseButton.vue';
 import StoryCard from 'src/components/StoryCard.vue';
 import TaskStoryDropdown from 'src/components/TaskStoryDropdown.vue';
 import GitCheckout from 'src/components/GitCheckout.vue';
-
-const app: {
-  activeTabs: () => Record<string, boolean>;
-  openTab: (tab: string) => void;
-} | undefined = inject('helpers');
 
 const cardClasses = ref<string[]>(['full-width', 'q-pa-sm', 'q-mb-sm']);
 
@@ -468,8 +464,7 @@ const filters = ref<Partial<TaskFilters>>({
 
 // RESULTS
 const results = computed(() => {
-  if(!filters.value.keyword)
-  {
+  if (!filters.value.keyword) {
     return [];
   }
 
@@ -498,7 +493,7 @@ const recentTasks = computed(() => {
 const flowTaskId = ref<string>(getFromLocalStorage(LocalStorageName.flowTask));
 const selectedTask = computed(() => taskStore.getTask(flowTaskId.value));
 
-function selectTask(task: Task) {
+function selectTask(task: any) {
   flowTaskId.value = task.id;
   saveToLocalStorage(LocalStorageName.flowTask, task.id);
 }
@@ -529,7 +524,7 @@ function updateSubtask(additionalMutations: Record<string, any>) {
     }
   );
 }
-watch(activeSubtask, (n: TaskActivityLog) => {
+watch(activeSubtask, (n) => {
   activeSubtaskMutations.value = { ...n };
 });
 
@@ -537,39 +532,34 @@ const taskStories = computed(() => !selectedTask.value ? undefined : getStoriesF
 
 const currentTab = ref<string>('current');
 const availableTabs = computed(() => {
-  if(!selectedTask.value)
-  {
+  if (!selectedTask.value) {
     return [];
   }
 
   const tabs = [];
 
-  if(selectedTask.value.activity?.length)
-  {
+  if (selectedTask.value.activity?.length) {
     tabs.push({
       name: 'activity',
       label: 'History'
     });
   }
 
-  if(selectedTask.value.activity?.length)
-  {
+  if (selectedTask.value.activity?.length) {
     tabs.push({
       name: 'current',
       label: 'Current'
     });
   }
 
-  if(selectedTask.value.next?.length)
-  {
+  if (selectedTask.value.next?.length) {
     tabs.push({
       name: 'next',
       label: 'Next up'
     });
   }
 
-  if(taskStories.value?.length)
-  {
+  if (taskStories.value?.length) {
     tabs.push({
       name: 'stories',
       label: 'Tickets'
@@ -610,12 +600,12 @@ function addTimestampAtEnd() {
 
 @import url('https://fonts.googleapis.com/css?family=Allerta');
 
-.content-container > div,
-.content-container > span {
+.content-container>div,
+.content-container>span {
   font-family: 'Allerta', sans-serif;
 }
 
-.q-card > div:last-child {
+.q-card>div:last-child {
   border-bottom: 1px;
 }
 

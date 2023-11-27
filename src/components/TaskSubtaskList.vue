@@ -63,7 +63,7 @@
           icon="save"
           dense
           flat
-          @click="saveNew({ due: 0, note: newLogMessage })"
+          @click="saveNew({ note: newLogMessage })"
         />
       </template>
     </q-input>
