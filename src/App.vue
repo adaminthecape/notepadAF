@@ -23,7 +23,7 @@
     </div> -->
 
     <div v-if="currentTab === 'flow'">
-      <TasksFlowActivity />
+      <TasksFlowActivity :a="1" :b="2" />
     </div>
     <div v-if="currentTab === 'tasks'">
       <TasksActivity />

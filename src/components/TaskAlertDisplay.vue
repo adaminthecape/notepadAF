@@ -23,30 +23,19 @@
 </template>
 
 <script setup lang="ts">
-import { TaskAlert } from 'src/types';
-import useTaskStore from 'src/pinia/taskStore';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { timeSince, transformSizeProp } from 'src/utils';
+import { useSingleTask } from 'src/components/composables/singleTask';
 
 const props = defineProps<{
   taskId: string;
 }>();
 
-const store = useTaskStore();
+const { task, removeAlert } = useSingleTask(props.taskId);
 
-const task = computed(() => store.getTask(props.taskId));
 const activeAlertsRenderKey = ref<number>(0);
+
 function timeSinceAlert(unix: number) {
   return timeSince(new Date(unix).getTime());
-}
-
-function removeAlert(alert: TaskAlert) {
-  if (!task.value.alerts?.length) {
-    return;
-  }
-
-  const alerts = task.value.alerts.filter((a) => a.unix !== alert.unix);
-
-  store.cloudUpdateSingle({ ...task.value, alerts });
 }
 </script>

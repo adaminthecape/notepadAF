@@ -113,10 +113,8 @@ import { queueTaskRefresh, transformSizeProp } from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
 import { computed, ref, watch } from 'vue';
 import { Task } from 'src/types';
-// import TaskOptionsModal from 'src/components/TaskOptionsModal.vue';
 import TaskOptionsDropdown from 'src/components/TaskOptionsDropdown.vue';
 import TaskAlertDisplay from 'src/components/TaskAlertDisplay.vue';
-import AddTag from 'src/components/AddTag.vue';
 import TaskStoryDropdown from 'src/components/TaskStoryDropdown.vue';
 import TaskOptions from 'src/components/TaskOptions.vue';
 import TaskTagsList from 'src/components/TaskFilters/TaskTagsList.vue';
@@ -191,7 +189,7 @@ function editTask(force?: boolean) {
   else {
     store.cloudUpdateSingle(task.value as Task);
   }
-};
+}
 
 function addTag(tag: string) {
   if (!(task.value.tags || []).includes(tag)) {
@@ -202,13 +200,13 @@ function addTag(tag: string) {
   }
 
   addingTag.value = false;
-};
+}
 
 function removeTag(tag: string) {
   const tags = (task.value.tags || []).filter((t) => t !== tag);
 
   store.cloudUpdateSingle({ ...task.value, tags });
-};
+}
 
 function toggleTextarea() {
   store.cloudUpdateSingle({
@@ -216,7 +214,7 @@ function toggleTextarea() {
     messageType:
       task.value.messageType === 'textarea' ? undefined : 'textarea',
   });
-};
+}
 
 /** manage alarms */
 // tickAlarms()

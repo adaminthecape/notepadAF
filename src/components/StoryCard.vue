@@ -112,19 +112,17 @@ v-for="label in story.labels" :label="label.name" :key="label.name"
 import {
   getFromLocalStorage,
   saveToLocalStorage,
-  copyToClipboard,
-  openInBrowser,
   LocalStorageName,
   saveToLocalStorageArray,
   transformSizeProp,
 } from '../utils';
-import { computed, onMounted } from 'vue';
-import usePivotalStore from 'src/pinia/pivotalStore';
 import DisplayStory from 'src/components/DisplayStory.vue';
 import AddTask from 'src/components/AddTask.vue';
 import SimpleModal from 'src/components/SimpleModal.vue';
 import AddSubtaskToTask from 'src/components/AddSubtaskToTask.vue';
 import GitCheckout from 'src/components/GitCheckout.vue';
+import { usePivotalStory } from 'src/components/composables/pivotalStory';
+import { useHelpers } from 'src/components/composables/helpers';
 
 const props = defineProps<{
   storyId: string | number;
@@ -132,23 +130,8 @@ const props = defineProps<{
   allowAddTasks?: boolean;
 }>();
 
-const store = usePivotalStore();
-
-const story = computed(() => {
-  return store.get(parseInt(`${props.storyId}`, 10));
-});
-
-function openLink(url: string) {
-  openInBrowser(url);
-}
-
-function copy(val: string) {
-  copyToClipboard(val);
-}
-
-onMounted(async () => {
-  await store.load({ id: parseInt(`${props.storyId}`, 10) });
-});
+const { story } = usePivotalStory(props.storyId);
+const { copy, openLink } = useHelpers();
 
 function openTasksForStory() {
   const existingFilters = getFromLocalStorage(

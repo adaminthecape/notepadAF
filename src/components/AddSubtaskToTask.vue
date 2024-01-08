@@ -43,17 +43,16 @@
         class="q-ml-sm"
         icon="add"
         v-close-popup
-        @click="addSubtaskToTask"
+        @click="addSubtaskToTask({ note: subtaskMessage }, storyId)"
       >Add</q-btn>
     </template>
   </SimpleModal>
 </template>
 
 <script setup lang="ts">
-import useTaskStore from 'src/pinia/taskStore';
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import SimpleModal from './SimpleModal.vue';
-import { Task } from 'src/types';
+import { useSingleTask } from 'src/components/composables/singleTask';
 
 const props = defineProps({
   storyId: {
@@ -74,33 +73,9 @@ const props = defineProps({
   }
 });
 
-const store = useTaskStore();
-
-const tasks = computed<Task[]>(() => (
-  (Object.values(store.getTasksInSelectedBuckets()) as Task[])
-    .sort((a: any, b: any) => b.updated - a.updated)
-));
-
 const selectedTaskId = ref('');
 
 const subtaskMessage = ref<string>('');
 
-function addSubtaskToTask() {
-  const task = tasks.value.find((t) => t?.id === selectedTaskId.value);
-
-  if (!task?.id || !selectedTaskId.value) {
-    return;
-  }
-
-  store.cloudUpdateSingleProperty({
-    taskId: task.id,
-    prop: 'next',
-    data: (task.next || []).concat({
-      due: 0, // todo: implement due date for subtasks
-      note: `${props.storyId}: ${subtaskMessage.value || ''}`
-    }),
-  }).then(() => {
-    subtaskMessage.value = '';
-  });
-}
+const { addSubtaskToTask } = useSingleTask(selectedTaskId.value);
 </script>

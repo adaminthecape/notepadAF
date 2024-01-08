@@ -28,7 +28,7 @@
           filled
         >
           <template #append>
-            <q-btn icon="save" dense flat @click="save" />
+            <q-btn icon="save" dense flat @click="toggle" />
           </template>
         </q-input>
       </q-card>
@@ -37,8 +37,8 @@
 </template>
 
 <script setup lang="ts">
-import useTaskStore from 'src/pinia/taskStore';
 import { computed, onMounted, ref, watch } from 'vue';
+import { useSingleTask } from 'src/components/composables/singleTask';
 
 const props = defineProps<{
   label?: string;
@@ -56,77 +56,7 @@ const renderIndex = ref(0);
 const logNote = ref(undefined);
 const isAddingNote = ref(false);
 
-const store = useTaskStore();
-const task = computed(() => store.getTask(props.taskId));
-
-const active = computed(() => {
-  return store.getTaskProperty(props.taskId, 'active');
-});
-
-const lastActivity = computed(() => {
-  const activity = store.getTaskProperty(props.taskId, 'activity');
-
-  if (activity && activity.length) {
-    return activity[activity.length - 1];
-  }
-
-  return undefined;
-});
-
-function save() {
-  if (!task.value) {
-    return;
-  }
-
-  const taskData = { ...task.value };
-
-  if (!taskData.activity) {
-    taskData.activity = [];
-  }
-
-  taskData.active = active.value ? 0 : Date.now();
-
-  if (!active.value) {
-    // task is now active; start a new log
-    taskData.activity.push({
-      start: Date.now(),
-      end: 0,
-      note: logNote.value || '',
-    });
-  } // task is no longer active; end the last log
-  else {
-    const lastLog = taskData.activity.length
-      ? taskData.activity[taskData.activity.length - 1]
-      : undefined;
-
-    const noteToAdd =
-      logNote.value || taskData.activity[taskData.activity.length - 1].note || '';
-
-    if (!lastLog) {
-      // create first log
-      taskData.activity.push({
-        start: active.value,
-        end: Date.now(),
-        note: logNote.value || '',
-      });
-    } else {
-      taskData.activity[taskData.activity.length - 1].end = Date.now();
-      taskData.activity[taskData.activity.length - 1].note = noteToAdd;
-    }
-  }
-
-  if (!taskData.next) {
-    taskData.next = [];
-  }
-
-  taskData.next.push({
-    note: lastActivity.value.note
-  });
-
-  store.cloudUpdateSingle(taskData).then(() => {
-    isAddingNote.value = false;
-  });
-}
+const { lastActivity, active, toggleActive } = useSingleTask(props.taskId);
 
 const emit = defineEmits<{
   (event: 'toggle', active: number): void;
@@ -137,7 +67,7 @@ function toggle() {
     if (active.value) {
       isAddingNote.value = true;
     } else {
-      save();
+      toggleActive(logNote.value);
     }
   } else {
     emit('toggle', active.value ? 0 : Date.now());

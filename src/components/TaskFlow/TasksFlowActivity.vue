@@ -1,4 +1,5 @@
 <template>
+  {{a}}/{{b}}
   <div class="q-ma-sm q-pa-sm standout-0 rounded">
     <!-- Top bar: -->
     <div class="row items-center justify-center full-width q-mb-xs">
@@ -419,7 +420,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, defineProps } from 'vue';
 import AppTabSelector from 'src/components/AppTabSelector.vue';
 import useTaskStore from 'src/pinia/taskStore';
 import {
@@ -446,12 +447,14 @@ import TaskPauseButton from 'src/components/TaskPauseButton.vue';
 import StoryCard from 'src/components/StoryCard.vue';
 import TaskStoryDropdown from 'src/components/TaskStoryDropdown.vue';
 import GitCheckout from 'src/components/GitCheckout.vue';
+import { useTasks } from 'src/components/composables/tasks';
 
 const cardClasses = ref<string[]>(['full-width', 'q-pa-sm', 'q-mb-sm']);
 
+const { tasks: allTasks } = useTasks();
+
 // STORE
 const taskStore = useTaskStore();
-const allTasks = computed<Task[]>(() => Object.values(taskStore.getTasksInSelectedBuckets()));
 
 // FILTER MODELS
 const filters = ref<Partial<TaskFilters>>({

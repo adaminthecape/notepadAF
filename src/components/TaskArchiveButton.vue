@@ -7,7 +7,7 @@
       :dense="dense"
       :color="archived ? 'secondary' : undefined"
       :icon="archived ? 'unarchive' : 'move_to_inbox'"
-      @click="toggle"
+      @click="toggleArchived"
     >
       <q-tooltip>
         <span v-if="archived">Archived {{ timeSinceArchived }}</span>
@@ -19,8 +19,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import useTaskStore from 'src/pinia/taskStore';
 import { timeSince, transformSizeProp } from 'src/utils';
+import { useSingleTask } from 'src/components/composables/singleTask';
 
 const props = defineProps({
   taskId: {
@@ -53,31 +53,7 @@ const props = defineProps({
   },
 });
 
-const store = useTaskStore();
+const { toggleArchived, archived } = useSingleTask(props.taskId);
 
-const archived = computed(() => {
-  return store.getTaskProperty(props.taskId, 'archived');
-});
-
-const timeSinceArchived = computed(() => {
-  return timeSince(store.getTaskProperty(props.taskId, 'archived'));
-});
-
-const emit = defineEmits<{
-  (event: 'toggle', active: number): void
-}>();
-
-function toggle() {
-  const newVal = archived.value ? 0 : Date.now();
-
-  if (props.taskId) {
-    store.cloudUpdateSingleProperty({
-      taskId: props.taskId,
-      prop: 'archived',
-      data: newVal
-    });
-  } else {
-    emit('toggle', newVal);
-  }
-}
+const timeSinceArchived = computed(() => timeSince(archived.value));
 </script>

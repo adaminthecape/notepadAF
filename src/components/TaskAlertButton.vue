@@ -27,12 +27,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineAsyncComponent } from 'vue';
+import { ref, computed } from 'vue';
 import useTaskStore from 'src/pinia/taskStore';
-import { Task, TaskAlert } from 'src/types';
+import { Task } from 'src/types';
 import { transformSizeProp } from 'src/utils';
+import CreateAlert from 'src/components/CreateAlert.vue';
+import { useSingleTask } from 'src/components/composables/singleTask';
 
-const store = useTaskStore();
 const props = defineProps<{
   taskId: string;
   label?: string;
@@ -42,50 +43,11 @@ const props = defineProps<{
   flat?: boolean;
   dense?: boolean;
 }>();
-const task = computed<Task>(() => store.getTask(props.taskId));
 
-const CreateAlert = defineAsyncComponent(() =>
-  import('src/components/CreateAlert.vue'));
+const store = useTaskStore();
+const task = computed<Task>(() => store.getTask(props.taskId));
 
 const isCreatingAlert = ref(false);
 
-function getTaskDataWithNewAlert(alert: TaskAlert) {
-  if (!task.value) {
-    console.warn('Task not found!', alert);
-
-    return undefined;
-  }
-
-  const taskData = { ...task.value };
-
-  if (!taskData.alerts) {
-    taskData.alerts = [];
-  }
-
-  if (alert.id) {
-    delete alert.id;
-  }
-
-  taskData.alerts.push(alert);
-
-  return taskData;
-};
-
-function addAlertToTask(alert: TaskAlert) {
-  if (!task.value || !alert || !alert.time || !alert.date) {
-    console.warn('Not enough data for alert!', alert);
-
-    return;
-  }
-
-  const taskData = getTaskDataWithNewAlert(alert);
-
-  if (!taskData) {
-    return;
-  }
-
-  store.cloudUpdateSingle(taskData as Task).then(() => {
-    isCreatingAlert.value = false;
-  });
-};
+const { addAlertToTask } = useSingleTask(props.taskId);
 </script>

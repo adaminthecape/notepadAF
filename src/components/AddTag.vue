@@ -60,14 +60,12 @@
 </template>
 
 <script setup lang="ts">
-import { Task } from 'src/types';
-import { transformSizeProp } from 'src/utils';
 import {
   ref,
-  defineAsyncComponent,
   computed
 } from 'vue';
-import useTaskStore from 'src/pinia/taskStore';
+import SimpleModal from 'src/components/SimpleModal.vue';
+import { useTaskTags } from 'src/components/composables/taskTags';
 
 const props = defineProps<{
   selectedTags?: string[] | '';
@@ -76,57 +74,17 @@ const props = defineProps<{
   disableAdd?: boolean;
 }>();
 
-const store = useTaskStore();
-
-const SimpleModal = defineAsyncComponent(() => import('src/components/SimpleModal.vue'));
-
 const value = ref<string>('');
 
-const tasksList = computed<Task[]>(() => {
-  return Object.values(store.getTasks);
-});
-
-function isStoryId(x: string | number) {
-  return `${x}` === `${parseInt(String(x), 10)}`;
-}
-
-const allTags = computed(() => {
-  if (!tasksList.value || !tasksList.value.length) {
-    return [];
-  }
-
-  if (props.tags?.length) {
+const allTags = computed<string[]>(() => {
+  if(props.tags)
+  {
     return props.tags;
   }
 
-  const { other, stories } = tasksList.value.reduce(
-    (agg: string[], task: Task) => {
-      const tags = [...(task.tags || [])].filter(
-        (tag) => !agg.includes(tag)
-      );
+  const { allTags: allComputedTags } = useTaskTags();
 
-      if (tags.length) {
-        return agg.concat(tags);
-      }
-
-      return agg;
-    },
-    [] as string[]
-  ).sort()
-    .reduce((agg: { stories: string[], other: string[] }, item: string) => {
-      if (isStoryId(item)) {
-        agg.stories.push(item);
-      }
-      else {
-        agg.other.push(item);
-      }
-      return agg;
-    }, {
-      stories: [],
-      other: []
-    });
-
-  return [...other, ...stories];
+  return allComputedTags.value;
 });
 
 const filteredList = computed(() => {

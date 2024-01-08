@@ -3,9 +3,6 @@
 </template>
 
 <script setup lang="ts">
-import usePivotalStore from 'src/pinia/pivotalStore';
-import { computed } from 'vue';
-
 const props = defineProps({
   message: {
     type: String,
@@ -16,10 +13,4 @@ const props = defineProps({
     default: undefined
   }
 });
-
-const store = usePivotalStore();
-
-const storyName = computed(() => {
-  return store.get(parseInt(props.message, 10))?.title;
-})
 </script>

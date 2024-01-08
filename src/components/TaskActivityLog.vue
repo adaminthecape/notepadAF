@@ -126,16 +126,15 @@ import {
   transformSizeProp,
 } from 'src/utils';
 import useTaskStore from 'src/pinia/taskStore';
-import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { Task, TaskActivityLog, TaskAlert, TaskFilters } from 'src/types';
 import TimeChip from 'src/components/TimeChip.vue';
+import TaskActiveButton from 'src/components/TaskActiveButton.vue';
 import StoryListTooltip from 'src/components/StoryListTooltip.vue';
 import CreateAlert from 'src/components/CreateAlert.vue';
 import { removeUndefined } from 'src/mixins/firebase';
+import { useSingleTask } from 'src/components/composables/singleTask';
 
-const TaskActiveButton = defineAsyncComponent(
-  () => import('src/components/TaskActiveButton.vue')
-);
 const props = defineProps({
   taskId: {
     type: String,
@@ -156,6 +155,8 @@ const props = defineProps({
 });
 
 const store = useTaskStore();
+
+const { task } = props.taskId ? useSingleTask(props.taskId) : { task: null };
 
 const allActivity = ref<TaskActivityLog[]>([]);
 const listRenderIndex = ref(0);
@@ -255,24 +256,6 @@ function updateTime(
   });
 
   updateLog(data);
-}
-
-function incrementBy(
-  startOrEnd: 'start' | 'end',
-  log: TaskActivityLog,
-  amount: number
-) {
-  if (!startOrEnd || !amount || !log) {
-    return;
-  }
-
-  const index = taskActivity.value.findIndex(
-    (l: TaskActivityLog) => l.start === log.start && l.end === log.end
-  );
-
-  const newTime = taskActivity.value[index][startOrEnd] + amount;
-
-  updateTime(index, newTime, startOrEnd);
 }
 
 function updateTimeFromAlert(

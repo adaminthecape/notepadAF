@@ -12,9 +12,10 @@
 </template>
 
 <script setup lang="ts">
-import usePivotalStore, { PivotalStoryId } from 'src/pinia/pivotalStore';
+import { PivotalStoryId } from 'src/pinia/pivotalStore';
 import { computed, defineAsyncComponent, onMounted } from 'vue';
 import MarkdownIt from 'markdown-it';
+import { usePivotalStory } from 'src/components/composables/pivotalStory';
 
 const SimpleLayout = defineAsyncComponent(() => import('src/components/SimpleLayout.vue'));
 
@@ -22,12 +23,7 @@ const props = defineProps<{
   storyId: PivotalStoryId;
 }>();
 
-const store = usePivotalStore();
-
-const story = computed(() => {
-
-  return store.get(props.storyId);
-});
+const { story } = usePivotalStory(props.storyId);
 
 const parsedMarkdown = computed(() => {
   if(!story.value?.description)
@@ -38,12 +34,6 @@ const parsedMarkdown = computed(() => {
   const markdown = new MarkdownIt();
 
   return markdown.render(story.value.description);
-});
-
-onMounted(async () => {
-  await store.load({
-    id: parseInt(`${props.storyId}`, 10)
-  });
 });
 </script>
 

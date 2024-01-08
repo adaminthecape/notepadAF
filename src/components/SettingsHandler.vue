@@ -253,14 +253,6 @@ function qZoom(add: number): void {
   currentZoomLevel.value = getZoomLevelName(level);
 }
 
-function addZoom(amount: number) {
-  const current = parseInt(currentZoomLevel.value.split('%')[0], 10);
-  const zoomLevel = `${current + amount}%`;
-
-  (document.getElementsByTagName('body')[0].style as any).zoom = zoomLevel;
-  currentZoomLevel.value = zoomLevel;
-  saveToLocalStorage(LocalStorageName.zoomLevel, zoomLevel);
-}
 function toggleDarkMode() {
   if (Dark.isActive) {
     themeStore.setLightMode();

@@ -367,7 +367,6 @@ onMounted(() => {
   filterTasks();
 });
 
-
 const tmpInterval = ref();
 
 /****** Loading/fetching tasks */
@@ -459,27 +458,6 @@ function saveFilters() {
     inverseSort: inverseSort.value,
     pagination: pagination.value,
   });
-}
-
-/****** Filtering tasks - booleans */
-function getFilterBoolColor(prop: FilterType) {
-  return (
-    (filters.value[prop] === true && 'green-6') ||
-    (filters.value[prop] === false && 'red-6') ||
-    'grey-6'
-  );
-}
-
-function toggleFilterBool(prop: keyof typeof FilterTypes) {
-  if (filters.value[prop] === true) {
-    filters.value[prop] = false;
-  } else if (filters.value[prop] === false) {
-    filters.value[prop] = null;
-  } else {
-    filters.value[prop] = true;
-  }
-
-  filterTasks();
 }
 
 const applyFilters = ref<boolean>(true);

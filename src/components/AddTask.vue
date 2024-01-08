@@ -88,7 +88,7 @@
 import { transformSizeProp } from 'src/utils';
 import { Task } from 'src/types';
 import { ref, defineAsyncComponent } from 'vue';
-import useTaskStore from 'src/pinia/taskStore';
+import { useTasks } from 'src/components/composables/tasks';
 
 // const TaskActiveButton = defineAsyncComponent(() =>
 //     import('src/components/TaskActiveButton.vue'));
@@ -124,18 +124,11 @@ function toggleTextarea() {
   newTaskRenderIndex.value += 1;
 }
 
-const store = useTaskStore();
-
 async function addNewTask() {
-  const tags = Array.isArray(newTask.value.tags) ? newTask.value.tags : [];
+  const { addNewTask: addNewFn } = useTasks();
 
-  if (Array.isArray(newTask.value.stories)) {
-    tags.push(...newTask.value.stories.map((s) => `${s}`));
-  }
+  await addNewFn(newTask.value);
 
-  newTask.value.tags = tags;
-
-  await store.cloudUpdateSingle(newTask.value as Task);
   newTask.value = { ...props.initialTaskData };
   // this.$refs.messageInput.focus();
 }

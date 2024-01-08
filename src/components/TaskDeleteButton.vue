@@ -49,13 +49,13 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import useTaskStore from 'src/pinia/taskStore';
 import { transformSizeProp } from 'src/utils';
+import { useSingleTask } from 'src/components/composables/singleTask';
 
 const props = defineProps({
   taskId: {
     type: String,
-    default: undefined,
+    required: true
   },
   label: {
     type: String,
@@ -85,21 +85,7 @@ const props = defineProps({
 
 const isConfirmingDeletion = ref<boolean>(false);
 
-const store = useTaskStore();
-
-const task = computed(() => (
-  props.taskId ? store.getTask(props.taskId) : undefined
-));
-
-function toggleDeleted() {
-  if (!task.value) return;
-
-  store.cloudUpdateSingle(
-    { ...task.value, deleted: task.value.deleted ? 0 : Date.now() }
-  ).then(() => {
-    isConfirmingDeletion.value = false;
-  });
-}
+const { task, toggleDeleted } = useSingleTask(props.taskId);
 
 function handleClick(): void {
   if (!task.value) return;

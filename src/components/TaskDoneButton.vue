@@ -73,9 +73,9 @@
 <script setup lang="ts">
 import { timeSince, transformSizeProp } from 'src/utils';
 import { computed, ref } from 'vue';
-import useTaskStore from 'src/pinia/taskStore';
 import TimeChip from 'src/components/TimeChip.vue';
 import CreateAlert from 'src/components/CreateAlert.vue';
+import { useSingleTask } from 'src/components/composables/singleTask';
 
 const props = defineProps({
   taskId: {
@@ -112,11 +112,8 @@ const props = defineProps({
   }
 });
 
-const store = useTaskStore();
+const { done, setDone, title: taskTitle } = useSingleTask(props.taskId);
 
-const taskTitle = computed(() => store.getTaskProperty(props.taskId, 'message'));
-
-const done = computed(() => store.getTaskProperty(props.taskId, 'done'));
 const timeSinceDone = computed(() => timeSince(done.value));
 const withinPreviousDay = computed(() => (Date.now() - done.value) < 86400000);
 
@@ -135,16 +132,8 @@ function preToggle() {
   }
 }
 
-function setDone(newVal: number) {
-  store.cloudUpdateSingleProperty({
-    taskId: props.taskId,
-    prop: 'done',
-    data: newVal,
-  });
-}
-
 function toggle() {
-  const newVal = done.value ? 0 : Date.now();
+  const newVal = done.value === 0 ? Date.now() : 0;
 
   if (props.taskId) {
     setDone(newVal);

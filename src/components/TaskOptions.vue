@@ -108,7 +108,6 @@ import {
   transformSizeProp
 } from 'src/utils';
 import { ref, computed, watch } from 'vue';
-import useTaskStore from 'src/pinia/taskStore';
 
 import TaskSubtaskButton from 'src/components/TaskSubtaskButton.vue';
 import TaskActivityLog from 'src/components/TaskActivityLog.vue';
@@ -118,6 +117,7 @@ import TaskArchiveButton from 'src/components/TaskArchiveButton.vue';
 import TaskEditButton from 'src/components/TaskEditButton.vue';
 import TaskDoneButton from 'src/components/TaskDoneButton.vue';
 import TaskActiveButton from 'src/components/TaskActiveButton.vue';
+import { useSingleTask } from 'src/components/composables/singleTask';
 
 const props = defineProps<{
   taskId: string;
@@ -143,19 +143,11 @@ const props = defineProps<{
   doneChip?: boolean;
 }>();
 
-const store = useTaskStore();
-const task = computed(() => store.getTask(props.taskId));
+const { task, refreshTask, goToActivity } = useSingleTask(props.taskId);
+
 const taskRenderIndex = ref(0);
 const isViewingActivity = ref(false);
 const showAllOptions = ref(false);
-
-function refreshTask() {
-  queueTaskRefresh(props.taskId);
-}
-
-function goToActivity() {
-  goToActivityPageForTask(props.taskId);
-}
 
 const emit = defineEmits<{
   (event: 'editTask'): void;
