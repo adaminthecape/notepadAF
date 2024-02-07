@@ -1,5 +1,4 @@
 <template>
-  {{a}}/{{b}}
   <div class="q-ma-sm q-pa-sm standout-0 rounded">
     <!-- Top bar: -->
     <div class="row items-center justify-center full-width q-mb-xs">

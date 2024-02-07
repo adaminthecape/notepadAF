@@ -1,16 +1,35 @@
 import axios from 'axios';
 import { getFromLocalStorage, LocalStorageName } from 'src/utils';
+import { PivotalStory } from '@/pinia/pivotalStore';
 
 function getPivotalToken() {
   return getFromLocalStorage(LocalStorageName.pivotalToken);
 }
 
-function getPivotalProjectId() {
-  return getFromLocalStorage(LocalStorageName.pivotalProjectId);
+function getPivotalProjectId(): number | undefined {
+  const savedValue = getFromLocalStorage(
+    LocalStorageName.pivotalProjectId
+  );
+
+  if(!savedValue)
+  {
+    return undefined;
+  }
+
+  return parseInt(savedValue, 10);
 }
 
-export function getPivotalProjectIdAlt() {
-  return getFromLocalStorage(LocalStorageName.pivotalProjectIdAlt);
+export function getPivotalProjectIdAlt(): number | undefined {
+  const savedValue = getFromLocalStorage(
+    LocalStorageName.pivotalProjectIdAlt
+  );
+
+  if(!savedValue)
+  {
+    return undefined;
+  }
+
+  return parseInt(savedValue, 10);
 }
 
 function htmlEncode(str: string) {
@@ -35,14 +54,14 @@ export async function getPivotalEndpoint(
   endpoint: string,
   params: Record<string, any>,
   queryParams: Record<string, any>
-) {
+): Promise<any> {
   const projectId = getPivotalProjectId();
   const baseUri = 'https://www.pivotaltracker.com/services/v5/';
 
   if (!endpoint) {
     endpoint = `${baseUri}/projects/${projectId}/stories`;
   } else {
-    endpoint = endpoint.replace('{projectId}', projectId);
+    endpoint = endpoint.replace('{projectId}', String(projectId));
 
     endpoint = `${baseUri}${endpoint}`;
   }
@@ -98,9 +117,9 @@ export async function getPivotalEndpoint(
 
 export async function getPivotalStory(
   storyId: string | number,
-  endpoint: string,
-  projectIdOverride: number
-) {
+  endpoint?: string,
+  projectIdOverride?: number
+): Promise<PivotalStory> {
   const projectId = projectIdOverride || getPivotalProjectId();
   const baseUri = 'https://www.pivotaltracker.com/services/v5/';
 
@@ -111,7 +130,7 @@ export async function getPivotalStory(
 
     endpoint = `${baseUri}/projects/${projectId}/stories/${storyId}`;
   } else {
-    endpoint = endpoint.replace('{projectId}', projectId);
+    endpoint = endpoint.replace('{projectId}', String(projectId));
 
     endpoint = `${baseUri}${endpoint}`;
   }
