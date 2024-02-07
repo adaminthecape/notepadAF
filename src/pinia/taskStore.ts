@@ -224,7 +224,7 @@ const useTaskStore = defineStore('taskStore', {
       prop: string;
       data: any;
     }) {
-      console.log('single property:', { taskId, prop, data });
+      // console.log('single property:', { taskId, prop, data });
       if (!taskId || !prop || typeof data === 'undefined') {
         return;
       }

@@ -94,6 +94,7 @@ v-for="label in story.labels" :label="label.name" :key="label.name"
     </template>
     <template #actions>
       <q-btn
+        icon="link"
         label="View"
         color="primary"
         :dense="dense"
@@ -101,9 +102,9 @@ v-for="label in story.labels" :label="label.name" :key="label.name"
         class="q-mr-xs"
         @click.stop.prevent="openLink(story.url)"
     />
-      <q-btn icon="content_copy" color="negative" :dense="dense" flat>
-        <q-tooltip>Checkout to branch</q-tooltip>
-      </q-btn>
+<!--      <q-btn icon="content_copy" color="negative" :dense="dense" flat>-->
+<!--        <q-tooltip>Checkout to branch</q-tooltip>-->
+<!--      </q-btn>-->
     </template>
   </SimpleModal>
 </template>

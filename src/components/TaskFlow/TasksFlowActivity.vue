@@ -12,7 +12,6 @@
       <q-space />
       <GitCheckout target="184425511" />
       <AppTabSelector />
-      <q-input v-model="testUrl" />
     </div>
     <!-- Content: -->
     <q-card

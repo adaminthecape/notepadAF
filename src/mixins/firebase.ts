@@ -232,7 +232,7 @@ export async function updateTaskDataByPath(
   const fullPath = `${dbName}/tasks/${taskId}/${path.split('.').join('/')}`;
   const updatedPath = `${dbName}/tasks/${taskId}/updated`;
 
-  console.log('update:', fullPath, removeUndefined(data));
+  // console.log('update:', fullPath, removeUndefined(data));
 
   if (isDebug()) {
     return;
