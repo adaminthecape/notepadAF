@@ -29,7 +29,7 @@
                   style="display: inline;margin-right:-10px"
               /></template>
               <template #default>
-                <div class="q-py-sm">
+                <div class="q-py-sm" style="min-width: 70vw; max-width: 80vw;">
                   <q-item class="row items-center">
                     <q-input
                       v-model="log.note"
@@ -80,10 +80,44 @@
                   </q-item>
                   <q-item v-if="log.details">
                     <q-item-section>
-                      <q-card class="q-pa-sm standout-1" flat>
+                      <q-card class="q-pa-sm standout-1" flat style="overflow-x: scroll;max-width: 100%;">
                         {{ log.details }}
                       </q-card>
                     </q-item-section>
+                  </q-item>
+                  <q-item>
+                    <q-btn
+                      v-if="!showTaskMoveList"
+                      no-caps
+                      color="purple"
+                      @click="showTaskMoveList = true"
+                    >Move to another task</q-btn>
+                    <q-select
+                      v-if="showTaskMoveList"
+                      v-model="taskToMoveTo"
+                      :options="taskMoveListOptions"
+                      label="Choose another task ..."
+                      class="full-width"
+                      outlined
+                      dense
+                    >
+                      <template #append>
+                        <q-btn
+                          color="purple"
+                          icon="close"
+                          dense
+                          flat
+                          @click.stop.prevent="taskToMoveTo = undefined; showTaskMoveList = false"
+                        />
+                        <q-btn
+                          color="purple"
+                          icon="double_arrow"
+                          dense
+                          flat
+                          @click.stop.prevent="moveToSelectedTask(log, l)"
+                        />
+                      </template>
+                    </q-select>
                   </q-item>
                 </div>
               </template>
@@ -292,5 +326,53 @@ function setActivity() {
       : tasks) || [];
 
   // allActivity.value = tasksList;
+}
+
+const showTaskMoveList = ref(false);
+const taskToMoveTo = ref<{ label: string, value: string, updated: number }>();
+
+const taskMoveListOptions = computed(() =>
+{
+  if(!showTaskMoveList.value) return [];
+
+  return store.all.map((task: Task) => ({
+    label: task.message?.slice(0, 100) || `[Unknown] ${task.id}`,
+    value: task.id,
+    updated: task.updated
+  }))
+    .sort((a: any, b: any) => b.updated - a.updated);
+});
+
+function moveToSelectedTask(log: TaskActivityLog, index: number)
+{
+  const targetId = taskToMoveTo.value?.value;
+
+  if(!targetId || !log) return;
+
+  const targetTask = store.getTask(targetId);
+
+  if(!targetTask)
+  {
+    return;
+  }
+
+  const activity = [...(targetTask?.activity || [])]
+    .concat(log)
+    .filter((item: TaskActivityLog) => item)
+    .map((item: TaskActivityLog) => {
+      delete item.isEditing;
+
+      return removeUndefined(item);
+    });
+
+  store
+    .cloudUpdateSingleProperty({
+      taskId: targetId,
+      prop: 'activity',
+      data: activity
+    }).then(() =>
+    {
+      removeActivityLog(log);
+    });
 }
 </script>

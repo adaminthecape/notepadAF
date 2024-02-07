@@ -18,7 +18,7 @@
         now-btn
       />
     </div>
-    <div v-else class="row items-center">
+    <div v-else class="row items-center no-wrap">
       {{ prefix }}
       <q-input
         v-model="createAlertDate"
