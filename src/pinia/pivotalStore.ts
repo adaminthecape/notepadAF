@@ -22,7 +22,8 @@ type RootState = {
 
 function getStoryPromise(
   id: PivotalStoryId,
-  onAddStory: (story: PivotalStory) => void
+  onFound?: (story: PivotalStory) => void,
+  onNotFound?: (id: PivotalStoryId) => void
 ): StoryPromise
 {
   return {
@@ -49,9 +50,13 @@ function getStoryPromise(
             }
           }
 
-          if(story && onAddStory)
+          if(story && onFound)
           {
-            onAddStory(story);
+            onFound(story);
+          }
+          else if(!story && onNotFound)
+          {
+            onNotFound(id);
           }
         }
         catch(e)
@@ -92,6 +97,14 @@ const usePivotalStore = defineStore('pivotalStore', {
 
       this.ADD_STORY(newStory);
     },
+    markStoryResolved(id: PivotalStoryId)
+    {
+      this.resolvedStories.push(id);
+    },
+    getIsStoryResolved(id: PivotalStoryId)
+    {
+      return this.resolvedStories.some((resolvedId) => resolvedId == id);
+    },
     async load({ id, force = false }: { id: PivotalStoryId; force?: boolean; })
     {
       if(!id) return;
@@ -101,10 +114,16 @@ const usePivotalStore = defineStore('pivotalStore', {
         if(this.get(id)) return;
 
         if(this.promiseStack.some((p) => p.id === id)) return;
+
+        if(this.getIsStoryResolved(id)) return;
       }
 
       this.promiseStack.push(
-        getStoryPromise(id, this.ADD_STORY)
+        getStoryPromise(
+          id,
+          this.ADD_STORY,
+          this.markStoryResolved
+        )
       );
 
       this.resolveAll(false);
@@ -163,7 +182,7 @@ const usePivotalStore = defineStore('pivotalStore', {
         this.stories.push(story);
       }
 
-      this.resolvedStories.push(story.id);
+      this.markStoryResolved(story.id);
     }
   },
 });

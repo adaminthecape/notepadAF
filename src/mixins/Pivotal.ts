@@ -119,7 +119,7 @@ export async function getPivotalStory(
   storyId: string | number,
   endpoint?: string,
   projectIdOverride?: number
-): Promise<PivotalStory> {
+): Promise<PivotalStory | undefined> {
   const projectId = projectIdOverride || getPivotalProjectId();
   const baseUri = 'https://www.pivotaltracker.com/services/v5/';
 
@@ -147,6 +147,6 @@ export async function getPivotalStory(
   } catch (e) {
     console.error(e);
 
-    return null;
+    return undefined;
   }
 }
