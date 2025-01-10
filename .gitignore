@@ -1,6 +1,10 @@
 .DS_Store
 .thumbs.db
 node_modules
+.firebase*
+firebase*
+notesdb.json
+.vscode/*
 
 # Quasar core related directories
 .quasar
